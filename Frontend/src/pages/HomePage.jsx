@@ -4,7 +4,7 @@ import escudo from "../assets/escudo.png";
 
 const NAV_ITEMS = [
   { label: "Sobre Nosotros", href: "#sobre-nosotros" },
-  { label: "Registro de Predios", href: "#predios" },
+  { label: "Registro de Predios", href: "/predios", isRoute: true },
   { label: "Producción Animal y Vegetal", href: "#produccion" },
   { label: "Estadísticas Generales", href: "#estadisticas" },
   { label: "Contactos", href: "#contactos" },
@@ -44,17 +44,31 @@ export default function HomePage() {
         }}>
           {NAV_ITEMS.map((item) => (
             <li key={item.label}>
-              <a href={item.href} style={{
-                textDecoration: "none", color: "#444", fontSize: "13.5px",
-                fontWeight: 400, padding: "6px 14px", borderRadius: "6px",
-                display: "block", transition: "background 0.2s, color 0.2s",
-                whiteSpace: "nowrap", fontFamily: "'Poppins', sans-serif",
-              }}
-                onMouseEnter={e => { e.target.style.background = "#f0faf0"; e.target.style.color = "#589e38"; }}
-                onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.color = "#444"; }}
-              >
-                {item.label}
-              </a>
+              {item.isRoute ? (
+                <a href={item.href} style={{
+                  textDecoration: "none", color: "#444", fontSize: "13.5px",
+                  fontWeight: 400, padding: "6px 14px", borderRadius: "6px",
+                  display: "block", transition: "background 0.2s, color 0.2s",
+                  whiteSpace: "nowrap", fontFamily: "'Poppins', sans-serif",
+                }}
+                  onMouseEnter={e => { e.target.style.background = "#f0faf0"; e.target.style.color = "#589e38"; }}
+                  onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.color = "#444"; }}
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <a href={item.href} style={{
+                  textDecoration: "none", color: "#444", fontSize: "13.5px",
+                  fontWeight: 400, padding: "6px 14px", borderRadius: "6px",
+                  display: "block", transition: "background 0.2s, color 0.2s",
+                  whiteSpace: "nowrap", fontFamily: "'Poppins', sans-serif",
+                }}
+                  onMouseEnter={e => { e.target.style.background = "#f0faf0"; e.target.style.color = "#589e38"; }}
+                  onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.color = "#444"; }}
+                >
+                  {item.label}
+                </a>
+              )}
             </li>
           ))}
         </ul>
@@ -75,7 +89,7 @@ export default function HomePage() {
 
         <div style={{ position: "relative", zIndex: 2, padding: "0 80px", maxWidth: "580px" }}>
           <h1 style={{ color: "#fff", fontSize: "42px", fontWeight: 700, lineHeight: 1.2, margin: "0 0 20px" }}>
-            Ecosistema Digital Agropecuario<br />del Estado Barinas
+            Sistema Digital Agropecuario<br />del Estado Barinas
           </h1>
           <p style={{ color: "rgba(255,255,255,0.85)", fontSize: "15px", lineHeight: 1.6, margin: "0 0 36px" }}>
             Portal de información agropecuaria del <strong style={{ color: "#fff" }}>estado Barinas</strong>.
