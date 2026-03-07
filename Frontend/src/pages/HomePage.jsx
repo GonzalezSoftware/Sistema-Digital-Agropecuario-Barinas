@@ -6,7 +6,7 @@ const NAV_ITEMS = [
   { label: "Sobre Nosotros", href: "#sobre-nosotros" },
   { label: "Registro de Predios", href: "/predios", isRoute: true },
   { label: "Producción Animal y Vegetal", href: "/produccion", isRoute: true },
-  { label: "Estadísticas Generales", href: "#estadisticas" },
+  { label: "Estadísticas Generales", href: "/estadística-portalinfo", isRoute: true },
   { label: "Contactos", href: "#contactos" },
 ];
 

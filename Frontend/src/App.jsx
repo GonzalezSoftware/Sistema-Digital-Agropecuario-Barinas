@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import PrediosPage from "./pages/Predios/PrediosPage"
 import ProduccionPage from "./pages/Produccion/ProduccionPage"
+import EstadisticaPage from "./pages/Estadistica/EstadisticaPage"
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/predios" element={<PrediosPage />} />
         <Route path="/produccion" element={<ProduccionPage />} />
+        <Route path="/estadística-portalinfo" element={<EstadisticaPage />} />
       </Routes>
     </BrowserRouter>
   )
