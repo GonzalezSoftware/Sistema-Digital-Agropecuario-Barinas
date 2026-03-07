@@ -5,7 +5,7 @@ import escudo from "../assets/escudo.png";
 const NAV_ITEMS = [
   { label: "Sobre Nosotros", href: "#sobre-nosotros" },
   { label: "Registro de Predios", href: "/predios", isRoute: true },
-  { label: "Producción Animal y Vegetal", href: "#produccion" },
+  { label: "Producción Animal y Vegetal", href: "/produccion", isRoute: true },
   { label: "Estadísticas Generales", href: "#estadisticas" },
   { label: "Contactos", href: "#contactos" },
 ];
@@ -129,13 +129,13 @@ export default function HomePage() {
               img: "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=600&q=80",
               title: "Producción Animal",
               desc: "Control de inventario ganadero, salud, reproducción y producción.",
-              href: "#produccion"
+              href: "/produccion"
             },
             {
               img: "https://images.unsplash.com/photo-1601648764658-cf37e8c89b70?w=600&q=80",
               title: "Producción Vegetal",
               desc: "Gestión de cultivos, siembras, cosechas e insumos agrícolas.",
-              href: "#produccion"
+              href: "/produccion"
             },
             {
               img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80",
