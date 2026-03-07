@@ -1,15 +1,15 @@
 import logo from "../assets/logo.png";
 import bannerImg from "../assets/banner.jpg";
 import escudo from "../assets/escudo.png";
+import { Link } from "react-router-dom";
 
 const NAV_ITEMS = [
   { label: "Sobre Nosotros", href: "#sobre-nosotros" },
   { label: "Registro de Predios", href: "/predios", isRoute: true },
   { label: "Producción Animal y Vegetal", href: "#produccion" },
-  { label: "Estadísticas Generales", href: "#estadisticas" },
+  { label: "Estadísticas Generales", href: "/estadisticas", isRoute: true },
   { label: "Contactos", href: "#contactos" },
 ];
-
 export default function HomePage() {
   return (
     <div style={{ fontFamily: "'Poppins', sans-serif", margin: 0, padding: 0 }}>
