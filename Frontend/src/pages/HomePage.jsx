@@ -1,15 +1,15 @@
 import logo from "../assets/logo.png";
 import bannerImg from "../assets/banner.jpg";
 import escudo from "../assets/escudo.png";
-import { Link } from "react-router-dom";
 
 const NAV_ITEMS = [
   { label: "Sobre Nosotros", href: "#sobre-nosotros" },
   { label: "Registro de Predios", href: "/predios", isRoute: true },
-  { label: "Producción Animal y Vegetal", href: "#produccion" },
-  { label: "Estadísticas Generales", href: "/estadisticas", isRoute: true },
+  { label: "Producción Animal y Vegetal", href: "/produccion", isRoute: true },
+  { label: "Estadísticas Generales", href: "/estadística-portalinfo", isRoute: true },
   { label: "Contactos", href: "#contactos" },
 ];
+
 export default function HomePage() {
   return (
     <div style={{ fontFamily: "'Poppins', sans-serif", margin: 0, padding: 0 }}>
@@ -86,8 +86,7 @@ export default function HomePage() {
           objectFit: "cover", opacity: 0.5,
           clipPath: "polygon(8% 0%, 100% 0%, 100% 100%, 0% 100%)",
         }} />
-
-        <div style={{ position: "relative", zIndex: 2, padding: "0 80px", maxWidth: "580px" }}>
+<div style={{ position: "relative", zIndex: 2, padding: "0 80px", maxWidth: "580px" }}>
           <h1 style={{ color: "#fff", fontSize: "42px", fontWeight: 700, lineHeight: 1.2, margin: "0 0 20px" }}>
             Sistema Digital Agropecuario<br />del Estado Barinas
           </h1>
@@ -129,13 +128,13 @@ export default function HomePage() {
               img: "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=600&q=80",
               title: "Producción Animal",
               desc: "Control de inventario ganadero, salud, reproducción y producción.",
-              href: "#produccion"
+              href: "/produccion"
             },
             {
               img: "https://images.unsplash.com/photo-1601648764658-cf37e8c89b70?w=600&q=80",
               title: "Producción Vegetal",
               desc: "Gestión de cultivos, siembras, cosechas e insumos agrícolas.",
-              href: "#produccion"
+              href: "/produccion"
             },
             {
               img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80",
@@ -167,7 +166,7 @@ export default function HomePage() {
                   }} />
                 </div>
                 {/* Texto */}
-                <div style={{ padding: "24px" }}>
+<div style={{ padding: "24px" }}>
                   <h3 style={{ color: "#589e38", fontSize: "16px", margin: "0 0 10px", fontWeight: 700 }}>
                     {card.title}
                   </h3>
@@ -242,8 +241,7 @@ export default function HomePage() {
 
           {/* Tarjetas horizontales */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
-
-            {/* Correo */}
+{/* Correo */}
             <div style={{
               background: "#fff", borderRadius: "12px", padding: "32px 24px",
               boxShadow: "0 2px 12px rgba(0,0,0,0.06)", display: "flex",
@@ -318,8 +316,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
-      {/* FOOTER */}
+{/* FOOTER */}
       <footer style={{ background: "#fff", color: "#555", fontFamily: "'Poppins', sans-serif", borderTop: "1px solid #e8e8e8" }}>
 
         {/* Cuerpo del footer */}
@@ -391,7 +388,7 @@ export default function HomePage() {
                 onMouseLeave={e => e.currentTarget.style.background = "#f0f0f0"}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#555">
-                  <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" />
+<path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" />
                   <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#fff" />
                 </svg>
               </a>
@@ -455,8 +452,7 @@ export default function HomePage() {
 
         {/* Línea divisora */}
         <div style={{ borderTop: "1px solid #e8e8e8", margin: "0 80px" }} />
-
-        {/* Barra inferior */}
+{/* Barra inferior */}
         <div style={{
           maxWidth: "1100px", margin: "0 auto", padding: "20px 80px",
           display: "flex", justifyContent: "center", alignItems: "center",
