@@ -1,3 +1,1 @@
-from django.shortcuts import render
-
-# Create your views here.
+# Aquí irán las vistas del módulo de predios (autenticación, CRUD, etc.)

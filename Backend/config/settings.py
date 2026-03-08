@@ -107,8 +107,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
-
 LANGUAGE_CODE = 'es-ve'
 
 TIME_ZONE = 'America/Caracas'
