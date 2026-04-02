@@ -1,5 +1,5 @@
-import logo from "../../assets/logo.png";
-import escudo from "../../assets/escudo.png";
+import logo from "../../assets/gobierno.jpg";
+import escudo from "../../assets/logo2.jpg";
 import { useNavigate } from "react-router-dom";
 import React from "react";
 
@@ -219,8 +219,8 @@ function ChatBox() {
     if (p.match(/asogaba|que es|que realiza/))
       return "Asogaba es la Asociación Regional de Ganaderos del Estado Barinas, una organización gremial en Venezuela dedicada a defender, promover y mejorar la producción ganadera y agrícola en la región llanera. Esta asociación agrupa a productores, brinda asistencia técnica, y organiza eventos clave como las Ferias del Pilar y subastas ganaderas.";
 
-    if (p.match(/Luigui|luigui/))
-      return "Chamo Luigui el Monte Everest no tiene nada en contra de ti, sigue tu vida relajado";
+    if (p.match(/creador/))
+      return "Mi creador es Esteban González, un coquito ese loco";
 
     if (p.match(/datos|informacion|que se registra|campos|formulario/))
       return "En el sistema se registra la siguiente información de cada predio: datos catastrales como nombre, código y ubicación; coordenadas GPS precisas; superficie total en hectáreas; uso del suelo que puede ser agrícola, pecuario, mixto o forestal; topografía del terreno; fuente de agua disponible; cobertura vegetal; y galería fotográfica oficial.";
@@ -536,11 +536,12 @@ export default function PrediosPage() {
         boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "sticky", top: 0, zIndex: 100,
         gap: "24px",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "20px", cursor: "pointer" }}
-          onClick={() => navigate("/")}>
-          <img src={escudo} alt="Escudo" style={{ height: 58 }} />
-          <img src={logo} alt="Logo" style={{ height: 52 }} />
-        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px",ap: "20px",
+            marginLeft: "-30px" }}>
+                  <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 45 }} />
+                  <img src={escudo} alt="Logo MPPAT" style={{ height: 35 }} />
+                  
+                </div>
         <span style={{
           fontSize: "12px", color: "#888", fontStyle: "italic",
           lineHeight: 1.4, borderLeft: "2px solid #e0e0e0", paddingLeft: "16px",
