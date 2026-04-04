@@ -1,5 +1,5 @@
 import logo from "../assets/gobierno.jpg";
-import bannerImg from "../assets/banner.jpg";
+import bannerImg from "../assets/banner2.jpg";
 import escudo from "../assets/logo2.jpg";
 
 const NAV_ITEMS = [
