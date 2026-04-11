@@ -5,6 +5,15 @@ Backend/**/__pycache__/
 Backend/db.sqlite3
 *.pyc
 
+# Secretos y Configuración (MUY IMPORTANTE)
+.env
+Backend/config/settings.py.local
+.vscode/
+
 # Node
 Frontend/node_modules/
 Frontend/dist/
+
+# Archivos de medios (Para que no se llenen de fotos de cédulas el repo)
+Backend/media/
+Backend/cedulas/
