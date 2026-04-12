@@ -1,3 +1,6 @@
+# core/admin.py
 from django.contrib import admin
+from .models import Predio # Importa tus modelos aquí
 
-# Register your models here.
+admin.site.register(Predio)
+# Si tienes otros, regístralos igual: admin.site.register(Productor)
