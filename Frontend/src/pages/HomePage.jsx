@@ -1,6 +1,6 @@
-import logo from "../assets/logo.png";
+import logo from "../assets/gobierno.jpg";
 import bannerImg from "../assets/banner.jpg";
-import escudo from "../assets/escudo.png";
+import escudo from "../assets/logo2.jpg";
 
 const NAV_ITEMS = [
   { label: "Sobre Nosotros", href: "#sobre-nosotros" },
@@ -22,10 +22,11 @@ export default function HomePage() {
         fontFamily: "'Poppins', sans-serif", gap: "24px",
       }}>
         {/* Logo + Escudo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-
-          <img src={escudo} alt="Escudo de Barinas" style={{ height: 58 }} />
-          <img src={logo} alt="Logo" style={{ height: 52 }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "20px",ap: "20px",
+    marginLeft: "-30px" }}>
+          <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 45 }} />
+          <img src={escudo} alt="Logo MPPAT" style={{ height: 35 }} />
+          
         </div>
 
         {/* Texto institucional pegado al logo */}
@@ -332,7 +333,7 @@ export default function HomePage() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
               <img src={logo} alt="Logo" style={{ height: 50 }} />
-              <img src={escudo} alt="Escudo" style={{ height: 50 }} />
+              <img src={escudo} alt="Escudo" style={{ height: 40 }} />
             </div>
             <p style={{ fontSize: "14px", lineHeight: 1.8, color: "#777", maxWidth: "280px" }}>
               Ecosistema digital agropecuario del estado Barinas. Plataforma oficial para el registro
