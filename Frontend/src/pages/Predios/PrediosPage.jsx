@@ -132,352 +132,6 @@ const IconInfo = () => (
   </svg>
 );
 
-function ChatBox() {
-  const [mensajes, setMensajes] = React.useState([
-    {
-      rol: "asistente",
-      texto: "¡Hola! No existe información registrada en el sistema hasta los momentos, pero puedo explicarte todo lo que quieras saber sobre el módulo de predios agropecuarios de ASOGABA. ¿En qué te puedo ayudar?",
-    },
-  ]);
-  const [input, setInput] = React.useState("");
-  const [cargando, setCargando] = React.useState(false);
-  const [grabando, setGrabando] = React.useState(false);
-  const [hablandoIdx, setHablandoIdx] = React.useState(null);
-  const endRef = React.useRef(null);
-  const recognitionRef = React.useRef(null);
-
-  React.useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [mensajes, cargando]);
-
-  // Leer primera respuesta al cargar
-  React.useEffect(() => {
-    setTimeout(() => leerTexto(mensajes[0].texto, 0), 800);
-  }, []);
-
-  const leerTexto = (texto, idx) => {
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(texto);
-    utter.lang = "es-VE";
-    utter.rate = 1.05;
-    utter.pitch = 1;
-
-    // Buscar voz en español
-    const voces = window.speechSynthesis.getVoices();
-    const vozES = voces.find(v => v.lang.startsWith("es")) || voces[0];
-    if (vozES) utter.voice = vozES;
-
-    utter.onstart = () => setHablandoIdx(idx);
-    utter.onend = () => setHablandoIdx(null);
-    utter.onerror = () => setHablandoIdx(null);
-    window.speechSynthesis.speak(utter);
-  };
-
-  const detenerAudio = () => {
-    window.speechSynthesis.cancel();
-    setHablandoIdx(null);
-  };
-
-  const iniciarGrabacion = () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome.");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "es-VE";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onstart = () => setGrabando(true);
-
-    recognition.onresult = (event) => {
-      const texto = event.results[0][0].transcript;
-      setInput(texto);
-      setGrabando(false);
-    };
-
-    recognition.onerror = () => setGrabando(false);
-    recognition.onend = () => setGrabando(false);
-
-    recognitionRef.current = recognition;
-    recognition.start();
-  };
-
-  const detenerGrabacion = () => {
-    recognitionRef.current?.stop();
-    setGrabando(false);
-  };
-
-  const obtenerRespuesta = (pregunta) => {
-    const p = pregunta.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-    if (p.match(/registro|registrar|como registro|inscribir|inscripcion/))
-      return "Para registrar tu predio, debes comunicarte con ASOGABA a través de nuestros canales de contacto. Un empleado autorizado coordinará una visita técnica a tu predio para levantar toda la información necesaria. El proceso tiene 4 pasos: contacto inicial, visita técnica, registro en sistema y entrega de ficha técnica.";
-
-    if (p.match(/asogaba|que es|que realiza/))
-      return "Asogaba es la Asociación Regional de Ganaderos del Estado Barinas, una organización gremial en Venezuela dedicada a defender, promover y mejorar la producción ganadera y agrícola en la región llanera. Esta asociación agrupa a productores, brinda asistencia técnica, y organiza eventos clave como las Ferias del Pilar y subastas ganaderas.";
-
-    if (p.match(/creador/))
-      return "Mi creador es Esteban González, un coquito ese loco";
-
-    if (p.match(/datos|informacion|que se registra|campos|formulario/))
-      return "En el sistema se registra la siguiente información de cada predio: datos catastrales como nombre, código y ubicación; coordenadas GPS precisas; superficie total en hectáreas; uso del suelo que puede ser agrícola, pecuario, mixto o forestal; topografía del terreno; fuente de agua disponible; cobertura vegetal; y galería fotográfica oficial.";
-
-    if (p.match(/municipio|municipios|donde|cobertura/))
-      return "El módulo cubre los 11 municipios del estado Barinas: Barinas, Obispos, Cruz Paredes, Bolívar, Rojas, Pedraza, Sucre, Arismendi, Antonio José de Sucre, Sosa y Ezequiel Zamora. Todos los predios agropecuarios del estado pueden ser registrados.";
-
-    if (p.match(/ficha|ficha tecnica|documento|pdf|certificado/))
-      return "La ficha técnica es el documento oficial que se genera una vez completado el registro del predio. Contiene toda la información catastral, características físico-naturales, fotografías y coordenadas GPS. Está disponible en formato PDF para descarga e impresión.";
-
-    if (p.match(/empleado|personal|quien registra|asogaba|autorizado/))
-      return "El registro de predios es realizado exclusivamente por empleados autorizados de ASOGABA. Esto garantiza la veracidad y precisión de los datos. Los productores no pueden registrarse directamente en el sistema, deben contactar a ASOGABA para solicitar el servicio.";
-
-    if (p.match(/mapa|gps|ubicacion|coordenadas|leaflet|interactivo/))
-      return "El módulo cuenta con un mapa interactivo desarrollado con Leaflet que muestra la ubicación GPS precisa de cada predio registrado. Puedes visualizar todos los predios del estado, filtrar por municipio y ver los detalles de cada uno haciendo clic en el mapa.";
-
-    if (p.match(/foto|fotografia|imagen|galeria/))
-      return "Cada predio puede tener una galería fotográfica oficial con hasta 5 fotografías. Las fotos son tomadas durante la visita técnica y forman parte del expediente oficial del predio. Sirven para documentación, verificación y seguimiento de las condiciones del terreno.";
-
-    if (p.match(/reporte|excel|exportar|estadistica|informe/))
-      return "El sistema genera reportes oficiales en dos formatos: PDF con la ficha técnica completa del predio, y Excel con exportación masiva para análisis estadístico. También se pueden generar reportes agrupados por municipio, tipo de suelo y otros criterios.";
-
-    if (p.match(/tiempo|cuanto tarda|demora|proceso|duracion/))
-      return "El proceso de registro tiene una duración estimada de 5 a 10 días hábiles: contacto inicial 1 a 2 días, coordinación y visita técnica 2 a 5 días, ingreso al sistema 1 a 2 días, y entrega de ficha técnica 1 día. El tiempo puede variar según la disponibilidad del personal técnico.";
-
-    if (p.match(/costo|precio|gratis|pago|cobro/))
-      return "El registro de predios en el sistema de ASOGABA es completamente gratuito para los productores del estado Barinas. Es un servicio oficial del gobierno del estado para promover la gestión territorial agropecuaria.";
-
-    if (p.match(/contacto|telefono|correo|email|comunicar|llamar/))
-      return "Puedes contactar a ASOGABA a través de: teléfono 0273 300-0000, correo electrónico agrosistema arroba barinas punto gob punto ve, en horario de lunes a viernes de 8 de la mañana a 4 de la tarde.";
-
-    if (p.match(/suelo|uso|agricola|pecuario|mixto|forestal|tipo/))
-      return "El sistema clasifica los predios según su uso del suelo en 4 categorías: agrícola para cultivos y producción vegetal, pecuario para ganadería y producción animal, mixto para combinación de ambas actividades, y forestal para conservación y producción maderera.";
-
-    if (p.match(/topografia|relieve|plano|ondulado|quebrado|pendiente/))
-      return "La topografía del predio se clasifica en tres categorías: plano para terrenos con pendiente menor al 3%, ondulado para pendientes entre 3% y 15%, y quebrado para pendientes mayores al 15%. Esta característica es importante para determinar el tipo de actividad productiva recomendada.";
-
-    if (p.match(/agua|rio|pozo|lluvia|riego|hidrica/))
-      return "El módulo registra la disponibilidad hídrica de cada predio, clasificándola según su fuente principal: río o quebrada, pozo o noria, agua de lluvia, o sistema de riego. Esta información es clave para evaluar el potencial productivo del predio.";
-
-    if (p.match(/sistema|modulo|plataforma|herramienta/))
-      return "El Sistema Digital Agropecuario del Estado Barinas es una plataforma oficial para gestionar la información territorial agropecuaria. El módulo de predios permite registro catastral completo, geolocalización GPS, galería fotográfica, mapa interactivo, generación de fichas técnicas y reportes estadísticos, con cobertura de los 11 municipios.";
-
-    if (p.match(/hola|buenos|buenas|saludos/))
-      return "¡Hola! Soy el asistente virtual del módulo de Predios Agropecuarios de ASOGABA. Puedo explicarte cómo funciona el sistema, cómo registrar tu predio, qué datos se registran y mucho más. ¿En qué te puedo ayudar?";
-
-    if (p.match(/gracias|perfecto|excelente|genial/))
-      return "¡Con gusto! Si tienes más preguntas sobre el módulo de predios no dudes en consultarme. Para iniciar el proceso de registro recuerda contactar a ASOGABA.";
-
-    return "Para darte información más específica, te recomiendo contactar directamente a ASOGABA al teléfono 0273 300-0000, o al correo agrosistema arroba barinas punto gob punto ve, en horario de lunes a viernes de 8 de la mañana a 4 de la tarde. Puedes preguntarme sobre registro de predios, datos registrados, municipios, ficha técnica, mapa interactivo, reportes o costos.";
-  };
-
-  const enviar = async (textoDirecto) => {
-    const texto = (textoDirecto || input).trim();
-    if (!texto || cargando) return;
-
-    const nuevosMensajes = [...mensajes, { rol: "usuario", texto }];
-    setMensajes(nuevosMensajes);
-    setInput("");
-    setCargando(true);
-    window.speechSynthesis.cancel();
-
-    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 600));
-
-    const respuesta = obtenerRespuesta(texto);
-    const idxNuevo = nuevosMensajes.length;
-    setMensajes(prev => [...prev, { rol: "asistente", texto: respuesta }]);
-    setCargando(false);
-
-    // Leer respuesta automáticamente
-    setTimeout(() => leerTexto(respuesta, idxNuevo), 100);
-  };
-
-  const sugerencias = ["¿Cómo registro mi predio?", "¿Qué datos se registran?", "¿Qué municipios cubre?", "¿Qué es una ficha técnica?"];
-
-  return (
-    <>
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: "14px" }}>
-        {mensajes.map((m, i) => (
-          <div key={i} style={{
-            display: "flex",
-            justifyContent: m.rol === "usuario" ? "flex-end" : "flex-start",
-            gap: "10px", alignItems: "flex-end",
-          }}>
-            {m.rol === "asistente" && (
-              <div style={{
-                width: "30px", height: "30px", borderRadius: "50%", background: "#e8f5e9",
-                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#136442" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a10 10 0 0110 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/>
-                  <line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
-                </svg>
-              </div>
-            )}
-            <div style={{
-              maxWidth: "72%", padding: "12px 16px",
-              borderRadius: m.rol === "usuario" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-              background: m.rol === "usuario" ? "#136442" : "#f8faf8",
-              color: m.rol === "usuario" ? "#fff" : "#333",
-              fontSize: "13.5px", lineHeight: 1.6,
-              border: m.rol === "asistente" ? "1px solid #eef0ee" : "none",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.06)", whiteSpace: "pre-wrap",
-            }}>
-              {m.texto}
-              {/* Botón reproducir/detener en mensajes del asistente */}
-              {m.rol === "asistente" && (
-                <div style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <button
-                    onClick={() => hablandoIdx === i ? detenerAudio() : leerTexto(m.texto, i)}
-                    style={{
-                      background: hablandoIdx === i ? "#e8f5e9" : "#f0faf4",
-                      border: `1px solid ${hablandoIdx === i ? "#136442" : "#c8e6c9"}`,
-                      borderRadius: "20px", padding: "4px 12px",
-                      cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
-                      fontSize: "11px", color: "#136442", fontFamily: "'Poppins', sans-serif",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {hablandoIdx === i ? (
-                      <>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="#136442"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                        Detener
-                      </>
-                    ) : (
-                      <>
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="#136442"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        Escuchar
-                      </>
-                    )}
-                  </button>
-                  {hablandoIdx === i && (
-                    <div style={{ display: "flex", gap: "3px", alignItems: "center" }}>
-                      {[0,1,2,3].map(j => (
-                        <div key={j} style={{
-                          width: "3px", borderRadius: "2px", background: "#136442",
-                          animation: "audioBar 0.8s infinite ease-in-out",
-                          animationDelay: `${j * 0.15}s`,
-                          height: `${8 + j * 4}px`,
-                        }}/>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            {m.rol === "usuario" && (
-              <div style={{
-                width: "30px", height: "30px", borderRadius: "50%", background: "#136442",
-                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                </svg>
-              </div>
-            )}
-          </div>
-        ))}
-
-        {cargando && (
-          <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
-            <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: "#e8f5e9", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#136442" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2a10 10 0 0110 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/>
-                <line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
-              </svg>
-            </div>
-            <div style={{ background: "#f8faf8", border: "1px solid #eef0ee", borderRadius: "16px 16px 16px 4px", padding: "14px 18px", display: "flex", gap: "5px", alignItems: "center" }}>
-              {[0,1,2].map(i => (
-                <div key={i} style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#136442", animation: "bounce 1.2s infinite", animationDelay: `${i * 0.2}s`, opacity: 0.7 }}/>
-              ))}
-            </div>
-          </div>
-        )}
-        <div ref={endRef}/>
-      </div>
-
-      {mensajes.length <= 1 && (
-        <div style={{ padding: "0 24px 14px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {sugerencias.map(s => (
-            <button key={s} onClick={() => enviar(s)} style={{
-              background: "#f0faf4", border: "1px solid #c8e6c9", color: "#136442",
-              fontSize: "12px", padding: "7px 14px", borderRadius: "20px",
-              cursor: "pointer", fontFamily: "'Poppins', sans-serif", fontWeight: 500,
-            }}>{s}</button>
-          ))}
-        </div>
-      )}
-
-      {/* Input con micrófono */}
-      <div style={{ padding: "16px 24px", borderTop: "1px solid #f0f0f0", display: "flex", gap: "10px", alignItems: "center", background: "#fff" }}>
-
-        {/* Botón micrófono */}
-        <button
-          onClick={grabando ? detenerGrabacion : iniciarGrabacion}
-          title={grabando ? "Detener grabación" : "Grabar pregunta"}
-          style={{
-            width: "42px", height: "42px", borderRadius: "10px", border: "none",
-            background: grabando ? "#ff4444" : "#e8f5e9",
-            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0, position: "relative",
-            boxShadow: grabando ? "0 0 0 4px rgba(255,68,68,0.2)" : "none",
-            animation: grabando ? "pulse 1.2s infinite" : "none",
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={grabando ? "#fff" : "#136442"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
-            <path d="M19 10v2a7 7 0 01-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/>
-            <line x1="8" y1="23" x2="16" y2="23"/>
-          </svg>
-        </button>
-
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && !e.shiftKey && enviar()}
-          placeholder={grabando ? "🎤 Escuchando..." : "Escribe o graba tu pregunta..."}
-          style={{
-            flex: 1, border: `1.5px solid ${grabando ? "#ff4444" : "#eef0ee"}`, borderRadius: "10px",
-            padding: "11px 16px", fontSize: "13px", fontFamily: "'Poppins', sans-serif",
-            outline: "none", color: "#333", background: grabando ? "#fff5f5" : "#f8faf8",
-            transition: "all 0.2s",
-          }}
-          onFocus={e => { if (!grabando) e.target.style.borderColor = "#136442"; }}
-          onBlur={e => { if (!grabando) e.target.style.borderColor = "#eef0ee"; }}
-          readOnly={grabando}
-        />
-
-        <button onClick={() => enviar()} disabled={cargando || !input.trim()} style={{
-          background: cargando || !input.trim() ? "#e0e0e0" : "#136442",
-          border: "none", borderRadius: "10px", padding: "11px 22px",
-          cursor: cargando || !input.trim() ? "default" : "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          {cargando ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "spin 1s linear infinite" }}>
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          )}
-        </button>
-      </div>
-
-      <style>{`
-        @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-        @keyframes pulse { 0%,100%{box-shadow:0 0 0 4px rgba(255,68,68,0.2)} 50%{box-shadow:0 0 0 8px rgba(255,68,68,0.1)} }
-        @keyframes audioBar { 0%,100%{transform:scaleY(0.4)} 50%{transform:scaleY(1)} }
-      `}</style>
-    </>
-  );
-}
-
 export default function PrediosPage() {
   const navigate = useNavigate();
 
@@ -604,7 +258,7 @@ export default function PrediosPage() {
           }}>
             <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4ade80" }} />
             <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.8)" }}>
-              Módulo de Gestión Territorial — ASOGABA
+              Módulo de Gestión Territorial — MPPAT
             </span>
           </div>
           <h1 style={{ color: "#fff", fontSize: "42px", fontWeight: 700, lineHeight: 1.15, margin: "0 0 18px" }}>
@@ -612,7 +266,7 @@ export default function PrediosPage() {
             <span style={{ color: "#86efac" }}>de Predios Agropecuarios</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "15px", lineHeight: 1.8, margin: "0 0 36px", maxWidth: "500px" }}>
-            Sistema oficial administrado por <strong style={{ color: "#fff" }}>ASOGABA</strong> para el
+            Sistema oficial administrado por <strong style={{ color: "#fff" }}>MPPAT</strong> para el
             registro, caracterización y gestión territorial de predios agropecuarios del estado Barinas.
             Personal técnico autorizado garantiza la veracidad de cada dato ingresado.
           </p>
@@ -671,7 +325,7 @@ export default function PrediosPage() {
         </div>
         <p style={{ margin: 0, fontSize: "14px", color: "#1b4332", lineHeight: 1.6 }}>
           <strong>Información importante:</strong> El registro de predios es realizado exclusivamente
-          por empleados autorizados de ASOGABA para garantizar la veracidad de los datos.
+          por empleados autorizados de MPPAT para garantizar la veracidad de los datos.
           Si eres productor, comunícate con nosotros a través de los canales indicados más abajo.
         </p>
       </div>
@@ -698,7 +352,7 @@ export default function PrediosPage() {
             }} />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "24px", position: "relative", zIndex: 1 }}>
               {[
-                { numero: "01", title: "Contacto inicial", desc: "El productor contacta a ASOGABA por teléfono o correo para solicitar el registro de su predio.", Icon: IconContact },
+                { numero: "01", title: "Contacto inicial", desc: "El productor contacta al MPPAT por teléfono o correo para solicitar el registro de su predio.", Icon: IconContact },
                 { numero: "02", title: "Visita técnica", desc: "Personal autorizado realiza visita al predio para verificar y levantar la información en campo.", Icon: IconVisit },
                 { numero: "03", title: "Registro en sistema", desc: "El técnico ingresa la información catastral, GPS, superficie y características físico-naturales.", Icon: IconRegister },
                 { numero: "04", title: "Ficha técnica", desc: "Se genera la ficha técnica oficial del predio, disponible para consulta y descarga en PDF.", Icon: IconFile },
@@ -812,13 +466,13 @@ export default function PrediosPage() {
             ¿Deseas registrar tu predio?
           </h2>
           <p style={{ color: "#777", fontSize: "14px", lineHeight: 1.7, maxWidth: "560px", marginBottom: "48px" }}>
-            El proceso es sencillo. Personal técnico de ASOGABA se encargará de todo el registro
+            El proceso es sencillo. Personal técnico del MPPAT se encargará de todo el registro
             de manera oficial y verificada. Solo debes seguir estos pasos:
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", marginBottom: "48px" }}>
             {[
-              { num: "1", texto: "Comunícate con ASOGABA por teléfono o correo electrónico.", check: true },
+              { num: "1", texto: "Comunícate con el MPPAT por teléfono o correo electrónico.", check: true },
               { num: "2", texto: "Solicita formalmente el registro de tu predio agropecuario.", check: true },
               { num: "3", texto: "Coordina la fecha de visita técnica con el personal asignado.", check: true },
               { num: "4", texto: "Recibe tu ficha técnica oficial una vez completado el proceso.", check: true },
@@ -895,7 +549,7 @@ export default function PrediosPage() {
             Predios registrados en el estado Barinas
           </h2>
           <p style={{ color: "#777", fontSize: "14px", marginBottom: "48px", lineHeight: 1.7 }}>
-            Datos actualizados y verificados por el equipo técnico de ASOGABA
+            Datos actualizados y verificados por el equipo técnico del MPPAT
           </p>
 
           {/* Métricas principales */}
@@ -1297,73 +951,14 @@ export default function PrediosPage() {
         </div>
       </div>
 
-      {/* ASISTENTE IA */}
-      <div style={{ padding: "72px 80px", background: "#f8faf8" }}>
-        <div style={{ maxWidth: "1060px", margin: "0 auto" }}>
-          <span style={{ color: "#136442", fontWeight: 600, fontSize: "11px", textTransform: "uppercase", letterSpacing: "2px" }}>
-            Asistente Virtual
-          </span>
-          <h2 style={{ color: "#1b4332", fontSize: "28px", margin: "10px 0 8px", fontWeight: 700 }}>
-            ¿Tienes alguna pregunta?
-          </h2>
-          <p style={{ color: "#777", fontSize: "14px", marginBottom: "40px", lineHeight: 1.7 }}>
-            Nuestro asistente inteligente puede explicarte todo sobre el módulo de predios agropecuarios.
-          </p>
-
-          <div style={{
-            background: "#fff", borderRadius: "16px", border: "1px solid #eef0ee",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.06)", overflow: "hidden",
-            display: "flex", flexDirection: "column", height: "480px",
-          }}>
-            {/* Header del chat */}
-            <div style={{
-              background: "linear-gradient(120deg, #0a3d24, #136442)",
-              padding: "18px 24px", display: "flex", alignItems: "center", gap: "14px",
-            }}>
-              <div style={{
-                width: "42px", height: "42px", borderRadius: "50%",
-                background: "rgba(255,255,255,0.15)", display: "flex",
-                alignItems: "center", justifyContent: "center", border: "2px solid rgba(255,255,255,0.3)",
-              }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a10 10 0 0110 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z" />
-                  <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                  <line x1="9" y1="9" x2="9.01" y2="9" />
-                  <line x1="15" y1="9" x2="15.01" y2="9" />
-                </svg>
-              </div>
-              <div>
-                <div style={{ color: "#fff", fontWeight: 700, fontSize: "14px" }}>Asistente ASOGABA</div>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
-                  <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#4ade80" }} />
-                  <span style={{ color: "rgba(255,255,255,0.7)", fontSize: "11px" }}>En línea · Módulo de Predios</span>
-                </div>
-              </div>
-              <div style={{ marginLeft: "auto" }}>
-                <span style={{
-                  background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
-                  color: "rgba(255,255,255,0.8)", fontSize: "10px", fontWeight: 600,
-                  padding: "3px 10px", borderRadius: "20px", letterSpacing: "1px",
-                }}>
-                  IA · Claude
-                </span>
-              </div>
-            </div>
-
-            {/* Mensajes */}
-            <ChatBox />
-          </div>
-        </div>
-      </div>
-
       {/* FOOTER */}
       <footer style={{
         background: "#0a3d24", color: "rgba(255,255,255,0.45)",
         padding: "28px 80px", display: "flex",
         justifyContent: "space-between", alignItems: "center", fontSize: "13px",
       }}>
-        <span>© 2026 Ecosistema Digital Agropecuario, Estado Barinas.</span>
-        <span style={{ fontSize: "12px" }}>Administrado por ASOGABA · Todos los derechos reservados</span>
+        <span>© 2026 Sistema Digital Agropecuario, Estado Barinas.</span>
+        <span style={{ fontSize: "12px" }}>Administrado por el MPPAT · Todos los dereccios reservados</span>
       </footer>
 
     </div>
