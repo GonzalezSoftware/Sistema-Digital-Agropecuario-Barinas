@@ -89,8 +89,9 @@ export default function HomePage() {
         }} />
 
         <div style={{ position: "relative", zIndex: 2, padding: "0 80px", maxWidth: "580px" }}>
-          <h1 style={{ color: "#fff", fontSize: "42px", fontWeight: 700, lineHeight: 1.2, margin: "0 0 20px" }}>
-            Sistema Digital Agropecuario<br />del Estado Barinas
+          <h1 style={{ color: "#fff", fontSize: "42px", fontWeight: 700, lineHeight: 1.15, margin: "0 0 18px" }}>
+             Sistema Digital Agropecuario<br />
+            <span style={{ color: "#86efac" }}>del Estado Barinas</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.85)", fontSize: "15px", lineHeight: 1.6, margin: "0 0 36px" }}>
             Portal de información agropecuaria del <strong style={{ color: "#fff" }}>estado Barinas</strong>.
