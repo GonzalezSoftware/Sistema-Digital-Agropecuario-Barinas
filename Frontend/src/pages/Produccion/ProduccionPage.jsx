@@ -1,5 +1,5 @@
 import logo from "../../assets/logo.png";
-import escudo from "../../assets/escudo.png";
+import escudo from "../../assets/gobierno.jpg";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -61,8 +61,8 @@ export default function GestionProductivaPage() {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "20px", cursor: "pointer" }}
           onClick={() => navigate("/")}>
-          <img src={escudo} alt="Escudo" style={{ height: 58 }} />
-          <img src={logo} alt="Logo" style={{ height: 52 }} />
+          <img src={escudo} alt="Escudo" style={{ height: 45 }} />
+          <img src={logo} alt="Logo" style={{ height: 35 }} />
         </div>
         <span style={{
           fontSize: "12px", color: "#888", fontStyle: "italic",
@@ -77,7 +77,7 @@ export default function GestionProductivaPage() {
             padding: "8px 22px", borderRadius: "6px", cursor: "pointer",
             fontWeight: 600, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
           }}>
-            Registrar Productor
+            Registrar Produccion
           </button>
           <button onClick={() => navigate("/")} style={{
             background: "none", border: "1.5px solid #ccc", color: "#666",
@@ -115,7 +115,7 @@ export default function GestionProductivaPage() {
           }}>
             <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4ade80" }} />
             <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.8)" }}>
-              Módulo de Gestión Territorial — ASOGABA
+              Módulo de Gestión Territorial — MPPAT
             </span>
           </div>
           <h1 style={{ color: "#fff", fontSize: "42px", fontWeight: 700, lineHeight: 1.15, margin: "0 0 18px" }}>
@@ -124,8 +124,8 @@ export default function GestionProductivaPage() {
           </h1>
           <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "15px", lineHeight: 1.8, margin: "0 0 36px", maxWidth: "500px" }}>
              Administra y controla la producción agrícola y pecuaria de los predios del estado
-             Barinas. Registra rubros productivos, animales, ciclos reproductivos, producción y
-             datos técnicos que permiten mejorar la toma de decisiones del productor.
+             Barinas en coordinación con el Ministerio del Poder Popular para la Agricultura Productiva y Tierras. 
+             Registra rubros productivos, animales, ciclos reproductivos y datos técnicos que permiten mejorar la toma de decisiones y fortalecer el control institucional.
           </p>
           <div style={{ display: "flex", gap: "14px" }}>
             <button className="hero-btn-primary"
@@ -141,66 +141,86 @@ export default function GestionProductivaPage() {
         </div>
       
       </div>
-      
+
 
       
 
-      
-
-{/* FUNCIONES - TABS */}
+{/* FUNCIONES - PORTAL INFORMATIVO */}
 <div style={{ padding: "56px 80px", background: "#f5f7f5" }}>
-<span style={{ color: "#136442", fontWeight: 600, fontSize: "11px", textTransform: "uppercase", letterSpacing: "2px" }}>
-            ¿Para que Sirve?
-          </span>
-          <h2 style={{ color: "#1b4332", fontSize: "28px", margin: "10px 0 8px", fontWeight: 700 }}>
-            Funciones del Sistema
-          </h2>
-          <p style={{ color: "#777", fontSize: "14px", marginBottom: "48px", lineHeight: 1.7, maxWidth: "500px" }}>
-            Cada productor tendrá disponible las siguientes funciones para una mejor Gestión y Adminitración de su Producción Agropecuaria en base a sus predios.
-          </p>
+
+  <span style={{
+    color: "#136442",
+    fontWeight: 600,
+    fontSize: "11px",
+    textTransform: "uppercase",
+    letterSpacing: "2px"
+  }}>
+    Capacidades del Sistema
+  </span>
+
+  <h2 style={{
+    color: "#1b4332",
+    fontSize: "28px",
+    margin: "10px 0 8px",
+    fontWeight: 700
+  }}>
+    Funcionalidades del Módulo de Producción
+  </h2>
+
+  <p style={{
+    color: "#777",
+    fontSize: "14px",
+    marginBottom: "48px",
+    lineHeight: 1.7,
+    maxWidth: "600px"
+  }}>
+    Este módulo permite al Ministerio del Poder Popular para la Agricultura Productiva y Tierras (MPPAT)
+    gestionar, controlar y analizar la producción agropecuaria de los predios registrados,
+    integrando información técnica, productiva, económica y sanitaria para la toma de decisiones.
+  </p>
 
   {(() => {
 
     const funciones = [
       {
-        title: "Registro de Producción",
-        img: "https://images.unsplash.com/photo-1592982537447-6f2a6a0d58c2?w=600&q=80",
-        desc: "Registra rubros agrícolas, cultivos y especies animales presentes en cada predio."
-      },
-      {
-        title: "Control Reproductivo",
-        img: "https://images.unsplash.com/photo-1603484477859-abe6a73f9364?w=600&q=80",
-        desc: "Administra ciclos reproductivos del ganado incluyendo montas, partos y diagnósticos."
-      },
-      {
-        title: "Sanidad Animal",
-        img: "https://images.unsplash.com/photo-1589927986089-35812388d1f4?w=600&q=80",
-        desc: "Registra vacunas, enfermedades, tratamientos y controles sanitarios del hato."
-      },
-      {
-        title: "Gestión de Cultivos",
+        title: "Producción Vegetal",
         img: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=600&q=80",
-        desc: "Controla siembras, condiciones de cultivo, fertilización y producción agrícola."
+        desc: "Registro y control de cultivos, siembras, cosechas, manejo agronómico y rendimiento por hectárea."
       },
       {
-        title: "Uso de Insumos",
-        img: "https://images.unsplash.com/photo-1598514983318-2f64f8f4796c?w=600&q=80",
-        desc: "Registra fertilizantes, alimentos, medicamentos y otros insumos utilizados."
+        title: "Producción Animal",
+        img: "https://images.unsplash.com/photo-1596733430284-f7437764b1a9?w=600&q=80",
+        desc: "Gestión de inventario animal, producción pecuaria, alimentación, sanidad y control reproductivo."
       },
       {
-        title: "Historial Productivo",
-        img: "https://images.unsplash.com/photo-1554224155-1696413565d3?w=600&q=80",
-        desc: "Consulta el historial completo de producción vegetal y animal del predio."
+        title: "Planificación Productiva",
+        img: "https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=800&q=80",
+        desc: "Permite planificar ciclos agrícolas y pecuarios, estimando producción y recursos necesarios."
       },
       {
-        title: "Indicadores Productivos",
+        title: "Gestión Económica",
+        img: "https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=600&q=80",
+        desc: "Control de costos, ingresos y análisis de rentabilidad de la producción agropecuaria."
+      },
+      {
+        title: "Trazabilidad Productiva",
+        img: "https://images.unsplash.com/photo-1581092334651-ddf26d9a09d0?auto=format&fit=crop&w=800&q=80",
+        desc: "Seguimiento detallado de la producción desde su origen, insumos utilizados y destino final."
+      },
+      {
+        title: "Control de Insumos",
+        img: "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80",
+        desc: "Gestión de fertilizantes, alimentos, medicamentos y recursos utilizados en el predio."
+      },
+      {
+        title: "Indicadores y Análisis",
         img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80",
-        desc: "Calcula automáticamente indicadores técnicos de rendimiento agrícola y pecuario."
+        desc: "Generación automática de indicadores productivos, rendimiento y estadísticas del sistema."
       },
       {
-        title: "Alertas Productivas",
+        title: "Alertas y Seguimiento",
         img: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&q=80",
-        desc: "Detecta problemas productivos como baja producción, enfermedades o retrasos."
+        desc: "Detección de problemas productivos, sanitarios o de rendimiento para acciones oportunas."
       }
     ];
 
@@ -298,88 +318,162 @@ export default function GestionProductivaPage() {
 
 </div>
 
-      {/* PARA PRODUCTORES */}
-      <div id="productor-info" style={{ padding: "72px 80px", background: "#f8faf8" }}>
-        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-          <span style={{ color: "#136442", fontWeight: 600, fontSize: "11px", textTransform: "uppercase", letterSpacing: "2px" }}>
-            Para productores
-          </span>
-          <h2 style={{ fontSize: "28px", fontWeight: 700, margin: "10px 0 8px", color: "#1b4332" }}>
-            ¿Deseas registrar tu predio?
-          </h2>
-          <p style={{ color: "#777", fontSize: "14px", lineHeight: 1.7, maxWidth: "560px", marginBottom: "48px" }}>
-            El proceso es sencillo. Personal técnico de ASOGABA se encargará de todo el registro
-            de manera oficial y verificada. Solo debes seguir estos pasos:
+
+{/* FLUJO DEL MÓDULO DE PRODUCCIÓN */}
+<div id="modulo-produccion-info" style={{ padding: "72px 80px", background: "#f8faf8" }}>
+
+  <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+
+    <span style={{
+      color: "#136442",
+      fontWeight: 600,
+      fontSize: "11px",
+      textTransform: "uppercase",
+      letterSpacing: "2px"
+    }}>
+      Módulo de Producción Agropecuaria
+    </span>
+
+    <h2 style={{
+      fontSize: "28px",
+      fontWeight: 700,
+      margin: "10px 0 8px",
+      color: "#1b4332"
+    }}>
+      ¿Cómo funciona el sistema?
+    </h2>
+
+    <p style={{
+      color: "#777",
+      fontSize: "14px",
+      lineHeight: 1.7,
+      maxWidth: "650px",
+      marginBottom: "48px"
+    }}>
+      El módulo de producción del sistema del Ministerio del Poder Popular para la Agricultura Productiva y Tierras (MPPAT)
+      permite gestionar de forma integral la producción vegetal y animal de cada predio, registrando datos técnicos,
+      productivos, económicos y sanitarios para su análisis y control.
+    </p>
+
+    {/* PASOS DEL FLUJO */}
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(4, 1fr)",
+      gap: "20px",
+      marginBottom: "48px"
+    }}>
+
+      {[
+        {
+          num: "1",
+          texto: "Iniciar Sesion y Acceder al dashboard del módulo de producción agropecuaria.",
+        },
+        {
+          num: "2",
+          texto: "Seleccionar el predio previamente registrado en el sistema.",
+        },
+        {
+          num: "3",
+          texto: "Registrar producción vegetal o producción animal según corresponda.",
+        },
+        {
+          num: "4",
+          texto: "Consultar indicadores, reportes, trazabilidad y análisis productivo.",
+        }
+      ].map((paso) => (
+        <div key={paso.num} style={{
+          background: "#fff",
+          borderRadius: "14px",
+          padding: "24px 20px",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+          border: "1px solid #eef0ee",
+          borderTop: "3px solid #136442",
+        }}>
+
+          <div style={{
+            width: "34px",
+            height: "34px",
+            borderRadius: "8px",
+            background: "#e8f5e9",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: "14px",
+            fontSize: "14px",
+            fontWeight: 700,
+            color: "#136442",
+          }}>
+            {paso.num}
+          </div>
+
+          <p style={{
+            color: "#555",
+            fontSize: "13px",
+            lineHeight: 1.7,
+            margin: 0
+          }}>
+            {paso.texto}
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", marginBottom: "48px" }}>
-            {[
-              { num: "1", texto: "Comunícate con ASOGABA por teléfono o correo electrónico.", check: true },
-              { num: "2", texto: "Solicita formalmente el registro de tu predio agropecuario.", check: true },
-              { num: "3", texto: "Coordina la fecha de visita técnica con el personal asignado.", check: true },
-              { num: "4", texto: "Recibe tu ficha técnica oficial una vez completado el proceso.", check: true },
-            ].map((paso) => (
-              <div key={paso.num} className="step-card" style={{
-                background: "#fff", borderRadius: "14px", padding: "24px 20px",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-                border: "1px solid #eef0ee",
-                borderTop: "3px solid #136442",
-              }}>
-                <div style={{
-                  width: "34px", height: "34px", borderRadius: "8px",
-                  background: "#e8f5e9", display: "flex", alignItems: "center",
-                  justifyContent: "center", marginBottom: "14px",
-                  fontSize: "14px", fontWeight: 700, color: "#136442",
-                }}>
-                  {paso.num}
-                </div>
-                <p style={{ color: "#555", fontSize: "13px", lineHeight: 1.7, margin: "0 0 12px" }}>
-                  {paso.texto}
-                </p>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <IconCheckCircle />
-                  <span style={{ fontSize: "11px", color: "#136442", fontWeight: 600 }}>Requerido</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Tarjetas de contacto */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
-            {[
-              { Icon: IconPhone, label: "Teléfono", value: "(0273) 300-0000", href: "tel:+582733000000", isLink: true },
-              { Icon: IconMail, label: "Correo electrónico", value: "agrosistema@barinas.gob.ve", href: "mailto:agrosistema@barinas.gob.ve", isLink: true },
-              { Icon: IconClock, label: "Horario de atención", value: "Lunes a Viernes · 8:00am – 4:00pm", isLink: false },
-            ].map((item) => (
-              <div key={item.label} className="contact-card" style={{
-                background: "#fff", borderRadius: "14px", padding: "28px 24px",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.05)", display: "flex",
-                flexDirection: "column", alignItems: "flex-start", gap: "12px",
-                border: "1px solid #eef0ee",
-              }}>
-                <div style={{
-                  width: "46px", height: "46px", borderRadius: "11px",
-                  background: "#e8f5e9", display: "flex", alignItems: "center", justifyContent: "center",
-                }}>
-                  <item.Icon />
-                </div>
-                <p style={{ fontSize: "11px", color: "#aaa", margin: 0, textTransform: "uppercase", letterSpacing: "1.5px", fontWeight: 600 }}>
-                  {item.label}
-                </p>
-                {item.isLink ? (
-                  <a href={item.href} style={{ color: "#1b4332", textDecoration: "none", fontSize: "14px", fontWeight: 600, lineHeight: 1.5 }}>
-                    {item.value}
-                  </a>
-                ) : (
-                  <span style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, lineHeight: 1.5 }}>
-                    {item.value}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
-      </div>
+      ))}
+
+    </div>
+
+    {/* SUBSISTEMAS DEL MODULO */}
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: "20px"
+    }}>
+
+      {[
+        {
+          title: "Producción Vegetal",
+          desc: "Registro de cultivos, siembra, cosecha, rendimiento y manejo agronómico."
+        },
+        {
+          title: "Producción Animal",
+          desc: "Control de inventario pecuario, sanidad, reproducción y producción."
+        },
+        {
+          title: "Gestión Integral",
+          desc: "Trazabilidad, indicadores, análisis económico y reportes del sistema."
+        }
+      ].map((item) => (
+        <div key={item.title} style={{
+          background: "#fff",
+          borderRadius: "14px",
+          padding: "26px 22px",
+          border: "1px solid #eef0ee",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.05)"
+        }}>
+
+          <h3 style={{
+            color: "#136442",
+            fontSize: "15px",
+            marginBottom: "10px"
+          }}>
+            {item.title}
+          </h3>
+
+          <p style={{
+            color: "#555",
+            fontSize: "13px",
+            lineHeight: 1.6
+          }}>
+            {item.desc}
+          </p>
+
+        </div>
+      ))}
+
+    </div>
+
+  </div>
+</div>
+
+
 
       {/* ESTADÍSTICAS */}
       <div style={{ padding: "56px 80px", background: "#fff" }}>
@@ -402,10 +496,10 @@ export default function GestionProductivaPage() {
         }}>
 
           {[
-            { numero: "0", label: "Rubros Agrícolas", icon: "🌱" },
-            { numero: "0", label: "Animales Registrados", icon: "🐄" },
-            { numero: "0", label: "Producciones Registradas", icon: "📊" },
-            { numero: "0", label: "Alertas Activas", icon: "⚠️" },
+          { numero: "0", label: "Predios Registrados", icon: "📍" },
+          { numero: "0", label: "Productores Activos", icon: "👨‍🌾" },
+          { numero: "0", label: "Producción Total", icon: "📊" },
+          { numero: "0", label: "Superficie Cultivada", icon: "🌾" },
           ].map((stat) => (
 
             <div key={stat.label} style={{
