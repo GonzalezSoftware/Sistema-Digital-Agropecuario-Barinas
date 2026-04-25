@@ -82,14 +82,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'defaultdb',
-        'USER': 'avnadmin',
-        'PASSWORD': 'AVNS_YoKdqHf-ZKBU3dUe1Sb', # Haz clic en el "ojo" en Aiven para verla
-        'HOST': 'mysql-5d5195d-gonzalezsoftware2025-8ffc.d.aivencloud.com',
-        'PORT': '27046',
-        'OPTIONS': {
-            'ssl': {'ca': None}, # Esto es obligatorio para conectar con Aiven
-        },
+        'NAME': 'sistema_agropecuario_barinas',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 

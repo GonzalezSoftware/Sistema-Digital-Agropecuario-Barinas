@@ -5,7 +5,7 @@ import React from "react";
 
 const USUARIOS = [
   { usuario: "admin", clave: "admin123", rol: "Administrador", nombre: "Carlos Pérez" },
-  { usuario: "empleado", clave: "empleado123", rol: "Empleado ASOGABA", nombre: "María González" },
+  { usuario: "empleado", clave: "empleado123", rol: "Empleado MPPAT", nombre: "María González" },
 ];
 
 export default function LoginPrediosPage() {
