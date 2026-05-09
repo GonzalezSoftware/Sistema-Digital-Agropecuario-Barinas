@@ -5,6 +5,8 @@ import ProduccionPage from "./pages/Produccion/ProduccionPage"
 import EstadisticaPage from "./pages/Estadistica/EstadisticaPage"
 import LoginPrediosPage from "./pages/Predios/LoginPrediosPage";
 import Dashboard from "./pages/Predios/Dashboard";
+import LoginProduccionPage from "./pages/Produccion/LoginProduccionPage"
+import DashboardProduccion from "./pages/Produccion/DashboardProduccion"
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
         <Route path="/estadística-portalinfo" element={<EstadisticaPage />} />
         <Route path="/predios/login" element={<LoginPrediosPage />} />
         <Route path="/predios/Dashboard" element={<Dashboard />} />
+        <Route path="/produccion/login" element={<LoginProduccionPage />} />
+        <Route path="/produccion/DashboardP" element={<DashboardProduccion />} />
       </Routes>
     </BrowserRouter>
   )

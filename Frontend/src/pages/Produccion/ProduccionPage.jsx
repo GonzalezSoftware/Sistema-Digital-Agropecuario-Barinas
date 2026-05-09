@@ -72,7 +72,7 @@ export default function GestionProductivaPage() {
           <strong style={{ color: "#136442", fontStyle: "normal" }}>Venezuela</strong>
         </span>
         <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "12px" }}>
-          <button className="nav-btn-primary" onClick={() => navigate("/predios/login")} style={{
+          <button className="nav-btn-primary" onClick={() => navigate("/produccion/login")} style={{
             background: "#136442", border: "none", color: "#fff",
             padding: "8px 22px", borderRadius: "6px", cursor: "pointer",
             fontWeight: 600, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
