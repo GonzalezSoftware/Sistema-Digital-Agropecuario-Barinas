@@ -160,12 +160,17 @@ export default function Dashboard() {
     const [formData, setFormData] = useState(formInicial);
 
     //---------------------------------Validaciones del registro-------------------------------------
-    
+
     const [errors, setErrors] = useState({
         productor_nombre: "",
         productor_cedula: "",
         productor_telefono: "",
-        productor_correo: ""
+        productor_correo: "",
+        municipio: "",
+        parroquia: "",
+        comunidad: "",
+        centro_poblado: "",
+        coordenadas: ""
     });
 
     const verificarCedulaDuplicada = (cedula) => {
@@ -240,55 +245,166 @@ export default function Dashboard() {
             }
         }
 
+        // --- DENTRO DE validarCampoProductor ---
+
+        // Municipio y Parroquia (Obligatorios)
+        if (name === "municipio" || name === "parroquia") {
+            if (value === "") mensaje = "Este campo es obligatorio";
+        }
+
+        if (name === "comunidad" || name === "centro_poblado") {
+            const soloLetrasYEspacios = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+
+            if (value.trim() === "") {
+                mensaje = "Indique la localidad";
+            } else if (value.length < 3) {
+                mensaje = "El nombre es muy corto";
+            } else if (value.length > 30) {
+                mensaje = "Máximo 30 caracteres permitidos"; // <-- Nueva validación
+            } else if (!soloLetrasYEspacios.test(value)) {
+                mensaje = "Solo letras y espacios";
+            }
+        }
+
+        // COORDENADAS (La más importante)
+        if (name === "coordenadas") {
+            if (value === "") {
+                mensaje = "Pegue las coordenadas de Google Maps";
+            } else {
+                // Regex para validar formato: Numero, Numero (con negativos opcionales)
+                const regexCoords = /^-?\d+\.\d+,\s*-?\d+\.\d+$/;
+                if (!regexCoords.test(value)) {
+                    mensaje = "Formato inválido. Use: 8.123, -70.123";
+                }
+            }
+        }
+
+        // --- SECCIÓN III: IDENTIFICACIÓN DEL PREDIO ---
+
+        // Nombre del Predio
+        if (name === "nombre_predio") {
+            if (value.trim() === "") {
+                mensaje = "El nombre del predio es obligatorio";
+            } else if (value.length < 3) {
+                mensaje = "Nombre demasiado corto";
+            } else if (value.length > 50) {
+                mensaje = "Máximo 50 caracteres";
+            }
+        }
+
+        // Dirección (Detalle de cómo llegar o referencia)
+        if (name === "direccion") {
+            if (value.trim() === "") {
+                mensaje = "La dirección es necesaria para la ubicación física";
+            } else if (value.length < 10) {
+                mensaje = "Por favor, sea más específico (mín. 10 caracteres)";
+            }
+        }
+
+        // Superficie (Numérica y mayor a cero)
+        if (name === "superficie") {
+            const valorNum = parseFloat(value);
+            if (value === "") {
+                mensaje = "Indique las hectáreas";
+            } else if (isNaN(valorNum) || valorNum <= 0) {
+                mensaje = "Debe ser un número mayor a 0";
+            }
+        }
+
+        // Tipo de Propiedad
+        if (name === "tipo_propiedad") {
+            if (value === "") {
+                mensaje = "Seleccione el tipo de propiedad";
+            }
+        }
+
+        if (name === "vialidad") {
+            if (value === "") {
+                mensaje = "Debe calificar el estado de la vía de acceso";
+            }
+        }
+
+        // Validación para los campos de infraestructura: Solo enteros positivos
+        const validarInfraestructura = (valor) => {
+            if (valor === "") return ""; // Permitimos vacío para que el usuario pueda borrar
+
+            // Regex que verifica que SOLO haya números del inicio al fin
+            const soloNumerosEnteros = /^\d+$/;
+
+            if (!soloNumerosEnteros.test(valor)) {
+                return "Solo se permiten números enteros";
+            }
+
+            return "";
+        };
+
+        // --- SECCIÓN VII: MODELO DE PRODUCCIÓN ---
+
+        if (name === "tipo_explotacion") {
+            if (value === "") {
+                mensaje = "Seleccione el tipo de explotación";
+            }
+        }
+
         setErrors(prev => ({ ...prev, [name]: mensaje }));
     };
-
-
-
-
-
-
-
-
 
     //----------------------------
 
     //Función desactivar Botón
     const esFormularioValido = () => {
-        // 1. Verificar que no haya ningún mensaje de error activo
+        // 1. Que no existan mensajes de error en el estado
         const sinErrores = Object.values(errors).every(error => error === "");
 
-        // 2. Verificar que los campos obligatorios del productor tengan contenido
-        const camposObligatoriosRellenos =
+        // 2. Que los campos críticos tengan datos
+        const camposObligatorios =
             formData.productor_nombre.trim() !== "" &&
             formData.productor_cedula.trim() !== "" &&
-            formData.productor_telefono.trim() !== "";
+            formData.municipio !== "" &&
+            formData.parroquia !== "" &&
+            formData.coordenadas.trim() !== "" &&
+            formData.nombre_predio.trim() !== "" &&
+            formData.superficie !== "" &&
+            formData.tipo_propiedad !== "" &&
+            formData.vialidad !== "" &&
+            formData.tipo_explotacion !== "";
 
-        return sinErrores && camposObligatoriosRellenos;
+        return sinErrores && camposObligatorios;
     };
+
+
+    // Obtenemos una lista de los municipios que ya tienen al menos un predio registrado
+    const municipiosConRegistros = [...new Set(listaPredios.map(p => p.municipio))];
+
+    // Contamos cuántos hay
+    const totalMunicipiosBarinas = MUNICIPIOS.length; // Esto dará 12
+    const cantidadCubiertos = municipiosConRegistros.length;
 
     useEffect(() => {
         const data = sessionStorage.getItem("usuario_predios");
-        if (!data) navigate("/predios/login");
-        else setUsuario(JSON.parse(data));
-    }, [navigate]);
-
-    // EL NUEVO: Para cargar datos cuando entres a la pestaña historial
-    useEffect(() => {
-        if (tabActiva === "historial") {
+        if (!data) {
+            navigate("/predios/login");
+        } else {
+            setUsuario(JSON.parse(data));
+            // CARGA LOS DATOS AQUÍ APENAS INICIA
             obtenerHistorial();
         }
-    }, [tabActiva]);
+    }, [navigate]);
 
     // ── AQUÍ VAN LAS FUNCIONES ──
 
+    const [cargando, setCargando] = useState(true);
+
     const obtenerHistorial = async () => {
+        setCargando(true); // Empieza a cargar
         try {
             const response = await fetch('http://127.0.0.1:8000/api/predios/');
             const data = await response.json();
             setListaPredios(data);
         } catch (error) {
-            console.error("Error al obtener el historial:", error);
+            console.error("Error:", error);
+        } finally {
+            setCargando(false); // Terminó (con éxito o error)
         }
     };
 
@@ -443,11 +559,34 @@ export default function Dashboard() {
         });
     };
 
-    const manejarInfra = (campo, valor) => {
+    const manejarInfra = (key, e) => {
+        // Obtenemos el valor directamente del evento e
+        const valorOriginal = e.target.value;
+
+        // Filtramos: solo dejamos los números
+        const valorLimpio = valorOriginal.replace(/[^0-9]/g, "");
+
+        // Actualizamos el estado del formulario
         setFormData(prev => ({
             ...prev,
-            infraestructura: { ...prev.infraestructura, [campo]: parseInt(valor) || 0 }
+            infraestructura: {
+                ...prev.infraestructura,
+                [key]: valorLimpio
+            }
         }));
+
+        // Opcional: Si quieres mostrar error si intentan meter letras
+        if (valorOriginal !== valorLimpio) {
+            setErrors(prev => ({
+                ...prev,
+                [`infra_${key}`]: "Solo se permiten números"
+            }));
+        } else {
+            setErrors(prev => ({
+                ...prev,
+                [`infra_${key}`]: ""
+            }));
+        }
     };
 
     const guardarEnDjango = async () => {
@@ -639,6 +778,7 @@ export default function Dashboard() {
                     {guardadoExitoso && <div style={alertStyle}>¡Registro sincronizado con éxito!</div>}
 
                     {tabActiva === "inicio" && (
+
                         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
 
                             {/* ── CARDS PRINCIPALES ── */}
@@ -648,9 +788,23 @@ export default function Dashboard() {
                                 gap: "24px",
                                 marginBottom: "30px"
                             }}>
-                                <CardStat label="Predios Censados" value="0" color="#136442" />
-                                <CardStat label="Superficie Total" value="0" color="#136442" />
-                                <CardStat label="Municipios Cubiertos" value="0/0" color="#136442" />
+                                <CardStat
+                                    label="Predios Censados"
+                                    value={cargando ? <Spinner /> : listaPredios.length}
+                                    color="#136442"
+                                />
+
+                                <CardStat
+                                    label="Superficie Total"
+                                    value={cargando ? <Spinner /> : `${listaPredios.reduce((acc, p) => acc + parseFloat(p.superficie || 0), 0).toLocaleString()} Ha`}
+                                    color="#136442"
+                                />
+
+                                <CardStat
+                                    label="Municipios Cubiertos"
+                                    value={cargando ? <Spinner /> : `${cantidadCubiertos} / ${totalMunicipiosBarinas}`}
+                                    color="#136442"
+                                />
                             </div>
 
                             {/* ── GRÁFICOS ── */}
@@ -727,32 +881,81 @@ export default function Dashboard() {
 
                             <FormSection title="II. Georreferenciación y Ubicación">
                                 <div style={grid3}>
-                                    <SelectField label="Municipio" name="municipio" options={Object.keys(PARROQUIAS_POR_MUNICIPIO)} onChange={manejarCambio} />
-                                    <SelectField label="Parroquia" name="parroquia" options={formData.municipio ? PARROQUIAS_POR_MUNICIPIO[formData.municipio] : []} onChange={manejarCambio} disabled={!formData.municipio} />
-                                    <InputField label="Comunidad / Sector" name="comunidad" onChange={manejarCambio} />
-                                    <InputField label="Centro Poblado" name="centro_poblado" onChange={manejarCambio} />
+                                    <SelectField
+                                        label="Municipio"
+                                        name="municipio"
+                                        options={Object.keys(PARROQUIAS_POR_MUNICIPIO)}
+                                        onChange={manejarCambio}
+                                        error={errors.municipio}
+                                    />
+                                    <SelectField
+                                        label="Parroquia"
+                                        name="parroquia"
+                                        options={formData.municipio ? PARROQUIAS_POR_MUNICIPIO[formData.municipio] : []}
+                                        onChange={manejarCambio}
+                                        disabled={!formData.municipio}
+                                        error={errors.parroquia}
+                                    />
+                                    <InputField
+                                        label="Comunidad / Sector"
+                                        name="comunidad"
+                                        value={formData.comunidad}
+                                        onChange={manejarCambio}
+                                        error={errors.comunidad}
+                                    />
+                                    <InputField
+                                        label="Centro Poblado"
+                                        name="centro_poblado"
+                                        value={formData.centro_poblado}
+                                        onChange={manejarCambio}
+                                        error={errors.centro_poblado}
+                                    />
 
-                                    {/* CAMPO ÚNICO PARA COPIAR Y PEGAR DESDE GOOGLE MAPS */}
                                     <InputField
                                         label="Coordenadas (Latitud, Longitud)"
                                         name="coordenadas"
+                                        value={formData.coordenadas}
                                         placeholder="Ej: 8.097364, -69.312631"
                                         onChange={manejarCambio}
+                                        error={errors.coordenadas}
                                     />
                                 </div>
                             </FormSection>
 
                             <FormSection title="III. Identificación del Predio">
                                 <div style={grid3}>
-                                    <InputField label="Nombre del Predio" name="nombre_predio" onChange={manejarCambio} />
-                                    <InputField label="Dirección" name="direccion" onChange={manejarCambio} />
-                                    <InputField label="Superficie (Ha)" type="number" name="superficie" onChange={manejarCambio} />
+                                    <InputField
+                                        label="Nombre del Predio"
+                                        name="nombre_predio"
+                                        value={formData.nombre_predio}
+                                        onChange={manejarCambio}
+                                        error={errors.nombre_predio}
+                                        maxLength={50}
+                                    />
+                                    <InputField
+                                        label="Dirección"
+                                        name="direccion"
+                                        value={formData.direccion}
+                                        onChange={manejarCambio}
+                                        error={errors.direccion}
+                                        placeholder="Ej: Carretera vieja, entrada al lado de la escuela"
+                                    />
+                                    <InputField
+                                        label="Superficie (Ha)"
+                                        type="number"
+                                        name="superficie"
+                                        value={formData.superficie}
+                                        onChange={manejarCambio}
+                                        error={errors.superficie}
+                                    />
 
                                     <SelectField
                                         label="Tipo de Propiedad"
                                         name="tipo_propiedad"
+                                        value={formData.tipo_propiedad}
                                         options={["Público", "Privado"]}
                                         onChange={manejarCambio}
+                                        error={errors.tipo_propiedad}
                                     />
                                 </div>
                             </FormSection>
@@ -794,8 +997,10 @@ export default function Dashboard() {
                                     <SelectField
                                         label="Condición de la Vialidad"
                                         name="vialidad"
+                                        value={formData.vialidad} // Asegúrate de tener el value conectado
                                         options={["Excelente", "Bueno", "Regular", "Malo"]}
                                         onChange={manejarCambio}
+                                        error={errors.vialidad} // <--- Feedback visual
                                     />
                                 </div>
                             </FormSection>
@@ -806,25 +1011,29 @@ export default function Dashboard() {
                                         <InputField
                                             key={key}
                                             label={key.replace("_", " ").toUpperCase()}
-                                            type="number"
-                                            onChange={(e) => manejarInfra(key, e.target.value)}
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={formData.infraestructura[key] || ""} // Agregamos el || "" por seguridad
+                                            onChange={(e) => manejarInfra(key, e)} // <--- Pasamos el evento 'e' completo
+                                            error={errors[`infra_${key}`]}
+                                            placeholder="0"
                                         />
                                     ))}
                                 </div>
                             </FormSection>
 
                             <FormSection title="VII. Modelo de Producción">
-
                                 <SelectField
                                     label="Tipo de Explotación"
                                     name="tipo_explotacion"
+                                    value={formData.tipo_explotacion}
                                     options={["Intensivo", "Semi Intensivo", "Extensivo"]}
                                     onChange={manejarCambio}
+                                    error={errors.tipo_explotacion} // <--- Vinculación del error
                                 />
 
                                 <div style={{ marginTop: "20px" }}>
                                     <p style={labelStyle}>Sistemas de Registro</p>
-
                                     <div style={gridCheck}>
                                         {["Sanitario", "Productivo", "Reproductivo", "Financiero"].map(s => (
                                             <label key={s} style={radioLabel}>
@@ -845,7 +1054,6 @@ export default function Dashboard() {
                                         ))}
                                     </div>
                                 </div>
-
                             </FormSection>
 
                             <div style={{ textAlign: "right", paddingBottom: "50px" }}>
@@ -1420,4 +1628,26 @@ const btnSmall = {
     borderRadius: "4px",
     cursor: "pointer",
     fontSize: "12px"
+};
+
+const Spinner = ({ color = "#136442" }) => {
+    // Creamos una referencia para el elemento
+    const spinnerRef = (el) => {
+        if (el) {
+            el.animate(
+                [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+                { duration: 1000, iterations: Infinity }
+            );
+        }
+    };
+
+    return (
+        <svg
+            ref={spinnerRef}
+            width="30" height="30" viewBox="0 0 24 24" fill="none"
+            stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+        >
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+    );
 };
