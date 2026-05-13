@@ -28,8 +28,7 @@ class Predio(models.Model):
     direccion = models.TextField(null=True, blank=True) # <-- NUEVO
 
     superficie = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    este = models.CharField(max_length=50, null=True, blank=True)
-    norte = models.CharField(max_length=50, null=True, blank=True)
+    coordenadas = models.CharField(max_length=100, null=True, blank=True, help_text="Latitud, Longitud")
 
     # Campos de Tenencia y Tipo
     tipo_propiedad = models.CharField(max_length=50, null=True, blank=True) # <-- NUEVO (Público/Privado)
