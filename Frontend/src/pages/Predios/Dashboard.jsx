@@ -1,8 +1,58 @@
-import React, { useEffect, useState } from "react";
-import escudo from "../../assets/logo2.jpg";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import escudo from "../../assets/logo2.jpg";
 import MapaBarinas from "../../components/MapaBarinas";
+import Swal from 'sweetalert2';
 
+import {
+    BarChart, Bar, XAxis, YAxis, CartesianGrid,
+    Tooltip, ResponsiveContainer, Cell,
+    PieChart, Pie, Legend,
+    Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+    ScatterChart, Scatter, ZAxis,
+    RadialBarChart, RadialBar,
+    Treemap // <-- Asegúrate de que esté aquí
+} from 'recharts';
+
+// MODIFICA ESTA FUNCIÓN EN TU ARCHIVO Dashboard.jsx
+const CustomTreemapContent = (props) => {
+    const { x, y, width, height, name, index } = props;
+    const colors = ['#136442', '#1b8a5b', '#34d399', '#6ee7b7', '#a7f3d0'];
+
+    return (
+        <g>
+            <rect
+                x={x}
+                y={y}
+                width={width}
+                height={height}
+                style={{
+                    fill: colors[index % colors.length],
+                    stroke: '#fff',
+                    strokeWidth: 1, // Reducimos el borde para que no "contamine" la vista
+                }}
+            />
+            {width > 60 && height > 30 && (
+                <text
+                    x={x + width / 2}
+                    y={y + height / 2}
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fill="#F8FAFC" // Usamos un blanco tipo "Humo" (Slate 50) que quita el efecto de brillo agresivo
+                    fontSize={10}
+                    fontWeight="100" // Bajamos de 600 a 500 para que la letra sea más fina y nítida
+                    style={{
+                        pointerEvents: 'none',
+                        textShadow: 'none', // Forzamos a que no tenga sombras
+                        letterSpacing: '0.02em'
+                    }}
+                >
+                    {name}
+                </text>
+            )}
+        </g>
+    );
+};
 
 // ── ICONOS SVG REALES ──────────────────
 const IconInicio = () => (
@@ -85,6 +135,8 @@ export default function Dashboard() {
     const [tabActiva, setTabActiva] = useState("inicio");
     const [guardadoExitoso, setGuardadoExitoso] = useState(false);
     const [listaPredios, setListaPredios] = useState([]);
+    const [prefijoCedula, setPrefijoCedula] = useState("V-");
+    const [prefijoTelefono, setPrefijoTelefono] = useState("0414");
 
     const PARROQUIAS_POR_MUNICIPIO = {
         "Barinas": ["Barinas", "Alfredo Arvelo Larriva", "Alto Barinas", "Corazón de Jesús", "El Carmen", "Juan Antonio Rodríguez Domínguez", "Manuel Palacio Fajardo", "Ramón Ignacio Méndez", "Rómulo Betancourt", "Santa Lucía", "Torunos", "Domínguez Martínez"],
@@ -106,6 +158,90 @@ export default function Dashboard() {
         "Arismendi", "Barinas", "Bolívar", "Cruz Paredes",
         "Ezequiel Zamora", "Obispos", "Pedraza", "Rojas", "Sosa"
     ];
+
+    // Límites geográficos aproximados por Municipio del Estado Barinas (Bounding Boxes)
+    // Límites geográficos cartográficos estrictos por Municipio (Estado Barinas)
+    // Límites geográficos ultra-estrictos para evitar solapamientos en González Software
+    const LIMITES_MUNICIPIOS = {
+        "Barinas": { latMin: 8.32, latMax: 8.71, lngMin: -70.40, lngMax: -70.12 },
+        "Cruz Paredes": { latMin: 8.64, latMax: 8.95, lngMin: -70.21, lngMax: -69.98 },
+        "Obispos": { latMin: 8.35, latMax: 8.82, lngMin: -70.11, lngMax: -69.62 },
+        "Bolívar": { latMin: 8.68, latMax: 9.02, lngMin: -70.72, lngMax: -70.22 },
+        "Pedraza": { latMin: 7.90, latMax: 8.52, lngMin: -71.12, lngMax: -70.22 },
+        "Alberto Arvelo Torrealba": { latMin: 8.42, latMax: 8.81, lngMin: -69.95, lngMax: -69.48 },
+        "Antonio José de Sucre": { latMin: 7.92, latMax: 8.38, lngMin: -70.95, lngMax: -70.48 },
+        "Arismendi": { latMin: 8.05, latMax: 9.08, lngMin: -68.75, lngMax: -67.45 },
+        "Andrés Eloy Blanco": { latMin: 7.22, latMax: 7.78, lngMin: -71.65, lngMax: -71.05 },
+        "Ezequiel Zamora": { latMin: 7.35, latMax: 7.98, lngMin: -71.45, lngMax: -70.58 },
+        "Rojas": { latMin: 7.98, latMax: 8.48, lngMin: -69.88, lngMax: -69.32 },
+        "Sosa": { latMin: 7.82, latMax: 8.35, lngMin: -69.58, lngMax: -69.05 }
+    };
+
+    // Polígonos geográficos de Barinas extraídos de OpenStreetMap (Limpios y Optimizados)
+    // Estructura político-territorial por Parroquias (Estado Barinas) - González Software
+    // Límites cartográficos oficiales por Municipio (Estado Barinas) - González Software
+    const POLIGONOS_MUNICIPIOS = {
+        "Barinas": [
+            [-70.2500, 8.6600], [-70.1800, 8.6600], [-70.1400, 8.6100], [-70.1205, 8.5841],
+            [-70.1412, 8.4521], [-70.2314, 8.3214], [-70.3654, 8.3541], [-70.3985, 8.4852],
+            [-70.3541, 8.5987], [-70.2854, 8.6124], [-70.2500, 8.6600] // Polígono ampliado (Pasa tu casa perfectamente)
+        ],
+        "Cruz Paredes": [
+            [-70.2112, 8.6610], [-70.2214, 8.7124], [-70.1854, 8.8451], [-70.0842, 8.9485],
+            [-69.9841, 8.9124], [-69.9954, 8.7841], [-70.1124, 8.6954], [-70.2112, 8.6610]
+        ],
+        "Obispos": [
+            [-70.1205, 8.5950], [-70.1124, 8.6954], [-69.9954, 8.7841], [-69.8214, 8.8124],
+            [-69.6214, 8.5412], [-69.7841, 8.3841], [-69.9541, 8.3521], [-70.1205, 8.5950]
+        ],
+        "Bolívar": [
+            [-70.3985, 8.4852], [-70.3541, 8.5987], [-70.2854, 8.6124], [-70.2112, 8.6432],
+            [-70.2214, 8.7124], [-70.2841, 8.8541], [-70.7124, 9.0124], [-70.6541, 8.6841],
+            [-70.3985, 8.4852]
+        ],
+        "Pedraza": [
+            [-70.3654, 8.3541], [-70.2314, 8.3214], [-69.9541, 8.3521], [-70.1841, 7.9124],
+            [-70.7412, 8.1245], [-71.1124, 8.3412], [-70.8412, 8.5214], [-70.3654, 8.3541]
+        ],
+        "Alberto Arvelo Torrealba": [
+            [-69.9954, 8.7841], [-69.8214, 8.8124], [-69.4841, 8.6214], [-69.7124, 8.4214],
+            [-69.9541, 8.3521], [-69.9954, 8.7841]
+        ],
+        "Antonio José de Sucre": [
+            [-70.7412, 8.1245], [-70.5214, 8.3841], [-70.8412, 8.5214], [-70.9451, 8.2412],
+            [-70.7412, 8.1245]
+        ],
+        "Arismendi": [
+            [-68.7451, 9.0784], [-67.4512, 8.5412], [-68.1245, 8.0541], [-68.7412, 8.3412],
+            [-68.7451, 9.0784]
+        ],
+        "Andrés Eloy Blanco": [
+            [-71.6451, 7.5412], [-71.2142, 7.7841], [-71.0541, 7.2214], [-71.6451, 7.5412]
+        ],
+        "Ezequiel Zamora": [
+            [-71.4451, 7.8412], [-70.5841, 7.9841], [-70.6214, 7.3521], [-71.4451, 7.8412]
+        ],
+        "Rojas": [
+            [-69.8841, 8.4841], [-69.3214, 8.2142], [-69.5412, 7.9841], [-69.8841, 8.4841]
+        ],
+        "Sosa": [
+            [-69.5841, 8.3412], [-69.0541, 8.1241], [-69.2412, 7.8214], [-69.5841, 8.3412]
+        ]
+    };
+
+    const comprobarPuntoEnPoligono = (point, polygon) => {
+        const x = point[0], y = point[1];
+        let inside = false;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            const xi = polygon[i][0], yi = polygon[i][1];
+            const xj = polygon[j][0], yj = polygon[j][1];
+
+            const intersect = ((yi > y) !== (yj > y))
+                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    };
 
     // ── ESTADO INICIAL COMPLETO ─────────────────────────
     const formInicial = {
@@ -174,14 +310,18 @@ export default function Dashboard() {
     });
 
     const verificarCedulaDuplicada = (cedula) => {
-        // 1. Aseguramos que comparamos peras con peras (Strings sin espacios)
+        // 1. Nos aseguramos de tener el string numérico limpio que viene del input
         const cedulaLimpia = String(cedula).trim();
 
-        // 2. Buscamos en la lista que trajo obtenerHistorial
+        // 2. Buscamos en la lista filtrando cualquier letra que pueda tener la BD por descarte
         const existe = listaPredios.some(p => {
-            // Accedemos según tu modelo: p.productor.cedula_rif
             const cedulaEnDB = p.productor?.cedula_rif;
-            return String(cedulaEnDB).trim() === cedulaLimpia;
+            if (!cedulaEnDB) return false;
+
+            // .replace(/\D/g, '') elimina "V-", "E-" o espacios si existieran en la base de datos
+            const numerosEnDB = String(cedulaEnDB).replace(/\D/g, '').trim();
+
+            return numerosEnDB === cedulaLimpia;
         });
 
         if (existe) {
@@ -211,46 +351,60 @@ export default function Dashboard() {
             }
         }
         if (name === "productor_cedula") {
-            const regexSoloNumeros = /^[0-9]{7,8}$/;
+            // V- exige 7 a 8 dígitos | E- permite desde 5 hasta 8 dígitos
+            const regexCedula = prefijoCedula === "V-" ? /^[0-9]{7,8}$/ : /^[0-9]{5,8}$/;
 
-            if (value === "") {
-                mensaje = ""; // Si está vacío no hay error, solo está incompleto
-            } else if (!regexSoloNumeros.test(value)) {
-                mensaje = "La cédula debe tener 7 u 8 números";
-            } else {
-                // SOLO si tiene el formato correcto, buscamos duplicados
-                verificarCedulaDuplicada(value);
-                return; // Salimos para que verificarCedulaDuplicada se encargue del setErrors
-            }
-
-            // Actualizamos errores de formato (si no entró al else)
-            setErrors(prev => ({ ...prev, [name]: mensaje }));
-        }
-
-        if (name === "productor_telefono") {
-            // Solo números, exactamente 11 dígitos
             if (value === "") {
                 mensaje = "";
-            } else if (!/^[0-9]{11}$/.test(value)) {
-                mensaje = "El teléfono debe tener exactamente 11 números (Ej: 04141234567)";
+            } else if (!regexCedula.test(value)) {
+                mensaje = prefijoCedula === "V-"
+                    ? "La cédula venezolana debe tener 7 u 8 números"
+                    : "La cédula extranjera debe tener entre 5 y 8 números";
+            } else {
+                // Mandamos SOLO el número puro a buscar en la lista local
+                verificarCedulaDuplicada(value);
+                return;
+            }
+
+            setErrors(prev => ({ ...prev, [name]: mensaje }));
+        }
+        if (name === "productor_telefono") {
+            if (value === "") {
+                mensaje = "";
+            } else if (!/^[0-9]+$/.test(value)) {
+                mensaje = "El teléfono solo debe contener números";
+            } else if (value.length !== 10) {
+                mensaje = "El teléfono debe tener exactamente 10 dígitos (Ej: 4141234567)";
+            } else if (!/^(414|424|416|426|412)[0-9]{7}$/.test(value)) {
+                mensaje = "El número debe comenzar con una operadora válida (414, 424, 416, 426, 412)";
             }
         }
 
-        if (name === "productor_correo" && value !== "") {
-            // Esta regex verifica que tenga el formato básico Y que termine exactamente en @gmail.com o @hotmail.com
-            const regexDominiosPermitidos = /^[^\s@]+@(gmail\.com|hotmail\.com)$/i;
+        if (name === "productor_correo") {
+            if (value === "") {
+                mensaje = "";
+            } else {
+                // 1. Validación de formato y dominios permitidos
+                const regexDominiosPermitidos = /^[^\s@]+@(gmail\.com|hotmail\.com)$/i;
 
-            if (!regexDominiosPermitidos.test(value)) {
-                mensaje = "Solo se permiten correos @gmail.com o @hotmail.com";
+                // 2. Validación anti-patrones comunes de correos falsos (letras repetidas de teclado)
+                const esCorreoSospechoso = /(.)\1{4,}/i.test(value.split('@')[0]) ||
+                    /asdasd|12345|qwerty/i.test(value);
+
+                if (!regexDominiosPermitidos.test(value)) {
+                    mensaje = "Solo se permiten correos válidos de @gmail.com o @hotmail.com";
+                } else if (esCorreoSospechoso) {
+                    mensaje = "El correo parece falso o inválido. Por favor, verifícalo.";
+                } else if (value.split('@')[0].length < 4) {
+                    mensaje = "El nombre de usuario del correo es demasiado corto";
+                }
             }
-        }
 
+            setErrors(prev => ({ ...prev, [name]: mensaje }));
+        }
         // --- DENTRO DE validarCampoProductor ---
 
-        // Municipio y Parroquia (Obligatorios)
-        if (name === "municipio" || name === "parroquia") {
-            if (value === "") mensaje = "Este campo es obligatorio";
-        }
+
 
         if (name === "comunidad" || name === "centro_poblado") {
             const soloLetrasYEspacios = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
@@ -266,17 +420,66 @@ export default function Dashboard() {
             }
         }
 
-        // COORDENADAS (La más importante)
-        if (name === "coordenadas") {
-            if (value === "") {
-                mensaje = "Pegue las coordenadas de Google Maps";
-            } else {
-                // Regex para validar formato: Numero, Numero (con negativos opcionales)
+        // Creamos una lectura en tiempo real combinando el estado actual con el cambio reciente
+        const datosEnTiempoReal = {
+            ...formData,
+            [name]: value
+        };
+
+        // COORDENADAS & GEORREFERENCIACIÓN (Validación por Municipio - González Software)
+        if (name === "coordenadas" || name === "municipio") {
+            const coordenadasActuales = datosEnTiempoReal.coordenadas;
+            const municipioSeleccionado = datosEnTiempoReal.municipio;
+            const valorLimpio = coordenadasActuales ? coordenadasActuales.trim() : "";
+
+            // Si lo que estamos evaluando es el campo coordenadas y está vacío
+            if (name === "coordenadas" && valorLimpio === "") {
+                setErrors(prev => ({ ...prev, coordenadas: "Pegue las coordenadas de Google Maps" }));
+                return;
+            }
+
+            if (valorLimpio !== "") {
                 const regexCoords = /^-?\d+\.\d+,\s*-?\d+\.\d+$/;
-                if (!regexCoords.test(value)) {
-                    mensaje = "Formato inválido. Use: 8.123, -70.123";
+
+                if (!regexCoords.test(valorLimpio)) {
+                    setErrors(prev => ({ ...prev, coordenadas: "Formato inválido. Use: 8.123, -70.123" }));
+                    return;
+                } else {
+                    const partes = valorLimpio.split(",");
+                    const lat = parseFloat(partes[0].trim());
+                    const lng = parseFloat(partes[1].trim());
+
+                    if (!municipioSeleccionado) {
+                        setErrors(prev => ({ ...prev, coordenadas: "⚠️ Seleccione primero un Municipio para verificar los límites." }));
+                        return;
+                    } else {
+                        // Buscamos el polígono cartográfico del municipio seleccionado
+                        const poligono = POLIGONOS_MUNICIPIOS[municipioSeleccionado];
+
+                        if (poligono) {
+                            // Enviamos [Longitud, Latitud] al algoritmo geométrico estándar
+                            const estaAdentro = comprobarPuntoEnPoligono([lng, lat], poligono);
+
+                            if (!estaAdentro) {
+                                // Si no pasa la contención, mandamos el error directo a coordenadas
+                                setErrors(prev => ({
+                                    ...prev,
+                                    municipio: name === "municipio" && value === "" ? "Este campo es obligatorio" : "",
+                                    coordenadas: `Las coordenadas no corresponden geográficamente al Municipio ${municipioSeleccionado}.`
+                                }));
+                                return;
+                            } else {
+                                // Coordenada perfecta: Limpiamos alertas de error inmediatamente
+                                setErrors(prev => ({ ...prev, coordenadas: "" }));
+                            }
+                        }
+                    }
                 }
             }
+        }
+        // Municipio y Parroquia (Obligatorios)
+        if (name === "municipio" || name === "parroquia") {
+            if (value === "") mensaje = "Este campo es obligatorio";
         }
 
         // --- SECCIÓN III: IDENTIFICACIÓN DEL PREDIO ---
@@ -349,7 +552,226 @@ export default function Dashboard() {
         setErrors(prev => ({ ...prev, [name]: mensaje }));
     };
 
-    //----------------------------
+    const manejarCambio = (e) => {
+        const { name, value } = e.target;
+
+        // Actualizamos el dato de forma normal
+        setFormData(prev => {
+            const nuevoEstado = { ...prev, [name]: value };
+            if (name === "municipio") nuevoEstado.parroquia = "";
+            return nuevoEstado;
+        });
+
+        // Validamos en tiempo real
+        validarCampoProductor(name, value);
+    };
+    //-----------------------------------------------------------------------------------------------
+
+    //GRÁFICOS
+    const datosGrafico = useMemo(() => {
+        if (!listaPredios || listaPredios.length === 0) return [];
+
+        // Agrupamos: { "Barinas": 5, "Obispos": 2, ... }
+        const conteo = listaPredios.reduce((acc, p) => {
+            const muni = p.municipio || "Otros";
+            acc[muni] = (acc[muni] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Formateamos para Recharts y ordenamos por cantidad
+        return Object.entries(conteo)
+            .map(([name, cantidad]) => ({ name, cantidad }))
+            .sort((a, b) => b.cantidad - a.cantidad)
+            .slice(0, 6); // Mostramos solo los 6 principales para no saturar
+    }, [listaPredios]);
+
+    const datosTenencia = useMemo(() => {
+        if (!listaPredios || listaPredios.length === 0) return [];
+
+        const conteo = listaPredios.reduce((acc, p) => {
+            const tipo = p.tenencia || "No definido";
+            acc[tipo] = (acc[tipo] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Definimos una paleta de colores verdes y tierras para el sector agro
+        const COLORES = ['#136442', '#28a745', '#8bc34a', '#aed581', '#dcedc8', '#558b2f'];
+
+        return Object.entries(conteo).map(([name, value], index) => ({
+            name,
+            value,
+            color: COLORES[index % COLORES.length]
+        }));
+    }, [listaPredios]);
+
+    const datosServicios = useMemo(() => {
+        if (!listaPredios || listaPredios.length === 0) return [];
+
+        const serviciosLabels = ["Agua", "Electricidad", "Gas", "Internet", "Teléfono", "Transporte"];
+        const totalPredios = listaPredios.length;
+
+        // 1. Inicializamos contadores en 0
+        const conteo = {
+            Agua: 0,
+            Electricidad: 0,
+            Gas: 0,
+            Internet: 0,
+            Teléfono: 0,
+            Transporte: 0
+        };
+
+        // 2. Recorremos los predios
+        listaPredios.forEach(p => {
+            // Usamos 'servicios_lectura' que es el campo que devuelve los nombres desde Django
+            const misServicios = p.servicios_lectura || [];
+
+            if (Array.isArray(misServicios)) {
+                misServicios.forEach(s => {
+                    // Verificamos que el servicio exista en nuestro objeto de conteo
+                    if (conteo.hasOwnProperty(s)) {
+                        conteo[s]++;
+                    }
+                });
+            }
+        });
+
+        // 3. Convertimos a formato Radar (Escala 0 a 100)
+        return serviciosLabels.map(s => ({
+            subject: s,
+            // Calculamos el porcentaje de cobertura en Barinas
+            A: totalPredios > 0 ? (conteo[s] / totalPredios) * 100 : 0,
+            fullMark: 100
+        }));
+    }, [listaPredios]);
+
+    const datosVialidad = useMemo(() => {
+        if (!listaPredios || listaPredios.length === 0) return [];
+
+        // Definimos las categorías que tú manejas en el formulario
+        const categorias = ["Excelente", "Bueno", "Regular", "Malo"];
+
+        const conteo = {
+            Excelente: 0,
+            Bueno: 0,
+            Regular: 0,
+            Malo: 0
+        };
+
+        listaPredios.forEach(p => {
+            if (conteo.hasOwnProperty(p.vialidad)) {
+                conteo[p.vialidad]++;
+            }
+        });
+
+        return categorias.map(cat => ({
+            estado: cat,
+            cantidad: conteo[cat]
+        }));
+    }, [listaPredios]);
+
+    const datosIntensidad = useMemo(() => {
+        if (!listaPredios || listaPredios.length === 0) return [];
+
+        const municipiosMap = {};
+
+        listaPredios.forEach(p => {
+            const mun = p.municipio || "Otros";
+            // El tipo de explotación viene de p.produccion.tipo_explotacion
+            const tipo = p.produccion?.tipo_explotacion || "No Definido";
+
+            if (!municipiosMap[mun]) {
+                municipiosMap[mun] = { municipio: mun, Intensivo: 0, "Semi-Intensivo": 0, Extensivo: 0 };
+            }
+
+            if (municipiosMap[mun].hasOwnProperty(tipo)) {
+                municipiosMap[mun][tipo]++;
+            }
+        });
+
+        return Object.values(municipiosMap);
+    }, [listaPredios]);
+
+    const datosDispersion = useMemo(() => {
+        if (!listaPredios || listaPredios.length === 0) return [];
+
+        return listaPredios.map(p => {
+            // 1. Extraemos la infraestructura del objeto anidado que envía tu PredioSerializer
+            const infra = p.infraestructura || {};
+
+            // 2. Sumamos TODOS los campos que definiste en tu modelo Infraestructura
+            const totalInfra =
+                (infra.corrales || 0) +
+                (infra.galpones || 0) +
+                (infra.vaqueras || 0) +
+                (infra.cochineras || 0) +
+                (infra.silos || 0) +
+                (infra.caballerizas || 0) +
+                (infra.feedlot || 0) +
+                (infra.lagunas || 0) +
+                (infra.salas_ordeno || 0) +
+                (infra.queseras || 0) +
+                (infra.casas || 0) +
+                (infra.trapiches || 0) +
+                (infra.establos || 0);
+
+            return {
+                nombre: p.nombre_predio,
+                // 3. CAMBIO CLAVE: Usamos 'superficie' (como dice tu modelo)
+                superficie: parseFloat(p.superficie) || 0,
+                infraestructura: totalInfra,
+                municipio: p.municipio
+            };
+        });
+    }, [listaPredios]);
+
+    const datosDigitalizacion = useMemo(() => {
+        if (!listaPredios || listaPredios.length === 0) return [];
+
+        const total = listaPredios.length;
+
+        // Extraemos la data de la relación 'produccion' definida en tu Serializer
+        const cuenta = {
+            sanitario: listaPredios.filter(p => p.produccion?.registro_sanitario).length,
+            productivo: listaPredios.filter(p => p.produccion?.registro_productivo).length,
+            reproductivo: listaPredios.filter(p => p.produccion?.registro_reproductivo).length,
+            financiero: listaPredios.filter(p => p.produccion?.registro_financiero).length,
+        };
+
+        return [
+            { name: 'Sanitario', value: (cuenta.sanitario / total) * 100, fill: '#136442' },
+            { name: 'Productivo', value: (cuenta.productivo / total) * 100, fill: '#2d8a5c' },
+            { name: 'Reproductivo', value: (cuenta.reproductivo / total) * 100, fill: '#52b788' },
+            { name: 'Financiero', value: (cuenta.financiero / total) * 100, fill: '#95d5b2' },
+        ];
+    }, [listaPredios]);
+
+    const datosLegales = useMemo(() => {
+        if (!listaPredios || listaPredios.length === 0) return [];
+
+        // Agrupamos la superficie (hectáreas) usando los nombres reales del modelo: 'tenencia' y 'superficie'
+        const agrupado = listaPredios.reduce((acc, p) => {
+            // Usamos 'tenencia' que es el campo en tu modelo Predio
+            const estatus = p.tenencia || "Otros";
+            // Usamos 'superficie' que es el campo DecimalField en tu modelo
+            const hectareas = parseFloat(p.superficie) || 0;
+
+            acc[estatus] = (acc[estatus] || 0) + hectareas;
+            return acc;
+        }, {});
+
+        const totalHectareas = Object.values(agrupado).reduce((sum, val) => sum + val, 0);
+
+        return [{
+            name: 'Estatus Legal',
+            children: Object.entries(agrupado).map(([name, total]) => ({
+                name,
+                size: total,
+                porcentaje: totalHectareas > 0 ? ((total / totalHectareas) * 100).toFixed(2) : 0
+            }))
+        }];
+    }, [listaPredios]);
+
+    //-------------------------------------------------------------------------------------------------
 
     //Función desactivar Botón
     const esFormularioValido = () => {
@@ -480,15 +902,35 @@ export default function Dashboard() {
             });
 
             if (response.ok) {
-                const data = await response.json();
-                alert("¡Censo actualizado correctamente en el sistema!");
-
-                // Actualizamos la lista local
-                setListaPredios(prev => prev.map(p => p.id_predio === data.id_predio ? data : p));
-                setEditando(false);
+                // Alerta de Éxito - González Software
+                Swal.fire({
+                    title: '¡Actualización Exitosa!',
+                    text: 'El predio ha sido actualizado con éxito en el sistema.',
+                    icon: 'success',
+                    confirmButtonColor: '#10b981', // El verde esmeralda de tu UI
+                    confirmButtonText: 'Aceptar',
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        if (popup) {
+                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                        }
+                    }
+                });
             } else {
-                const err = await response.json();
-                alert("Error del servidor: " + JSON.stringify(err));
+                // Alerta de Error - González Software
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Por favor, verifique los datos',
+                    icon: 'error',
+                    confirmButtonColor: '#d32f2f', // Rojo de alerta
+                    confirmButtonText: 'Entendido',
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        if (popup) {
+                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                        }
+                    }
+                });
             }
         } catch (error) {
             alert("Error crítico: El servidor de Barinas no responde o hay un error en el código Django.");
@@ -499,7 +941,27 @@ export default function Dashboard() {
 
     // 2. ELIMINAR DEFINITIVO (DELETE)
     const eliminarDefinitivoReal = async () => {
-        if (!window.confirm(`¿ESTÁ COMPLETAMENTE SEGURO? Esta acción eliminará permanentemente el predio "${predioSeleccionado.nombre_predio}" de la base de datos.`)) {
+        // Alerta de confirmación previa con SweetAlert2
+        const resultado = await Swal.fire({
+            title: '¿ESTÁS SEGURO?',
+            text: `Esta acción eliminará permanentemente el predio "${predioSeleccionado.nombre_predio}" de la base de datos.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ce3a3a', // Rojo destructivo
+            cancelButtonColor: '#cdced0', // Gris neutral
+            confirmButtonText: 'Sí, eliminar permanentemente',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true, // Ubica el botón de confirmar a la derecha
+            didOpen: () => {
+                const popup = Swal.getPopup();
+                if (popup) {
+                    popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                }
+            }
+        });
+
+        // Si el usuario cancela o cierra la alerta, se frena la ejecución
+        if (!resultado.isConfirmed) {
             return;
         }
 
@@ -510,37 +972,59 @@ export default function Dashboard() {
             });
 
             if (response.ok) {
-                alert("Predio eliminado correctamente.");
-                // Removemos el predio de la lista principal
-                setListaPredios(prevLista => prevLista.filter(p => p.id_predio !== predioSeleccionado.id_predio));
-                setMostrarModal(false);
-                setPredioSeleccionado(null);
+                // Alerta de Éxito - González Software
+                Swal.fire({
+                    title: '¡Eliminación Exitosa!',
+                    text: 'El predio ha sido eliminado con éxito en el sistema.',
+                    icon: 'success',
+                    confirmButtonColor: '#10b981', // Verde esmeralda de la UI
+                    confirmButtonText: 'Aceptar',
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        if (popup) {
+                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                        }
+                    }
+                });
             } else {
-                alert("Error al intentar eliminar el registro.");
+                // Alerta de Error - González Software
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Por favor, verifique los datos o los permisos del sistema.',
+                    icon: 'error',
+                    confirmButtonColor: '#ce3a3a', // Rojo de alerta
+                    confirmButtonText: 'Entendido',
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        if (popup) {
+                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                        }
+                    }
+                });
             }
         } catch (error) {
             console.error("Error Red:", error);
-            alert("Error de conexión al intentar eliminar.");
+            // También unificada la alerta del catch para evitar el uso del alert nativo del navegador
+            Swal.fire({
+                title: 'Error de Red',
+                text: 'No se pudo establecer conexión con el servidor para procesar la eliminación.',
+                icon: 'error',
+                confirmButtonColor: '#d32f2f',
+                confirmButtonText: 'Entendido',
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) {
+                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }
+            });
         } finally {
             setCargandoAccion(false);
         }
     };
 
+    // ── MANEJADORES DE EVENTOS (SIN RETRASOS NI ESTADOS PEGADOS) ──────────────────────────────
 
-    // ── MANEJADORES DE EVENTOS (SIN RECORTES) ──────────────────────────────
-    const manejarCambio = (e) => {
-        const { name, value } = e.target;
-
-        // Actualizamos el dato
-        setFormData(prev => {
-            const nuevoEstado = { ...prev, [name]: value };
-            if (name === "municipio") nuevoEstado.parroquia = "";
-            return nuevoEstado;
-        });
-
-        // Validamos en tiempo real
-        validarCampoProductor(name, value);
-    };
 
     const manejarCambioTab = (tab) => {
 
@@ -634,12 +1118,35 @@ export default function Dashboard() {
             });
 
             if (response.ok) {
-                alert("¡Registro completado con éxito en Barinas!");
-                // Aquí puedes limpiar el formulario o redirigir
+                // Alerta de Éxito - González Software
+                Swal.fire({
+                    title: '¡Registro Exitoso!',
+                    text: 'El predio ha sido registrado con éxito en el sistema.',
+                    icon: 'success',
+                    confirmButtonColor: '#10b981', // El verde esmeralda de tu UI
+                    confirmButtonText: 'Aceptar',
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        if (popup) {
+                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                        }
+                    }
+                });
             } else {
-                const errorData = await response.json();
-                console.error("Error del servidor:", errorData);
-                alert("Error al guardar: " + JSON.stringify(errorData));
+                // Alerta de Error - González Software
+                Swal.fire({
+                    title: 'Error al guardar',
+                    text: 'Por favor, verifique los datos de georreferenciación e intente nuevamente.',
+                    icon: 'error',
+                    confirmButtonColor: '#d32f2f', // Rojo de alerta
+                    confirmButtonText: 'Entendido',
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        if (popup) {
+                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                        }
+                    }
+                });
             }
         } catch (error) {
             console.error("Error de red:", error);
@@ -817,27 +1324,412 @@ export default function Dashboard() {
                                 {/* Gráfico 1 - Barras */}
                                 <div style={chartCard}>
                                     <h3 style={chartTitle}>Predios por Municipio</h3>
-                                    <div style={chartPlaceholder}>Gráfico de Barras</div>
+                                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                                        {listaPredios.length === 0 ? (
+                                            <div style={{ ...chartPlaceholder, border: 'none' }}>
+                                                <p style={{ color: '#999' }}>No hay datos para mostrar</p>
+                                            </div>
+                                        ) : (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={datosGrafico} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                                    <XAxis
+                                                        dataKey="name"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#666', fontSize: 11, fontWeight: 500 }}
+                                                    />
+                                                    <YAxis
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#666', fontSize: 11 }}
+                                                        allowDecimals={false}
+                                                        dx={-10}
+                                                        // ESTO ES LO QUE BUSCAS:
+                                                        // 'dataMax' hace que el tope sea el valor más alto que tengas (ej. 1)
+                                                        // + 0.2 es para dejar un mini respiro y que no se corte el borde redondeado
+                                                        domain={[0, dataMax => (dataMax <= 1 ? 1 : dataMax + 1)]}
+                                                    />
+                                                    <Tooltip
+                                                        cursor={{ fill: 'rgba(19, 100, 66, 0.05)' }}
+                                                        contentStyle={{
+                                                            borderRadius: '12px',
+                                                            border: 'none',
+                                                            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                                                            fontSize: '12px'
+                                                        }}
+                                                        itemStyle={{ color: '#136442', fontWeight: 'bold' }}
+                                                    />
+                                                    <Bar
+                                                        dataKey="cantidad"
+                                                        radius={[6, 6, 0, 0]}
+                                                        barSize={35}
+                                                    >
+                                                        {datosGrafico.map((entry, index) => (
+                                                            <Cell
+                                                                key={`cell-${index}`}
+                                                                fill={index === 0 ? '#136442' : '#4CAF50'}
+                                                                fillOpacity={0.8 + (index * -0.1)} // Degradado visual sutil
+                                                            />
+                                                        ))}
+                                                    </Bar>
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Gráfico 2 - Circular */}
                                 <div style={chartCard}>
-                                    <h3 style={chartTitle}>Tenencia de la Tierra</h3>
-                                    <div style={chartPlaceholder}>Gráfico Circular</div>
+                                    <h3 style={chartTitle}>Estatus Legal de la Tierra</h3>
+                                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                                        {listaPredios.length === 0 ? (
+                                            <div style={chartPlaceholder}>Sin datos de tenencia</div>
+                                        ) : (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <PieChart>
+                                                    <Pie
+                                                        data={datosTenencia}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        innerRadius={60} // Esto lo convierte en Dona
+                                                        outerRadius={80}
+                                                        paddingAngle={5}
+                                                        dataKey="value"
+                                                        animationDuration={1000}
+                                                    >
+                                                        {datosTenencia.map((entry, index) => (
+                                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                                        ))}
+                                                    </Pie>
+                                                    <Tooltip
+                                                        contentStyle={{
+                                                            borderRadius: '12px',
+                                                            border: 'none',
+                                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                                        }}
+                                                    />
+                                                    <Legend
+                                                        verticalAlign="bottom"
+                                                        height={36}
+                                                        iconType="circle"
+                                                        wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                                                    />
+                                                </PieChart>
+                                            </ResponsiveContainer>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Gráfico 3 - Línea */}
                                 <div style={chartCard}>
-                                    <h3 style={chartTitle}>Superficie Registrada</h3>
-                                    <div style={chartPlaceholder}>Gráfico de Línea</div>
+                                    <h3 style={chartTitle}>Cobertura de Servicios Básicos (%)</h3>
+                                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                                        {listaPredios.length === 0 ? (
+                                            <div style={chartPlaceholder}>Sin datos de servicios</div>
+                                        ) : (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={datosServicios}>
+                                                    <PolarGrid stroke="#e0e0e0" />
+                                                    <PolarAngleAxis
+                                                        dataKey="subject"
+                                                        tick={{ fill: '#666', fontSize: 11, fontWeight: 'bold' }}
+                                                    />
+                                                    <PolarRadiusAxis
+                                                        angle={30}
+                                                        domain={[0, 100]}
+                                                        tick={{ fontSize: 10 }}
+                                                        axisLine={false}
+                                                    />
+                                                    <Radar
+                                                        name="Cobertura"
+                                                        dataKey="A"
+                                                        stroke="#136442"
+                                                        fill="#136442"
+                                                        fillOpacity={0.5}
+                                                    />
+                                                    <Tooltip
+                                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                                        formatter={(value) => [`${value.toFixed(1)}%`, "Cobertura"]}
+                                                    />
+                                                </RadarChart>
+                                            </ResponsiveContainer>
+                                        )}
+                                    </div>
                                 </div>
 
-                                {/* Gráfico 4 - Comparativo */}
+                                {/* Gráfico 4 - Vialidad */}
                                 <div style={chartCard}>
-                                    <h3 style={chartTitle}>Infraestructura</h3>
-                                    <div style={chartPlaceholder}>Gráfico Comparativo</div>
+                                    <h3 style={chartTitle}>Estado de la Vialidad</h3>
+                                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                                        {listaPredios.length === 0 ? (
+                                            <div style={chartPlaceholder}>Sin datos de vialidad</div>
+                                        ) : (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart
+                                                    layout="vertical" // Esto lo hace horizontal
+                                                    data={datosVialidad}
+                                                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                                                >
+                                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                                    <XAxis type="number" hide />
+                                                    <YAxis
+                                                        dataKey="estado"
+                                                        type="category"
+                                                        tick={{ fontSize: 12, fontWeight: 'bold' }}
+                                                        width={80}
+                                                    />
+                                                    <Tooltip
+                                                        cursor={{ fill: 'transparent' }}
+                                                        contentStyle={{ borderRadius: '10px' }}
+                                                    />
+                                                    <Bar dataKey="cantidad" radius={[0, 5, 5, 0]} barSize={30}>
+                                                        {datosVialidad.map((entry, index) => {
+                                                            // Colores según el estado
+                                                            const colors = {
+                                                                Excelente: '#0d5437', // Verde Oscuro (el mismo del Radar)
+                                                                Bueno: '#338261',     // Verde Esmeralda
+                                                                Regular: '#82ca9d',    // Verde Suave
+                                                                Malo: '#c8e6c9'        // Verde Muy Claro (Pastel)
+                                                            };
+                                                            return <Cell key={`cell-${index}`} fill={colors[entry.estado] || '#8884d8'} />;
+                                                        })}
+                                                    </Bar>
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        )}
+                                    </div>
                                 </div>
 
+                                {/*Grafico 5*/}
+
+                                <div style={chartCard}>
+                                    <h3 style={chartTitle}>Intensidad de Producción por Municipio</h3>
+                                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                                        {listaPredios.length === 0 ? (
+                                            <div style={{ ...chartPlaceholder, border: 'none' }}>
+                                                <p style={{ color: '#999' }}>No hay datos para mostrar</p>
+                                            </div>
+                                        ) : (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart
+                                                    data={datosIntensidad}
+                                                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                                                >
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                                    <XAxis
+                                                        dataKey="municipio"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#666', fontSize: 11, fontWeight: 500 }}
+                                                    />
+                                                    <YAxis
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#666', fontSize: 11 }}
+                                                        allowDecimals={false}
+                                                        dx={-10}
+                                                        // Ajuste dinámico: si el máximo es 1, el tope es 1. 
+                                                        // Si es mayor, le suma un pequeño margen para que no choque con el borde.
+                                                        domain={[0, dataMax => (dataMax <= 1 ? 1 : dataMax + 0.5)]}
+                                                    />
+                                                    <Tooltip
+                                                        cursor={{ fill: 'rgba(19, 100, 66, 0.05)' }}
+                                                        contentStyle={{
+                                                            borderRadius: '12px',
+                                                            border: 'none',
+                                                            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                                                            fontSize: '12px'
+                                                        }}
+                                                    />
+                                                    <Legend
+                                                        verticalAlign="top"
+                                                        align="right"
+                                                        iconType="circle"
+                                                        wrapperStyle={{ fontSize: '11px', paddingBottom: '10px' }}
+                                                    />
+
+                                                    {/* Barras Apiladas con los Verdes de Gonzalez Software */}
+                                                    <Bar
+                                                        dataKey="Intensivo"
+                                                        stackId="a"
+                                                        fill="#136442"
+                                                        barSize={35}
+                                                        radius={[6, 6, 0, 0]}
+                                                    />
+                                                    <Bar
+                                                        dataKey="Semi-Intensivo"
+                                                        stackId="a"
+                                                        fill="#4CAF50"
+                                                    />
+                                                    <Bar
+                                                        dataKey="Extensivo"
+                                                        stackId="a"
+                                                        fill="#82ca9d"
+                                                        radius={[6, 6, 0, 0]} // Redondeado solo en la cima del grupo
+                                                    />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Gráfico 6 - Dispersión: Superficie vs Infraestructura */}
+                                <div style={chartCard}>
+                                    <h3 style={chartTitle}>Relación Superficie vs. Infraestructura</h3>
+                                    <div style={{ width: '100%', height: 350, marginTop: '20px' }}>
+                                        {listaPredios.length === 0 ? (
+                                            <div style={{ ...chartPlaceholder, border: 'none' }}>
+                                                <p style={{ color: '#999' }}>No hay datos para mostrar</p>
+                                            </div>
+                                        ) : (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: -10 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                                    <XAxis
+                                                        type="number"
+                                                        dataKey="superficie"
+                                                        name="Superficie"
+                                                        unit=" Ha"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#666', fontSize: 11 }}
+                                                    />
+                                                    <YAxis
+                                                        type="number"
+                                                        dataKey="infraestructura"
+                                                        name="Infraestructura"
+                                                        unit=" und"
+                                                        axisLine={false}
+                                                        tickLine={false}
+                                                        tick={{ fill: '#666', fontSize: 11 }}
+                                                        allowDecimals={false}
+                                                    />
+                                                    <Tooltip
+                                                        cursor={{ strokeDasharray: '3 3' }}
+                                                        contentStyle={{
+                                                            borderRadius: '12px',
+                                                            border: 'none',
+                                                            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                                                            fontSize: '12px'
+                                                        }}
+                                                    />
+                                                    <Scatter
+                                                        name="Predios"
+                                                        data={datosDispersion}
+                                                        fill="#136442"
+                                                        fillOpacity={0.6}
+                                                    />
+                                                </ScatterChart>
+                                            </ResponsiveContainer>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Gráfico de Sistemas de Registro - Ajustado */}
+                                <div style={chartCard}>
+                                    <h3 style={chartTitle}>Sistemas de Registro Adoptados</h3>
+                                    <div style={{ width: '100%', height: 350, marginTop: '10px' }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <RadialBarChart
+                                                cx="40%"
+                                                cy="50%"
+                                                innerRadius="20%"  // Más pequeño el centro para dar más espacio a los anillos
+                                                outerRadius="90%"
+                                                barSize={20}       // Barras un poco más gruesas para que se note el color
+                                                data={datosDigitalizacion}
+                                                startAngle={90}    // Comienza arriba
+                                                endAngle={-270}   // Da la vuelta completa
+                                            >
+                                                <RadialBar
+                                                    minAngle={15}
+                                                    background={{ fill: '#f0f0f0' }}
+                                                    clockWise
+                                                    dataKey="value"
+                                                    radius={[10, 10, 10, 10]}
+                                                >
+                                                    {
+                                                        datosDigitalizacion.map((entry, index) => (
+                                                            <Cell key={`cell-${index}`} fill={[
+                                                                '#064e3b', // Sanitario
+                                                                '#059669', // Productivo
+                                                                '#34d399', // Reproductivo
+                                                                '#a7f3d0'  // Financiero
+                                                            ][index]} />
+                                                        ))
+                                                    }
+                                                </RadialBar>
+
+                                                <Legend
+                                                    iconSize={10}
+                                                    layout="vertical"
+                                                    verticalAlign="middle"
+                                                    align="right"
+                                                    wrapperStyle={{
+                                                        lineHeight: '45px',
+                                                        fontSize: '11px',
+                                                        right: '0px',
+                                                        fontWeight: 500,
+                                                        color: '#666'
+                                                    }}
+                                                />
+
+                                                <Tooltip
+                                                    formatter={(value, name, props) => [
+                                                        `${parseFloat(value).toFixed(2)}%`,
+                                                        `Registro ${props.payload.name}`
+                                                    ]}
+                                                    contentStyle={{
+                                                        borderRadius: '12px',
+                                                        border: 'none',
+                                                        boxShadow: '0 5px 15px rgba(0,0,0,0.1)'
+                                                    }}
+                                                />
+                                            </RadialBarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                    <p style={{ fontSize: '12px', color: '#666', textAlign: 'center', marginTop: '-20px' }}>
+                                        Grado de formalización de la producción
+                                    </p>
+                                </div>
+
+                                {/* Gráfico 2 - Treemap de Tenencia de Tierras (González Software) */}
+                                <div style={chartCard}>
+                                    <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
+                                    <div style={{ width: '100%', height: 350, marginTop: '20px' }}>
+                                        {listaPredios.length === 0 ? (
+                                            <div style={{ ...chartPlaceholder, border: 'none' }}>
+                                                <p style={{ color: '#999' }}>No hay datos de superficie en Aiven</p>
+                                            </div>
+                                        ) : (
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <Treemap
+                                                    data={datosLegales}
+                                                    dataKey="size"
+                                                    aspectRatio={4 / 3}
+                                                    stroke="#fff"
+                                                    content={<CustomTreemapContent />}
+                                                >
+                                                    <Tooltip
+                                                        contentStyle={{
+                                                            borderRadius: '12px',
+                                                            border: 'none',
+                                                            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                                                            fontSize: '12px'
+                                                        }}
+                                                        formatter={(value, name, props) => [
+                                                            `${value} Hectáreas (${props.payload.porcentaje}%)`,
+                                                            props.payload.name
+                                                        ]}
+                                                    />
+                                                </Treemap>
+                                            </ResponsiveContainer>
+                                        )}
+                                    </div>
+                                    <p style={{ fontSize: '11px', color: '#666', textAlign: 'center', marginTop: '10px' }}>
+                                        Basado en el campo 'superficie' de la base de datos db-agro-barinas
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -852,23 +1744,84 @@ export default function Dashboard() {
                                         name="productor_nombre"
                                         value={formData.productor_nombre}
                                         onChange={manejarCambio}
-                                        error={errors.productor_nombre} // Pasamos el mensaje de error
+                                        error={errors.productor_nombre}
                                     />
+
+                                    {/* Cédula con el estilo del select de antes que te gustó */}
                                     <InputField
-                                        label="Cédula (Solo números)"
+                                        label="Cédula"
                                         name="productor_cedula"
                                         value={formData.productor_cedula}
-                                        onChange={manejarCambio}
+                                        onChange={(e) => {
+                                            // Bloquea cualquier carácter que no sea número de inmediato
+                                            e.target.value = e.target.value.replace(/\D/g, '');
+                                            manejarCambio(e);
+                                        }}
                                         error={errors.productor_cedula}
-                                        maxLength={9}
+                                        maxLength={8}
+                                        prefix={
+                                            <select
+                                                value={prefijoCedula}
+                                                onChange={(e) => {
+                                                    const nuevoPrefijo = e.target.value;
+                                                    setPrefijoCedula(nuevoPrefijo);
+
+                                                    manejarCambio({
+                                                        target: {
+                                                            name: "productor_cedula",
+                                                            value: formData.productor_cedula
+                                                        }
+                                                    });
+                                                }}
+                                                style={{
+                                                    backgroundColor: "transparent",
+                                                    border: "none",
+                                                    outline: "none",
+                                                    color: "#475569",
+                                                    fontSize: "14px",
+                                                    fontWeight: "600",
+                                                    padding: "0 10px",
+                                                    cursor: "pointer",
+                                                    height: "100%"
+                                                }}
+                                            >
+                                                <option value="V-">V-</option>
+                                                <option value="E-">E-</option>
+                                            </select>
+                                        }
                                     />
+
+                                    {/* 📞 TELÉFONO REUTILIZANDO TU INPUTFIELD CON PREFIJO FIJO */}
                                     <InputField
                                         label="Teléfono"
                                         name="productor_telefono"
                                         value={formData.productor_telefono}
-                                        onChange={manejarCambio}
+                                        onChange={(e) => {
+                                            // Filtramos aquí directo para que solo deje escribir números antes de ir al validador
+                                            e.target.value = e.target.value.replace(/\D/g, '');
+                                            manejarCambio(e);
+                                        }}
                                         error={errors.productor_telefono}
+                                        maxLength={10} // Limita a los 10 dígitos (4141234567)
+                                        placeholder="4141234567"
+                                        prefix={
+                                            <div style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "6px",
+                                                padding: "0 12px",
+                                                color: "#475569",
+                                                fontSize: "14px",
+                                                fontWeight: "600",
+                                                userSelect: "none",
+                                                height: "100%"
+                                            }}>
+                                                <span>🇻🇪</span>
+                                                <span>+58</span>
+                                            </div>
+                                        }
                                     />
+
                                     <InputField
                                         label="Correo (Opcional)"
                                         name="productor_correo"
@@ -1092,7 +2045,7 @@ export default function Dashboard() {
                                         value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
                                         style={{
                                             width: "100%", padding: "10px 15px", borderRadius: "8px",
-                                            border: "1px solid #ccc", fontSize: "14px", outline: "none",
+                                            border: "1.4px solid #ccc", fontSize: "14px", outline: "none",
                                         }}
                                     />
                                 </div>
@@ -1116,8 +2069,15 @@ export default function Dashboard() {
                                     </thead>
                                     <tbody>
                                         {prediosFiltrados.length > 0 ? (
-                                            prediosFiltrados.map((p) => (
-                                                <tr key={p.id_predio} style={{ borderBottom: "1px solid #f0f0f0" }}>
+                                            prediosFiltrados.map((p, index) => (
+                                                <tr
+                                                    key={p.id_predio}
+                                                    style={{
+                                                        borderBottom: "1px solid #f0f0f0",
+                                                        // Alterna el fondo: las filas pares van en blanco, las impares en gris claro
+                                                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
+                                                    }}
+                                                >
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>#{p.id_predio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
@@ -1151,7 +2111,7 @@ export default function Dashboard() {
                                     }}>
                                         {/* Encabezado Dinámico */}
                                         <div style={{
-                                            backgroundColor: editando ? "#0ea5e9" : "#136442",
+                                            backgroundColor: editando ? "#136442" : "#136442",
                                             padding: "18px 25px", color: "#fff", display: "flex",
                                             justifyContent: "space-between", alignItems: "center",
                                             position: "sticky", top: 0, zIndex: 10, transition: "background-color 0.3s"
@@ -1164,115 +2124,320 @@ export default function Dashboard() {
 
                                         <div style={{ padding: "30px", opacity: cargandoAccion ? 0.5 : 1, pointerEvents: cargandoAccion ? 'none' : 'auto' }}>
 
-                                            {/* I. DATOS DEL PRODUCTOR */}
+                                            {/* I. DATOS DEL PRODUCTOR UNIFICADOS CON DISEÑO DE EDICIÓN */}
                                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "25px", marginBottom: "35px" }}>
                                                 <div style={{ gridColumn: "span 3", borderBottom: "2px solid #136442", paddingBottom: "5px" }}>
                                                     <strong style={{ color: "#136442", fontSize: "14px" }}>I. DATOS DEL PRODUCTOR</strong>
                                                 </div>
+
+                                                {/* NOMBRE COMPLETO */}
                                                 <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>NOMBRE COMPLETO</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.productor?.nombre} onChange={(e) => actualizarProductor('nombre', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.productor?.nombre}</p>}
+                                                    {editando ? (
+                                                        <InputField
+                                                            label="Nombre Completo"
+                                                            name="nombre"
+                                                            value={predioSeleccionado.productor?.nombre || ""}
+                                                            onChange={(e) => actualizarProductor('nombre', e.target.value)}
+                                                            error={errors?.productor_nombre}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Nombre Completo"
+                                                            name="nombre"
+                                                            value={predioSeleccionado.productor?.nombre || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </div>
+
+                                                {/* CÉDULA / RIF */}
                                                 <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>CÉDULA / RIF</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.productor?.cedula_rif} onChange={(e) => actualizarProductor('cedula_rif', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.productor?.cedula_rif}</p>}
+                                                    {editando ? (
+                                                        <InputField
+                                                            label="Cédula / RIF"
+                                                            name="cedula_rif"
+                                                            value={predioSeleccionado.productor?.cedula_rif || ""}
+                                                            onChange={(e) => actualizarProductor('cedula_rif', e.target.value)}
+                                                            error={errors?.productor_cedula}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Cédula / RIF"
+                                                            name="cedula_rif"
+                                                            value={predioSeleccionado.productor?.cedula_rif || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </div>
+
+                                                {/* TELÉFONO */}
                                                 <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>TELÉFONO</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.productor?.telefono} onChange={(e) => actualizarProductor('telefono', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.productor?.telefono || "N/A"}</p>}
+                                                    {editando ? (
+                                                        <InputField
+                                                            label="Teléfono"
+                                                            name="telefono"
+                                                            value={predioSeleccionado.productor?.telefono || ""}
+                                                            onChange={(e) => actualizarProductor('telefono', e.target.value)}
+                                                            error={errors?.productor_telefono}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Teléfono"
+                                                            name="telefono"
+                                                            value={predioSeleccionado.productor?.telefono || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </div>
+
+                                                {/* CORREO ELECTRÓNICO */}
                                                 <div style={{ gridColumn: "span 3" }}>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>CORREO ELECTRÓNICO</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.productor?.correo} onChange={(e) => actualizarProductor('correo', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.productor?.correo || "N/A"}</p>}
+                                                    {editando ? (
+                                                        <InputField
+                                                            label="Correo Electrónico"
+                                                            name="correo"
+                                                            value={predioSeleccionado.productor?.correo || ""}
+                                                            onChange={(e) => actualizarProductor('correo', e.target.value)}
+                                                            error={errors?.productor_correo}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Correo Electrónico"
+                                                            name="correo"
+                                                            value={predioSeleccionado.productor?.correo || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            {/* II. GEORREFERENCIACIÓN Y UBICACIÓN */}
+                                            {/* II. GEORREFERENCIACIÓN Y UBICACIÓN UNIFICADOS CON DISEÑO DE EDICIÓN */}
                                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "25px", marginBottom: "35px" }}>
                                                 <div style={{ gridColumn: "span 3", borderBottom: "2px solid #136442", paddingBottom: "5px" }}>
                                                     <strong style={{ color: "#136442", fontSize: "14px" }}>II. GEORREFERENCIACIÓN Y UBICACIÓN</strong>
                                                 </div>
 
+                                                {/* MUNICIPIO */}
                                                 <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>MUNICIPIO</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.municipio} onChange={(e) => actualizarPredio('municipio', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.municipio}</p>}
-                                                </div>
-
-                                                <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>PARROQUIA</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.parroquia} onChange={(e) => actualizarPredio('parroquia', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.parroquia}</p>}
-                                                </div>
-
-                                                <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>COMUNIDAD / SECTOR</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.comunidad} onChange={(e) => actualizarPredio('comunidad', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.comunidad}</p>}
-                                                </div>
-
-                                                {/* --- CAMBIO AQUÍ: CAMPO ÚNICO DE COORDENADAS --- */}
-                                                <div style={{ gridColumn: "span 2" }}>
-                                                    <small style={{ color: "#136442", fontWeight: "bold" }}>COORDENADAS (LATITUD Y LONGITUD)</small>
-                                                    {/* --- CORRECCIÓN: Usar el nombre exacto del modelo --- */}
                                                     {editando ? (
-                                                        <input
-                                                            type="text"
-                                                            style={{ ...estiloInput, border: "1px solid #0ea5e9", letterSpacing: "1px" }}
-                                                            placeholder="Ej: 8.097364, -69.312631"
-                                                            value={predioSeleccionado.coordenadas || ""}
-                                                            onChange={(e) => actualizarPredio('coordenadas', e.target.value)}
+                                                        <InputField
+                                                            label="Municipio"
+                                                            name="municipio"
+                                                            value={predioSeleccionado.municipio || ""}
+                                                            onChange={(e) => actualizarPredio('municipio', e.target.value)}
+                                                            error={errors?.municipio}
                                                         />
                                                     ) : (
-                                                        <p style={{ ...estiloP, backgroundColor: "#f0fdf4", padding: "8px", borderRadius: "6px", border: "1px" }}>
-                                                            <strong>{predioSeleccionado.coordenadas || "Sin coordenadas registradas"}</strong>
-                                                        </p>
+                                                        <InputField
+                                                            label="Municipio"
+                                                            name="municipio"
+                                                            value={predioSeleccionado.municipio || "N/A"}
+                                                            disabled
+                                                        />
                                                     )}
                                                 </div>
 
+                                                {/* PARROQUIA */}
                                                 <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>CENTRO POBLADO</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.centro_poblado} onChange={(e) => actualizarPredio('centro_poblado', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.centro_poblado}</p>}
+                                                    {editando ? (
+                                                        <InputField
+                                                            label="Parroquia"
+                                                            name="parroquia"
+                                                            value={predioSeleccionado.parroquia || ""}
+                                                            onChange={(e) => actualizarPredio('parroquia', e.target.value)}
+                                                            error={errors?.parroquia}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Parroquia"
+                                                            name="parroquia"
+                                                            value={predioSeleccionado.parroquia || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                {/* COMUNIDAD / SECTOR */}
+                                                <div>
+                                                    {editando ? (
+                                                        <InputField
+                                                            label="Comunidad / Sector"
+                                                            name="comunidad"
+                                                            value={predioSeleccionado.comunidad || ""}
+                                                            onChange={(e) => actualizarPredio('comunidad', e.target.value)}
+                                                            error={errors?.comunidad}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Comunidad / Sector"
+                                                            name="comunidad"
+                                                            value={predioSeleccionado.comunidad || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                {/* COORDENADAS (LATITUD Y LONGITUD) */}
+                                                <div style={{ gridColumn: "span 2" }}>
+                                                    {editando ? (
+                                                        <InputField
+                                                            label="Coordenadas (Latitud y Longitud)"
+                                                            name="coordenadas"
+                                                            placeholder="Ej: 8.097364, -69.312631"
+                                                            value={predioSeleccionado.coordenadas || ""}
+                                                            onChange={(e) => actualizarPredio('coordenadas', e.target.value)}
+                                                            error={errors?.coordenadas}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Coordenadas (Latitud y Longitud)"
+                                                            name="coordenadas"
+                                                            value={predioSeleccionado.coordenadas || "Sin coordenadas registradas"}
+                                                            disabled
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                {/* CENTRO POBLADO */}
+                                                <div>
+                                                    {editando ? (
+                                                        <InputField
+                                                            label="Centro Poblado"
+                                                            name="centro_poblado"
+                                                            value={predioSeleccionado.centro_poblado || ""}
+                                                            onChange={(e) => actualizarPredio('centro_poblado', e.target.value)}
+                                                            error={errors?.centro_poblado}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Centro Poblado"
+                                                            name="centro_poblado"
+                                                            value={predioSeleccionado.centro_poblado || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            {/* III, IV y V. IDENTIFICACIÓN Y TENENCIA */}
-                                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "25px", marginBottom: "35px", padding: "20px", backgroundColor: "#f8faf9", borderRadius: "10px" }}>
+                                            {/* III y IV. IDENTIFICACIÓN Y TENENCIA UNIFICADOS CON DISEÑO DE EDICIÓN */}
+                                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "25px", marginBottom: "35px" }}>
                                                 <div style={{ gridColumn: "span 3", borderBottom: "2px solid #ccc", paddingBottom: "5px" }}>
                                                     <strong style={{ color: "#136442", fontSize: "14px" }}>III. IDENTIFICACIÓN Y IV. TENENCIA</strong>
                                                 </div>
+
+                                                {/* DIRECCIÓN EXACTA */}
                                                 <div style={{ gridColumn: "span 2" }}>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>DIRECCIÓN EXACTA</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.direccion} onChange={(e) => actualizarPredio('direccion', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.direccion || "N/A"}</p>}
-                                                </div>
-                                                <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>SUPERFICIE (HA)</small>
-                                                    {editando ? <input type="number" style={estiloInput} value={predioSeleccionado.superficie} onChange={(e) => actualizarPredio('superficie', e.target.value)} /> : <p style={estiloP}><strong>{predioSeleccionado.superficie} Ha</strong></p>}
-                                                </div>
-                                                <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>TIPO DE PROPIEDAD</small>
                                                     {editando ? (
-                                                        <select style={estiloInput} value={predioSeleccionado.tipo_propiedad} onChange={(e) => actualizarPredio('tipo_propiedad', e.target.value)}>
-                                                            <option value="Público">Público</option>
-                                                            <option value="Privado">Privado</option>
-                                                        </select>
-                                                    ) : <p style={estiloP}>{predioSeleccionado.tipo_propiedad}</p>}
+                                                        <InputField
+                                                            label="Dirección Exacta"
+                                                            name="direccion"
+                                                            value={predioSeleccionado.direccion || ""}
+                                                            onChange={(e) => actualizarPredio('direccion', e.target.value)}
+                                                            error={errors?.direccion}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Dirección Exacta"
+                                                            name="direccion"
+                                                            value={predioSeleccionado.direccion || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </div>
+
+                                                {/* SUPERFICIE (HA) */}
                                                 <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>TENENCIA DE LA TIERRA</small>
-                                                    {editando ? <input style={estiloInput} value={predioSeleccionado.tenencia} onChange={(e) => actualizarPredio('tenencia', e.target.value)} /> : <p style={estiloP}>{predioSeleccionado.tenencia}</p>}
-                                                </div>
-                                                <div>
-                                                    <small style={{ color: "#888", fontWeight: "bold" }}>CONDICIÓN VIALIDAD</small>
                                                     {editando ? (
-                                                        <select style={estiloInput} value={predioSeleccionado.vialidad} onChange={(e) => actualizarPredio('vialidad', e.target.value)}>
-                                                            <option value="Excelente">Excelente</option>
-                                                            <option value="Bueno">Bueno</option>
-                                                            <option value="Regular">Regular</option>
-                                                            <option value="Malo">Malo</option>
-                                                        </select>
-                                                    ) : <p style={estiloP}>{predioSeleccionado.vialidad}</p>}
+                                                        <InputField
+                                                            label="Superficie (Ha)"
+                                                            name="superficie"
+                                                            type="number"
+                                                            value={predioSeleccionado.superficie || ""}
+                                                            onChange={(e) => actualizarPredio('superficie', e.target.value)}
+                                                            error={errors?.superficie}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Superficie (Ha)"
+                                                            name="superficie"
+                                                            value={predioSeleccionado.superficie ? `${predioSeleccionado.superficie} Ha` : "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                {/* TIPO DE PROPIEDAD */}
+                                                <div>
+                                                    {editando ? (
+                                                        <>
+                                                            <small style={{ color: "#888", fontWeight: "bold", display: "block", marginBottom: "4px" }}>TIPO DE PROPIEDAD</small>
+                                                            <select
+                                                                style={estiloInput}
+                                                                value={predioSeleccionado.tipo_propiedad || ""}
+                                                                onChange={(e) => actualizarPredio('tipo_propiedad', e.target.value)}
+                                                            >
+                                                                <option value="Público">Público</option>
+                                                                <option value="Privado">Privado</option>
+                                                            </select>
+                                                        </>
+                                                    ) : (
+                                                        <InputField
+                                                            label="Tipo de Propiedad"
+                                                            name="tipo_propiedad"
+                                                            value={predioSeleccionado.tipo_propiedad || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                {/* TENENCIA DE LA TIERRA */}
+                                                <div>
+                                                    {editando ? (
+                                                        <InputField
+                                                            label="Tenencia de la Tierra"
+                                                            name="tenencia"
+                                                            value={predioSeleccionado.tenencia || ""}
+                                                            onChange={(e) => actualizarPredio('tenencia', e.target.value)}
+                                                            error={errors?.tenencia}
+                                                        />
+                                                    ) : (
+                                                        <InputField
+                                                            label="Tenencia de la Tierra"
+                                                            name="tenencia"
+                                                            value={predioSeleccionado.tenencia || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                {/* CONDICIÓN VIALIDAD */}
+                                                <div>
+                                                    {editando ? (
+                                                        <>
+                                                            <small style={{ color: "#888", fontWeight: "bold", display: "block", marginBottom: "4px" }}>CONDICIÓN VIALIDAD</small>
+                                                            <select
+                                                                style={estiloInput}
+                                                                value={predioSeleccionado.vialidad || ""}
+                                                                onChange={(e) => actualizarPredio('vialidad', e.target.value)}
+                                                            >
+                                                                <option value="Excelente">Excelente</option>
+                                                                <option value="Bueno">Bueno</option>
+                                                                <option value="Regular">Regular</option>
+                                                                <option value="Malo">Malo</option>
+                                                            </select>
+                                                        </>
+                                                    ) : (
+                                                        <InputField
+                                                            label="Condición Vialidad"
+                                                            name="vialidad"
+                                                            value={predioSeleccionado.vialidad || "N/A"}
+                                                            disabled
+                                                        />
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            {/* VI. INFRAESTRUCTURA */}
+                                            {/* VI. INFRAESTRUCTURA UNIFICADA */}
                                             <div style={{ marginBottom: "35px" }}>
                                                 <div style={{ borderBottom: "2px solid #136442", paddingBottom: "5px", marginBottom: "15px" }}>
                                                     <strong style={{ color: "#136442", fontSize: "14px" }}>VI. INFRAESTRUCTURA</strong>
@@ -1283,16 +2448,138 @@ export default function Dashboard() {
                                                         { k: 'cochineras', l: 'COCHINERAS' }, { k: 'silos', l: 'SILOS' }, { k: 'caballerizas', l: 'CABALLERIZAS' },
                                                         { k: 'feedlot', l: 'FEEDLOT' }, { k: 'lagunas', l: 'LAGUNAS' }, { k: 'salas_ordeno', l: 'SALAS ORDEÑO' },
                                                         { k: 'queseras', l: 'QUESERAS' }, { k: 'casas', l: 'CASAS' }, { k: 'trapiches', l: 'TRAPICHES' }, { k: 'establos', l: 'ESTABLOS' }
-                                                    ].map((item) => (
-                                                        <div key={item.k} style={{ border: "1px solid #eee", padding: "10px", borderRadius: "8px", textAlign: "center", backgroundColor: predioSeleccionado.infraestructura?.[item.k] > 0 ? "#f0fdf4" : "#fff" }}>
-                                                            <small style={{ color: "#777", fontSize: "10px", display: "block" }}>{item.l}</small>
-                                                            {editando ? (
-                                                                <input type="number" style={{ ...estiloInput, textAlign: "center" }} value={predioSeleccionado.infraestructura?.[item.k]} onChange={(e) => actualizarInfraestructura(item.k, e.target.value)} />
-                                                            ) : (
-                                                                <span style={{ fontWeight: "bold", fontSize: "16px", color: predioSeleccionado.infraestructura?.[item.k] > 0 ? "#136442" : "#333" }}>{predioSeleccionado.infraestructura?.[item.k] || 0}</span>
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                    ].map((item) => {
+                                                        const valorAsignado = Number(predioSeleccionado.infraestructura?.[item.k] || 0);
+                                                        const tieneCantidad = valorAsignado > 0;
+
+                                                        return (
+                                                            <div
+                                                                key={item.k}
+                                                                style={{
+                                                                    border: "1px solid",
+                                                                    borderColor: tieneCantidad ? "#bbf7d0" : "#e2e8f0",
+                                                                    padding: "12px 10px",
+                                                                    borderRadius: "8px",
+                                                                    textAlign: "center",
+                                                                    backgroundColor: tieneCantidad ? "#f0fdf4" : "#fff",
+                                                                    display: "flex",
+                                                                    flexDirection: "column",
+                                                                    justifyContent: "center",
+                                                                    alignItems: "center",
+                                                                    minHeight: "75px",
+                                                                    transition: "all 0.2s ease"
+                                                                }}
+                                                            >
+                                                                {/* El label superior se queda exactamente igual en ambos modos */}
+                                                                <small style={{
+                                                                    color: "#64748b",
+                                                                    fontSize: "10px",
+                                                                    fontWeight: "700",
+                                                                    letterSpacing: "0.5px",
+                                                                    display: "block",
+                                                                    marginBottom: "6px"
+                                                                }}>
+                                                                    {item.l}
+                                                                </small>
+
+                                                                {editando ? (
+                                                                    /* En modo edición, el input se mimetiza con la tarjeta */
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        value={valorAsignado}
+                                                                        onChange={(e) => actualizarInfraestructura(item.k, e.target.value)}
+                                                                        style={{
+                                                                            width: "100%",
+                                                                            background: "transparent",
+                                                                            border: "none",
+                                                                            outline: "none",
+                                                                            textAlign: "center",
+                                                                            fontWeight: "bold",
+                                                                            fontSize: "18px",
+                                                                            color: tieneCantidad ? "#136442" : "#333",
+                                                                            padding: 0,
+                                                                            margin: 0,
+                                                                            fontFamily: "inherit"
+                                                                        }}
+                                                                    />
+                                                                ) : (
+                                                                    /* En modo lectura, solo se muestra el texto plano */
+                                                                    <span style={{
+                                                                        fontWeight: "bold",
+                                                                        fontSize: "18px",
+                                                                        color: tieneCantidad ? "#136442" : "#333"
+                                                                    }}>
+                                                                        {valorAsignado}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
+                                            {/* ── V. SERVICIOS BÁSICOS (CORREGIDO PARA USAR SERVICIOS_LECTURA) ── */}
+                                            <div style={{ marginBottom: "35px" }}>
+                                                <div style={{ borderBottom: "2px solid #136442", paddingBottom: "5px", marginBottom: "15px" }}>
+                                                    <strong style={{ color: "#136442", fontSize: "14px" }}>V. SERVICIOS BÁSICOS</strong>
+                                                </div>
+                                                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                                    {[
+                                                        { id: 'Agua', l: 'Agua' },
+                                                        { id: 'Electricidad', l: 'Electricidad' },
+                                                        { id: 'Gas', l: 'Gas' },
+                                                        { id: 'Internet', l: 'Internet' },
+                                                        { id: 'Teléfono', l: 'Teléfono' },
+                                                        { id: 'Transporte', l: 'Transporte' }
+                                                    ].map((srv) => {
+                                                        // Evaluamos la existencia del servicio usando 'servicios_lectura' tal cual viene de tu base de datos
+                                                        const poseeServicio = predioSeleccionado.servicios_lectura?.includes(srv.id);
+
+                                                        return (
+                                                            <div
+                                                                key={srv.id}
+                                                                onClick={() => {
+                                                                    if (editando) {
+                                                                        // Definimos el nuevo array mapeado
+                                                                        const nuevosServicios = poseeServicio
+                                                                            ? predioSeleccionado.servicios_lectura.filter(s => s !== srv.id)
+                                                                            : [...(predioSeleccionado.servicios_lectura || []), srv.id];
+
+                                                                        // Llamamos a tu función de actualización del estado local del predio
+                                                                        actualizarPredio('servicios_lectura', nuevosServicios);
+                                                                    }
+                                                                }}
+                                                                style={{
+                                                                    display: "flex",
+                                                                    alignItems: "center",
+                                                                    gap: "8px",
+                                                                    padding: "10px 18px",
+                                                                    borderRadius: "8px",
+                                                                    // Si lo posee se resalta con el verde principal, si no, se queda en gris tenue
+                                                                    backgroundColor: poseeServicio ? "#136442" : "#f1f5f9",
+                                                                    color: poseeServicio ? "#fff" : "#475569",
+                                                                    fontSize: "12px",
+                                                                    fontWeight: "500",
+                                                                    border: "1px solid",
+                                                                    borderColor: poseeServicio ? "#136442" : "#cbd5e1",
+                                                                    cursor: editando ? "pointer" : "default",
+                                                                    transition: "all 0.2s ease",
+                                                                    boxShadow: poseeServicio ? "0 2px 4px rgba(19,100,66,0.2)" : "none"
+                                                                }}
+                                                            >
+                                                                {/* Indicador visual dinámico */}
+                                                                <span style={{
+                                                                    fontSize: "14px",
+                                                                    fontWeight: "bold",
+                                                                    color: poseeServicio ? "#fff" : "#94a3b8"
+                                                                }}>
+                                                                    {poseeServicio ? "✓" : "○"}
+                                                                </span>
+                                                                {srv.l}
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
 
@@ -1301,7 +2588,7 @@ export default function Dashboard() {
                                                 <div style={{ border: "1px solid #e0e0e0", padding: "15px", borderRadius: "8px" }}>
                                                     <strong style={{ color: "#136442", fontSize: "13px", display: "block", marginBottom: "10px" }}>TIPO DE EXPLOTACIÓN</strong>
                                                     {editando ? (
-                                                        <select style={estiloInput} value={predioSeleccionado.produccion?.tipo_explotacion} onChange={(e) => actualizarProduccion('tipo_explotacion', e.target.value)}>
+                                                        <select style={estiloInput} value={predioSeleccionado.produccion?.tipo_explotacion || ""} onChange={(e) => actualizarProduccion('tipo_explotacion', e.target.value)}>
                                                             <option value="Intensivo">Intensivo</option>
                                                             <option value="Semi Intensivo">Semi Intensivo</option>
                                                             <option value="Extensivo">Extensivo</option>
@@ -1344,7 +2631,7 @@ export default function Dashboard() {
                                             <button
                                                 onClick={eliminarDefinitivoReal}
                                                 disabled={cargandoAccion}
-                                                style={{ ...estiloBoton, backgroundColor: "#ef4444", opacity: cargandoAccion ? 0.5 : 1 }}
+                                                style={{ ...estiloBoton, backgroundColor: "#ce3a3a", opacity: cargandoAccion ? 0.5 : 1 }}
                                             >
                                                 ELIMINAR
                                             </button>
@@ -1352,7 +2639,7 @@ export default function Dashboard() {
                                             <button
                                                 onClick={() => editando ? guardarCambiosReal() : setEditando(true)}
                                                 disabled={cargandoAccion}
-                                                style={{ ...estiloBoton, backgroundColor: editando ? "#0ea5e9" : "#136442", opacity: cargandoAccion ? 0.5 : 1 }}
+                                                style={{ ...estiloBoton, backgroundColor: editando ? "#136442" : "#136442", opacity: cargandoAccion ? 0.5 : 1 }}
                                             >
                                                 {cargandoAccion ? "PROCESANDO..." : editando ? "CONFIRMAR CAMBIOS" : "EDITAR FICHA"}
                                             </button>
@@ -1393,6 +2680,7 @@ export default function Dashboard() {
                                     border: "1px solid #e0e0e0",
                                     height: "600px"
                                 }}>
+                                    
                                     <div style={{ height: "100%", width: "100%", borderRadius: "12px", overflow: "hidden" }}>
                                         <MapaBarinas predios={listaPredios} />
                                     </div>
@@ -1403,59 +2691,69 @@ export default function Dashboard() {
                                     width: "100%",
                                     backgroundColor: "#fff",
                                     padding: "25px",
-                                    borderRadius: "16px",
-                                    boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
-                                    border: "1px solid #f0f0f0"
+                                    borderRadius: "12px",
+                                    boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
+                                    border: "1px solid #eee"
                                 }}>
                                     <h4 style={{
-                                        color: "#2d572c",
+                                        color: "#136442",
                                         marginBottom: "20px",
                                         fontWeight: "700",
-                                        borderBottom: "2px solid #e8f5e9",
+                                        borderBottom: "2px solid #ccc",
                                         paddingBottom: "10px",
                                         display: "flex",
                                         alignItems: "center",
-                                        gap: "10px"
+                                        gap: "10px",
+                                        fontSize: "14px",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.5px"
                                     }}>
-                                        📊 Distribución por Municipios
+                                        Distribución por Municipios
                                     </h4>
 
-                                    {/* Grid para que los contadores se vean organizados en filas */}
+                                    {/* Grid organizado para los contadores */}
                                     <div style={{
                                         display: "grid",
-                                        gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+                                        gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
                                         gap: "15px"
                                     }}>
                                         {MUNICIPIOS.map(muni => {
                                             const total = listaPredios.filter(p => p.municipio === muni).length;
+                                            const tieneRegistros = total > 0;
+
                                             return (
                                                 <div key={muni} style={{
                                                     display: "flex",
-                                                    justifyContent: "space-between",
+                                                    flexDirection: "column",
                                                     alignItems: "center",
-                                                    padding: "12px 15px",
-                                                    borderRadius: "12px",
-                                                    backgroundColor: total > 0 ? "#f1f8e9" : "#fafafa",
-                                                    border: `1px solid ${total > 0 ? "#c5e1a5" : "#eee"}`,
-                                                    transition: "transform 0.2s ease",
+                                                    justifyContent: "center",
+                                                    padding: "15px 10px",
+                                                    borderRadius: "8px",
+                                                    border: `1px solid ${tieneRegistros ? "#bbf7d0" : "#e5e7eb"}`,
+                                                    backgroundColor: tieneRegistros ? "#f0fdf4" : "#f9fafb",
+                                                    boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+                                                    transition: "all 0.2s ease",
                                                     cursor: "default"
                                                 }}>
+                                                    {/* Nombre del Municipio */}
                                                     <span style={{
-                                                        fontWeight: total > 0 ? "600" : "400",
-                                                        color: total > 0 ? "#33691e" : "#888",
-                                                        fontSize: "14px"
+                                                        fontSize: "10px",
+                                                        fontWeight: "bold",
+                                                        color: tieneRegistros ? "#136442" : "#6b7280",
+                                                        marginBottom: "6px",
+                                                        textAlign: "center",
+                                                        textTransform: "uppercase",
+                                                        letterSpacing: "0.5px"
                                                     }}>
                                                         {muni}
                                                     </span>
+
+                                                    {/* Contador Numérico */}
                                                     <span style={{
-                                                        backgroundColor: total > 0 ? "#33691e" : "#ccc",
-                                                        color: "#fff",
-                                                        padding: "4px 12px",
-                                                        borderRadius: "8px",
-                                                        fontSize: "13px",
+                                                        fontSize: "20px",
                                                         fontWeight: "bold",
-                                                        minWidth: "35px",
-                                                        textAlign: "center"
+                                                        color: tieneRegistros ? "#136442" : "#1f2937",
+                                                        lineHeight: "1"
                                                     }}>
                                                         {total}
                                                     </span>
@@ -1511,19 +2809,55 @@ const FormSection = ({ title, children }) => (
     </div>
 );
 
-const InputField = ({ label, error, ...props }) => (
+const InputField = ({ label, error, prefix, ...props }) => (
     <div style={{ marginBottom: "15px" }}>
         <label style={labelStyle}>{label}</label>
-        <input
-            {...props}
+
+        {/* Este contenedor ahora maneja el borde, el fondo y agrupa el select con el input */}
+        <div
             style={{
-                ...inputStyle,
-                // Si hay error, el borde se pone rojo y el fondo cambia levemente
+                display: "flex",
+                alignItems: "center",
+                borderRadius: "8px", // Mantiene el redondeado de tu UI
+                overflow: "hidden",  // Corta las esquinas del select para que no sobresalgan
+                transition: "all 0.2s ease",
+                // Si hay error, el contenedor completo se pone rojo
                 border: error ? "1.5px solid #ef4444" : "1px solid #e2e8f0",
                 backgroundColor: error ? "#fef2f2" : "#f8fafc"
             }}
-        />
-        {/* Si existe un error, lo mostramos justo debajo del input */}
+            // Clase utilitaria por si necesitas detectar el foco general
+            className="focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500"
+        >
+            {/* Si pasamos un prefijo (el combobox), se renderiza aquí al inicio */}
+            {prefix && (
+                <div style={{
+                    height: "42px", // Asegura la misma altura del input
+                    display: "flex",
+                    alignItems: "center",
+                    backgroundColor: error ? "#fee2e2" : "#f1f5f9", // Fondo gris suave o rojizo si hay error
+                    borderRight: error ? "1.5px solid #ef4444" : "1px solid #e2e8f0",
+                }}>
+                    {prefix}
+                </div>
+            )}
+
+            {/* Tu input original, ahora limpio de bordes y fondos propios */}
+            <input
+                {...props}
+                style={{
+                    ...inputStyle,
+                    border: "none",            // Le quitamos el borde porque ahora lo maneja el div superior
+                    backgroundColor: "transparent", // Hereda el fondo del contenedor
+                    width: "100%",
+                    height: "42px",
+                    outline: "none",
+                    boxShadow: "none",
+                    margin: 0
+                }}
+            />
+        </div>
+
+        {/* Mensaje de error justo debajo */}
         {error && (
             <p style={{
                 color: "#ef4444",
@@ -1537,7 +2871,6 @@ const InputField = ({ label, error, ...props }) => (
         )}
     </div>
 );
-
 const SelectField = ({ label, options, error, ...props }) => (
     <div style={{ marginBottom: "15px" }}>
         <label style={labelStyle}>{label}</label>
