@@ -1,33 +1,144 @@
 import React, { useEffect, useState } from "react";
 import escudo from "../../assets/logo2.jpg";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-// ── ICONOS SVG REALES ──────────────────
+// ── ICONOS SVG DEL DASHBOARD PRODUCCIÓN ──────────────────
 const IconInicio = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+    </svg>
 );
 const IconBuscarPredio = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
 );
-const IconRegistroInv = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+const IconCaracterizacion = () => (
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M9 11l3 3L22 4"></path>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+    </svg>
 );
-const IconProduccionAnimal = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h18"></path><path d="M6 8l6-4 6 4"></path><path d="M6 16l6 4 6-4"></path></svg>
+const IconProduccionGeneral = () => (
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M12 2v20"></path>
+        <path d="M5 12a7 7 0 0 1 14 0"></path>
+        <path d="M12 12c0-3-2-5-5-5"></path>
+        <path d="M12 12c0-3 2-5 5-5"></path>
+    </svg>
 );
-const IconProduccionVegetal = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22V12"></path><path d="M5 12a7 7 0 0 1 14 0"></path><path d="M12 12c0-3-2-5-5-5"></path><path d="M12 12c0-3 2-5 5-5"></path></svg>
+const IconSanidad = () => (
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M12 2v20"></path>
+        <path d="M2 12h20"></path>
+    </svg>
+);
+const IconNecesidades = () => (
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <circle cx="12" cy="16" r="1"></circle>
+    </svg>
+);
+const IconActualizacion = () => (
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <polyline points="1 20 1 14 7 14"></polyline>
+        <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path>
+        <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
+    </svg>
 );
 const IconReportes = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <line x1="18" y1="20" x2="18" y2="10"></line>
+        <line x1="12" y1="20" x2="12" y2="4"></line>
+        <line x1="6" y1="20" x2="6" y2="14"></line>
+    </svg>
 );
 
 export default function DashboardProduccion() {
+
     const navigate = useNavigate();
     const [usuario, setUsuario] = useState(null);
     const [tabActiva, setTabActiva] = useState("inicio");
     const [guardadoExitoso, setGuardadoExitoso] = useState(false);
-
 
     useEffect(() => {
         const data = sessionStorage.getItem("usuario_produccion");
@@ -35,40 +146,109 @@ export default function DashboardProduccion() {
         else setUsuario(JSON.parse(data));
     }, [navigate]);
 
+
+
+    const [mostrarModal, setMostrarModal] = useState(false);
     const [predioSeleccionado, setPredioSeleccionado] = useState(null);
 
+    const [editando, setEditando] = useState(false);
+    const [cargandoAccion, setCargandoAccion] = useState(false);
+
+    const [mostrarFicha, setMostrarFicha] = useState(false);
+    const [predioFicha, setPredioFicha] = useState(null);
+
+
+    const [predios, setPredios] = useState([]);
     const [predioActivo, setPredioActivo] = useState(null);
     const [listaPredios, setListaPredios] = useState([]);
     const [busquedaCedula, setBusquedaCedula] = useState("");
 
-    useEffect(() => {
-        // Simulación de predios desde backend
-        const prediosMock = [
-            {
-                id: 1,
-                productor: "Juan Pérez",
-                cedula: "12345678",
-                predio: "Finca La Esperanza",
-                municipio: "Barinas"
-            },
-            {
-                id: 2,
-                productor: "María González",
-                cedula: "87654321",
-                predio: "Hato San José",
-                municipio: "Obispos"
-            }
-        ];
 
-        setListaPredios(prediosMock);
+    useEffect(() => {
+        const obtenerPredios = async () => {
+            try {
+                setCargando(true);
+
+                const response = await fetch("http://127.0.0.1:8000/api/predios/");
+                const data = await response.json();
+
+                console.log(data);
+
+                setListaPredios(data);
+            } catch (error) {
+                console.error("Error obteniendo predios:", error);
+            } finally {
+                setCargando(false);
+            }
+        };
+
+        obtenerPredios();
     }, []);
 
-    const filtrarPredios = listaPredios.filter(p =>
-        p.cedula.includes(busquedaCedula)
+    const filtrarPredios = listaPredios.filter((p) =>
+        p.productor?.cedula_rif?.includes(busquedaCedula),
     );
 
-    const [inventarioInicial, setInventarioInicial] = useState({
+    const [cargando, setCargando] = useState(false);
 
+
+    const [subCaracterizacion, setSubCaracterizacion] = useState("animal");
+
+    const [rubrosVegetales, setRubrosVegetales] = useState([
+        {
+            rubro: "",
+            hectareas: "",
+            estado: "",
+            riego: "",
+            ciclo_productivo: "",
+            tipo_produccion: "",
+            produccion_estimada: "",
+            destino: ""
+        }
+    ]);
+
+    const agregarRubroVegetal = () => {
+
+        setRubrosVegetales(prev => [
+            ...prev,
+            {
+                rubro: "",
+                hectareas: "",
+                estado: "",
+                riego: "",
+                ciclo_productivo: "",
+                tipo_produccion: "",
+                produccion_estimada: "",
+                destino: ""
+            }
+        ]);
+
+    };
+
+    const eliminarRubroVegetal = (index) => {
+
+        setRubrosVegetales(prev =>
+            prev.filter((_, i) => i !== index)
+        );
+
+    };
+
+    const actualizarRubroVegetal = (index, campo, valor) => {
+
+        setRubrosVegetales(prev => {
+
+            const copia = [...prev];
+
+            copia[index][campo] = valor;
+
+            return copia;
+
+        });
+
+    };
+
+
+    const [inventarioInicial, setInventarioInicial] = useState({
         especiesSeleccionadas: [],
 
         vacunos: {
@@ -80,7 +260,13 @@ export default function DashboardProduccion() {
             maute: 0,
             mauta: 0,
             becerra: 0,
-            becerro: 0
+            becerro: 0,
+        },
+
+        capacidadVacuna: {
+            leche_diaria: 0,
+            carne_anual: 0,
+            sistemas: [],
         },
 
         bufalinos: {
@@ -92,7 +278,15 @@ export default function DashboardProduccion() {
             bumauta: 0,
             bumaute: 0,
             bucerra: 0,
-            bucerro: 0
+            bucerro: 0,
+        },
+
+        capacidadBufalina: {
+            leche_diaria: 0,
+            carne_anual: 0,
+            partos_anuales: 0,
+            reproductores: 0,
+            sistemas: [],
         },
 
         equinos: {
@@ -104,7 +298,18 @@ export default function DashboardProduccion() {
             potrilla: 0,
             potrillo: 0,
             burro: 0,
-            burra: 0
+            burra: 0,
+        },
+
+        capacidadEquina: {
+            sistemas: [],
+            trabajo_agricola: 0,
+            transporte: 0,
+            reproduccion: 0,
+            deporte: 0,
+            exhibicion: 0,
+            turismo: 0,
+            carga: 0,
         },
 
         ovinos: {
@@ -113,16 +318,18 @@ export default function DashboardProduccion() {
             borrego: 0,
             borrega: 0,
             cordero: 0,
-            cordera: 0
+            cordera: 0,
         },
 
-        caprinos: {
-            cabrio: 0,
-            cabra: 0,
-            cabrilloo: 0,
-            cabrilla: 0,
-            cabrito: 0,
-            cabrita: 0
+        capacidadOvina: {
+            sistemas: [],
+            carne_anual: 0,
+            leche_diaria: 0,
+            lana_anual: 0,
+            cria: 0,
+            reproduccion: 0,
+            doble_proposito: 0,
+            genetica: 0,
         },
 
         porcinos: {
@@ -130,13 +337,47 @@ export default function DashboardProduccion() {
             cerda_gestante: 0,
             cerda_lactante: 0,
             lechon: 0,
-            lechona: 0
+            lechona: 0,
+        },
+
+        capacidadPorcina: {
+            sistemas: [],
+            cria: 0,
+            engorde: 0,
+            reproduccion: 0,
+            ciclo_completo: 0,
+            genetica: 0,
+            carne_anual: 0,
+        },
+
+        caprinos: {
+            cabrio: 0,
+            cabra: 0,
+            cabrillo: 0,
+            cabrilla: 0,
+            cabrito: 0,
+            cabrita: 0,
+        },
+
+        capacidadCaprino: {
+            sistemas: [],
+            vientres: 0,
+            engorde: 0,
+            leche_diaria: 0,
+            carne_anual: 0,
         },
 
         conejos: {
             macho: 0,
             madre: 0,
-            gazapo: 0
+            gazapo: 0,
+        },
+
+        capacidadCunicola: {
+            sistemas: [],
+            jaulas_madre: 0,
+            reproductoras: 0,
+            carne_anual: 0
         },
 
         aves: {
@@ -148,11 +389,25 @@ export default function DashboardProduccion() {
             pavos: 0,
             avestruz: 0,
             guinea: 0,
-            otros: 0
+            otros: 0,
+        },
+
+        capacidadAvesCorral: {
+            sistemas: [],
+            capacidad_alojamiento: 0,
+            produccion_huevos: 0,
+            capacidad_lote: 0,
         },
 
         apicultura: {
-            colmenas: 0
+            colmenas: 0,
+        },
+
+        capacidadApicultura: {
+            sistemas: [],
+            colmenas_activas: 0,
+            miel_anual: 0,
+            nucleos_anuales: 0,
         },
 
         maquinariaSeleccionada: [],
@@ -166,7 +421,7 @@ export default function DashboardProduccion() {
             cosechadora: 0,
             desgranadora: 0,
             basuca: 0,
-            remolque: 0
+            remolque: 0,
         },
 
         implementos: {
@@ -183,14 +438,14 @@ export default function DashboardProduccion() {
             sembradora: 0,
             subsolador: 0,
             surcadora: 0,
-            trompo_fertilizador: 0
+            trompo_fertilizador: 0,
         },
 
         riego: {
             electrobomba: 0,
             molino_viento: 0,
             motobomba: 0,
-            motor_diesel: 0
+            motor_diesel: 0,
         },
 
         otros_equipos: {
@@ -201,59 +456,93 @@ export default function DashboardProduccion() {
             termonebulizadores: 0,
             trilladora: 0,
             acuicultura_aireacion: 0,
-            alimentacion_mecanizada: 0
-        }
-
+            alimentacion_mecanizada: 0,
+        },
     });
 
-    const [subAnimal, setSubAnimal] = useState("registroAnimal");
+    const [produccionVegetal, setProduccionVegetal] = useState([
+        {
+            rubro: "",
+            hectareas: "",
+            estado: "",
+            riego: "",
+            produccion_estimada: "",
+            destino: "",
+        },
+    ]);
 
-    const [produccionAnimal, setProduccionAnimal] = useState({
-        registro: {},
-        produccion: [],
-        sanidad: [],
-        reproduccion: []
+    const [produccionGeneral, setProduccionGeneral] = useState({
+        animal: {
+            leche: 0,
+            carne: 0,
+            queso: 0,
+            huevos: 0,
+            pescado: 0,
+        },
+
+        vegetal: {
+            maiz: 0,
+            arroz: 0,
+            cafe: 0,
+            cacao: 0,
+            yuca: 0,
+        },
+
+        agroindustrial: {
+            queso_artesanal: 0,
+            harina: 0,
+            conservas: 0,
+        },
     });
 
-    const [subVegetal, setSubVegetal] = useState("planificacion");
-
-    const [planificacion, setPlanificacion] = useState({
-        cultivo: "",
-        superficie: 0,
-        fecha_siembra: "",
-        produccion_esperada: 0
+    const [sanidadAsistencia, setSanidadAsistencia] = useState({
+        vacunacion: false,
+        asistencia_tecnica: false,
+        visitas_institucionales: false,
+        observaciones: "",
     });
 
-    const [produccionVegetal, setProduccionVegetal] = useState({
-        cultivo: "",
-        produccion_real: 0,
-        fecha_cosecha: "",
-        observaciones: ""
+    const [necesidadesProductor, setNecesidadesProductor] = useState({
+        financiamiento: false,
+        semillas: false,
+        fertilizantes: false,
+        maquinaria: false,
+        asistencia_tecnica: false,
+        combustible: false,
+        observaciones: "",
     });
 
+    const [actualizacionProductiva, setActualizacionProductiva] = useState({
+        fecha_actualizacion: "",
+        observaciones: "",
+        responsable: "",
+    });
 
     // ── MANEJADORES DE EVENTOS (SIN RECORTES) ──────────────────────────────
     const manejarCambio = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const manejarChecklist = (item) => {
-        setFormData(prev => {
+        setFormData((prev) => {
             const existe = prev.servicios.includes(item);
             return {
                 ...prev,
                 servicios: existe
-                    ? prev.servicios.filter(s => s !== item)
-                    : [...prev.servicios, item]
+                    ? prev.servicios.filter((s) => s !== item)
+                    : [...prev.servicios, item],
             };
         });
     };
 
     const manejarInfra = (campo, valor) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            infraestructura: { ...prev.infraestructura, [campo]: parseInt(valor) || 0 }
+            infraestructura: {
+                ...prev.infraestructura,
+                [campo]: parseInt(valor) || 0,
+            },
         }));
     };
 
@@ -266,6 +555,142 @@ export default function DashboardProduccion() {
         }, 2500);
     };
 
+const guardarInventario = async () => {
+
+    if (!predioActivo?.id_predio) {
+
+        alert("Seleccione un predio");
+
+        return;
+    }
+
+    try {
+
+        const data = {
+
+            // ─────────────────────────────
+            // RUBROS VEGETALES
+            // ─────────────────────────────
+
+            rubros_vegetales: rubrosVegetales,
+
+            // ─────────────────────────────
+            // EXISTENCIA ANIMAL
+            // ─────────────────────────────
+
+            existencia_animal: {
+
+                especiesSeleccionadas:
+                    inventarioInicial.especiesSeleccionadas,
+
+                vacunos:
+                    inventarioInicial.vacunos,
+
+                capacidadVacuna:
+                    inventarioInicial.capacidadVacuna,
+
+                bufalinos:
+                    inventarioInicial.bufalinos,
+
+                capacidadBufalina:
+                    inventarioInicial.capacidadBufalina,
+
+                equinos:
+                    inventarioInicial.equinos,
+
+                capacidadEquina:
+                    inventarioInicial.capacidadEquina,
+
+                ovinos:
+                    inventarioInicial.ovinos,
+
+                capacidadOvina:
+                    inventarioInicial.capacidadOvina,
+
+                porcinos:
+                    inventarioInicial.porcinos,
+
+                capacidadPorcina:
+                    inventarioInicial.capacidadPorcina,
+
+                caprinos:
+                    inventarioInicial.caprinos,
+
+                capacidadCaprino:
+                    inventarioInicial.capacidadCaprino,
+
+                conejos:
+                    inventarioInicial.conejos,
+
+                capacidadCunicola:
+                    inventarioInicial.capacidadCunicola,
+
+                aves:
+                    inventarioInicial.aves,
+
+                capacidadAvesCorral:
+                    inventarioInicial.capacidadAvesCorral,
+
+                apicultura:
+                    inventarioInicial.apicultura,
+
+                capacidadApicultura:
+                    inventarioInicial.capacidadApicultura
+            },
+
+            // ─────────────────────────────
+            // MAQUINARIA
+            // ─────────────────────────────
+
+            maquinaria: {
+
+                maquinariaSeleccionada:
+                    inventarioInicial.maquinariaSeleccionada,
+
+                maquinaria_ruedas:
+                    inventarioInicial.maquinaria_ruedas,
+
+                implementos:
+                    inventarioInicial.implementos,
+
+                riego:
+                    inventarioInicial.riego,
+
+                otros_equipos:
+                    inventarioInicial.otros_equipos
+            }
+        };
+
+        console.log(
+            "DATOS ENVIADOS:",
+            data
+        );
+
+        const response = await axios.patch(
+
+            `http://127.0.0.1:8000/api/predios/${predioActivo.id_predio}/`,
+
+            data
+        );
+
+        console.log(response.data);
+
+        alert(
+            "Caracterización guardada correctamente"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "ERROR:",
+            error.response?.data || error.message
+        );
+
+        alert(
+            "Error al guardar"
+        );
+    }
+};
     const cerrarSesion = () => {
         sessionStorage.removeItem("usuario_produccion");
         navigate("/produccion/login");
@@ -274,24 +699,31 @@ export default function DashboardProduccion() {
     if (!usuario) return null;
 
     return (
-        <div style={{ display: "flex", height: "100vh", backgroundColor: "#f8fafc", fontFamily: "'Poppins', sans-serif" }}>
-
+        <div
+            style={{
+                display: "flex",
+                height: "100vh",
+                backgroundColor: "#f8fafc",
+                fontFamily: "'Poppins', sans-serif",
+            }}
+        >
             {/* Importación de Poppins Global */}
             <style>{`@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');`}</style>
 
             {/* ── SIDEBAR REDISEÑADO ── */}
             <aside style={sidebarContainerStyle}>
-
                 {/* Encabezado: Info del Usuario */}
-                <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "15px",
-                    backgroundColor: "rgba(255,255,255,0.08)",
-                    borderRadius: "18px",
-                    marginBottom: "25px"
-                }}>
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "15px",
+                        backgroundColor: "rgba(255,255,255,0.08)",
+                        borderRadius: "18px",
+                        marginBottom: "25px",
+                    }}
+                >
                     <div style={avatarWrapper}>
                         <img
                             src={
@@ -303,29 +735,42 @@ export default function DashboardProduccion() {
                         />
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                        <span style={{
-                            fontSize: "14px",
-                            fontWeight: "700",
-                            color: "#fff",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis"
-                        }}>
+                    <div
+                        style={{ display: "flex", flexDirection: "column", minWidth: 0 }}
+                    >
+                        <span
+                            style={{
+                                fontSize: "14px",
+                                fontWeight: "700",
+                                color: "#fff",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                            }}
+                        >
                             {usuario.nombre}
                         </span>
 
-                        <span style={{
-                            fontSize: "11px",
-                            color: "#86efac"
-                        }}>
+                        <span
+                            style={{
+                                fontSize: "11px",
+                                color: "#86efac",
+                            }}
+                        >
                             {usuario.rol || "Analista"}
                         </span>
                     </div>
                 </div>
 
                 {/* Navegación */}
-                <nav style={{ flex: 1 }}>
+                <nav
+                    style={{
+                        flex: 1,
+                        overflowY: "auto",
+                        paddingRight: "6px",
+                        marginBottom: "15px",
+                    }}
+                >
                     <MenuItem
                         label="Inicio"
                         active={tabActiva === "inicio"}
@@ -341,24 +786,38 @@ export default function DashboardProduccion() {
                     />
 
                     <MenuItem
-                        label="Inventario"
-                        active={tabActiva === "inventario"}
-                        onClick={() => setTabActiva("inventario")}
-                        icon={<IconRegistroInv />}
+                        label="Caracterización"
+                        active={tabActiva === "caracterizacion"}
+                        onClick={() => setTabActiva("caracterizacion")}
+                        icon={<IconCaracterizacion />}
                     />
 
                     <MenuItem
-                        label="Agrícola Animal"
-                        active={tabActiva === "prodAnimal"}
-                        onClick={() => setTabActiva("prodAnimal")}
-                        icon={<IconProduccionAnimal />}
+                        label="Producción General"
+                        active={tabActiva === "produccionGeneral"}
+                        onClick={() => setTabActiva("produccionGeneral")}
+                        icon={<IconProduccionGeneral />}
                     />
 
                     <MenuItem
-                        label="Agrícola Vegetal"
-                        active={tabActiva === "prodVegetal"}
-                        onClick={() => setTabActiva("prodVegetal")}
-                        icon={<IconProduccionVegetal />}
+                        label="Sanidad y Asistencia"
+                        active={tabActiva === "sanidad"}
+                        onClick={() => setTabActiva("sanidad")}
+                        icon={<IconSanidad />}
+                    />
+
+                    <MenuItem
+                        label="Necesidades"
+                        active={tabActiva === "necesidades"}
+                        onClick={() => setTabActiva("necesidades")}
+                        icon={<IconNecesidades />}
+                    />
+
+                    <MenuItem
+                        label="Actualización Productiva"
+                        active={tabActiva === "actualizacion"}
+                        onClick={() => setTabActiva("actualizacion")}
+                        icon={<IconActualizacion />}
                     />
 
                     <MenuItem
@@ -371,108 +830,148 @@ export default function DashboardProduccion() {
 
                 {/* Botón cerrar sesión */}
                 <button onClick={cerrarSesion} style={logoutButtonStyle}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" strokeWidth="2"
-                        style={{ marginRight: "8px" }}>
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        style={{ marginRight: "8px" }}
+                    >
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                         <polyline points="16 17 21 12 16 7"></polyline>
                         <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
                     Cerrar Sesión
                 </button>
-
             </aside>
 
             {/* ── CONTENIDO PRINCIPAL ── */}
-            <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-
-                <header style={{
-
-                    ...headerContainerStyle,
-                    justifyContent: "space-between", // Empuja el logo a la derecha
-                    paddingRight: "40px"             // Espaciado lateral
-                }}>
-
+            <main
+                style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                }}
+            >
+                <header
+                    style={{
+                        ...headerContainerStyle,
+                        justifyContent: "space-between", // Empuja el logo a la derecha
+                        paddingRight: "40px", // Espaciado lateral
+                    }}
+                >
                     <div>
-                        <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#0f172a", margin: 0 }}>
-                            {
-                                tabActiva === "inicio" && "Módulo de Producción"
-                            }
-                            {
-                                tabActiva === "seleccionPredio" && "Selección de Predio"
-                            }
-                            {
-                                tabActiva === "inventario" && "Gestión de Inventario"
-                            }
-                            {
-                                tabActiva === "prodAnimal" && "Producción Animal"
-                            }
-                            {
-                                tabActiva === "prodVegetal" && "Producción Vegetal"
-                            }
-                            {
-                                tabActiva === "reportes" && "Reportes del Sistema"
-                            }
+                        <h2
+                            style={{
+                                fontSize: "20px",
+                                fontWeight: 700,
+                                color: "#0f172a",
+                                margin: 0,
+                            }}
+                        >
+                            {tabActiva === "inicio"
+                                ? "Dashboard Producción"
+                                : tabActiva === "seleccionPredio"
+                                    ? "Selección de Predio"
+                                    : tabActiva === "caracterizacion"
+                                        ? "Caracterización Productiva"
+                                        : tabActiva === "produccionGeneral"
+                                            ? "Producción General"
+                                            : tabActiva === "sanidad"
+                                                ? "Sanidad y Asistencia Técnica"
+                                                : tabActiva === "necesidades"
+                                                    ? "Necesidades del Productor"
+                                                    : tabActiva === "actualizacion"
+                                                        ? "Actualización Productiva"
+                                                        : "Reportes y Estadísticas"}
                         </h2>
-                        <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>Estado Barinas • Sector Agropecuario</p>
+                        <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
+                            Estado Barinas • Sector Agropecuario
+                        </p>
                     </div>
 
                     {predioActivo && (
-                        <div style={{
-                            background: "#e6f4ea",
-                            border: "1px solid #bbf7d0",
-                            padding: "8px 15px",
-                            borderRadius: "12px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px"
-                        }}>
-                            <span style={{ fontWeight: "700", color: "#136442" }}>
+                        <div
+                            style={{
+                                background: "#e6f4ea",
+                                border: "1px solid #bbf7d0",
+                                padding: "8px 15px",
+                                borderRadius: "12px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "10px",
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontWeight: "700",
+                                    color: "#136442",
+                                }}
+                            >
                                 🟢 Predio Activo:
                             </span>
 
-                            <span style={{ fontSize: "13px", color: "#0f172a" }}>
-                                {predioActivo.predio} — {predioActivo.productor}
+                            <span
+                                style={{
+                                    fontSize: "13px",
+                                    color: "#0f172a",
+                                }}
+                            >
+                                {predioActivo.nombre_predio} — {predioActivo.productor?.nombre}
                             </span>
-
                         </div>
                     )}
 
                     {/* --- LOGO MPPAT / ESCUDO --- */}
                     <div style={{ display: "flex", alignItems: "center" }}>
-                        <img
-                            src={escudo}
-                            alt="Logo MPPAT"
-                            style={logoDerechoStyle}
-                        />
+                        <img src={escudo} alt="Logo MPPAT" style={logoDerechoStyle} />
                     </div>
                 </header>
 
                 <section style={{ flex: 1, padding: "30px", overflowY: "auto" }}>
-                    {guardadoExitoso && <div style={alertStyle}>¡Registro sincronizado con éxito!</div>}
+                    {guardadoExitoso && (
+                        <div style={alertStyle}>¡Registro sincronizado con éxito!</div>
+                    )}
 
                     {tabActiva === "inicio" && (
                         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-
                             {/* ── CARDS PRINCIPALES ── */}
-                            <div style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                                gap: "24px",
-                                marginBottom: "30px"
-                            }}>
-                                <CardStat label="Predios en Producción" value="0" color="#136442" />
-                                <CardStat label="Registros de Producción" value="0" color="#136442" />
-                                <CardStat label="Movimientos de Inventario" value="0" color="#136442" />
+                            <div
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                                    gap: "24px",
+                                    marginBottom: "30px",
+                                }}
+                            >
+                                <CardStat
+                                    label="Predios en Producción"
+                                    value="0"
+                                    color="#136442"
+                                />
+                                <CardStat
+                                    label="Registros de Producción"
+                                    value="0"
+                                    color="#136442"
+                                />
+                                <CardStat
+                                    label="Movimientos de Inventario"
+                                    value="0"
+                                    color="#136442"
+                                />
                             </div>
 
                             {/* ── GRÁFICOS ── */}
-                            <div style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                                gap: "20px"
-                            }}>
-
+                            <div
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                                    gap: "20px",
+                                }}
+                            >
                                 {/* Gráfico 1 - Barras */}
                                 <div style={chartCard}>
                                     <h3 style={chartTitle}>Producción General</h3>
@@ -496,18 +995,13 @@ export default function DashboardProduccion() {
                                     <h3 style={chartTitle}>Estado del Sistema</h3>
                                     <div style={chartPlaceholder}>Gráfico</div>
                                 </div>
-
                             </div>
                         </div>
                     )}
 
-
-
                     {tabActiva === "seleccionPredio" && (
                         <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-
                             <FormSection title="🔍 Buscar Predio por Productor">
-
                                 <div style={grid3}>
                                     <InputField
                                         label="Cédula del Productor"
@@ -516,83 +1010,488 @@ export default function DashboardProduccion() {
                                         onChange={(e) => setBusquedaCedula(e.target.value)}
                                     />
                                 </div>
-
                             </FormSection>
 
                             {/* LISTA DE RESULTADOS */}
                             <FormSection title="📋 Predios Disponibles">
 
-                                {filtrarPredios.length === 0 && (
-                                    <p style={{ color: "#64748b" }}>
-                                        No se encontraron predios
-                                    </p>
-                                )}
+                                {cargando ? (
+                                    /* ESTADO 1: CARGANDO */
+                                    <div style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        padding: "40px 0",
+                                        flexDirection: "column",
+                                        gap: "10px"
+                                    }}>
+                                        <Spinner color="#136442" />
+                                        <p style={{ color: "#136442", fontWeight: "600", fontSize: "14px", margin: 0 }}>
+                                            Buscando información...
+                                        </p>
+                                    </div>
+                                ) : filtrarPredios.length === 0 ? (
+                                    /* ESTADO 2: NO HAY RESULTADOS */
+                                    <p style={{ color: "#64748b" }}>No se encontraron predios</p>
+                                ) : (
+                                    /* ESTADO 3: MOSTRAR INFORMACIÓN */
+                                    filtrarPredios.map((p) => (
+                                        <div
+                                            key={p.id_predio}
+                                            style={{
+                                                padding: "15px",
+                                                border: "1px solid #e2e8f0",
+                                                borderRadius: "12px",
+                                                marginBottom: "12px",
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                background:
+                                                    predioActivo?.id_predio === p.id_predio
+                                                        ? "#e6f4ea"
+                                                        : "#fff",
+                                            }}
+                                        >
+                                            <div>
+                                                <p style={{ margin: 0, fontWeight: "700" }}>
+                                                    {p.nombre_predio}
+                                                </p>
 
-                                {filtrarPredios.map((p) => (
+                                                <p
+                                                    style={{
+                                                        margin: 0,
+                                                        fontSize: "12px",
+                                                        color: "#64748b",
+                                                    }}
+                                                >
+                                                    {p.productor?.nombre} - CI: {p.productor?.cedula_rif}
+                                                </p>
+                                            </div>
+
+                                            <div style={{ display: "flex", gap: "10px" }}>
+
+                                                {/* BOTÓN SELECCIONAR */}
+                                                <button
+                                                    style={{
+                                                        background: "#136442",
+                                                        color: "#fff",
+                                                        border: "none",
+                                                        padding: "10px 18px",
+                                                        borderRadius: "10px",
+                                                        cursor: "pointer",
+                                                        fontWeight: "600"
+                                                    }}
+                                                    onClick={() => {
+                                                        setPredioActivo(p);
+                                                    }}
+                                                >
+                                                    Seleccionar
+                                                </button>
+
+                                                {/* BOTÓN VER FICHA */}
+                                                <button
+                                                    style={{
+                                                        background: "#0ea5e9",
+                                                        color: "#fff",
+                                                        border: "none",
+                                                        padding: "10px 18px",
+                                                        borderRadius: "10px",
+                                                        cursor: "pointer",
+                                                        fontWeight: "600"
+                                                    }}
+                                                    onClick={() => {
+                                                        console.log("PREDIO:", p);
+                                                        setPredioSeleccionado(p);
+                                                        setMostrarModal(true);
+                                                    }}
+                                                >
+                                                    Ver Ficha
+                                                </button>
+
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </FormSection>
+
+                            {/* ── MODAL INTEGRAL DE FICHA TÉCNICA ── */}
+                            {mostrarModal && predioSeleccionado && (
+                                <div
+                                    style={{
+                                        position: "fixed",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        backgroundColor: "rgba(0,0,0,0.7)",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        zIndex: 1000,
+                                        padding: "15px",
+                                    }}
+                                >
                                     <div
-                                        key={p.id}
                                         style={{
-                                            padding: "15px",
-                                            border: "1px solid #e2e8f0",
+                                            backgroundColor: "#fff",
+                                            width: "100%",
+                                            maxWidth: "950px",
+                                            maxHeight: "95vh",
                                             borderRadius: "12px",
-                                            marginBottom: "12px",
+                                            overflowY: "auto",
+                                            boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
                                             display: "flex",
-                                            justifyContent: "space-between",
-                                            alignItems: "center",
-                                            background: predioActivo?.id === p.id ? "#e6f4ea" : "#fff"
+                                            flexDirection: "column",
                                         }}
                                     >
-                                        <div>
-                                            <p style={{ margin: 0, fontWeight: "700" }}>
-                                                {p.predio}
-                                            </p>
-                                            <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
-                                                {p.productor} - CI: {p.cedula}
-                                            </p>
+                                        {/* HEADER */}
+                                        <div
+                                            style={{
+                                                backgroundColor: editando ? "#0ea5e9" : "#136442",
+                                                padding: "18px 25px",
+                                                color: "#fff",
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                position: "sticky",
+                                                top: 0,
+                                                zIndex: 10,
+                                            }}
+                                        >
+                                            <h3 style={{ margin: 0, fontSize: "16px" }}>
+                                                {editando
+                                                    ? "MODO EDICIÓN ACTIVADO"
+                                                    : `FICHA TÉCNICA: ${predioSeleccionado.nombre_predio?.toUpperCase()}`}
+                                            </h3>
+
+                                            <button
+                                                onClick={() => {
+                                                    setMostrarModal(false);
+                                                    setEditando(false);
+                                                }}
+                                                style={{
+                                                    background: "none",
+                                                    border: "none",
+                                                    color: "#fff",
+                                                    cursor: "pointer",
+                                                    fontSize: "22px",
+                                                }}
+                                            >
+                                                ✕
+                                            </button>
                                         </div>
 
-                                        <button
-                                            style={{
-                                                background: "#136442",
-                                                color: "#fff",
-                                                border: "none",
-                                                padding: "10px 18px",
-                                                borderRadius: "10px",
-                                                cursor: "pointer"
-                                            }}
-                                            onClick={() => setPredioActivo(p)}
-                                        >
-                                            Seleccionar
-                                        </button>
-                                    </div>
-                                ))}
+                                        {/* CONTENIDO */}
+                                        <div style={{ padding: "30px" }}>
 
-                            </FormSection>
+                                            {/* I. DATOS DEL PRODUCTOR */}
+                                            <div
+                                                style={{
+                                                    display: "grid",
+                                                    gridTemplateColumns: "1fr 1fr 1fr",
+                                                    gap: "25px",
+                                                    marginBottom: "35px",
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        gridColumn: "span 3",
+                                                        borderBottom: "2px solid #136442",
+                                                        paddingBottom: "5px",
+                                                    }}
+                                                >
+                                                    <strong
+                                                        style={{
+                                                            color: "#136442",
+                                                            fontSize: "14px",
+                                                        }}
+                                                    >
+                                                        I. DATOS DEL PRODUCTOR
+                                                    </strong>
+                                                </div>
+
+                                                <div>
+                                                    <small>NOMBRE COMPLETO</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.productor?.nombre || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>CÉDULA / RIF</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.productor?.cedula_rif || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>TELÉFONO</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.productor?.telefono || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div style={{ gridColumn: "span 3" }}>
+                                                    <small>CORREO ELECTRÓNICO</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.productor?.correo || "N/A"}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* II. UBICACIÓN */}
+                                            <div
+                                                style={{
+                                                    display: "grid",
+                                                    gridTemplateColumns: "1fr 1fr 1fr",
+                                                    gap: "25px",
+                                                    marginBottom: "35px",
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        gridColumn: "span 3",
+                                                        borderBottom: "2px solid #136442",
+                                                        paddingBottom: "5px",
+                                                    }}
+                                                >
+                                                    <strong
+                                                        style={{
+                                                            color: "#136442",
+                                                            fontSize: "14px",
+                                                        }}
+                                                    >
+                                                        II. GEORREFERENCIACIÓN Y UBICACIÓN
+                                                    </strong>
+                                                </div>
+
+                                                <div>
+                                                    <small>MUNICIPIO</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.municipio || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>PARROQUIA</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.parroquia || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>COMUNIDAD</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.comunidad || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>CENTRO POBLADO</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.centro_poblado || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>COORDENADAS</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.coordenadas || "N/A"}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* III. IDENTIFICACIÓN */}
+                                            <div
+                                                style={{
+                                                    display: "grid",
+                                                    gridTemplateColumns: "1fr 1fr 1fr",
+                                                    gap: "25px",
+                                                    marginBottom: "35px",
+                                                    padding: "20px",
+                                                    backgroundColor: "#f8faf9",
+                                                    borderRadius: "10px",
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        gridColumn: "span 3",
+                                                        borderBottom: "2px solid #ccc",
+                                                        paddingBottom: "5px",
+                                                    }}
+                                                >
+                                                    <strong
+                                                        style={{
+                                                            color: "#136442",
+                                                            fontSize: "14px",
+                                                        }}
+                                                    >
+                                                        III. IDENTIFICACIÓN Y TENENCIA
+                                                    </strong>
+                                                </div>
+
+                                                <div style={{ gridColumn: "span 2" }}>
+                                                    <small>DIRECCIÓN EXACTA</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.direccion || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>SUPERFICIE</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.superficie || 0} Ha
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>TIPO PROPIEDAD</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.tipo_propiedad || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>TENENCIA</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.tenencia || "N/A"}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <small>VIALIDAD</small>
+                                                    <p style={estiloP}>
+                                                        {predioSeleccionado.vialidad || "N/A"}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* BOTONES */}
+                                        <div
+                                            style={{
+                                                padding: "20px 30px",
+                                                backgroundColor: "#f4f4f4",
+                                                display: "flex",
+                                                justifyContent: "flex-end",
+                                                gap: "10px",
+                                                borderTop: "1px solid #ddd",
+                                            }}
+                                        >
+                                            <button
+                                                onClick={() => setEditando(!editando)}
+                                                style={{
+                                                    ...estiloBoton,
+                                                    backgroundColor: "#136442",
+                                                }}
+                                            >
+                                                {editando ? "MODO VISUALIZACIÓN" : "EDITAR FICHA"}
+                                            </button>
+
+                                            <button
+                                                onClick={() => {
+                                                    setMostrarModal(false);
+                                                    setEditando(false);
+                                                }}
+                                                style={{
+                                                    ...estiloBoton,
+                                                    backgroundColor: "#374151",
+                                                }}
+                                            >
+                                                CERRAR
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* PREDIO ACTIVO */}
                             {predioActivo && (
-                                <FormSection title="✅ Predio Seleccionado">
+                                <FormSection title="📄 Ficha del Predio Seleccionado">
+                                    <div
+                                        style={{
+                                            background: "#f8fafc",
+                                            padding: "25px",
+                                            borderRadius: "16px",
+                                            border: "1px solid #dbeafe",
+                                        }}
+                                    >
+                                        <div style={grid3}>
+                                            <div>
+                                                <p style={labelStyle}>Nombre del Predio</p>
+                                                <p>{predioActivo.nombre_predio}</p>
+                                            </div>
 
-                                    <div style={{
-                                        background: "#f0fdf4",
-                                        padding: "15px",
-                                        borderRadius: "12px",
-                                        border: "1px solid #bbf7d0"
-                                    }}>
-                                        <p><b>Predio:</b> {predioActivo.predio}</p>
-                                        <p><b>Productor:</b> {predioActivo.productor}</p>
-                                        <p><b>Cédula:</b> {predioActivo.cedula}</p>
-                                        <p><b>Municipio:</b> {predioActivo.municipio}</p>
+                                            <div>
+                                                <p style={labelStyle}>Productor</p>
+                                                <p>{predioActivo.productor?.nombre}</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Cédula / RIF</p>
+                                                <p>{predioActivo.productor?.cedula_rif}</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Municipio</p>
+                                                <p>{predioActivo.municipio}</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Parroquia</p>
+                                                <p>{predioActivo.parroquia || "No registrado"}</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Comunidad</p>
+                                                <p>{predioActivo.comunidad || "No registrado"}</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Centro Poblado</p>
+                                                <p>{predioActivo.centro_poblado || "No registrado"}</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Superficie</p>
+                                                <p>{predioActivo.superficie} Ha</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Tenencia</p>
+                                                <p>{predioActivo.tenencia}</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Tipo Propiedad</p>
+                                                <p>{predioActivo.tipo_propiedad || "No registrado"}</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Vialidad</p>
+                                                <p>{predioActivo.vialidad || "No registrado"}</p>
+                                            </div>
+
+                                            <div>
+                                                <p style={labelStyle}>Fecha Registro</p>
+
+                                                <p>
+                                                    {predioActivo.fecha_registro
+                                                        ? new Date(
+                                                            predioActivo.fecha_registro,
+                                                        ).toLocaleDateString()
+                                                        : "Sin fecha"}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-
                                 </FormSection>
                             )}
-
                         </div>
                     )}
-                    {tabActiva === "inventario" && (
-                        <div style={{ maxWidth: "950px", margin: "0 auto" }}>
 
+                    {tabActiva === "caracterizacion" && (
+                        <div style={{ maxWidth: "950px", margin: "0 auto" }}>
                             {/* 🔴 BLOQUE DE VALIDACIÓN */}
                             {!predioActivo ? (
                                 <FormSection title="⚠️ Selección requerida">
@@ -602,462 +1501,1947 @@ export default function DashboardProduccion() {
                                 </FormSection>
                             ) : (
                                 <>
-                                    <FormSection title="Existencia Animal">
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "10px",
+                                            flexWrap: "wrap",
+                                            marginBottom: "25px",
+                                        }}
+                                    >
+                                        <button onClick={() => setSubCaracterizacion("animal")}
+                                            style={btnPrincipal}>
+                                            Existencia Animal
+                                        </button>
 
-                                        <div style={gridCheck}>
-                                            {[
-                                                "Vacuno",
-                                                "Bufalino",
-                                                "Equino",
-                                                "Ovino",
-                                                "Porcino",
-                                                "Caprino",
-                                                "Conejo",
-                                                "Aves de corral",
-                                                "Apicultura",
-                                                "Otros"
-                                            ].map((item) => (
+                                        <button onClick={() => setSubCaracterizacion("vegetal")}
+                                            style={btnPrincipal}>
+                                            Producción Vegetal
+                                        </button>
 
-                                                <label key={item} style={radioLabel}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={inventarioInicial.especiesSeleccionadas.includes(item)}
-                                                        onChange={() => {
+                                        <button onClick={() => setSubCaracterizacion("maquinaria")}
+                                            style={btnPrincipal}>
+                                            Maquinarias
+                                        </button>
+                                    </div>
 
-                                                            const existe =
-                                                                inventarioInicial.especiesSeleccionadas.includes(item);
+                                    {subCaracterizacion === "animal" && (
+                                        <FormSection title="Existencia Animal">
+                                            <div style={gridCheck}>
+                                                {[
+                                                    "Vacuno",
+                                                    "Bufalino",
+                                                    "Equino",
+                                                    "Ovino",
+                                                    "Porcino",
+                                                    "Caprino",
+                                                    "Conejo",
+                                                    "Aves de corral",
+                                                    "Apicultura",
+                                                ].map((item) => (
+                                                    <label key={item} style={radioLabel}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={inventarioInicial.especiesSeleccionadas.includes(
+                                                                item,
+                                                            )}
+                                                            onChange={() => {
+                                                                const existe =
+                                                                    inventarioInicial.especiesSeleccionadas.includes(
+                                                                        item,
+                                                                    );
 
-                                                            setInventarioInicial(prev => ({
-                                                                ...prev,
-                                                                especiesSeleccionadas: existe
-                                                                    ? prev.especiesSeleccionadas.filter(i => i !== item)
-                                                                    : [...prev.especiesSeleccionadas, item]
-                                                            }));
-                                                        }}
-                                                    />
+                                                                setInventarioInicial((prev) => ({
+                                                                    ...prev,
+                                                                    especiesSeleccionadas: existe
+                                                                        ? prev.especiesSeleccionadas.filter(
+                                                                            (i) => i !== item,
+                                                                        )
+                                                                        : [...prev.especiesSeleccionadas, item],
+                                                                }));
+                                                            }}
+                                                        />
 
-                                                    {item}
-                                                </label>
+                                                        {item}
+                                                    </label>
+                                                ))}
+                                            </div>
 
-                                            ))}
-                                        </div>
+                                        </FormSection>
 
-                                    </FormSection>
+                                    )}
 
-                                    {inventarioInicial.especiesSeleccionadas.includes("Vacuno") && (
-
-                                        <FormSection title="Vacunos">
-
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Vacuno",) && (
+                                        <FormSection title="Vacunos" >
                                             <div style={grid3}>
                                                 {Object.keys(inventarioInicial.vacunos).map((item) => (
-
                                                     <InputField
                                                         key={item}
                                                         label={item.replaceAll("_", " ").toUpperCase()}
                                                         type="number"
+                                                        value={inventarioInicial.vacunos[item]}
                                                         onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
+                                                            setInventarioInicial((prev) => ({
                                                                 ...prev,
                                                                 vacunos: {
                                                                     ...prev.vacunos,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
+                                                                    [item]: parseInt(e.target.value) || 0,
+                                                                },
                                                             }));
-
                                                         }}
                                                     />
-
                                                 ))}
+                                            </div>
+                                            <p
+                                                style={{
+                                                    fontWeight: "700",
+                                                    color: "#136442",
+                                                    marginTop: "15px",
+                                                }}
+                                            >
+                                                Total Vacunos:{" "}
+                                                {Object.values(inventarioInicial.vacunos).reduce(
+                                                    (a, b) => a + b,
+                                                    0,
+                                                )}
+                                            </p>
+                                        </FormSection>
+                                    )}
+
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Vacuno",) && (
+                                        <FormSection title="Capacidad Productiva Vacuna">
+                                            {/* SISTEMAS PRODUCTIVOS */}
+                                            <div>
+                                                <p
+                                                    style={{
+                                                        fontWeight: "700",
+                                                        color: "#136442",
+                                                        marginBottom: "15px",
+                                                        fontSize: "15px",
+                                                    }}
+                                                >
+                                                    Sistemas Productivos
+                                                </p>
+
+                                                <div style={gridCheck}>
+                                                    {[
+                                                        "Cría",
+                                                        "Ceba",
+                                                        "Doble propósito",
+                                                        "Lechería",
+                                                        "Genética",
+                                                    ].map((item) => (
+                                                        <label key={item} style={radioLabel}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                                    item,
+                                                                )}
+                                                                onChange={() => {
+                                                                    const existe =
+                                                                        inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                                            item,
+                                                                        );
+
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+
+                                                                        capacidadVacuna: {
+                                                                            ...prev.capacidadVacuna,
+
+                                                                            sistemas: existe
+                                                                                ? prev.capacidadVacuna.sistemas.filter(
+                                                                                    (s) => s !== item,
+                                                                                )
+                                                                                : [
+                                                                                    ...prev.capacidadVacuna.sistemas,
+                                                                                    item,
+                                                                                ],
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+
+                                                            {item}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* CAMPOS DINÁMICOS */}
+                                            <div
+                                                style={{
+                                                    marginTop: "25px",
+                                                }}
+                                            >
+                                                <div style={grid3}>
+                                                    {/* LECHE */}
+                                                    {(inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                        "Lechería",
+                                                    ) ||
+                                                        inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                            "Doble propósito",
+                                                        )) && (
+                                                            <InputField
+                                                                label="Producción de leche diaria (L)"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadVacuna: {
+                                                                            ...prev.capacidadVacuna,
+                                                                            leche_diaria: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* CARNE */}
+                                                    {(inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                        "Ceba",
+                                                    ) ||
+                                                        inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                            "Doble propósito",
+                                                        )) && (
+                                                            <InputField
+                                                                label="Producción carne anual (Kg)"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadVacuna: {
+                                                                            ...prev.capacidadVacuna,
+                                                                            carne_anual: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* CRÍA */}
+                                                    {inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                        "Cría",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Cantidad de partos anuales"
+                                                                type="number"
+                                                            />
+                                                        )}
+
+                                                    {/* GENÉTICA */}
+                                                    {inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                        "Genética",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Cantidad de reproductores"
+                                                                type="number"
+                                                            />
+                                                        )}
+                                                </div>
                                             </div>
 
                                         </FormSection>
                                     )}
 
-                                    {inventarioInicial.especiesSeleccionadas.includes("Bufalino") && (
-
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Bufalino",) && (
                                         <FormSection title="Bufalinos">
-
                                             <div style={grid3}>
-                                                {Object.keys(inventarioInicial.bufalinos).map((item) => (
+                                                {Object.keys(inventarioInicial.bufalinos).map(
+                                                    (item) => (
+                                                        <InputField
+                                                            key={item}
+                                                            label={item.replaceAll("_", " ").toUpperCase()}
+                                                            type="number"
+                                                            value={inventarioInicial.bufalinos[item]}
+                                                            onChange={(e) => {
+                                                                setInventarioInicial((prev) => ({
+                                                                    ...prev,
+                                                                    bufalinos: {
+                                                                        ...prev.bufalinos,
+                                                                        [item]: parseInt(e.target.value) || 0,
+                                                                    },
+                                                                }));
+                                                            }}
+                                                        />
+                                                    ),
+                                                )}
+                                            </div>
 
-                                                    <InputField
-                                                        key={item}
-                                                        label={item.replaceAll("_", " ").toUpperCase()}
-                                                        type="number"
-                                                        onChange={(e) => {
+                                            <p
+                                                style={{
+                                                    fontWeight: "700",
+                                                    color: "#136442",
+                                                    marginTop: "15px",
+                                                }}
+                                            >
+                                                Total Bufalinos:{" "}
+                                                {Object.values(inventarioInicial.bufalinos).reduce(
+                                                    (a, b) => a + b,
+                                                    0,
+                                                )}
+                                            </p>
+                                        </FormSection>
+                                    )}
 
-                                                            setInventarioInicial(prev => ({
-                                                                ...prev,
-                                                                bufalinos: {
-                                                                    ...prev.bufalinos,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
-                                                            }));
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Bufalino",) && (
+                                        <FormSection title="Capacidad Productiva Bufalina">
+                                            {/* SISTEMAS PRODUCTIVOS */}
+                                            <div>
+                                                <p
+                                                    style={{
+                                                        fontWeight: "700",
+                                                        color: "#136442",
+                                                        marginBottom: "15px",
+                                                        fontSize: "15px",
+                                                    }}
+                                                >
+                                                    Sistemas Productivos
+                                                </p>
 
-                                                        }}
-                                                    />
+                                                <div style={gridCheck}>
+                                                    {[
+                                                        "Cría",
+                                                        "Ceba",
+                                                        "Doble propósito",
+                                                        "Lechería",
+                                                        "Genética",
+                                                    ].map((item) => (
+                                                        <label key={item} style={radioLabel}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                                    item,
+                                                                )}
+                                                                onChange={() => {
+                                                                    const existe =
+                                                                        inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                                            item,
+                                                                        );
 
-                                                ))}
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+
+                                                                        capacidadBufalina: {
+                                                                            ...prev.capacidadBufalina,
+
+                                                                            sistemas: existe
+                                                                                ? prev.capacidadBufalina.sistemas.filter(
+                                                                                    (s) => s !== item,
+                                                                                )
+                                                                                : [
+                                                                                    ...prev.capacidadBufalina.sistemas,
+                                                                                    item,
+                                                                                ],
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+
+                                                            {item}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* CAMPOS DINÁMICOS */}
+                                            <div
+                                                style={{
+                                                    marginTop: "25px",
+                                                }}
+                                            >
+                                                <div style={grid3}>
+                                                    {/* LECHE */}
+                                                    {(inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                        "Lechería",
+                                                    ) ||
+                                                        inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                            "Doble propósito",
+                                                        )) && (
+                                                            <InputField
+                                                                label="Producción de leche diaria (L)"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadBufalina: {
+                                                                            ...prev.capacidadBufalina,
+                                                                            leche_diaria: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* CARNE */}
+                                                    {(inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                        "Ceba",
+                                                    ) ||
+                                                        inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                            "Doble propósito",
+                                                        )) && (
+                                                            <InputField
+                                                                label="Producción carne anual (Kg)"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadBufalina: {
+                                                                            ...prev.capacidadBufalina,
+                                                                            carne_anual: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* CRÍA */}
+                                                    {inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                        "Cría",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Cantidad de partos anuales"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadBufalina: {
+                                                                            ...prev.capacidadBufalina,
+                                                                            partos_anuales:
+                                                                                parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* GENÉTICA */}
+                                                    {inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                        "Genética",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Cantidad de reproductores"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadBufalina: {
+                                                                            ...prev.capacidadBufalina,
+                                                                            reproductores:
+                                                                                parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+                                                </div>
                                             </div>
 
                                         </FormSection>
                                     )}
 
-                                    {inventarioInicial.especiesSeleccionadas.includes("Equino") && (
-
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Equino",) && (
                                         <FormSection title="Equinos">
-
                                             <div style={grid3}>
                                                 {Object.keys(inventarioInicial.equinos).map((item) => (
-
                                                     <InputField
                                                         key={item}
                                                         label={item.replaceAll("_", " ").toUpperCase()}
                                                         type="number"
+                                                        value={inventarioInicial.equinos[item]}
                                                         onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
+                                                            setInventarioInicial((prev) => ({
                                                                 ...prev,
                                                                 equinos: {
                                                                     ...prev.equinos,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
+                                                                    [item]: parseInt(e.target.value) || 0,
+                                                                },
                                                             }));
-
                                                         }}
                                                     />
-
                                                 ))}
+                                            </div>
+
+                                            <p
+                                                style={{
+                                                    fontWeight: "700",
+                                                    color: "#136442",
+                                                    marginTop: "15px",
+                                                }}
+                                            >
+                                                Total Equinos:{" "}
+                                                {Object.values(inventarioInicial.equinos).reduce(
+                                                    (a, b) => a + b,
+                                                    0,
+                                                )}
+                                            </p>
+                                        </FormSection>
+                                    )}
+
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Equino",) && (
+                                        <FormSection title="Capacidad Productiva Equina">
+                                            {/* SISTEMAS PRODUCTIVOS */}
+                                            <div>
+                                                <p
+                                                    style={{
+                                                        fontWeight: "700",
+                                                        color: "#136442",
+                                                        marginBottom: "15px",
+                                                        fontSize: "15px",
+                                                    }}
+                                                >
+                                                    Sistemas Productivos
+                                                </p>
+
+                                                <div style={gridCheck}>
+                                                    {[
+                                                        "Trabajo agrícola",
+                                                        "Transporte",
+                                                        "Reproducción",
+                                                        "Deporte",
+                                                        "Exhibición",
+                                                        "Turismo",
+                                                        "Carga",
+                                                    ].map((item) => (
+                                                        <label key={item} style={radioLabel}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={inventarioInicial.capacidadEquina.sistemas.includes(
+                                                                    item,
+                                                                )}
+                                                                onChange={() => {
+                                                                    const existe =
+                                                                        inventarioInicial.capacidadEquina.sistemas.includes(
+                                                                            item,
+                                                                        );
+
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+
+                                                                        capacidadEquina: {
+                                                                            ...prev.capacidadEquina,
+
+                                                                            sistemas: existe
+                                                                                ? prev.capacidadEquina.sistemas.filter(
+                                                                                    (s) => s !== item,
+                                                                                )
+                                                                                : [
+                                                                                    ...prev.capacidadEquina.sistemas,
+                                                                                    item,
+                                                                                ],
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+
+                                                            {item}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* CAMPOS DINÁMICOS */}
+                                            <div
+                                                style={{
+                                                    marginTop: "25px",
+                                                }}
+                                            >
+                                                <div style={grid3}>
+                                                    {/* TRABAJO */}
+                                                    {inventarioInicial.capacidadEquina.sistemas.includes(
+                                                        "Trabajo agrícola",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Cantidad para trabajo agrícola"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadEquina: {
+                                                                            ...prev.capacidadEquina,
+                                                                            trabajo_agricola:
+                                                                                parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* TRANSPORTE */}
+                                                    {inventarioInicial.capacidadEquina.sistemas.includes(
+                                                        "Transporte",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Cantidad para transporte"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadEquina: {
+                                                                            ...prev.capacidadEquina,
+                                                                            transporte: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* REPRODUCCIÓN */}
+                                                    {inventarioInicial.capacidadEquina.sistemas.includes(
+                                                        "Reproducción",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Animales reproductores"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadEquina: {
+                                                                            ...prev.capacidadEquina,
+                                                                            reproduccion: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* DEPORTE */}
+                                                    {inventarioInicial.capacidadEquina.sistemas.includes(
+                                                        "Deporte",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Equinos para deporte"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadEquina: {
+                                                                            ...prev.capacidadEquina,
+                                                                            deporte: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* EXHIBICIÓN */}
+                                                    {inventarioInicial.capacidadEquina.sistemas.includes(
+                                                        "Exhibición",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Equinos de exhibición"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadEquina: {
+                                                                            ...prev.capacidadEquina,
+                                                                            exhibicion: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* TURISMO */}
+                                                    {inventarioInicial.capacidadEquina.sistemas.includes(
+                                                        "Turismo",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Equinos para turismo"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadEquina: {
+                                                                            ...prev.capacidadEquina,
+                                                                            turismo: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* CARGA */}
+                                                    {inventarioInicial.capacidadEquina.sistemas.includes(
+                                                        "Carga",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Equinos de carga"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadEquina: {
+                                                                            ...prev.capacidadEquina,
+                                                                            carga: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+                                                </div>
                                             </div>
 
                                         </FormSection>
                                     )}
 
-                                    {inventarioInicial.especiesSeleccionadas.includes("Ovino") && (
-
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Ovino",) && (
                                         <FormSection title="Ovinos">
-
                                             <div style={grid3}>
                                                 {Object.keys(inventarioInicial.ovinos).map((item) => (
-
                                                     <InputField
                                                         key={item}
                                                         label={item.replaceAll("_", " ").toUpperCase()}
                                                         type="number"
+                                                        value={inventarioInicial.ovinos[item]}
                                                         onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
+                                                            setInventarioInicial((prev) => ({
                                                                 ...prev,
                                                                 ovinos: {
                                                                     ...prev.ovinos,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
+                                                                    [item]: parseInt(e.target.value) || 0,
+                                                                },
                                                             }));
-
                                                         }}
                                                     />
-
                                                 ))}
+                                            </div>
+
+                                            <p
+                                                style={{
+                                                    fontWeight: "700",
+                                                    color: "#136442",
+                                                    marginTop: "15px",
+                                                }}
+                                            >
+                                                Total Ovinos:{" "}
+                                                {Object.values(inventarioInicial.ovinos).reduce(
+                                                    (a, b) => a + b,
+                                                    0,
+                                                )}
+                                            </p>
+                                        </FormSection>
+                                    )}
+
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Ovino",) && (
+                                        <FormSection title="Capacidad Productiva Ovina">
+                                            {/* SISTEMAS PRODUCTIVOS */}
+                                            <div>
+                                                <p
+                                                    style={{
+                                                        fontWeight: "700",
+                                                        color: "#136442",
+                                                        marginBottom: "15px",
+                                                        fontSize: "15px",
+                                                    }}
+                                                >
+                                                    Sistemas Productivos
+                                                </p>
+
+                                                <div style={gridCheck}>
+                                                    {[
+                                                        "Carne",
+                                                        "Leche",
+                                                        "Lana",
+                                                        "Cría",
+                                                        "Reproducción",
+                                                        "Doble propósito",
+                                                        "Genética",
+                                                    ].map((item) => (
+                                                        <label key={item} style={radioLabel}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={inventarioInicial.capacidadOvina.sistemas.includes(
+                                                                    item,
+                                                                )}
+                                                                onChange={() => {
+                                                                    const existe =
+                                                                        inventarioInicial.capacidadOvina.sistemas.includes(
+                                                                            item,
+                                                                        );
+
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+
+                                                                        capacidadOvina: {
+                                                                            ...prev.capacidadOvina,
+
+                                                                            sistemas: existe
+                                                                                ? prev.capacidadOvina.sistemas.filter(
+                                                                                    (s) => s !== item,
+                                                                                )
+                                                                                : [
+                                                                                    ...prev.capacidadOvina.sistemas,
+                                                                                    item,
+                                                                                ],
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+
+                                                            {item}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* CAMPOS DINÁMICOS */}
+                                            <div
+                                                style={{
+                                                    marginTop: "25px",
+                                                }}
+                                            >
+                                                <div style={grid3}>
+                                                    {/* CARNE */}
+                                                    {inventarioInicial.capacidadOvina.sistemas.includes(
+                                                        "Carne",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Producción carne anual (Kg)"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadOvina: {
+                                                                            ...prev.capacidadOvina,
+                                                                            carne_anual: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* LECHE */}
+                                                    {inventarioInicial.capacidadOvina.sistemas.includes(
+                                                        "Leche",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Producción leche diaria (L)"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadOvina: {
+                                                                            ...prev.capacidadOvina,
+                                                                            leche_diaria: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* LANA */}
+                                                    {inventarioInicial.capacidadOvina.sistemas.includes(
+                                                        "Lana",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Producción lana anual (Kg)"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadOvina: {
+                                                                            ...prev.capacidadOvina,
+                                                                            lana_anual: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* CRÍA */}
+                                                    {inventarioInicial.capacidadOvina.sistemas.includes(
+                                                        "Cría",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Animales destinados a cría"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadOvina: {
+                                                                            ...prev.capacidadOvina,
+                                                                            cria: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* REPRODUCCIÓN */}
+                                                    {inventarioInicial.capacidadOvina.sistemas.includes(
+                                                        "Reproducción",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Reproductores activos"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadOvina: {
+                                                                            ...prev.capacidadOvina,
+                                                                            reproduccion: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* DOBLE PROPÓSITO */}
+                                                    {inventarioInicial.capacidadOvina.sistemas.includes(
+                                                        "Doble propósito",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Animales doble propósito"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadOvina: {
+                                                                            ...prev.capacidadOvina,
+                                                                            doble_proposito:
+                                                                                parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* GENÉTICA */}
+                                                    {inventarioInicial.capacidadOvina.sistemas.includes(
+                                                        "Genética",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Animales de genética"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadOvina: {
+                                                                            ...prev.capacidadOvina,
+                                                                            genetica: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+                                                </div>
                                             </div>
 
                                         </FormSection>
                                     )}
 
-                                    {inventarioInicial.especiesSeleccionadas.includes("Caprino") && (
-
-                                        <FormSection title="Caprinos">
-
-                                            <div style={grid3}>
-                                                {Object.keys(inventarioInicial.caprinos).map((item) => (
-
-                                                    <InputField
-                                                        key={item}
-                                                        label={item.replaceAll("_", " ").toUpperCase()}
-                                                        type="number"
-                                                        onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
-                                                                ...prev,
-                                                                caprinos: {
-                                                                    ...prev.caprinos,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
-                                                            }));
-
-                                                        }}
-                                                    />
-
-                                                ))}
-                                            </div>
-
-                                        </FormSection>
-                                    )}
-
-                                    {inventarioInicial.especiesSeleccionadas.includes("Porcino") && (
-
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Porcino",) && (
                                         <FormSection title="Porcinos">
-
                                             <div style={grid3}>
                                                 {Object.keys(inventarioInicial.porcinos).map((item) => (
-
                                                     <InputField
                                                         key={item}
                                                         label={item.replaceAll("_", " ").toUpperCase()}
                                                         type="number"
+                                                        value={inventarioInicial.porcinos[item]}
                                                         onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
+                                                            setInventarioInicial((prev) => ({
                                                                 ...prev,
                                                                 porcinos: {
                                                                     ...prev.porcinos,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
+                                                                    [item]: parseInt(e.target.value) || 0,
+                                                                },
                                                             }));
-
                                                         }}
                                                     />
-
                                                 ))}
+                                            </div>
+
+                                            <p
+                                                style={{
+                                                    fontWeight: "700",
+                                                    color: "#136442",
+                                                    marginTop: "15px",
+                                                }}
+                                            >
+                                                Total Porcinos:{" "}
+                                                {Object.values(inventarioInicial.porcinos).reduce(
+                                                    (a, b) => a + b,
+                                                    0,
+                                                )}
+                                            </p>
+                                        </FormSection>
+                                    )}
+
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Porcino",) && (
+                                        <FormSection title="Capacidad Productiva Porcina">
+                                            {/* SISTEMAS PRODUCTIVOS */}
+                                            <div>
+                                                <p
+                                                    style={{
+                                                        fontWeight: "700",
+                                                        color: "#136442",
+                                                        marginBottom: "15px",
+                                                        fontSize: "15px",
+                                                    }}
+                                                >
+                                                    Sistemas Productivos
+                                                </p>
+
+                                                <div style={gridCheck}>
+                                                    {[
+                                                        "Cría",
+                                                        "Engorde",
+                                                        "Reproducción",
+                                                        "Ciclo completo",
+                                                        "Genética",
+                                                        "Producción de carne",
+                                                    ].map((item) => (
+                                                        <label key={item} style={radioLabel}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={inventarioInicial.capacidadPorcina.sistemas.includes(
+                                                                    item,
+                                                                )}
+                                                                onChange={() => {
+                                                                    const existe =
+                                                                        inventarioInicial.capacidadPorcina.sistemas.includes(
+                                                                            item,
+                                                                        );
+
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+
+                                                                        capacidadPorcina: {
+                                                                            ...prev.capacidadPorcina,
+
+                                                                            sistemas: existe
+                                                                                ? prev.capacidadPorcina.sistemas.filter(
+                                                                                    (s) => s !== item,
+                                                                                )
+                                                                                : [
+                                                                                    ...prev.capacidadPorcina.sistemas,
+                                                                                    item,
+                                                                                ],
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+
+                                                            {item}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* CAMPOS DINÁMICOS */}
+                                            <div
+                                                style={{
+                                                    marginTop: "25px",
+                                                }}
+                                            >
+                                                <div style={grid3}>
+                                                    {/* CRÍA */}
+                                                    {inventarioInicial.capacidadPorcina.sistemas.includes(
+                                                        "Cría",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Cantidad destinada a cría"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadPorcina: {
+                                                                            ...prev.capacidadPorcina,
+                                                                            cria: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* ENGORDE */}
+                                                    {inventarioInicial.capacidadPorcina.sistemas.includes(
+                                                        "Engorde",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Capacidad de engorde"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadPorcina: {
+                                                                            ...prev.capacidadPorcina,
+                                                                            engorde: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* REPRODUCCIÓN */}
+                                                    {inventarioInicial.capacidadPorcina.sistemas.includes(
+                                                        "Reproducción",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Reproductores activos"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadPorcina: {
+                                                                            ...prev.capacidadPorcina,
+                                                                            reproduccion: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* CICLO COMPLETO */}
+                                                    {inventarioInicial.capacidadPorcina.sistemas.includes(
+                                                        "Ciclo completo",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Capacidad ciclo completo"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadPorcina: {
+                                                                            ...prev.capacidadPorcina,
+                                                                            ciclo_completo:
+                                                                                parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* GENÉTICA */}
+                                                    {inventarioInicial.capacidadPorcina.sistemas.includes(
+                                                        "Genética",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Animales de genética"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadPorcina: {
+                                                                            ...prev.capacidadPorcina,
+                                                                            genetica: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+
+                                                    {/* PRODUCCIÓN CARNE */}
+                                                    {inventarioInicial.capacidadPorcina.sistemas.includes(
+                                                        "Producción de carne",
+                                                    ) && (
+                                                            <InputField
+                                                                label="Producción carne anual (Kg)"
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        capacidadPorcina: {
+                                                                            ...prev.capacidadPorcina,
+                                                                            carne_anual: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        )}
+                                                </div>
                                             </div>
 
                                         </FormSection>
                                     )}
 
-                                    {inventarioInicial.especiesSeleccionadas.includes("Conejo") && (
-
-                                        <FormSection title="Conejos">
-
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Caprino",) && (
+                                        <FormSection title="Caprinos">
                                             <div style={grid3}>
-                                                {Object.keys(inventarioInicial.conejos).map((item) => (
-
+                                                {Object.keys(inventarioInicial.caprinos).map((item) => (
                                                     <InputField
                                                         key={item}
                                                         label={item.replaceAll("_", " ").toUpperCase()}
                                                         type="number"
+                                                        value={inventarioInicial.caprinos[item]}
                                                         onChange={(e) => {
+                                                            setInventarioInicial((prev) => ({
+                                                                ...prev,
+                                                                caprinos: {
+                                                                    ...prev.caprinos,
+                                                                    [item]: parseInt(e.target.value) || 0,
+                                                                },
+                                                            }));
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
 
-                                                            setInventarioInicial(prev => ({
+                                            <p
+                                                style={{
+                                                    fontWeight: "700",
+                                                    color: "#136442",
+                                                    marginTop: "15px",
+                                                }}
+                                            >
+                                                Total Caprinos:{" "}
+                                                {Object.values(inventarioInicial.caprinos).reduce(
+                                                    (a, b) => a + b,
+                                                    0,
+                                                )}
+                                            </p>
+                                        </FormSection>
+                                    )}
+
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Caprino") && (
+                                        <FormSection title="Capacidad Productiva Caprina">
+                                            {/* SISTEMAS PRODUCTIVOS */}
+                                            <div>
+                                                <p style={{ fontWeight: "700", color: "#136442", marginBottom: "15px", fontSize: "15px" }}>
+                                                    Sistemas Productivos Caprinos
+                                                </p>
+                                                <div style={gridCheck}>
+                                                    {[
+                                                        "Cría y Recría",
+                                                        "Engorde",
+                                                        "Producción de Leche",
+                                                        "Producción de Carne",
+                                                        "Doble Propósito",
+                                                        "Genética"
+                                                    ].map((item) => (
+                                                        <label key={item} style={radioLabel}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={inventarioInicial.capacidadCaprino.sistemas.includes(item)}
+                                                                onChange={() => {
+                                                                    const existe = inventarioInicial.capacidadCaprino.sistemas.includes(item);
+                                                                    setInventarioInicial(prev => ({
+                                                                        ...prev,
+                                                                        capacidadCaprino: {
+                                                                            ...prev.capacidadCaprino,
+                                                                            sistemas: existe
+                                                                                ? prev.capacidadCaprino.sistemas.filter(s => s !== item)
+                                                                                : [...prev.capacidadCaprino.sistemas, item]
+                                                                        }
+                                                                    }));
+                                                                }}
+                                                            />
+                                                            {item}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* CAMPOS DINÁMICOS */}
+                                            <div style={{ marginTop: "25px" }}>
+                                                <div style={grid3}>
+                                                    {inventarioInicial.capacidadCaprino.sistemas.includes("Cría y Recría") && (
+                                                        <InputField
+                                                            label="Vientres en producción"
+                                                            type="number"
+                                                            value={inventarioInicial.capacidadCaprino.vientres || ""}
+                                                            onChange={(e) => setInventarioInicial(prev => ({
+                                                                ...prev,
+                                                                capacidadCaprino: { ...prev.capacidadCaprino, vientres: parseInt(e.target.value) || 0 }
+                                                            }))}
+                                                        />
+                                                    )}
+                                                    {inventarioInicial.capacidadCaprino.sistemas.includes("Engorde") && (
+                                                        <InputField
+                                                            label="Capacidad de engorde (Cabezas)"
+                                                            type="number"
+                                                            value={inventarioInicial.capacidadCaprino.engorde || ""}
+                                                            onChange={(e) => setInventarioInicial(prev => ({
+                                                                ...prev,
+                                                                capacidadCaprino: { ...prev.capacidadCaprino, engorde: parseInt(e.target.value) || 0 }
+                                                            }))}
+                                                        />
+                                                    )}
+                                                    {inventarioInicial.capacidadCaprino.sistemas.includes("Producción de Leche") && (
+                                                        <InputField
+                                                            label="Producción diaria promedio (Lts)"
+                                                            type="number"
+                                                            value={inventarioInicial.capacidadCaprino.leche_diaria || ""}
+                                                            onChange={(e) => setInventarioInicial(prev => ({
+                                                                ...prev,
+                                                                capacidadCaprino: { ...prev.capacidadCaprino, leche_diaria: parseInt(e.target.value) || 0 }
+                                                            }))}
+                                                        />
+                                                    )}
+                                                    {(inventarioInicial.capacidadCaprino.sistemas.includes("Producción de Carne") || inventarioInicial.capacidadCaprino.sistemas.includes("Doble Propósito")) && (
+                                                        <InputField
+                                                            label="Producción carne estimado anual (Kg)"
+                                                            type="number"
+                                                            value={inventarioInicial.capacidadCaprino.carne_anual || ""}
+                                                            onChange={(e) => setInventarioInicial(prev => ({
+                                                                ...prev,
+                                                                capacidadCaprino: { ...prev.capacidadCaprino, carne_anual: parseInt(e.target.value) || 0 }
+                                                            }))}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </FormSection>
+                                    )}
+
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Conejo",) && (
+                                        <FormSection title="Conejos">
+                                            <div style={grid3}>
+                                                {Object.keys(inventarioInicial.conejos).map((item) => (
+                                                    <InputField
+                                                        key={item}
+                                                        label={item.replaceAll("_", " ").toUpperCase()}
+                                                        type="number"
+                                                        value={inventarioInicial.conejos[item]}
+                                                        onChange={(e) => {
+                                                            setInventarioInicial((prev) => ({
                                                                 ...prev,
                                                                 conejos: {
                                                                     ...prev.conejos,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
+                                                                    [item]: parseInt(e.target.value) || 0,
+                                                                },
                                                             }));
-
                                                         }}
                                                     />
-
                                                 ))}
                                             </div>
 
+                                            <p
+                                                style={{
+                                                    fontWeight: "700",
+                                                    color: "#136442",
+                                                    marginTop: "15px",
+                                                }}
+                                            >
+                                                Total Conejos:{" "}
+                                                {Object.values(inventarioInicial.conejos).reduce(
+                                                    (a, b) => a + b,
+                                                    0,
+                                                )}
+                                            </p>
                                         </FormSection>
                                     )}
 
-                                    {inventarioInicial.especiesSeleccionadas.includes("Aves de corral") && (
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Conejo") && (
+                                        <FormSection title="Capacidad Productiva Cunícola (Conejos)">
+                                            {/* SISTEMAS PRODUCTIVOS */}
+                                            <div>
+                                                <p style={{ fontWeight: "700", color: "#136442", marginBottom: "15px", fontSize: "15px" }}>
+                                                    Sistemas Productivos Cunícolas
+                                                </p>
+                                                <div style={gridCheck}>
+                                                    {[
+                                                        "Producción de Carne",
+                                                        "Pie de Cría (Genética)",
+                                                        "Mascotas / Peletería"
+                                                    ].map((item) => (
+                                                        <label key={item} style={radioLabel}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={inventarioInicial.capacidadCunicola.sistemas.includes(item)}
+                                                                onChange={() => {
+                                                                    const existe = inventarioInicial.capacidadCunicola.sistemas.includes(item);
+                                                                    setInventarioInicial(prev => ({
+                                                                        ...prev,
+                                                                        capacidadCunicola: {
+                                                                            ...prev.capacidadCunicola,
+                                                                            sistemas: existe
+                                                                                ? prev.capacidadCunicola.sistemas.filter(s => s !== item)
+                                                                                : [...prev.capacidadCunicola.sistemas, item]
+                                                                        }
+                                                                    }));
+                                                                }}
+                                                            />
+                                                            {item}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
 
+                                            {/* CAMPOS DINÁMICOS */}
+                                            <div style={{ marginTop: "25px" }}>
+                                                <div style={grid3}>
+                                                    <InputField
+                                                        label="Número total de jaulas madre"
+                                                        type="number"
+                                                        value={inventarioInicial.capacidadCunicola.jaulas_madre || ""}
+                                                        onChange={(e) => setInventarioInicial(prev => ({
+                                                            ...prev,
+                                                            capacidadCunicola: { ...prev.capacidadCunicola, jaulas_madre: parseInt(e.target.value) || 0 }
+                                                        }))}
+                                                    />
+                                                    {inventarioInicial.capacidadCunicola.sistemas.includes("Producción de Carne") && (
+                                                        <InputField
+                                                            label="Canales / Carne estimada anual (Kg)"
+                                                            type="number"
+                                                            value={inventarioInicial.capacidadCunicola.carne_anual || ""}
+                                                            onChange={(e) => setInventarioInicial(prev => ({
+                                                                ...prev,
+                                                                capacidadCunicola: { ...prev.capacidadCunicola, carne_anual: parseInt(e.target.value) || 0 }
+                                                            }))}
+                                                        />
+                                                    )}
+                                                    {inventarioInicial.capacidadCunicola.sistemas.includes("Pie de Cría (Genética)") && (
+                                                        <InputField
+                                                            label="Conejas reproductoras activas"
+                                                            type="number"
+                                                            value={inventarioInicial.capacidadCunicola.reproductoras || ""}
+                                                            onChange={(e) => setInventarioInicial(prev => ({
+                                                                ...prev,
+                                                                capacidadCunicola: { ...prev.capacidadCunicola, reproductoras: parseInt(e.target.value) || 0 }
+                                                            }))}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </FormSection>
+                                    )}
+
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Aves de corral",) && (
                                         <FormSection title="Aves">
-
                                             <div style={grid3}>
                                                 {Object.keys(inventarioInicial.aves).map((item) => (
-
                                                     <InputField
                                                         key={item}
                                                         label={item.replaceAll("_", " ").toUpperCase()}
                                                         type="number"
+                                                        value={inventarioInicial.aves[item]}
                                                         onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
+                                                            setInventarioInicial((prev) => ({
                                                                 ...prev,
                                                                 aves: {
                                                                     ...prev.aves,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
+                                                                    [item]: parseInt(e.target.value) || 0,
+                                                                },
                                                             }));
-
                                                         }}
                                                     />
-
                                                 ))}
                                             </div>
 
+                                            <p
+                                                style={{
+                                                    fontWeight: "700",
+                                                    color: "#136442",
+                                                    marginTop: "15px",
+                                                }}
+                                            >
+                                                Total Aves de Corral:{" "}
+                                                {Object.values(inventarioInicial.aves).reduce(
+                                                    (a, b) => a + b,
+                                                    0,
+                                                )}
+                                            </p>
                                         </FormSection>
                                     )}
 
-                                    {inventarioInicial.especiesSeleccionadas.includes("Apicultura") && (
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Aves de corral") && (
+                                        <FormSection title="Capacidad Productiva Aves de Corral">
+                                            {/* SISTEMAS PRODUCTIVOS */}
+                                            <div>
+                                                <p style={{ fontWeight: "700", color: "#136442", marginBottom: "15px", fontSize: "15px" }}>
+                                                    Sistemas Productivos Avícolas
+                                                </p>
+                                                <div style={gridCheck}>
+                                                    {[
+                                                        "Producción de Huevo (Postura)",
+                                                        "Pollo de Engorde",
+                                                        "Recría / Levantes",
+                                                        "Aves de Traspatio (Doble Propósito)"
+                                                    ].map((item) => (
+                                                        <label key={item} style={radioLabel}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={inventarioInicial.capacidadAvesCorral.sistemas.includes(item)}
+                                                                onChange={() => {
+                                                                    const existe = inventarioInicial.capacidadAvesCorral.sistemas.includes(item);
+                                                                    setInventarioInicial(prev => ({
+                                                                        ...prev,
+                                                                        capacidadAvesCorral: {
+                                                                            ...prev.capacidadAvesCorral,
+                                                                            sistemas: existe
+                                                                                ? prev.capacidadAvesCorral.sistemas.filter(s => s !== item)
+                                                                                : [...prev.capacidadAvesCorral.sistemas, item]
+                                                                        }
+                                                                    }));
+                                                                }}
+                                                            />
+                                                            {item}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
 
+                                            {/* CAMPOS DINÁMICOS */}
+                                            <div style={{ marginTop: "25px" }}>
+                                                <div style={grid3}>
+                                                    {inventarioInicial.capacidadAvesCorral.sistemas.includes("Producción de Huevo (Postura)") && (
+                                                        <>
+                                                            <InputField
+                                                                label="Capacidad de alojamiento (Aves)"
+                                                                type="number"
+                                                                value={inventarioInicial.capacidadAvesCorral.capacidad_alojamiento || ""}
+                                                                onChange={(e) => setInventarioInicial(prev => ({
+                                                                    ...prev,
+                                                                    capacidadAvesCorral: { ...prev.capacidadAvesCorral, capacidad_alojamiento: parseInt(e.target.value) || 0 }
+                                                                }))}
+                                                            />
+                                                            <InputField
+                                                                label="Producción diaria (Cartones/Huevos)"
+                                                                type="number"
+                                                                value={inventarioInicial.capacidadAvesCorral.produccion_huevos || ""}
+                                                                onChange={(e) => setInventarioInicial(prev => ({
+                                                                    ...prev,
+                                                                    capacidadAvesCorral: { ...prev.capacidadAvesCorral, produccion_huevos: parseInt(e.target.value) || 0 }
+                                                                }))}
+                                                            />
+                                                        </>
+                                                    )}
+                                                    {inventarioInicial.capacidadAvesCorral.sistemas.includes("Pollo de Engorde") && (
+                                                        <InputField
+                                                            label="Capacidad por ciclo / lote"
+                                                            type="number"
+                                                            value={inventarioInicial.capacidadAvesCorral.capacidad_lote || ""}
+                                                            onChange={(e) => setInventarioInicial(prev => ({
+                                                                ...prev,
+                                                                capacidadAvesCorral: { ...prev.capacidadAvesCorral, capacidad_lote: parseInt(e.target.value) || 0 }
+                                                            }))}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </FormSection>
+                                    )}
+
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Apicultura",) && (
                                         <FormSection title="Apicultura">
-
                                             <div style={grid3}>
-                                                {Object.keys(inventarioInicial.apicultura).map((item) => (
+                                                {Object.keys(inventarioInicial.apicultura).map(
+                                                    (item) => (
+                                                        <InputField
+                                                            key={item}
+                                                            label={item.replaceAll("_", " ").toUpperCase()}
+                                                            type="number"
+                                                            value={inventarioInicial.apicultura[item]}
+                                                            onChange={(e) => {
+                                                                setInventarioInicial((prev) => ({
+                                                                    ...prev,
+                                                                    apicultura: {
+                                                                        ...prev.apicultura,
+                                                                        [item]: parseInt(e.target.value) || 0,
+                                                                    },
+                                                                }));
+                                                            }}
+                                                        />
+                                                    ),
+                                                )}
+                                            </div>
 
+                                            <p
+                                                style={{
+                                                    fontWeight: "700",
+                                                    color: "#136442",
+                                                    marginTop: "15px",
+                                                }}
+                                            >
+                                                Total Colmenas:{" "}
+                                                {Object.values(inventarioInicial.apicultura).reduce(
+                                                    (a, b) => a + b,
+                                                    0,
+                                                )}
+                                            </p>
+                                        </FormSection>
+                                    )}
+
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Apicultura") && (
+                                        <FormSection title="Capacidad Productiva Apícola">
+                                            {/* SISTEMAS PRODUCTIVOS */}
+                                            <div>
+                                                <p style={{ fontWeight: "700", color: "#136442", marginBottom: "15px", fontSize: "15px" }}>
+                                                    Sistemas Productivos Apícolas
+                                                </p>
+                                                <div style={gridCheck}>
+                                                    {[
+                                                        "Producción de Miel",
+                                                        "Producción de Derivados (Polen/Cera)",
+                                                        "Crianza de Reinas y Núcleos"
+                                                    ].map((item) => (
+                                                        <label key={item} style={radioLabel}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={inventarioInicial.capacidadApicultura.sistemas.includes(item)}
+                                                                onChange={() => {
+                                                                    const existe = inventarioInicial.capacidadApicultura.sistemas.includes(item);
+                                                                    setInventarioInicial(prev => ({
+                                                                        ...prev,
+                                                                        capacidadApicultura: {
+                                                                            ...prev.capacidadApicultura,
+                                                                            sistemas: existe
+                                                                                ? prev.capacidadApicultura.sistemas.filter(s => s !== item)
+                                                                                : [...prev.capacidadApicultura.sistemas, item]
+                                                                        }
+                                                                    }));
+                                                                }}
+                                                            />
+                                                            {item}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* CAMPOS DINÁMICOS */}
+                                            <div style={{ marginTop: "25px" }}>
+                                                <div style={grid3}>
                                                     <InputField
-                                                        key={item}
-                                                        label={item.replaceAll("_", " ").toUpperCase()}
+                                                        label="Número de colmenas activas"
                                                         type="number"
-                                                        onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
-                                                                ...prev,
-                                                                apicultura: {
-                                                                    ...prev.apicultura,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
-                                                            }));
-
-                                                        }}
+                                                        value={inventarioInicial.capacidadApicultura.colmenas_activas || ""}
+                                                        onChange={(e) => setInventarioInicial(prev => ({
+                                                            ...prev,
+                                                            capacidadApicultura: { ...prev.capacidadApicultura, colmenas_activas: parseInt(e.target.value) || 0 }
+                                                        }))}
                                                     />
+                                                    {inventarioInicial.capacidadApicultura.sistemas.includes("Producción de Miel") && (
+                                                        <InputField
+                                                            label="Producción estimada anual (Kg/Litros)"
+                                                            type="number"
+                                                            value={inventarioInicial.capacidadApicultura.miel_anual || ""}
+                                                            onChange={(e) => setInventarioInicial(prev => ({
+                                                                ...prev,
+                                                                capacidadApicultura: { ...prev.capacidadApicultura, miel_anual: parseInt(e.target.value) || 0 }
+                                                            }))}
+                                                        />
+                                                    )}
+                                                    {inventarioInicial.capacidadApicultura.sistemas.includes("Crianza de Reinas y Núcleos") && (
+                                                        <InputField
+                                                            label="Núcleos producidos por año"
+                                                            type="number"
+                                                            value={inventarioInicial.capacidadApicultura.nucleos_anuales || ""}
+                                                            onChange={(e) => setInventarioInicial(prev => ({
+                                                                ...prev,
+                                                                capacidadApicultura: { ...prev.capacidadApicultura, nucleos_anuales: parseInt(e.target.value) || 0 }
+                                                            }))}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </FormSection>
+                                    )}
 
+
+                                    {subCaracterizacion === "vegetal" && (
+                                        <FormSection title="Producción Vegetal">
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: "20px" }}>
+                                                {rubrosVegetales.map((item, index) => (
+                                                    <div
+                                                        key={index}
+                                                        style={{
+                                                            border: "1px solid #e2e8f0",
+                                                            borderRadius: "14px",
+                                                            padding: "20px",
+                                                            background: "#ffffff",
+                                                            position: "relative"
+                                                        }}
+                                                    >
+                                                        {/* Encabezado del ítem para dar contexto visual */}
+                                                        <div style={{ display: "flex", justifyContent: "between", alignItems: "center", marginBottom: "15px" }}>
+                                                            <span style={{ fontWeight: "600", color: "#475569", fontSize: "14px" }}>
+                                                                Rubro #{index + 1}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Grid estructurado simétricamente */}
+                                                        <div style={grid3}>
+                                                            <InputField
+                                                                label="Rubro"
+                                                                value={item.rubro}
+                                                                onChange={(e) => actualizarRubroVegetal(index, "rubro", e.target.value)}
+                                                            />
+
+                                                            <InputField
+                                                                label="Hectáreas Sembradas"
+                                                                type="number"
+                                                                value={item.hectareas}
+                                                                onChange={(e) => actualizarRubroVegetal(index, "hectareas", e.target.value)}
+                                                            />
+
+                                                            <div>
+                                                                <label style={labelStyle}>Estado del Cultivo</label>
+                                                                <select
+                                                                    style={inputStyle}
+                                                                    value={item.estado}
+                                                                    onChange={(e) => actualizarRubroVegetal(index, "estado", e.target.value)}
+                                                                >
+                                                                    <option value="">Seleccione</option>
+                                                                    <option value="Excelente">Excelente</option>
+                                                                    <option value="Bueno">Bueno</option>
+                                                                    <option value="Regular">Regular</option>
+                                                                    <option value="Malo">Malo</option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div>
+                                                                <label style={labelStyle}>Tipo de Riego</label>
+                                                                <select
+                                                                    style={inputStyle}
+                                                                    value={item.riego}
+                                                                    onChange={(e) => actualizarRubroVegetal(index, "riego", e.target.value)}
+                                                                >
+                                                                    <option value="">Seleccione</option>
+                                                                    <option value="Secano">Secano</option>
+                                                                    <option value="Goteo">Goteo</option>
+                                                                    <option value="Aspersión">Aspersión</option>
+                                                                    <option value="Inundación">Inundación</option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div>
+                                                                <label style={labelStyle}>Ciclo Productivo</label>
+                                                                <select
+                                                                    style={inputStyle}
+                                                                    value={item.ciclo_productivo}
+                                                                    onChange={(e) => actualizarRubroVegetal(index, "ciclo_productivo", e.target.value)}
+                                                                >
+                                                                    <option value="">Seleccione</option>
+                                                                    <option value="Corto">Corto</option>
+                                                                    <option value="Semipermanente">Semipermanente</option>
+                                                                    <option value="Permanente">Permanente</option>
+                                                                    <option value="Anual">Anual</option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div>
+                                                                <label style={labelStyle}>Tipo de Producción</label>
+                                                                <select
+                                                                    style={inputStyle}
+                                                                    value={item.tipo_produccion}
+                                                                    onChange={(e) => actualizarRubroVegetal(index, "tipo_produccion", e.target.value)}
+                                                                >
+                                                                    <option value="">Seleccione</option>
+                                                                    <option value="Tradicional">Tradicional</option>
+                                                                    <option value="Tecnificada">Tecnificada</option>
+                                                                    <option value="Orgánica">Orgánica</option>
+                                                                    <option value="Intensiva">Intensiva</option>
+                                                                    <option value="Extensiva">Extensiva</option>
+                                                                </select>
+                                                            </div>
+
+                                                            <InputField
+                                                                label="Producción Estimada"
+                                                                type="number"
+                                                                value={item.produccion_estimada}
+                                                                onChange={(e) => actualizarRubroVegetal(index, "produccion_estimada", e.target.value)}
+                                                            />
+
+                                                            <div>
+                                                                <label style={labelStyle}>Destino de Producción</label>
+                                                                <select
+                                                                    style={inputStyle}
+                                                                    value={item.destino}
+                                                                    onChange={(e) => actualizarRubroVegetal(index, "destino", e.target.value)}
+                                                                >
+                                                                    <option value="">Seleccione</option>
+                                                                    <option value="Consumo">Consumo</option>
+                                                                    <option value="Venta">Venta</option>
+                                                                    <option value="Mixto">Mixto</option>
+                                                                    <option value="Industrial">Industrial</option>
+                                                                </select>
+                                                            </div>
+
+                                                            {/* Contenedor del botón eliminar para que se alinee perfectamente en el grid */}
+                                                            <div style={{ display: "flex", alignItems: "flex-end", height: "100%" }}>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => eliminarRubroVegetal(index)}
+                                                                    style={{
+                                                                        background: "#dc2626",
+                                                                        color: "#fff",
+                                                                        border: "none",
+                                                                        padding: "10px 16px",
+                                                                        borderRadius: "10px",
+                                                                        cursor: "pointer",
+                                                                        width: "100%",
+                                                                        height: "42px", // Ajustar a la altura promedio de tus inputs
+                                                                        fontWeight: "500"
+                                                                    }}
+                                                                >
+                                                                    Eliminar Rubro
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* Botón principal de agregar */}
+                                            <button
+                                                type="button"
+                                                onClick={agregarRubroVegetal}
+                                                style={{
+                                                    background: "#136442",
+                                                    color: "#fff",
+                                                    border: "none",
+                                                    padding: "12px 20px",
+                                                    borderRadius: "12px",
+                                                    cursor: "pointer",
+                                                    fontWeight: "600",
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    gap: "8px"
+                                                }}
+                                            >
+                                                <span>+</span> Agregar Rubro
+                                            </button>
+                                        </FormSection>
+                                    )}
+
+
+                                    {subCaracterizacion === "maquinaria" && (
+                                        <FormSection title="Maquinarias y Equipos">
+                                            <div style={gridCheck}>
+                                                {[
+                                                    "Maquinaria Agrícola de Ruedas",
+                                                    "Implementos Agrícolas",
+                                                    "Equipos de Riego",
+                                                    "Otros Equipos",
+                                                ].map((item) => (
+                                                    <label key={item} style={radioLabel}>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={inventarioInicial.maquinariaSeleccionada.includes(
+                                                                item,
+                                                            )}
+                                                            onChange={() => {
+                                                                const existe =
+                                                                    inventarioInicial.maquinariaSeleccionada.includes(
+                                                                        item,
+                                                                    );
+
+                                                                setInventarioInicial((prev) => ({
+                                                                    ...prev,
+                                                                    maquinariaSeleccionada: existe
+                                                                        ? prev.maquinariaSeleccionada.filter(
+                                                                            (i) => i !== item,
+                                                                        )
+                                                                        : [...prev.maquinariaSeleccionada, item],
+                                                                }));
+                                                            }}
+                                                        />
+
+                                                        {item}
+                                                    </label>
                                                 ))}
                                             </div>
 
                                         </FormSection>
                                     )}
 
-                                    <FormSection title="Maquinarias y Equipos">
-
-                                        <div style={gridCheck}>
-
-                                            {[
-                                                "Maquinaria Agrícola",
-                                                "Implementos Agrícolas",
-                                                "Equipos de Riego",
-                                                "Otros Equipos"
-                                            ].map((item) => (
-
-                                                <label key={item} style={radioLabel}>
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={inventarioInicial.maquinariaSeleccionada.includes(item)}
-                                                        onChange={() => {
-
-                                                            const existe =
-                                                                inventarioInicial.maquinariaSeleccionada.includes(item);
-
-                                                            setInventarioInicial(prev => ({
-                                                                ...prev,
-                                                                maquinariaSeleccionada: existe
-                                                                    ? prev.maquinariaSeleccionada.filter(i => i !== item)
-                                                                    : [...prev.maquinariaSeleccionada, item]
-                                                            }));
-
-                                                        }}
-                                                    />
-
-                                                    {item}
-                                                </label>
-
-                                            ))}
-
-                                        </div>
-
-                                    </FormSection>
-
-                                    {inventarioInicial.maquinariaSeleccionada.includes("Maquinaria Agrícola") && (
-
-                                        <FormSection title="Maquinaria Agrícola de Ruedas">
-
-                                            <div style={grid3}>
-
-                                                {Object.keys(inventarioInicial.maquinaria_ruedas).map((item) => (
-
-                                                    <InputField
-                                                        key={item}
-                                                        label={item.replaceAll("_", " ").toUpperCase()}
-                                                        type="number"
-                                                        onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
-                                                                ...prev,
-                                                                maquinaria_ruedas: {
-                                                                    ...prev.maquinaria_ruedas,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
-                                                            }));
-
-                                                        }}
-                                                    />
-
-                                                ))}
-
-                                            </div>
-
-                                        </FormSection>
+                                    
+                                    {subCaracterizacion === "maquinaria" && inventarioInicial.maquinariaSeleccionada.includes("Maquinaria Agrícola de Ruedas") && (
+                                                <FormSection title="Maquinaria Agrícola de Ruedas">
+                                                    <div style={grid3}>
+                                                        {Object.keys(inventarioInicial.maquinaria_ruedas).map(
+                                                            (item) => (
+                                                                <InputField
+                                                                    key={item}
+                                                                    label={item.replaceAll("_", " ").toUpperCase()}
+                                                                    type="number"
+                                                                    onChange={(e) => {
+                                                                        setInventarioInicial((prev) => ({
+                                                                            ...prev,
+                                                                            maquinaria_ruedas: {
+                                                                                ...prev.maquinaria_ruedas,
+                                                                                [item]: parseInt(e.target.value) || 0,
+                                                                            },
+                                                                        }));
+                                                                    }}
+                                                                />
+                                                            ),
+                                                        )}
+                                                    </div>
+                                                </FormSection>
                                     )}
 
-                                    {inventarioInicial.maquinariaSeleccionada.includes("Implementos Agrícolas") && (
-
-                                        <FormSection title="Implemetos Agrícolas">
-
-                                            <div style={grid3}>
-
-                                                {Object.keys(inventarioInicial.implementos).map((item) => (
-
-                                                    <InputField
-                                                        key={item}
-                                                        label={item.replaceAll("_", " ").toUpperCase()}
-                                                        type="number"
-                                                        onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
-                                                                ...prev,
-                                                                implementos: {
-                                                                    ...prev.implementos,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
-                                                            }));
-
-                                                        }}
-                                                    />
-
-                                                ))}
-
-                                            </div>
-
-                                        </FormSection>
+                                    {subCaracterizacion === "maquinaria" && inventarioInicial.maquinariaSeleccionada.includes("Implementos Agrícolas") && (
+                                                <FormSection title="Implemetos Agrícolas">
+                                                    <div style={grid3}>
+                                                        {Object.keys(inventarioInicial.implementos).map(
+                                                            (item) => (
+                                                                <InputField
+                                                                    key={item}
+                                                                    label={item.replaceAll("_", " ").toUpperCase()}
+                                                                    type="number"
+                                                                    onChange={(e) => {
+                                                                        setInventarioInicial((prev) => ({
+                                                                            ...prev,
+                                                                            implementos: {
+                                                                                ...prev.implementos,
+                                                                                [item]: parseInt(e.target.value) || 0,
+                                                                            },
+                                                                        }));
+                                                                    }}
+                                                                />
+                                                            ),
+                                                        )}
+                                                    </div>
+                                                </FormSection>
                                     )}
 
-                                    {inventarioInicial.maquinariaSeleccionada.includes("Equipos de Riego") && (
-
-                                        <FormSection title="Equipos de Riego">
-
-                                            <div style={grid3}>
-
-                                                {Object.keys(inventarioInicial.riego).map((item) => (
-
-                                                    <InputField
-                                                        key={item}
-                                                        label={item.replaceAll("_", " ").toUpperCase()}
-                                                        type="number"
-                                                        onChange={(e) => {
-
-                                                            setInventarioInicial(prev => ({
-                                                                ...prev,
-                                                                riego: {
-                                                                    ...prev.riego,
-                                                                    [item]: parseInt(e.target.value) || 0
-                                                                }
-                                                            }));
-
-                                                        }}
-                                                    />
-
-                                                ))}
-
-                                            </div>
-
-                                        </FormSection>
+                                    {subCaracterizacion === "maquinaria" && inventarioInicial.maquinariaSeleccionada.includes("Equipos de Riego") && (
+                                                <FormSection title="Equipos de Riego">
+                                                    <div style={grid3}>
+                                                        {Object.keys(inventarioInicial.riego).map((item) => (
+                                                            <InputField
+                                                                key={item}
+                                                                label={item.replaceAll("_", " ").toUpperCase()}
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        riego: {
+                                                                            ...prev.riego,
+                                                                            [item]: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </FormSection>
                                     )}
+
+                                    {subCaracterizacion === "maquinaria" && inventarioInicial.maquinariaSeleccionada.includes("Otros Equipos") && (
+                                                <FormSection title="Otros Equipos">
+                                                    <div style={grid3}>
+                                                        {Object.keys(inventarioInicial.otros_equipos).map((item) => (
+                                                            <InputField
+                                                                key={item}
+                                                                label={item.replaceAll("_", " ").toUpperCase()}
+                                                                type="number"
+                                                                onChange={(e) => {
+                                                                    setInventarioInicial((prev) => ({
+                                                                        ...prev,
+                                                                        otros_equipos: {
+                                                                            ...prev.otros_equipos,
+                                                                            [item]: parseInt(e.target.value) || 0,
+                                                                        },
+                                                                    }));
+                                                                }}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </FormSection>
+                                    )}
+
+
 
                                     {/* 💾 BOTÓN GUARDAR */}
                                     <div style={{ textAlign: "right", paddingBottom: "40px" }}>
                                         <button
-                                            onClick={() => {
-                                                console.log({
-                                                    predio: predioActivo,
-                                                    inventario
-                                                });
-                                            }}
+                                            onClick={guardarInventario}
                                             style={btnPrincipal}
                                         >
                                             Guardar Inventario
@@ -1065,328 +3449,73 @@ export default function DashboardProduccion() {
                                     </div>
                                 </>
                             )}
-
-                        </div>
-                    )}
-
-                    {tabActiva === "prodAnimal" && (
-
-                        <div style={{ maxWidth: "950px", margin: "0 auto" }}>
-
-                            {!predioActivo ? (
-                                <FormSection title="⚠️ Selección requerida">
-                                    <p style={{ color: "#64748b" }}>
-                                        Debes seleccionar un predio.
-                                    </p>
-                                </FormSection>
-                            ) : (
-                                <>
-                                    {/* 🔽 AQUÍ VA TODO TU MÓDULO */}
-
-                                    {/* SUBMENÚ */}
-                                    <FormSection title="🐄 Producción Animal">
-                                        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-
-                                            <button onClick={() => setSubAnimal("registroAnimal")} style={btnPrincipal}>
-                                                Registro Animal
-                                            </button>
-
-                                            <button onClick={() => setSubAnimal("produccion")} style={btnPrincipal}>
-                                                Producción
-                                            </button>
-
-                                            <button onClick={() => setSubAnimal("sanidad")} style={btnPrincipal}>
-                                                Sanidad
-                                            </button>
-
-                                            <button onClick={() => setSubAnimal("reproduccion")} style={btnPrincipal}>
-                                                Reproducción
-                                            </button>
-
-                                        </div>
-                                    </FormSection>
-
-                                    {subAnimal === "registroAnimal" && (
-                                        <FormSection title="Registro Animal del Predio">
-
-                                            <div style={grid3}>
-                                                <InputField label="Vacunos" type="number" />
-                                                <InputField label="Bufalinos" type="number" />
-                                                <InputField label="Equinos" type="number" />
-                                                <InputField label="Porcinos" type="number" />
-                                                <InputField label="Aves" type="number" />
-                                                <InputField label="Otros" type="number" />
-                                            </div>
-
-                                            <div style={{ textAlign: "right", marginTop: "20px" }}>
-                                                <button style={btnPrincipal}>
-                                                    Guardar Registro Animal
-                                                </button>
-                                            </div>
-
-                                        </FormSection>
-                                    )}
-
-                                    {subAnimal === "produccion" && (
-                                        <FormSection title="Registro de Producción Animal">
-
-                                            <div style={grid3}>
-                                                <InputField label="Leche (Lts)" type="number" />
-                                                <InputField label="Carne (Kg)" type="number" />
-                                                <InputField label="Huevos (Unidades)" type="number" />
-                                                <InputField label="Miel (Kg)" type="number" />
-                                            </div>
-
-                                            <div style={grid3}>
-                                                <InputField label="Fecha" type="date" />
-                                                <InputField label="Observaciones" />
-                                            </div>
-
-                                            <div style={{ textAlign: "right", marginTop: "20px" }}>
-                                                <button style={btnPrincipal}>
-                                                    Registrar Producción
-                                                </button>
-                                            </div>
-
-                                        </FormSection>
-                                    )}
-
-                                    {subAnimal === "sanidad" && (
-                                        <FormSection title="Control Sanitario">
-
-                                            <div style={grid3}>
-                                                <InputField label="Vacunaciones" />
-                                                <InputField label="Enfermedades Detectadas" />
-                                                <InputField label="Tratamientos Aplicados" />
-                                            </div>
-
-                                            <div style={grid3}>
-                                                <InputField label="Fecha" type="date" />
-                                            </div>
-
-                                            <div style={{ textAlign: "right", marginTop: "20px" }}>
-                                                <button style={btnPrincipal}>
-                                                    Registrar Sanidad
-                                                </button>
-                                            </div>
-
-                                        </FormSection>
-                                    )}
-
-                                    {subAnimal === "reproduccion" && (
-                                        <FormSection title="Control de Reproducción">
-
-                                            <div style={grid3}>
-                                                <InputField label="Ciclos de Monta" />
-                                                <InputField label="Gestaciones" />
-                                                <InputField label="Partos" />
-                                                <InputField label="Tasa de Natalidad (%)" type="number" />
-                                            </div>
-
-                                            <div style={grid3}>
-                                                <InputField label="Fecha" type="date" />
-                                            </div>
-
-                                            <div style={{ textAlign: "right", marginTop: "20px" }}>
-                                                <button style={btnPrincipal}>
-                                                    Registrar Reproducción
-                                                </button>
-                                            </div>
-
-                                        </FormSection>
-                                    )}
-
-                                </>
-                            )}
-
-                        </div>
-                    )}
-
-                    {tabActiva === "prodVegetal" && (
-
-                        <div style={{ maxWidth: "950px", margin: "0 auto" }}>
-
-                            {!predioActivo ? (
-                                <FormSection title="⚠️ Selección requerida">
-                                    <p style={{ color: "#64748b" }}>
-                                        Debes seleccionar un predio.
-                                    </p>
-                                </FormSection>
-                            ) : (
-                                <>
-                                    {/* SUBMENÚ */}
-                                    <FormSection title="🌱 Producción Vegetal">
-
-                                        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                                            <button onClick={() => setSubVegetal("planificacion")} style={btnPrincipal}>Planificación</button>
-                                            <button onClick={() => setSubVegetal("produccion")} style={btnPrincipal}>Producción</button>
-                                            <button onClick={() => setSubVegetal("comparacion")} style={btnPrincipal}>Comparación</button>
-                                        </div>
-
-                                    </FormSection>
-
-                                    {subVegetal === "planificacion" && (
-                                        <FormSection title="Planificación de Siembra">
-
-                                            <div style={grid3}>
-                                                <InputField
-                                                    label="Cultivo"
-                                                    value={planificacion.cultivo}
-                                                    onChange={(e) => setPlanificacion(prev => ({ ...prev, cultivo: e.target.value }))}
-                                                />
-
-                                                <InputField
-                                                    label="Superficie (Ha)"
-                                                    type="number"
-                                                    onChange={(e) => setPlanificacion(prev => ({ ...prev, superficie: parseInt(e.target.value) || 0 }))}
-                                                />
-
-                                                <InputField
-                                                    label="Fecha de Siembra"
-                                                    type="date"
-                                                    onChange={(e) => setPlanificacion(prev => ({ ...prev, fecha_siembra: e.target.value }))}
-                                                />
-
-                                                <InputField
-                                                    label="Producción Esperada (Kg)"
-                                                    type="number"
-                                                    onChange={(e) => setPlanificacion(prev => ({ ...prev, produccion_esperada: parseInt(e.target.value) || 0 }))}
-                                                />
-                                            </div>
-
-                                            <div style={{ textAlign: "right", marginTop: "20px" }}>
-                                                <button style={btnPrincipal}>Guardar Planificación</button>
-                                            </div>
-
-                                        </FormSection>
-                                    )}
-
-                                    {subVegetal === "produccion" && (
-                                        <FormSection title="Registro de Producción (Cosecha)">
-
-                                            <div style={grid3}>
-                                                <InputField
-                                                    label="Cultivo"
-                                                    value={produccionVegetal.cultivo}
-                                                    onChange={(e) => setProduccionVegetal(prev => ({ ...prev, cultivo: e.target.value }))}
-                                                />
-
-                                                <InputField
-                                                    label="Producción Real (Kg)"
-                                                    type="number"
-                                                    onChange={(e) => setProduccionVegetal(prev => ({ ...prev, produccion_real: parseInt(e.target.value) || 0 }))}
-                                                />
-
-                                                <InputField
-                                                    label="Fecha de Cosecha"
-                                                    type="date"
-                                                    onChange={(e) => setProduccionVegetal(prev => ({ ...prev, fecha_cosecha: e.target.value }))}
-                                                />
-
-                                                <InputField
-                                                    label="Observaciones"
-                                                    onChange={(e) => setProduccionVegetal(prev => ({ ...prev, observaciones: e.target.value }))}
-                                                />
-                                            </div>
-
-                                            <div style={{ textAlign: "right", marginTop: "20px" }}>
-                                                <button style={btnPrincipal}>Registrar Cosecha</button>
-                                            </div>
-
-                                        </FormSection>
-                                    )}
-
-                                    {subVegetal === "comparacion" && (
-                                        <FormSection title="Comparación Plan vs Producción">
-
-                                            <div style={{
-                                                background: "#f8fafc",
-                                                padding: "20px",
-                                                borderRadius: "12px",
-                                                border: "1px solid #e2e8f0"
-                                            }}>
-
-                                                <p><b>Cultivo:</b> {planificacion.cultivo}</p>
-                                                <p><b>Producción Esperada:</b> {planificacion.produccion_esperada} Kg</p>
-                                                <p><b>Producción Real:</b> {produccionVegetal.produccion_real} Kg</p>
-
-                                                <hr />
-
-                                                <p>
-                                                    <b>Diferencia:</b>{" "}
-                                                    {produccionVegetal.produccion_real - planificacion.produccion_esperada} Kg
-                                                </p>
-
-                                                <p>
-                                                    <b>Rendimiento (%):</b>{" "}
-                                                    {planificacion.produccion_esperada > 0
-                                                        ? ((produccionVegetal.produccion_real / planificacion.produccion_esperada) * 100).toFixed(2)
-                                                        : 0
-                                                    } %
-                                                </p>
-
-                                            </div>
-
-                                        </FormSection>
-                                    )}
-                                </>
-                            )}
-
                         </div>
                     )}
 
                     {tabActiva === "reportes" && (
-
                         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-
                             {/* 🔴 VALIDACIÓN */}
                             {!predioActivo ? (
                                 <FormSection title="⚠️ Selección requerida">
-                                    <p>Debe seleccionar un predio para ver reportes específicos.</p>
+                                    <p>
+                                        Debe seleccionar un predio para ver reportes específicos.
+                                    </p>
                                 </FormSection>
                             ) : (
-
                                 <>
                                     {/* ── NIVEL ESPECÍFICO ── */}
                                     <FormSection title="📊 Reporte del Predio Seleccionado">
-
                                         <div style={grid3}>
-                                            <CardStat label="Nombre del Predio" value={predioActivo.predio} color="#136442" />
-                                            <CardStat label="Productor" value={predioActivo.productor} color="#136442" />
-                                            <CardStat label="Municipio" value={predioActivo.municipio} color="#136442" />
+                                            <CardStat
+                                                label="Nombre del Predio"
+                                                value={predioActivo.predio}
+                                                color="#136442"
+                                            />
+                                            <CardStat
+                                                label="Productor"
+                                                value={predioActivo.productor}
+                                                color="#136442"
+                                            />
+                                            <CardStat
+                                                label="Municipio"
+                                                value={predioActivo.municipio}
+                                                color="#136442"
+                                            />
                                         </div>
-
                                     </FormSection>
 
                                     {/* ── PRODUCCIÓN ANIMAL ── */}
                                     <FormSection title="🐄 Producción Animal">
-
                                         <div style={chartCard}>
                                             <h3 style={chartTitle}>Distribución de Especies</h3>
                                             <div style={chartPlaceholder}>Gráfico Animal</div>
                                         </div>
-
                                     </FormSection>
 
                                     {/* ── PRODUCCIÓN VEGETAL ── */}
                                     <FormSection title="🌱 Producción Vegetal">
-
                                         <div style={chartCard}>
                                             <h3 style={chartTitle}>Producción por Rubro</h3>
                                             <div style={chartPlaceholder}>Gráfico Cultivos</div>
                                         </div>
-
                                     </FormSection>
                                 </>
                             )}
 
                             {/* ── NIVEL GLOBAL ── */}
                             <FormSection title="🌎 Reporte Global del Sistema">
-
                                 <div style={grid3}>
                                     <CardStat label="Total Predios" value="0" color="#136442" />
-                                    <CardStat label="Producción Total" value="0" color="#136442" />
-                                    <CardStat label="Rendimiento Promedio" value="0%" color="#136442" />
+                                    <CardStat
+                                        label="Producción Total"
+                                        value="0"
+                                        color="#136442"
+                                    />
+                                    <CardStat
+                                        label="Rendimiento Promedio"
+                                        value="0%"
+                                        color="#136442"
+                                    />
                                 </div>
 
                                 <div style={{ marginTop: "20px" }}>
@@ -1397,12 +3526,9 @@ export default function DashboardProduccion() {
                                         </div>
                                     </div>
                                 </div>
-
                             </FormSection>
-
                         </div>
                     )}
-
                 </section>
             </main>
         </div>
@@ -1430,7 +3556,7 @@ const MenuItem = ({ label, active, onClick, icon }) => (
             // 🔥 QUITA EFECTO BLANCO AL HACER CLICK
             outline: "none",
             WebkitTapHighlightColor: "transparent",
-            userSelect: "none"
+            userSelect: "none",
         }}
         onMouseDown={(e) => e.preventDefault()} // evita “flash” de focus
     >
@@ -1440,8 +3566,28 @@ const MenuItem = ({ label, active, onClick, icon }) => (
 );
 
 const FormSection = ({ title, children }) => (
-    <div style={{ background: "#fff", padding: "28px", borderRadius: "20px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)", marginBottom: "24px", border: "1px solid #e2e8f0" }}>
-        <h3 style={{ fontSize: "13px", color: "#136442", marginBottom: "25px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px" }}>{title}</h3>
+    <div
+        style={{
+            background: "#fff",
+            padding: "28px",
+            borderRadius: "20px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            marginBottom: "24px",
+            border: "1px solid #e2e8f0",
+        }}
+    >
+        <h3
+            style={{
+                fontSize: "13px",
+                color: "#136442",
+                marginBottom: "25px",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+            }}
+        >
+            {title}
+        </h3>
         {children}
     </div>
 );
@@ -1457,15 +3603,45 @@ const SelectField = ({ label, options, ...props }) => (
     <div style={{ marginBottom: "15px" }}>
         <label style={labelStyle}>{label}</label>
         <select {...props} style={inputStyle}>
-            {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+            {options.map((opt) => (
+                <option key={opt} value={opt}>
+                    {opt}
+                </option>
+            ))}
         </select>
     </div>
 );
 
 const CardStat = ({ label, value, color }) => (
-    <div style={{ background: "#fff", padding: "24px", borderRadius: "20px", borderTop: `4px solid ${color}`, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.05)" }}>
-        <p style={{ margin: 0, color: "#64748b", fontSize: "13px", fontWeight: "500" }}>{label}</p>
-        <h3 style={{ margin: "10px 0 0", fontSize: "28px", color: "#1e293b", fontWeight: "700" }}>{value}</h3>
+    <div
+        style={{
+            background: "#fff",
+            padding: "24px",
+            borderRadius: "20px",
+            borderTop: `4px solid ${color}`,
+            boxShadow: "0 10px 15px -3px rgba(0,0,0,0.05)",
+        }}
+    >
+        <p
+            style={{
+                margin: 0,
+                color: "#64748b",
+                fontSize: "13px",
+                fontWeight: "500",
+            }}
+        >
+            {label}
+        </p>
+        <h3
+            style={{
+                margin: "10px 0 0",
+                fontSize: "28px",
+                color: "#1e293b",
+                fontWeight: "700",
+            }}
+        >
+            {value}
+        </h3>
     </div>
 );
 
@@ -1474,14 +3650,14 @@ const chartCard = {
     borderRadius: "20px",
     padding: "20px",
     boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-    border: "1px solid #e2e8f0"
+    border: "1px solid #e2e8f0",
 };
 
 const chartTitle = {
     fontSize: "14px",
     fontWeight: "700",
     color: "#136442",
-    marginBottom: "15px"
+    marginBottom: "15px",
 };
 
 const chartPlaceholder = {
@@ -1494,34 +3670,202 @@ const chartPlaceholder = {
     color: "#64748b",
     fontSize: "13px",
     fontWeight: "600",
-    border: "2px dashed #cbd5e1"
+    border: "2px dashed #cbd5e1",
 };
 
 // ── ESTILOS SIDEBAR Y GENERAL ──────────────────────────────────────────────────
 const sidebarContainerStyle = {
-    width: "290px", backgroundColor: "#136442", padding: "25px",
-    display: "flex", flexDirection: "column", color: "#fff", boxShadow: "4px 0 10px rgba(0,0,0,0.05)"
+    width: "290px",
+    height: "100vh",
+    backgroundColor: "#136442",
+    padding: "25px",
+    display: "flex",
+    flexDirection: "column",
+    color: "#fff",
+    boxShadow: "4px 0 10px rgba(0,0,0,0.05)",
+    overflow: "hidden",
 };
-const brandContainer = { display: "flex", alignItems: "center", gap: "12px", marginBottom: "35px", paddingLeft: "10px" };
-const logoSquare = { width: "38px", height: "38px", background: "#fff", color: "#136442", borderRadius: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "900", fontSize: "14px" };
-const brandText = { fontSize: "18px", fontWeight: "700", letterSpacing: "-0.5px" };
-const userCardStyle = { display: "flex", alignItems: "center", gap: "12px", padding: "15px", backgroundColor: "rgba(255,255,255,0.08)", borderRadius: "18px", marginBottom: "30px" };
-const avatarWrapper = { width: "45px", height: "45px", borderRadius: "12px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.2)" };
+const brandContainer = {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    marginBottom: "35px",
+    paddingLeft: "10px",
+};
+const logoSquare = {
+    width: "38px",
+    height: "38px",
+    background: "#fff",
+    color: "#136442",
+    borderRadius: "10px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: "900",
+    fontSize: "14px",
+};
+const brandText = {
+    fontSize: "18px",
+    fontWeight: "700",
+    letterSpacing: "-0.5px",
+};
+const userCardStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "15px",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: "18px",
+    marginBottom: "30px",
+};
+const avatarWrapper = {
+    width: "45px",
+    height: "45px",
+    borderRadius: "12px",
+    overflow: "hidden",
+    border: "2px solid rgba(255,255,255,0.2)",
+};
 const userNameStyle = { fontSize: "14px", fontWeight: "600", color: "#fff" };
 const userRoleLabel = { fontSize: "11px", color: "#86efac" };
-const sectionLabel = { fontSize: "10px", fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: "1.5px", marginBottom: "15px", paddingLeft: "10px" };
-const logoutButtonStyle = { background: "rgba(255,255,255,0.05)", color: "#fca5a5", border: "none", padding: "14px", borderRadius: "15px", cursor: "pointer", fontWeight: "600", fontSize: "13px", marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "center" };
-const headerContainerStyle = { height: "85px", background: "#fff", display: "flex", alignItems: "center", padding: "0 40px", borderBottom: "1px solid #f1f5f9" };
-const inputStyle = { width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: "14px", outline: "none", backgroundColor: "#f8fafc" };
-const labelStyle = { display: "block", fontSize: "12px", fontWeight: "700", color: "#475569", marginBottom: "8px" };
-const grid3 = { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" };
-const gridCheck = { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "15px" };
-const radioLabel = { fontSize: "13px", color: "#334155", display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", padding: "10px", background: "#f1f5f9", borderRadius: "8px" };
-const btnPrincipal = { background: "#136442", color: "#fff", border: "none", padding: "16px 40px", borderRadius: "12px", fontWeight: "700", cursor: "pointer", boxShadow: "0 4px 14px rgba(19, 100, 66, 0.3)" };
-const alertStyle = { background: "#136442", color: "#fff", padding: "15px 25px", borderRadius: "12px", marginBottom: "20px", fontWeight: "500", textAlign: "center" };
+const sectionLabel = {
+    fontSize: "10px",
+    fontWeight: "700",
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: "1.5px",
+    marginBottom: "15px",
+    paddingLeft: "10px",
+};
+const logoutButtonStyle = {
+    background: "rgba(255,255,255,0.05)",
+    color: "#fca5a5",
+    border: "none",
+    padding: "14px",
+    borderRadius: "15px",
+    cursor: "pointer",
+    fontWeight: "600",
+    fontSize: "13px",
+    marginTop: "auto",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+};
+const headerContainerStyle = {
+    height: "85px",
+    background: "#fff",
+    display: "flex",
+    alignItems: "center",
+    padding: "0 40px",
+    borderBottom: "1px solid #f1f5f9",
+};
+const inputStyle = {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
+    fontSize: "14px",
+    outline: "none",
+    backgroundColor: "#f8fafc",
+};
+const labelStyle = {
+    display: "block",
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#475569",
+    marginBottom: "8px",
+};
+const grid3 = {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "20px",
+};
+const gridCheck = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+    gap: "15px",
+};
+const radioLabel = {
+    fontSize: "13px",
+    color: "#334155",
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    cursor: "pointer",
+    padding: "10px",
+    background: "#f1f5f9",
+    borderRadius: "8px",
+};
+const btnPrincipal = {
+    background: "#136442",
+    color: "#fff",
+    border: "none",
+    padding: "16px 40px",
+    borderRadius: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
+    boxShadow: "0 4px 14px rgba(19, 100, 66, 0.3)",
+};
+const alertStyle = {
+    background: "#136442",
+    color: "#fff",
+    padding: "15px 25px",
+    borderRadius: "12px",
+    marginBottom: "20px",
+    fontWeight: "500",
+    textAlign: "center",
+};
 const logoDerechoStyle = {
     height: "40px", // Un poco más grande para que destaque
     width: "auto",
     objectFit: "contain",
-    opacity: "0.9"
+    opacity: "0.9",
 };
+
+
+const estiloInput = {
+    width: "100%",
+    padding: "10px",
+    borderRadius: "8px",
+    border: "1px solid #d1d5db",
+    marginTop: "5px",
+    fontSize: "14px"
+};
+
+const estiloP = {
+    margin: "6px 0 0 0",
+    fontWeight: "500",
+    color: "#111827"
+};
+
+const estiloBoton = {
+    border: "none",
+    padding: "10px 18px",
+    borderRadius: "10px",
+    color: "#fff",
+    fontWeight: "600",
+    cursor: "pointer"
+};
+
+const Spinner = ({ color = "#136442" }) => {
+    // Creamos una referencia para el elemento
+    const spinnerRef = (el) => {
+        if (el) {
+            el.animate(
+                [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+                { duration: 1000, iterations: Infinity }
+            );
+        }
+    };
+
+    return (
+        <svg
+            ref={spinnerRef}
+            width="30" height="30" viewBox="0 0 24 24" fill="none"
+            stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+        >
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+    );
+};
+
+
+
