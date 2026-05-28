@@ -2,6 +2,11 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import escudo from "../../assets/logo2.jpg";
 import Swal from 'sweetalert2';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -12,6 +17,257 @@ import {
     RadialBarChart, RadialBar,
     Treemap // <-- Asegúrate de que esté aquí
 } from 'recharts';
+
+const generarPDFPredio = (predio) => {
+
+    console.log("DATOS REALES DEL PREDIO RECIBIDOS EN EL PDF:", predio);
+
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "letter"
+    });
+
+    // Colores base institucionales
+    const verdeBarinas = [19, 100, 66];
+    const grisOscuro = [40, 40, 40];
+    const grisSuave = [245, 247, 246];
+
+    // ────────────────────────────────────────────────────────
+    // CINTILLO INSTITUCIONAL SUPERIOR (Logos y Ente)
+    // ────────────────────────────────────────────────────────
+    try {
+        // Se amplió el ancho (width) de ambos logos para mejorar su proporción horizontal
+        // doc.addImage(ruta, formato, x, y, ancho, alto)
+        doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
+        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+    } catch (error) {
+        console.warn("No se pudieron cargar las imágenes de los logos en el PDF. Verifique las rutas relativas.", error);
+    }
+
+    // Bloque de texto oficial alineado a la derecha
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...verdeBarinas);
+    doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(100, 100, 100);
+    doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
+
+    const fechaEmision = predio.fecha_registro
+        ? new Date(predio.fecha_registro).toLocaleDateString()
+        : new Date().toLocaleDateString();
+    doc.text(`Fecha de Registro: ${fechaEmision}`, 204, 18, { align: "right" });
+
+    // Línea divisoria del encabezado principal
+    doc.setDrawColor(...verdeBarinas);
+    doc.setLineWidth(0.6);
+    doc.line(12, 25, 204, 25);
+
+    // ────────────────────────────────────────────────────────
+    // TÍTULO CENTRAL DE LA FICHA TÉCNICA
+    // ────────────────────────────────────────────────────────
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(...verdeBarinas);
+    const tituloFicha = `FICHA TÉCNICA: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`;
+    doc.text(tituloFicha, 12, 34);
+
+    // SE ELIMINÓ EL SUBTÍTULO DEL CÓDIGO ÚNICO DE REGISTRO TERRITORIAL (#PRD-7)
+
+    // ────────────────────────────────────────────────────────
+    // I. DATOS DEL PRODUCTOR
+    // ────────────────────────────────────────────────────────
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...verdeBarinas);
+    doc.text("I. DATOS DEL PRODUCTOR", 12, 44); // Se subió un poco el eje Y (de 49 a 44) para equilibrar el espacio vacío
+
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(12, 46, 204, 46);
+
+    const datosProductor = [
+        ["Nombre Completo:", predio.productor?.nombre || "N/A", "Cédula / RIF:", predio.productor?.cedula_rif || "N/A"],
+        ["Teléfono Celular:", predio.productor?.telefono || "N/A", "Correo Electrónico:", predio.productor?.correo || "N/A"]
+    ];
+
+    autoTable(doc, {
+        startY: 48, // Ajustado acorde a la nueva altura
+        body: datosProductor,
+        theme: "plain",
+        styles: { fontSize: 9, cellPadding: 2.5, font: "helvetica" },
+        columnStyles: {
+            0: { fontStyle: "bold", width: 32, textColor: grisOscuro },
+            1: { width: 68 },
+            2: { fontStyle: "bold", width: 28, textColor: grisOscuro },
+            3: { width: 64 }
+        },
+        margin: { left: 12, right: 12 }
+    });
+
+    // ────────────────────────────────────────────────────────
+    // II. DATOS DEL PREDIO (Identificación y Ubicación)
+    // ────────────────────────────────────────────────────────
+    let currentY = doc.lastAutoTable.finalY + 7;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...verdeBarinas);
+    doc.text("II. DATOS DEL PREDIO E IDENTIFICACIÓN TERRITORIAL", 12, currentY);
+    doc.line(12, currentY + 2, 204, currentY + 2);
+
+    const datosPredio = [
+        ["Municipio:", predio.municipio || "N/A", "Parroquia:", predio.parroquia || "N/A"],
+        ["Comunidad / Sector:", predio.comunidad || "N/A", "Centro Poblado:", predio.centro_poblado || "N/A"],
+        ["Superficie Total (Ha):", predio.superficie ? `${predio.superficie} Ha` : "0.00 Ha", "Coordenadas UTM:", predio.coordenadas || "N/A"],
+        ["Tipo de Propiedad:", predio.tipo_propiedad || "N/A", "Tenencia de Tierra:", predio.tenencia || "N/A"],
+        ["Vialidad Interna:", predio.vialidad || "N/A", "Dirección Detallada:", predio.direccion || "N/A"]
+    ];
+
+    autoTable(doc, {
+        startY: currentY + 4,
+        body: datosPredio,
+        theme: "plain",
+        styles: { fontSize: 9, cellPadding: 2.5, font: "helvetica" },
+        columnStyles: {
+            0: { fontStyle: "bold", width: 35, textColor: grisOscuro },
+            1: { width: 65 },
+            2: { fontStyle: "bold", width: 32, textColor: grisOscuro },
+            3: { width: 60 }
+        },
+        margin: { left: 12, right: 12 }
+    });
+
+    // ────────────────────────────────────────────────────────
+    // III. INFRAESTRUCTURA DE LA UNIDAD DE PRODUCCIÓN
+    // ────────────────────────────────────────────────────────
+    currentY = doc.lastAutoTable.finalY + 7;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...verdeBarinas);
+    doc.text("III. INFRAESTRUCTURA Y ESTRUCTURAS DISPONIBLES", 12, currentY);
+    doc.line(12, currentY + 2, 204, currentY + 2);
+
+    const infra = predio.infraestructura || {};
+    const infreestructureData = [
+        ["Corrales:", infra.corrales || 0, "Galpones:", infra.galpones || 0, "Vaqueras:", infra.vaqueras || 0],
+        ["Cochineras:", infra.cochineras || 0, "Silos:", infra.silos || 0, "Caballerizas:", infra.caballerizas || 0],
+        ["Feedlot:", infra.feedlot || 0, "Lagunas / Reservorios:", infra.lagunas || 0, "Salas de Ordeño:", infra.salas_ordeno || 0],
+        ["Queseras:", infra.queseras || 0, "Casas de Habitación:", infra.casas || 0, "Trapiches:", infra.trapiches || 0],
+        ["Establos:", infra.establos || 0, "", "", "", ""]
+    ];
+
+    autoTable(doc, {
+        startY: currentY + 4,
+        body: infreestructureData,
+        theme: "plain",
+        styles: { fontSize: 9, cellPadding: 2, font: "helvetica" },
+        willDrawCell: (data) => {
+            if (data.column.index % 2 === 0) {
+                doc.setFillColor(...grisSuave);
+                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, "F");
+            }
+        },
+        columnStyles: {
+            0: { fontStyle: "bold", textColor: verdeBarinas, width: 38 },
+            1: { width: 26, halign: "center" },
+            2: { fontStyle: "bold", textColor: verdeBarinas, width: 38 },
+            3: { width: 26, halign: "center" },
+            4: { fontStyle: "bold", textColor: verdeBarinas, width: 38 },
+            5: { width: 26, halign: "center" }
+        },
+        margin: { left: 12, right: 12 }
+    });
+
+    // ────────────────────────────────────────────────────────
+    // IV. RÉGIMEN DE PRODUCCIÓN Y REGISTROS
+    // ────────────────────────────────────────────────────────
+    currentY = doc.lastAutoTable.finalY + 7;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...verdeBarinas);
+    doc.text("IV. RÉGIMEN SOCIO-PRODUCTIVO Y CONTROLES", 12, currentY);
+    doc.line(12, currentY + 2, 204, currentY + 2);
+
+    const prod = predio.produccion || {};
+    const datosProduccion = [
+        ["Tipo de Explotación Económica principal:", prod.tipo_explotacion || "N/A"],
+        ["Cuenta con Registro Sanitario Vigente:", prod.registro_sanitario ? "SÍ (Verificado)" : "NO"],
+        ["Mantiene Registro de Control Productivo:", prod.registro_productivo ? "SÍ (Verificado)" : "NO"],
+        ["Mantiene Registro de Control Reproductivo:", prod.registro_reproductivo ? "SÍ (Verificado)" : "NO"],
+        ["Mantiene Registro Financiero / Contable:", prod.registro_financiero ? "SÍ (Verificado)" : "NO"]
+    ];
+
+    autoTable(doc, {
+        startY: currentY + 4,
+        body: datosProduccion,
+        theme: "striped",
+        headStyles: { fillColor: verdeBarinas },
+        styles: { fontSize: 9, cellPadding: 2.5, font: "helvetica" },
+        columnStyles: {
+            0: { fontStyle: "bold", width: 130, textColor: grisOscuro },
+            1: { halign: "center", fontStyle: "bold", textColor: verdeBarinas, width: 62 }
+        },
+        margin: { left: 12, right: 12 }
+    });
+
+    // ────────────────────────────────────────────────────────
+    // V. SERVICIOS BÁSICOS (USANDO LA ESTRUCTURA CORRECTA)
+    // ────────────────────────────────────────────────────────
+    currentY = doc.lastAutoTable.finalY + 7;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...verdeBarinas);
+    doc.text("V. SERVICIOS BÁSICOS INSTALADOS EN EL PREDIO", 12, currentY);
+    doc.line(12, currentY + 2, 204, currentY + 2);
+
+    // Simplificación absoluta: usamos el campo que ya definimos en el Serializer
+    const serviciosFinales = predio.servicios_lectura || [];
+    const listaServiciosText = serviciosFinales.length > 0
+        ? serviciosFinales.join("   |   ")
+        : "Ningún servicio básico declarado en el registro territorial.";
+
+    autoTable(doc, {
+        startY: currentY + 4,
+        body: [[listaServiciosText]],
+        theme: "plain",
+        styles: {
+            fontSize: 9,
+            cellPadding: 4,
+            font: "helvetica",
+            fontStyle: serviciosFinales.length > 0 ? "normal" : "italic",
+            textColor: serviciosFinales.length > 0 ? [20, 20, 20] : [110, 110, 110]
+        },
+        willDrawCell: (data) => {
+            doc.setFillColor(...grisSuave);
+            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, "F");
+        },
+        margin: { left: 12, right: 12 }
+    });
+
+    // ────────────────────────────────────────────────────────
+    // PIE DE PÁGINA DINÁMICO
+    // ────────────────────────────────────────────────────────
+    const totalPaginas = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPaginas; i++) {
+        doc.setPage(i);
+        doc.setFontSize(7);
+        doc.setTextColor(140, 140, 140);
+
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.3);
+        doc.line(12, 268, 204, 268);
+
+        doc.text("Ficha técnica legalizada bajo los términos del Sistema Integral Agropecuario del Estado Barinas.", 12, 272);
+        doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
+    }
+
+    const fileSanitizado = `Ficha_Tecnica_Predio_${(predio.nombre_predio || "Registro").replace(/\s+/g, "_")}.pdf`;
+    doc.save(fileSanitizado);
+};
+
 
 // MODIFICA ESTA FUNCIÓN EN TU ARCHIVO Dashboard.jsx
 const CustomTreemapContent = (props) => {
@@ -70,9 +326,16 @@ const IconHistorial = () => (
     </svg>
 );
 
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+const IconReportes = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+    </svg>
+);
+
 
 // Corregir iconos de Leaflet en React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -1074,55 +1337,89 @@ export default function Dashboard() {
 
     const guardarEnDjango = async () => {
         try {
+            // 1. Limpieza y formateo del teléfono del productor
+            const numeroLimpio = formData.productor_telefono ? formData.productor_telefono.replace(/\D/g, '') : '';
+            const telefonoFormateado = numeroLimpio ? `58${numeroLimpio}` : '';
+
+            // 2. Acoplamiento correcto del prefijo a la Cédula (V- o E-)
+            const cedulaCompleta = formData.productor_cedula ? `${prefijoCedula}${formData.productor_cedula.trim()}` : '';
+
+            // 3. Validación de consistencia para el arreglo de servicios
+            const serviciosFormateados = Array.isArray(formData.servicios) ? formData.servicios : [];
+
+            // 4. SANITIZACIÓN DE INFRAESTRUCTURA: Convertir strings numéricos a Integers puros para DRF
+            const infraestructuraSanitizada = {};
+            if (formData.infraestructura) {
+                Object.keys(formData.infraestructura).forEach((key) => {
+                    const valor = formData.infraestructura[key];
+                    // Convertimos a entero base 10 de forma segura. Si está vacío o no es un número, pasa a 0.
+                    infraestructuraSanitizada[key] = valor !== "" ? parseInt(valor, 10) : 0;
+                    if (isNaN(infraestructuraSanitizada[key])) {
+                        infraestructuraSanitizada[key] = 0;
+                    }
+                });
+            }
+
+            // 5. Asegurar un arreglo seguro para los sistemas de registro de producción
+            const sistemasReg = Array.isArray(formData.sistemas_registro) ? formData.sistemas_registro : [];
+
+            // 6. Construcción del payload final procesado
+            const payload = {
+                // Datos del Productor formalizados
+                productor: {
+                    cedula_rif: cedulaCompleta,
+                    nombre: formData.productor_nombre?.trim(),
+                    telefono: telefonoFormateado,
+                    correo: formData.productor_correo?.trim() || null // Si está vacío lo manda como null
+                },
+
+                // Datos base del Predio (Campos nativos)
+                nombre_predio: formData.nombre_predio?.trim(),
+                municipio: formData.municipio,
+                parroquia: formData.parroquia,
+                comunidad: formData.comunidad?.trim(),
+                centro_poblado: formData.centro_poblado?.trim(),
+                direccion: formData.direccion?.trim(),
+                superficie: formData.superficie !== "" ? parseFloat(formData.superficie) : 0,
+                coordenadas: formData.coordenadas?.trim() || null,
+                tipo_propiedad: formData.tipo_propiedad,
+                tenencia: formData.tenencia,
+                vialidad: formData.vialidad,
+                servicios: serviciosFormateados,
+
+                // Bloques relacionales limpios y tipados correctamente
+                infraestructura: infraestructuraSanitizada,
+
+                produccion: {
+                    tipo_explotacion: formData.tipo_explotacion,
+                    registro_sanitario: sistemasReg.includes("Sanitario"),
+                    registro_productivo: sistemasReg.includes("Productivo"),
+                    registro_reproductivo: sistemasReg.includes("Reproductivo"),
+                    registro_financiero: sistemasReg.includes("Financiero")
+                },
+
+                // Datos complementarios obligatorios por estructura de serializers
+                rubros_vegetales: formData.rubros_vegetales || [],
+                existencia_animal: formData.existencia_animal || {},
+                maquinaria: formData.maquinaria || {}
+            };
+
+            // 7. Despacho de la petición HTTP
             const response = await fetch('http://127.0.0.1:8000/api/predios/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Si tienes autenticación, añade el token aquí
+                    // 'Authorization': `Bearer ${token}` // Descomentar de ser necesario más adelante
                 },
-                body: JSON.stringify({
-                    // Datos del Productor
-                    productor: {
-                        cedula_rif: formData.productor_cedula,
-                        nombre: formData.productor_nombre,
-                        telefono: formData.productor_telefono,
-                        correo: formData.productor_correo
-                    },
-                    // Datos del Predio
-                    nombre_predio: formData.nombre_predio,
-                    municipio: formData.municipio,
-                    parroquia: formData.parroquia,
-                    comunidad: formData.comunidad,
-                    superficie: formData.superficie,
-                    coordenadas: formData.coordenadas,
-                    tenencia: formData.tenencia,
-                    vialidad: formData.vialidad,
-                    servicios: formData.servicios,
-                    centro_poblado: formData.centro_poblado,
-                    direccion: formData.direccion,
-                    tipo_propiedad: formData.tipo_propiedad,
-
-                    // Relación con Infraestructura
-                    infraestructura: formData.infraestructura,
-
-                    // Relación con Producción
-                    produccion: {
-                        tipo_explotacion: formData.tipo_explotacion,
-                        registro_sanitario: formData.sistemas_registro.includes("Sanitario"),
-                        registro_productivo: formData.sistemas_registro.includes("Productivo"),
-                        registro_reproductivo: formData.sistemas_registro.includes("Reproductivo"),
-                        registro_financiero: formData.sistemas_registro.includes("Financiero")
-                    }
-                })
+                body: JSON.stringify(payload)
             });
 
             if (response.ok) {
-                // Alerta de Éxito - González Software
                 Swal.fire({
                     title: '¡Registro Exitoso!',
                     text: 'El predio ha sido registrado con éxito en el sistema.',
                     icon: 'success',
-                    confirmButtonColor: '#10b981', // El verde esmeralda de tu UI
+                    confirmButtonColor: '#10b981',
                     confirmButtonText: 'Aceptar',
                     didOpen: () => {
                         const popup = Swal.getPopup();
@@ -1131,13 +1428,20 @@ export default function Dashboard() {
                         }
                     }
                 });
+
+                // Aquí podrías opcionalmente limpiar el formulario o redirigir al usuario
             } else {
-                // Alerta de Error - González Software
+                // Extracción detallada de errores devueltos por los serializadores de Django
+                const errorData = await response.json();
+                console.error("Errores de validación de Django:", errorData);
+                // ── AGREGA ESTA LÍNEA PARA VER AL CULPABLE DIRECTAMENTE ──
+                console.dir(errorData.productor);
+
                 Swal.fire({
                     title: 'Error al guardar',
-                    text: 'Por favor, verifique los datos de georreferenciación e intente nuevamente.',
+                    text: 'Por favor, verifique los datos introducidos e intente nuevamente.',
                     icon: 'error',
-                    confirmButtonColor: '#d32f2f', // Rojo de alerta
+                    confirmButtonColor: '#d32f2f',
                     confirmButtonText: 'Entendido',
                     didOpen: () => {
                         const popup = Swal.getPopup();
@@ -1152,7 +1456,6 @@ export default function Dashboard() {
             alert("No se pudo conectar con el servidor.");
         }
     };
-
     const cerrarSesion = () => {
         sessionStorage.removeItem("usuario_predios");
         navigate("/predios/login");
@@ -1239,6 +1542,13 @@ export default function Dashboard() {
                         active={tabActiva === "mapa"}
                         onClick={() => manejarCambioTab("mapa")}
                         icon={<IconMapa />}
+                    />
+
+                    <MenuItem
+                        label="Reportes"
+                        active={tabActiva === "reportes"}
+                        onClick={() => manejarCambioTab("reportes")}
+                        icon={<IconReportes />}
                     />
                 </nav>
 
@@ -2679,7 +2989,7 @@ export default function Dashboard() {
                                     border: "1px solid #e0e0e0",
                                     height: "600px"
                                 }}>
-                                    
+
                                     <div style={{ height: "100%", width: "100%", borderRadius: "12px", overflow: "hidden" }}>
                                         <MapaBarinas predios={listaPredios} />
                                     </div>
@@ -2765,6 +3075,109 @@ export default function Dashboard() {
                             </div>
                         </div>
                     )}
+
+                    {tabActiva === "reportes" && (
+                        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+
+                            {/* ── TÍTULO Y BUSCADOR (Exactamente igual al historial) ── */}
+                            <div style={{
+                                display: "flex", justifyContent: "space-between", alignItems: "center",
+                                marginBottom: "20px", flexWrap: "wrap", gap: "10px"
+                            }}>
+                                <h2 style={{ color: "#136442", fontSize: "16px", fontWeight: "bold", margin: 0 }}>
+                                    Historial de Predios Registrados
+                                </h2>
+
+                                <div style={{ position: "relative", width: "100%", maxWidth: "350px" }}>
+                                    <input
+                                        type="text" placeholder="Buscar por productor o predio..."
+                                        value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
+                                        style={{
+                                            width: "100%", padding: "10px 15px", borderRadius: "8px",
+                                            border: "1.4px solid #ccc", fontSize: "14px", outline: "none",
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* ── TABLA DE REGISTROS (Exactamente igual al historial) ── */}
+                            <div style={{
+                                backgroundColor: "#fff", padding: "20px", borderRadius: "12px",
+                                boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
+                            }}>
+                                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: "2px solid #136442", color: "#136442" }}>
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>ID</th>
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>Nombre del Predio</th>
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>Productor</th>
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>Municipio</th>
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>Superficie</th>
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {/* Nota: Si usas 'prediosFiltrados' para las búsquedas de este módulo, se mantendrá sincronizado perfectamente */}
+                                        {prediosFiltrados.length > 0 ? (
+                                            prediosFiltrados.map((p, index) => (
+                                                <tr
+                                                    key={p.id_predio}
+                                                    style={{
+                                                        borderBottom: "1px solid #f0f0f0",
+                                                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
+                                                    }}
+                                                >
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>#{p.id_predio}</td>
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>
+                                                        {/* Única diferencia: El botón ejecuta la función del PDF usando los mismos estilos del botón de detalles */}
+                                                        <button
+                                                            onClick={() => {
+                                                                // 1. BUSCAMOS EL PREDIO EN LA LISTA MAESTRA (la que tiene todo cargado)
+                                                                // Buscamos el objeto que coincida con el ID del predio que quieres imprimir
+                                                                const predioActualizado = listaPredios.find(item => item.id_predio === p.id_predio) || p;
+
+                                                                // 2. FORZAMOS EL USO DE 'servicios_lectura'
+                                                                // Si el predio tiene servicios, úsalos. Si no, intenta obtenerlos de donde los estés editando (predioSeleccionado)
+                                                                const serviciosParaPDF = (predioActualizado.servicios_lectura && predioActualizado.servicios_lectura.length > 0)
+                                                                    ? predioActualizado.servicios_lectura
+                                                                    : (predioSeleccionado?.id_predio === p.id_predio ? predioSeleccionado.servicios_lectura : []);
+
+                                                                // 3. CONSTRUIMOS EL OBJETO QUE EL PDF VA A LEER
+                                                                const objetoParaPDF = {
+                                                                    ...predioActualizado,
+                                                                    servicios_lectura: serviciosParaPDF
+                                                                };
+
+                                                                console.log("Lo que le estoy enviando al PDF:", objetoParaPDF);
+
+                                                                // 4. GENERAMOS
+                                                                generarPDFPredio(objetoParaPDF);
+                                                            }}
+                                                            style={{ /* tus estilos */ }}
+                                                        >
+                                                            Generar Ficha PDF
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="6" style={{ textAlign: "center", padding: "40px", color: "#999" }}>
+                                                    No se encontraron registros.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    )}
+
                 </section>
             </main>
         </div>
