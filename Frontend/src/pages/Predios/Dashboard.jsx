@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import escudo from "../../assets/logo2.jpg";
-import MapaBarinas from "../../components/MapaBarinas";
 import Swal from 'sweetalert2';
 
 import {
