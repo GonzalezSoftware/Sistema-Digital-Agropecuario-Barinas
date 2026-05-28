@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import escudo from "../../assets/logo2.jpg";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import axios from "axios";
 
 // ── ICONOS SVG DEL DASHBOARD PRODUCCIÓN ──────────────────
@@ -146,7 +147,8 @@ export default function DashboardProduccion() {
         else setUsuario(JSON.parse(data));
     }, [navigate]);
 
-
+    const [codigoGenerado, setCodigoGenerado] = useState("");
+    const [codigoIngresado, setCodigoIngresado] = useState("");
 
     const [mostrarModal, setMostrarModal] = useState(false);
     const [predioSeleccionado, setPredioSeleccionado] = useState(null);
@@ -555,142 +557,260 @@ export default function DashboardProduccion() {
         }, 2500);
     };
 
-const guardarInventario = async () => {
+    const guardarInventario = async () => {
 
-    if (!predioActivo?.id_predio) {
+        if (!predioActivo?.id_predio) {
 
-        alert("Seleccione un predio");
+            Swal.fire({
+                icon: "warning",
+                title: "Predio no seleccionado",
+                text: "Debe seleccionar un predio"
+            });
 
-        return;
-    }
+            return;
+        }
 
-    try {
+        // ─────────────────────────────
+        // CONFIRMACIÓN
+        // ─────────────────────────────
 
-        const data = {
+        const confirmacion = await Swal.fire({
 
-            // ─────────────────────────────
-            // RUBROS VEGETALES
-            // ─────────────────────────────
+            title: "¿Guardar caracterización?",
 
-            rubros_vegetales: rubrosVegetales,
+            text: "Se enviará un código de validación al productor.",
 
-            // ─────────────────────────────
-            // EXISTENCIA ANIMAL
-            // ─────────────────────────────
+            icon: "question",
 
-            existencia_animal: {
+            showCancelButton: true,
 
-                especiesSeleccionadas:
-                    inventarioInicial.especiesSeleccionadas,
+            confirmButtonText: "Sí, continuar",
 
-                vacunos:
-                    inventarioInicial.vacunos,
+            cancelButtonText: "Cancelar",
 
-                capacidadVacuna:
-                    inventarioInicial.capacidadVacuna,
+            confirmButtonColor: "#136442"
+        });
 
-                bufalinos:
-                    inventarioInicial.bufalinos,
+        if (!confirmacion.isConfirmed) return;
 
-                capacidadBufalina:
-                    inventarioInicial.capacidadBufalina,
+        // ─────────────────────────────
+        // GENERAR CÓDIGO
+        // ─────────────────────────────
 
-                equinos:
-                    inventarioInicial.equinos,
+        const codigo = Math.floor(
+            100000 + Math.random() * 900000
+        ).toString();
 
-                capacidadEquina:
-                    inventarioInicial.capacidadEquina,
+        setCodigoGenerado(codigo);
 
-                ovinos:
-                    inventarioInicial.ovinos,
+        console.log("CÓDIGO GENERADO:", codigo);
 
-                capacidadOvina:
-                    inventarioInicial.capacidadOvina,
+        // ─────────────────────────────
+        // ENVIAR  WHATSAPP
+        // ─────────────────────────────
+        const telefono =
+            predioActivo?.productor?.telefono;
 
-                porcinos:
-                    inventarioInicial.porcinos,
+        const envio = await axios.post(
 
-                capacidadPorcina:
-                    inventarioInicial.capacidadPorcina,
+            "http://127.0.0.1:8000/api/enviar-codigo/",
 
-                caprinos:
-                    inventarioInicial.caprinos,
-
-                capacidadCaprino:
-                    inventarioInicial.capacidadCaprino,
-
-                conejos:
-                    inventarioInicial.conejos,
-
-                capacidadCunicola:
-                    inventarioInicial.capacidadCunicola,
-
-                aves:
-                    inventarioInicial.aves,
-
-                capacidadAvesCorral:
-                    inventarioInicial.capacidadAvesCorral,
-
-                apicultura:
-                    inventarioInicial.apicultura,
-
-                capacidadApicultura:
-                    inventarioInicial.capacidadApicultura
-            },
-
-            // ─────────────────────────────
-            // MAQUINARIA
-            // ─────────────────────────────
-
-            maquinaria: {
-
-                maquinariaSeleccionada:
-                    inventarioInicial.maquinariaSeleccionada,
-
-                maquinaria_ruedas:
-                    inventarioInicial.maquinaria_ruedas,
-
-                implementos:
-                    inventarioInicial.implementos,
-
-                riego:
-                    inventarioInicial.riego,
-
-                otros_equipos:
-                    inventarioInicial.otros_equipos
+            {
+                telefono
             }
-        };
-
-        console.log(
-            "DATOS ENVIADOS:",
-            data
         );
 
-        const response = await axios.patch(
+        const codigoServidor =
+            envio.data.codigo;
 
-            `http://127.0.0.1:8000/api/predios/${predioActivo.id_predio}/`,
+        setCodigoGenerado(codigoServidor);
 
-            data
-        );
+        Swal.fire({
 
-        console.log(response.data);
+            icon: "success",
 
-        alert(
-            "Caracterización guardada correctamente"
-        );
+            title: "Código enviado",
 
-    } catch (error) {
+            text:
+                "El código fue enviado al WhatsApp del productor"
+        });
 
-        console.error(
-            "ERROR:",
-            error.response?.data || error.message
-        );
 
-        alert(
-            "Error al guardar"
-        );
-    }
-};
+        // ─────────────────────────────
+        // PEDIR CÓDIGO
+        // ─────────────────────────────
+
+        const { value: codigoUsuario } = await Swal.fire({
+
+            title: "Validación del Productor",
+
+            input: "text",
+
+            inputLabel: "Ingrese el código enviado al WhatsApp del productor",
+
+            inputPlaceholder: "Ingrese el código",
+
+            confirmButtonText: "Validar",
+
+            confirmButtonColor: "#136442",
+
+            showCancelButton: true
+        });
+
+        if (!codigoUsuario) {
+
+            Swal.fire({
+                icon: "warning",
+                title: "Proceso cancelado"
+            });
+
+            return;
+        }
+
+        // ─────────────────────────────
+        // VALIDAR CÓDIGO
+        // ─────────────────────────────
+
+        if (codigoUsuario !== codigoServidor) {
+
+            Swal.fire({
+                icon: "error",
+                title: "Código incorrecto",
+                text: "No se pudo validar al productor"
+            });
+
+            return;
+        }
+
+        // ─────────────────────────────
+        // DATA PARA DJANGO
+        // ─────────────────────────────
+
+        try {
+
+            const data = {
+
+                rubros_vegetales: rubrosVegetales,
+
+                existencia_animal: {
+
+                    especiesSeleccionadas:
+                        inventarioInicial.especiesSeleccionadas,
+
+                    vacunos:
+                        inventarioInicial.vacunos,
+
+                    capacidadVacuna:
+                        inventarioInicial.capacidadVacuna,
+
+                    bufalinos:
+                        inventarioInicial.bufalinos,
+
+                    capacidadBufalina:
+                        inventarioInicial.capacidadBufalina,
+
+                    equinos:
+                        inventarioInicial.equinos,
+
+                    capacidadEquina:
+                        inventarioInicial.capacidadEquina,
+
+                    ovinos:
+                        inventarioInicial.ovinos,
+
+                    capacidadOvina:
+                        inventarioInicial.capacidadOvina,
+
+                    porcinos:
+                        inventarioInicial.porcinos,
+
+                    capacidadPorcina:
+                        inventarioInicial.capacidadPorcina,
+
+                    caprinos:
+                        inventarioInicial.caprinos,
+
+                    capacidadCaprino:
+                        inventarioInicial.capacidadCaprino,
+
+                    conejos:
+                        inventarioInicial.conejos,
+
+                    capacidadCunicola:
+                        inventarioInicial.capacidadCunicola,
+
+                    aves:
+                        inventarioInicial.aves,
+
+                    capacidadAvesCorral:
+                        inventarioInicial.capacidadAvesCorral,
+
+                    apicultura:
+                        inventarioInicial.apicultura,
+
+                    capacidadApicultura:
+                        inventarioInicial.capacidadApicultura,
+                },
+
+                maquinaria: {
+
+                    maquinariaSeleccionada:
+                        inventarioInicial.maquinariaSeleccionada,
+
+                    maquinaria_ruedas:
+                        inventarioInicial.maquinaria_ruedas,
+
+                    implementos:
+                        inventarioInicial.implementos,
+
+                    riego:
+                        inventarioInicial.riego,
+
+                    otros_equipos:
+                        inventarioInicial.otros_equipos
+                }
+            };
+
+            console.log("DATOS ENVIADOS:", data);
+
+            const response = await axios.patch(
+
+                `http://127.0.0.1:8000/api/predios/${predioActivo.id_predio}/`,
+
+                data
+            );
+
+            console.log(response.data);
+
+            Swal.fire({
+
+                icon: "success",
+
+                title: "Caracterización guardada",
+
+                text: "La información fue validada por el productor"
+            });
+
+        } catch (error) {
+
+            console.error(
+
+                "ERROR:",
+
+                error.response?.data || error.message
+            );
+
+            Swal.fire({
+
+                icon: "error",
+
+                title: "Error al guardar",
+
+                text: "Ocurrió un problema en el servidor"
+            });
+        }
+    };
+
     const cerrarSesion = () => {
         sessionStorage.removeItem("usuario_produccion");
         navigate("/produccion/login");
@@ -788,7 +908,27 @@ const guardarInventario = async () => {
                     <MenuItem
                         label="Caracterización"
                         active={tabActiva === "caracterizacion"}
-                        onClick={() => setTabActiva("caracterizacion")}
+                        onClick={() => {
+
+                            if (
+                                predioActivo?.caracterizacion_completada
+                            ) {
+
+                                Swal.fire({
+
+                                    icon: "warning",
+
+                                    title: "Caracterización ya realizada",
+
+                                    text:
+                                        "Este predio ya posee una caracterización productiva registrada. Debe utilizar la opción de Actualización Productiva."
+                                });
+
+                                return;
+                            }
+
+                            setTabActiva("caracterizacion");
+                        }}
                         icon={<IconCaracterizacion />}
                     />
 
@@ -3339,101 +3479,101 @@ const guardarInventario = async () => {
                                         </FormSection>
                                     )}
 
-                                    
+
                                     {subCaracterizacion === "maquinaria" && inventarioInicial.maquinariaSeleccionada.includes("Maquinaria Agrícola de Ruedas") && (
-                                                <FormSection title="Maquinaria Agrícola de Ruedas">
-                                                    <div style={grid3}>
-                                                        {Object.keys(inventarioInicial.maquinaria_ruedas).map(
-                                                            (item) => (
-                                                                <InputField
-                                                                    key={item}
-                                                                    label={item.replaceAll("_", " ").toUpperCase()}
-                                                                    type="number"
-                                                                    onChange={(e) => {
-                                                                        setInventarioInicial((prev) => ({
-                                                                            ...prev,
-                                                                            maquinaria_ruedas: {
-                                                                                ...prev.maquinaria_ruedas,
-                                                                                [item]: parseInt(e.target.value) || 0,
-                                                                            },
-                                                                        }));
-                                                                    }}
-                                                                />
-                                                            ),
-                                                        )}
-                                                    </div>
-                                                </FormSection>
+                                        <FormSection title="Maquinaria Agrícola de Ruedas">
+                                            <div style={grid3}>
+                                                {Object.keys(inventarioInicial.maquinaria_ruedas).map(
+                                                    (item) => (
+                                                        <InputField
+                                                            key={item}
+                                                            label={item.replaceAll("_", " ").toUpperCase()}
+                                                            type="number"
+                                                            onChange={(e) => {
+                                                                setInventarioInicial((prev) => ({
+                                                                    ...prev,
+                                                                    maquinaria_ruedas: {
+                                                                        ...prev.maquinaria_ruedas,
+                                                                        [item]: parseInt(e.target.value) || 0,
+                                                                    },
+                                                                }));
+                                                            }}
+                                                        />
+                                                    ),
+                                                )}
+                                            </div>
+                                        </FormSection>
                                     )}
 
                                     {subCaracterizacion === "maquinaria" && inventarioInicial.maquinariaSeleccionada.includes("Implementos Agrícolas") && (
-                                                <FormSection title="Implemetos Agrícolas">
-                                                    <div style={grid3}>
-                                                        {Object.keys(inventarioInicial.implementos).map(
-                                                            (item) => (
-                                                                <InputField
-                                                                    key={item}
-                                                                    label={item.replaceAll("_", " ").toUpperCase()}
-                                                                    type="number"
-                                                                    onChange={(e) => {
-                                                                        setInventarioInicial((prev) => ({
-                                                                            ...prev,
-                                                                            implementos: {
-                                                                                ...prev.implementos,
-                                                                                [item]: parseInt(e.target.value) || 0,
-                                                                            },
-                                                                        }));
-                                                                    }}
-                                                                />
-                                                            ),
-                                                        )}
-                                                    </div>
-                                                </FormSection>
+                                        <FormSection title="Implemetos Agrícolas">
+                                            <div style={grid3}>
+                                                {Object.keys(inventarioInicial.implementos).map(
+                                                    (item) => (
+                                                        <InputField
+                                                            key={item}
+                                                            label={item.replaceAll("_", " ").toUpperCase()}
+                                                            type="number"
+                                                            onChange={(e) => {
+                                                                setInventarioInicial((prev) => ({
+                                                                    ...prev,
+                                                                    implementos: {
+                                                                        ...prev.implementos,
+                                                                        [item]: parseInt(e.target.value) || 0,
+                                                                    },
+                                                                }));
+                                                            }}
+                                                        />
+                                                    ),
+                                                )}
+                                            </div>
+                                        </FormSection>
                                     )}
 
                                     {subCaracterizacion === "maquinaria" && inventarioInicial.maquinariaSeleccionada.includes("Equipos de Riego") && (
-                                                <FormSection title="Equipos de Riego">
-                                                    <div style={grid3}>
-                                                        {Object.keys(inventarioInicial.riego).map((item) => (
-                                                            <InputField
-                                                                key={item}
-                                                                label={item.replaceAll("_", " ").toUpperCase()}
-                                                                type="number"
-                                                                onChange={(e) => {
-                                                                    setInventarioInicial((prev) => ({
-                                                                        ...prev,
-                                                                        riego: {
-                                                                            ...prev.riego,
-                                                                            [item]: parseInt(e.target.value) || 0,
-                                                                        },
-                                                                    }));
-                                                                }}
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                </FormSection>
+                                        <FormSection title="Equipos de Riego">
+                                            <div style={grid3}>
+                                                {Object.keys(inventarioInicial.riego).map((item) => (
+                                                    <InputField
+                                                        key={item}
+                                                        label={item.replaceAll("_", " ").toUpperCase()}
+                                                        type="number"
+                                                        onChange={(e) => {
+                                                            setInventarioInicial((prev) => ({
+                                                                ...prev,
+                                                                riego: {
+                                                                    ...prev.riego,
+                                                                    [item]: parseInt(e.target.value) || 0,
+                                                                },
+                                                            }));
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </FormSection>
                                     )}
 
                                     {subCaracterizacion === "maquinaria" && inventarioInicial.maquinariaSeleccionada.includes("Otros Equipos") && (
-                                                <FormSection title="Otros Equipos">
-                                                    <div style={grid3}>
-                                                        {Object.keys(inventarioInicial.otros_equipos).map((item) => (
-                                                            <InputField
-                                                                key={item}
-                                                                label={item.replaceAll("_", " ").toUpperCase()}
-                                                                type="number"
-                                                                onChange={(e) => {
-                                                                    setInventarioInicial((prev) => ({
-                                                                        ...prev,
-                                                                        otros_equipos: {
-                                                                            ...prev.otros_equipos,
-                                                                            [item]: parseInt(e.target.value) || 0,
-                                                                        },
-                                                                    }));
-                                                                }}
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                </FormSection>
+                                        <FormSection title="Otros Equipos">
+                                            <div style={grid3}>
+                                                {Object.keys(inventarioInicial.otros_equipos).map((item) => (
+                                                    <InputField
+                                                        key={item}
+                                                        label={item.replaceAll("_", " ").toUpperCase()}
+                                                        type="number"
+                                                        onChange={(e) => {
+                                                            setInventarioInicial((prev) => ({
+                                                                ...prev,
+                                                                otros_equipos: {
+                                                                    ...prev.otros_equipos,
+                                                                    [item]: parseInt(e.target.value) || 0,
+                                                                },
+                                                            }));
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </FormSection>
                                     )}
 
 

@@ -36,6 +36,7 @@ class Predio(models.Model):
     vialidad = models.CharField(max_length=50) # (Excelente, Bueno, etc.)
     
     fecha_registro = models.DateTimeField(auto_now_add=True)
+    caracterizacion_completada = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'predios'
