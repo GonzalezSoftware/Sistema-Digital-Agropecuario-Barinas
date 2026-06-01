@@ -7,6 +7,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import MapaBarinas from "../../components/MapaBarinas";
+
 
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -214,7 +216,7 @@ const generarPDFPredio = (predio) => {
     });
 
     // ────────────────────────────────────────────────────────
-    // V. SERVICIOS BÁSICOS (USANDO LA ESTRUCTURA CORRECTA)
+    // V. SERVICIOS BÁSICOS (NORMALIZADO)
     // ────────────────────────────────────────────────────────
     currentY = doc.lastAutoTable.finalY + 7;
     doc.setFont("helvetica", "bold");
@@ -223,10 +225,19 @@ const generarPDFPredio = (predio) => {
     doc.text("V. SERVICIOS BÁSICOS INSTALADOS EN EL PREDIO", 12, currentY);
     doc.line(12, currentY + 2, 204, currentY + 2);
 
-    // Simplificación absoluta: usamos el campo que ya definimos en el Serializer
+    // LÓGICA DE NORMALIZACIÓN:
+    // 1. Tomamos el array de la base de datos
+    // 2. Convertimos cada elemento a minúsculas, excepto la primera letra
     const serviciosFinales = predio.servicios_lectura || [];
-    const listaServiciosText = serviciosFinales.length > 0
-        ? serviciosFinales.join("   |   ")
+
+    const serviciosProcesados = serviciosFinales.map(s => {
+        if (!s) return "";
+        const str = s.toString();
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    });
+
+    const listaServiciosText = serviciosProcesados.length > 0
+        ? serviciosProcesados.join("   |   ")
         : "Ningún servicio básico declarado en el registro territorial.";
 
     autoTable(doc, {
@@ -1084,6 +1095,7 @@ export default function Dashboard() {
         try {
             const response = await fetch('http://127.0.0.1:8000/api/predios/');
             const data = await response.json();
+            console.log("Datos brutos del servidor:", data);
             setListaPredios(data);
         } catch (error) {
             console.error("Error:", error);
@@ -1149,6 +1161,7 @@ export default function Dashboard() {
 
     const guardarCambiosReal = async () => {
         setCargandoAccion(true);
+        console.log("Enviando al servidor - Campo:", campo, "Valor:", valor);
         try {
             const datosAEnviar = JSON.parse(JSON.stringify(predioSeleccionado));
 
@@ -3136,28 +3149,19 @@ export default function Dashboard() {
                                                         {/* Única diferencia: El botón ejecuta la función del PDF usando los mismos estilos del botón de detalles */}
                                                         <button
                                                             onClick={() => {
-                                                                // 1. BUSCAMOS EL PREDIO EN LA LISTA MAESTRA (la que tiene todo cargado)
-                                                                // Buscamos el objeto que coincida con el ID del predio que quieres imprimir
-                                                                const predioActualizado = listaPredios.find(item => item.id_predio === p.id_predio) || p;
+                                                                // Buscamos si existe la propiedad, si no, devolvemos un array vacío por defecto
+                                                                const servicios = p.servicios_lectura || [];
 
-                                                                // 2. FORZAMOS EL USO DE 'servicios_lectura'
-                                                                // Si el predio tiene servicios, úsalos. Si no, intenta obtenerlos de donde los estés editando (predioSeleccionado)
-                                                                const serviciosParaPDF = (predioActualizado.servicios_lectura && predioActualizado.servicios_lectura.length > 0)
-                                                                    ? predioActualizado.servicios_lectura
-                                                                    : (predioSeleccionado?.id_predio === p.id_predio ? predioSeleccionado.servicios_lectura : []);
-
-                                                                // 3. CONSTRUIMOS EL OBJETO QUE EL PDF VA A LEER
-                                                                const objetoParaPDF = {
-                                                                    ...predioActualizado,
-                                                                    servicios_lectura: serviciosParaPDF
+                                                                // Creamos un objeto "seguro" que el PDF entenderá
+                                                                const predioParaPDF = {
+                                                                    ...p,
+                                                                    servicios_lectura: servicios // Forzamos que siempre exista
                                                                 };
 
-                                                                console.log("Lo que le estoy enviando al PDF:", objetoParaPDF);
-
-                                                                // 4. GENERAMOS
-                                                                generarPDFPredio(objetoParaPDF);
+                                                                // Esto asegura que el PDF reciba un array, incluso si está vacío, evitando errores
+                                                                generarPDFPredio(predioParaPDF);
                                                             }}
-                                                            style={{ /* tus estilos */ }}
+                                                            style={{ /* ...tus estilos */ }}
                                                         >
                                                             Generar Ficha PDF
                                                         </button>

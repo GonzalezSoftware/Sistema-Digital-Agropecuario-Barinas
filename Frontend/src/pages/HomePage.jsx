@@ -22,11 +22,13 @@ export default function HomePage() {
         fontFamily: "'Poppins', sans-serif", gap: "24px",
       }}>
         {/* Logo + Escudo */}
-        <div style={{ display: "flex", alignItems: "center", gap: "20px",ap: "20px",
-    marginLeft: "-30px" }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: "20px", ap: "20px",
+          marginLeft: "-30px"
+        }}>
           <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 45 }} />
           <img src={escudo} alt="Logo MPPAT" style={{ height: 35 }} />
-          
+
         </div>
 
         {/* Texto institucional pegado al logo */}
@@ -90,7 +92,7 @@ export default function HomePage() {
 
         <div style={{ position: "relative", zIndex: 2, padding: "0 80px", maxWidth: "580px" }}>
           <h1 style={{ color: "#fff", fontSize: "42px", fontWeight: 700, lineHeight: 1.15, margin: "0 0 18px" }}>
-             Sistema Digital Agropecuario<br />
+            Sistema Digital Agropecuario<br />
             <span style={{ color: "#86efac" }}>del Estado Barinas</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.85)", fontSize: "15px", lineHeight: 1.6, margin: "0 0 36px" }}>
@@ -99,7 +101,7 @@ export default function HomePage() {
             estadísticas. Todo en una sola plataforma pensada para el productor venezolano.
           </p>
           <div style={{ display: "flex", gap: "16px" }}>
-            <a href="#predios" style={{
+            <a href="../Predios" style={{
               backgroundColor: "#fff", color: "#589e38", padding: "14px 32px",
               borderRadius: "4px", textDecoration: "none", fontWeight: 600, fontSize: "14px",
             }}>Registrar Predio</a>
@@ -111,77 +113,132 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* CARDS */}
-      <div style={{ padding: "64px 80px", background: "#f5f7f5" }}>
-        <h2 style={{ textAlign: "center", color: "#1b4332", fontSize: "25px", marginBottom: "40px" }}>
-          ¿Qué puedes gestionar?
-        </h2>
-        <div style={{
-          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: "28px", maxWidth: "1100px", margin: "0 auto",
-        }}>
-          {[
-            {
-              img: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80",
-              title: "Registro de Predios",
-              desc: "Administra predios con información catastral, ubicación y propietarios.",
-              href: "#predios"
-            },
-            {
-              img: "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=600&q=80",
-              title: "Producción Animal",
-              desc: "Control de inventario ganadero, salud, reproducción y producción.",
-              href: "/produccion"
-            },
-            {
-              img: "https://images.unsplash.com/photo-1601648764658-cf37e8c89b70?w=600&q=80",
-              title: "Producción Vegetal",
-              desc: "Gestión de cultivos, siembras, cosechas e insumos agrícolas.",
-              href: "/produccion"
-            },
-            {
-              img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80",
-              title: "Estadísticas",
-              desc: "Reportes y estadísticas generales de toda tu actividad agropecuaria.",
-              href: "#estadisticas"
-            },
-          ].map((card) => (
-            <a key={card.title} href={card.href} style={{ textDecoration: "none" }}>
-              <div style={{
-                background: "#fff", borderRadius: "12px", overflow: "hidden",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.07)", cursor: "pointer",
-                transition: "transform 0.2s, box-shadow 0.2s",
-              }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = "translateY(-6px)";
-                  e.currentTarget.style.boxShadow = "0 12px 28px rgba(88,158,56,0.15)";
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.07)";
-                }}
-              >
-                {/* Imagen */}
-                <div style={{ height: "160px", overflow: "hidden" }}>
-                  <img src={card.img} alt={card.title} style={{
-                    width: "100%", height: "100%", objectFit: "cover",
-                    transition: "transform 0.3s",
-                  }} />
+      {/* PORTAL INFORMATIVO - DISEÑO ESTÁTICO */}
+      <div id="portal-informativo" style={{ padding: "80px 20px", background: "#f8faf9" }}>
+        <div style={{ maxWidth: "1100px", margin: "0 auto", position: "relative" }}>
+
+          <div style={{ textAlign: "center", marginBottom: "50px" }}>
+            <h2 style={{ color: "#1b4332", fontSize: "32px" }}>Noticias del Sector Agropecuario</h2>
+          </div>
+
+          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+
+            {/* BOTÓN IZQUIERDA (SIN FUNCIÓN) */}
+            <button style={navButtonStyle("left")}> &lt; </button>
+
+            {/* CONTENEDOR DE NOTICIAS (ESTÁTICO) */}
+            <div style={{
+              display: "flex",
+              gap: "25px",
+              overflow: "hidden",
+              padding: "40px 10px",
+              width: "100%",
+              maxWidth: "1010px", // Exactamente 3 tarjetas
+              margin: "0 auto",
+              justifyContent: "center"
+            }}>
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="tarjeta-noticia" style={{
+                  minWidth: "320px",
+                  background: "#fff",
+                  borderRadius: "16px",
+                  border: "1px solid #e2e8f0",
+                  boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
+                  transition: "transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease"
+                }}>
+                  <div style={{ height: "180px", background: "#cbd5e1", borderRadius: "16px 16px 0 0" }} />
+                  <div style={{ padding: "20px" }}>
+                    <div style={{ width: "40%", height: "10px", background: "#e2e8f0", marginBottom: "10px", borderRadius: "4px" }} />
+                    <div style={{ width: "90%", height: "18px", background: "#cbd5e1", borderRadius: "4px" }} />
+                  </div>
                 </div>
-                {/* Texto */}
-                <div style={{ padding: "24px" }}>
-                  <h3 style={{ color: "#589e38", fontSize: "16px", margin: "0 0 10px", fontWeight: 700 }}>
-                    {card.title}
-                  </h3>
-                  <p style={{ color: "#555", fontSize: "14px", lineHeight: 1.6, margin: 0 }}>
-                    {card.desc}
-                  </p>
-                </div>
-              </div>
-            </a>
-          ))}
+              ))}
+            </div>
+
+            {/* BOTÓN DERECHA (SIN FUNCIÓN) */}
+            <button style={navButtonStyle("right")}> &gt; </button>
+          </div>
         </div>
       </div>
+
+      <style>{`
+  .tarjeta-noticia {
+    transform: scale(0.9); 
+  }
+  .tarjeta-noticia:hover {
+    transform: scale(1.01) !important;
+    box-shadow: 0 30px 40px -10px rgba(0,0,0,0.2) !important;
+  }
+  @keyframes aparecer {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tarjeta-noticia { animation: aparecer 0.8s ease-out forwards; }
+`}
+      </style>
+
+     <div style={{ padding: "20px", background: "#f8faf9" }}>
+  <div style={{ textAlign: "center", marginBottom: "60px" }}>
+    <span style={{ color: "#589e38", fontSize: "12px", fontWeight: 800, letterSpacing: "2px", textTransform: "uppercase" }}>
+      Soluciones Integrales
+    </span>
+    <h2 style={{ color: "#1b4332", fontSize: "32px", margin: "10px 0" }}>¿Qué puedes gestionar hoy?</h2>
+  </div>
+
+  <div style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: "30px",
+    width: "95%",
+    margin: "0 auto",
+  }}>
+    {[
+      { img: "https://images.unsplash.com/photo-1591389703635-e15a07b842d7?q=80&w=1333&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Registro de Predios", desc: "Administra información catastral, ubicación y gestión de terrenos." },
+      { img: "https://images.unsplash.com/photo-1454179083322-198bb4daae41?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Producción Animal", desc: "Control de inventario ganadero, salud, reproducción y rendimiento." },
+      { img: "https://images.unsplash.com/photo-1554402100-8d1d9f3dff80?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Producción Vegetal", desc: "Gestión de ciclos de siembra, cosechas e insumos agrícolas." },
+      { img: "https://images.unsplash.com/flagged/photo-1553267252-d100936057c1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Estadísticas", desc: "Reportes visuales y análisis de tu actividad agropecuaria." },
+      { img: "https://plus.unsplash.com/premium_photo-1661389248634-912a0e92b85d?q=80&w=1467&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Reportes", desc: "Generación de informes detallados sobre la rentabilidad y el flujo de caja." },
+      { img: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Actualización de Predio", desc: "Modifica datos catastrales, linderos y mejoras en tiempo real." }
+    ].map((card, idx) => (
+      <div key={idx} className="card-container" style={{
+        background: "#fff",
+        borderRadius: "20px",
+        overflow: "hidden",
+        boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
+        transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)"
+      }}>
+        <div style={{ height: "180px", overflow: "hidden" }}>
+          <img src={card.img} alt={card.title} className="card-img" style={{
+            width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.8s ease"
+          }} />
+        </div>
+
+        <div style={{ padding: "25px" }}>
+          <div style={{
+            width: "30px", height: "3px", background: "#589e38",
+            marginBottom: "15px", borderRadius: "2px", opacity: 0.8
+          }} />
+          <h3 style={{ color: "#1b4332", fontSize: "19px", margin: "0 0 10px", fontWeight: 700 }}>
+            {card.title}
+          </h3>
+          <p style={{ color: "#64748b", fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+            {card.desc}
+          </p>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>{`
+  .card-container:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -10px rgba(88, 158, 56, 0.15) !important;
+  }
+  .card-container:hover .card-img {
+    transform: scale(1.05);
+  }
+`}</style>
 
       {/* SOBRE NOSOTROS */}
       <div id="sobre-nosotros" style={{
@@ -473,3 +530,19 @@ export default function HomePage() {
     </div>
   );
 }
+
+const navButtonStyle = (side) => ({
+  position: "absolute",
+  [side === "left" ? "left" : "right"]: "-20px",
+  zIndex: 10,
+  background: "#589e38",
+  color: "#fff",
+  border: "none",
+  width: "45px",
+  height: "45px",
+  borderRadius: "50%",
+  fontSize: "20px",
+  cursor: "pointer",
+  boxShadow: "0 4px 6px rgba(0,0,0,0.2)",
+  transition: "all 0.2s ease"
+});
