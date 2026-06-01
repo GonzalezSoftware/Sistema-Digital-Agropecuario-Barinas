@@ -132,6 +132,14 @@ const IconInfo = () => (
   </svg>
 );
 
+const NAV_ITEMS = [
+  { label: "Sobre Nosotros", href: "#sobre-nosotros" },
+  { label: "Registro de Predios", href: "/predios", isRoute: true },
+  { label: "Producción Animal y Vegetal", href: "/produccion", isRoute: true },
+  { label: "Estadísticas Generales", href: "/estadística-portalinfo", isRoute: true },
+  { label: "Contactos", href: "#contactos" },
+];
+
 export default function PrediosPage() {
   const navigate = useNavigate();
 
@@ -190,12 +198,14 @@ export default function PrediosPage() {
         boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "sticky", top: 0, zIndex: 100,
         gap: "24px",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "20px",ap: "20px",
-            marginLeft: "-30px" }}>
-                  <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 45 }} />
-                  <img src={escudo} alt="Logo MPPAT" style={{ height: 35 }} />
-                  
-                </div>
+        <div style={{
+          display: "flex", alignItems: "center", gap: "20px", ap: "20px",
+          marginLeft: "-30px"
+        }}>
+          <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 45 }} />
+          <img src={escudo} alt="Logo MPPAT" style={{ height: 35 }} />
+
+        </div>
         <span style={{
           fontSize: "12px", color: "#888", fontStyle: "italic",
           lineHeight: 1.4, borderLeft: "2px solid #e0e0e0", paddingLeft: "16px",
@@ -401,14 +411,14 @@ export default function PrediosPage() {
             {[
               {
                 Icon: IconClipboard,
-                title: "Registro Catastral",
-                desc: "Superficie, uso del suelo, topografía, cobertura vegetal y características físico-naturales completas.",
+                title: "Información del predio",
+                desc: "Nombre del predio, productor, coordenadas (latitud y longitud), infraestructura, servicios básicos y mucho más...",
                 tag: "Core",
               },
               {
                 Icon: IconMap,
                 title: "Mapa Interactivo",
-                desc: "Geolocalización GPS precisa visualizada en mapa interactivo del estado Barinas con Leaflet.",
+                desc: "Georreferenciación precisa visualizada en mapa interactivo del estado Barinas con Leaflet.",
                 tag: "Geo",
               },
               {
@@ -539,426 +549,153 @@ export default function PrediosPage() {
         </div>
       </div>
 
-      {/* ESTADÍSTICAS */}
-      <div style={{ padding: "72px 80px", background: "#fff" }}>
-        <div style={{ maxWidth: "1060px", margin: "0 auto" }}>
-          <span style={{ color: "#136442", fontWeight: 600, fontSize: "11px", textTransform: "uppercase", letterSpacing: "2px" }}>
-            Estadísticas del módulo
-          </span>
-          <h2 style={{ color: "#1b4332", fontSize: "28px", margin: "10px 0 8px", fontWeight: 700 }}>
-            Predios registrados en el estado Barinas
-          </h2>
-          <p style={{ color: "#777", fontSize: "14px", marginBottom: "48px", lineHeight: 1.7 }}>
-            Datos actualizados y verificados por el equipo técnico del MPPAT
-          </p>
-
-          {/* Métricas principales */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px", marginBottom: "40px" }}>
-            {[
-              { Icon: IconLayers, numero: "0", label: "Predios Registrados", sub: "En el sistema" },
-              { Icon: IconTrendingUp, numero: "0 ha", label: "Superficie Total", sub: "Hectáreas catastradas" },
-              { Icon: IconMapPin, numero: "11", label: "Municipios", sub: "Estado Barinas" },
-              { Icon: IconUsers, numero: "0", label: "Productores", sub: "Registrados" },
-            ].map((stat) => (
-              <div key={stat.label} className="stat-card" style={{
-                background: "#f8faf8", borderRadius: "14px", padding: "28px 20px",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
-                border: "1px solid #eef0ee", borderBottom: "3px solid #136442",
-              }}>
-                <div style={{ width: "48px", height: "48px", borderRadius: "11px", background: "#e8f5e9", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
-                  <stat.Icon />
-                </div>
-                <div style={{ fontSize: "30px", fontWeight: 700, color: "#136442", marginBottom: "4px", lineHeight: 1 }}>{stat.numero}</div>
-                <div style={{ fontSize: "14px", color: "#1b4332", fontWeight: 600, marginBottom: "4px" }}>{stat.label}</div>
-                <div style={{ fontSize: "12px", color: "#aaa" }}>{stat.sub}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Métricas secundarias */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "40px" }}>
-            {[
-              { numero: "0", label: "Predios Agrícolas" },
-              { numero: "0", label: "Predios Pecuarios" },
-              { numero: "0", label: "Predios Mixtos" },
-              { numero: "0", label: "Fichas Generadas" },
-            ].map((stat) => (
-              <div key={stat.label} style={{ background: "#f8faf8", borderRadius: "10px", padding: "18px 16px", border: "1px solid #eef0ee", textAlign: "center" }}>
-                <div style={{ fontSize: "22px", fontWeight: 700, color: "#136442", marginBottom: "4px" }}>{stat.numero}</div>
-                <div style={{ fontSize: "12px", color: "#888" }}>{stat.label}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* FILA 1 — Barras municipios + Dona uso suelo */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: "24px", marginBottom: "24px" }}>
-
-            {/* Barras SVG — Predios por municipio */}
-            <div style={{ background: "#f8faf8", borderRadius: "14px", padding: "28px", border: "1px solid #eef0ee" }}>
-              <h3 style={{ color: "#1b4332", fontSize: "15px", fontWeight: 700, margin: "0 0 4px" }}>Predios por Municipio</h3>
-              <p style={{ color: "#aaa", fontSize: "12px", margin: "0 0 20px" }}>Distribución geográfica — se llenará con datos reales</p>
-              {(() => {
-                const municipios = ["Barinas", "Obispos", "Cruz P.", "Bolívar", "Rojas", "Pedraza", "Sucre", "Arismendi", "Sto. Dom.", "Sosa", "E. Zamora"];
-                const valores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-                const maxVal = Math.max(...valores, 1);
-                const w = 520, h = 200, padL = 8, padR = 8, padT = 10, padB = 50;
-                const barW = (w - padL - padR) / municipios.length;
-                const colores = ["#136442", "#1a7a50", "#136442", "#1a7a50", "#136442", "#1a7a50", "#136442", "#1a7a50", "#136442", "#1a7a50", "#136442"];
-                return (
-                  <svg width="100%" viewBox={`0 0 ${w} ${h + padB}`} style={{ overflow: "visible" }}>
-                    {[0, 25, 50, 75, 100].map(v => {
-                      const y = padT + (h - padT) * (1 - v / 100);
-                      return <line key={v} x1={padL} x2={w - padR} y1={y} y2={y} stroke="#f0f0f0" strokeWidth="1" />;
-                    })}
-                    {municipios.map((m, i) => {
-                      const barH = Math.max(((valores[i] / maxVal) * (h - padT - 4)), 4);
-                      const x = padL + i * barW + barW * 0.15;
-                      const bw = barW * 0.7;
-                      const y = padT + (h - padT) - barH;
-                      return (
-                        <g key={m}>
-                          <rect x={x} y={y} width={bw} height={barH} fill={colores[i]} rx="4" opacity="0.85" />
-                          <text x={x + bw / 2} y={h + padT + 14} textAnchor="middle" fontSize="9" fill="#999" transform={`rotate(-35, ${x + bw / 2}, ${h + padT + 14})`}>{m}</text>
-                        </g>
-                      );
-                    })}
-                    <line x1={padL} x2={w - padR} y1={h + padT - 0} y2={h + padT} stroke="#e0e0e0" strokeWidth="1" />
-                  </svg>
-                );
-              })()}
-            </div>
-
-            {/* Dona SVG — Uso del suelo */}
-            <div style={{ background: "#f8faf8", borderRadius: "14px", padding: "28px", border: "1px solid #eef0ee" }}>
-              <h3 style={{ color: "#1b4332", fontSize: "15px", fontWeight: 700, margin: "0 0 4px" }}>Uso del Suelo</h3>
-              <p style={{ color: "#aaa", fontSize: "12px", margin: "0 0 16px" }}>Clasificación por tipo de actividad</p>
-              {(() => {
-                const data = [
-                  { name: "Pecuario", value: 45, color: "#136442" },
-                  { name: "Agrícola", value: 30, color: "#1e8a5a" },
-                  { name: "Mixto", value: 18, color: "#4ade80" },
-                  { name: "Forestal", value: 7, color: "#bbf7d0" },
-                ];
-                const cx = 90, cy = 90, r = 72, ri = 44;
-                let angle = -90;
-                const slices = data.map(d => {
-                  const deg = (d.value / 100) * 360;
-                  const start = angle;
-                  angle += deg;
-                  return { ...d, start, end: angle };
-                });
-                const arc = (cx, cy, r, startDeg, endDeg) => {
-                  const toRad = d => (d * Math.PI) / 180;
-                  const x1 = cx + r * Math.cos(toRad(startDeg));
-                  const y1 = cy + r * Math.sin(toRad(startDeg));
-                  const x2 = cx + r * Math.cos(toRad(endDeg));
-                  const y2 = cy + r * Math.sin(toRad(endDeg));
-                  const large = endDeg - startDeg > 180 ? 1 : 0;
-                  return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
-                };
-                return (
-                  <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                    <svg width="180" height="180">
-                      {slices.map((s, i) => (
-                        <path key={i}
-                          d={`${arc(cx, cy, r, s.start, s.end)} L ${cx + ri * Math.cos((s.end * Math.PI) / 180)} ${cy + ri * Math.sin((s.end * Math.PI) / 180)} A ${ri} ${ri} 0 ${s.end - s.start > 180 ? 1 : 0} 0 ${cx + ri * Math.cos((s.start * Math.PI) / 180)} ${cy + ri * Math.sin((s.start * Math.PI) / 180)} Z`}
-                          fill={s.color} opacity="0.9"
-                        />
-                      ))}
-                      <circle cx={cx} cy={cy} r={ri - 2} fill="#f8faf8" />
-                      <text x={cx} y={cy - 6} textAnchor="middle" fontSize="18" fontWeight="700" fill="#136442">100%</text>
-                      <text x={cx} y={cy + 12} textAnchor="middle" fontSize="9" fill="#aaa">Catastrado</text>
-                    </svg>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                      {data.map(d => (
-                        <div key={d.name} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <div style={{ width: "10px", height: "10px", borderRadius: "3px", background: d.color }} />
-                          <span style={{ fontSize: "12px", color: "#555", flex: 1 }}>{d.name}</span>
-                          <span style={{ fontSize: "13px", fontWeight: 700, color: "#136442" }}>{d.value}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* FILA 2 — Radar + Área crecimiento */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: "24px", marginBottom: "24px" }}>
-
-            {/* Radar SVG */}
-            <div style={{ background: "#f8faf8", borderRadius: "14px", padding: "28px", border: "1px solid #eef0ee" }}>
-              <h3 style={{ color: "#1b4332", fontSize: "15px", fontWeight: 700, margin: "0 0 4px" }}>Características del Territorio</h3>
-              <p style={{ color: "#aaa", fontSize: "12px", margin: "0 0 8px" }}>Indicadores físico-naturales promedio</p>
-              {(() => {
-                const data = [
-                  { label: "Fertilidad", val: 78 },
-                  { label: "Agua", val: 65 },
-                  { label: "Accesib.", val: 82 },
-                  { label: "Cobertura", val: 55 },
-                  { label: "Topograf.", val: 90 },
-                  { label: "Clima", val: 73 },
-                ];
-                const cx = 150, cy = 140, maxR = 95, n = data.length;
-                const toRad = d => (d * Math.PI) / 180;
-                const angle = i => toRad(-90 + (360 / n) * i);
-                const rings = [20, 40, 60, 80, 100];
-                const point = (i, pct) => {
-                  const r = (pct / 100) * maxR;
-                  return [cx + r * Math.cos(angle(i)), cy + r * Math.sin(angle(i))];
-                };
-                const dataPoints = data.map((d, i) => point(i, d.val));
-                const polygon = dataPoints.map(p => p.join(",")).join(" ");
-                return (
-                  <svg width="100%" viewBox="0 0 300 280">
-                    {rings.map(r => {
-                      const pts = data.map((_, i) => point(i, r)).map(p => p.join(",")).join(" ");
-                      return <polygon key={r} points={pts} fill="none" stroke="#e8e8e8" strokeWidth="1" />;
-                    })}
-                    {data.map((_, i) => {
-                      const [x, y] = point(i, 100);
-                      return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#e8e8e8" strokeWidth="1" />;
-                    })}
-                    <polygon points={polygon} fill="#136442" fillOpacity="0.15" stroke="#136442" strokeWidth="2" />
-                    {dataPoints.map(([x, y], i) => <circle key={i} cx={x} cy={y} r="4" fill="#136442" />)}
-                    {data.map((d, i) => {
-                      const [x, y] = point(i, 115);
-                      return <text key={i} x={x} y={y} textAnchor="middle" fontSize="10" fill="#777" dominantBaseline="middle">{d.label}</text>;
-                    })}
-                    {data.map((d, i) => {
-                      const [x, y] = point(i, d.val);
-                      return <text key={i} x={x + 6} y={y - 6} fontSize="9" fill="#136442" fontWeight="700">{d.val}</text>;
-                    })}
-                  </svg>
-                );
-              })()}
-            </div>
-
-            {/* Área SVG — Crecimiento */}
-            <div style={{ background: "#f8faf8", borderRadius: "14px", padding: "28px", border: "1px solid #eef0ee" }}>
-              <h3 style={{ color: "#1b4332", fontSize: "15px", fontWeight: 700, margin: "0 0 4px" }}>Crecimiento de Registros</h3>
-              <p style={{ color: "#aaa", fontSize: "12px", margin: "0 0 20px" }}>Proyección mensual de predios a registrar</p>
-              {(() => {
-                const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-                const valores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-                const w = 480, h = 180, padL = 32, padR = 16, padT = 16, padB = 24;
-                const innerW = w - padL - padR;
-                const innerH = h - padT - padB;
-                const maxV = Math.max(...valores, 10);
-                const pts = meses.map((_, i) => {
-                  const x = padL + (i / (meses.length - 1)) * innerW;
-                  const y = padT + innerH - (valores[i] / maxV) * innerH;
-                  return [x, y];
-                });
-                const lineD = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0]} ${p[1]}`).join(" ");
-                const areaD = `${lineD} L ${pts[pts.length - 1][0]} ${padT + innerH} L ${pts[0][0]} ${padT + innerH} Z`;
-                return (
-                  <svg width="100%" viewBox={`0 0 ${w} ${h}`} style={{ overflow: "visible" }}>
-                    <defs>
-                      <linearGradient id="gradArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#136442" stopOpacity="0.2" />
-                        <stop offset="100%" stopColor="#136442" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    {[0, 25, 50, 75, 100].map(v => {
-                      const y = padT + innerH - (v / 100) * innerH;
-                      return (
-                        <g key={v}>
-                          <line x1={padL} x2={w - padR} y1={y} y2={y} stroke="#f0f0f0" strokeWidth="1" />
-                          <text x={padL - 4} y={y + 4} textAnchor="end" fontSize="9" fill="#bbb">{Math.round(maxV * v / 100)}</text>
-                        </g>
-                      );
-                    })}
-                    <path d={areaD} fill="url(#gradArea)" />
-                    <path d={lineD} fill="none" stroke="#136442" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                    {pts.map(([x, y], i) => (
-                      <g key={i}>
-                        <circle cx={x} cy={y} r="5" fill="#fff" stroke="#136442" strokeWidth="2" />
-                        <text x={x} y={h - 4} textAnchor="middle" fontSize="9" fill="#999">{meses[i]}</text>
-                      </g>
-                    ))}
-                    <line x1={padL} x2={w - padR} y1={padT + innerH} y2={padT + innerH} stroke="#e0e0e0" strokeWidth="1" />
-                  </svg>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* FILA 3 — Barras horizontales + Topografía + Agua */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "24px", marginBottom: "32px" }}>
-
-            {/* Barras horizontales — Superficie */}
-            <div style={{ background: "#f8faf8", borderRadius: "14px", padding: "28px", border: "1px solid #eef0ee" }}>
-              <h3 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 700, margin: "0 0 4px" }}>Superficie por Tipo</h3>
-              <p style={{ color: "#aaa", fontSize: "12px", margin: "0 0 20px" }}>Hectáreas por categoría</p>
-              {(() => {
-                const data = [
-                  { tipo: "Pecuario", val: 0, color: "#136442" },
-                  { tipo: "Agrícola", val: 0, color: "#1e8a5a" },
-                  { tipo: "Mixto", val: 0, color: "#27a869" },
-                  { tipo: "Forestal", val: 0, color: "#4ade80" },
-                ];
-                const maxV = Math.max(...data.map(d => d.val), 1);
-                return (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    {data.map(d => (
-                      <div key={d.tipo}>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-                          <span style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}>{d.tipo}</span>
-                          <span style={{ fontSize: "12px", color: "#136442", fontWeight: 700 }}>{d.val} ha</span>
-                        </div>
-                        <div style={{ background: "#eef0ee", borderRadius: "8px", height: "10px", overflow: "hidden" }}>
-                          <div style={{
-                            width: `${(d.val / maxV) * 100}%`, height: "100%",
-                            background: d.color, borderRadius: "8px",
-                            minWidth: d.val > 0 ? "4px" : "0",
-                            transition: "width 1s ease",
-                          }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Dona SVG — Topografía */}
-            <div style={{ background: "#f8faf8", borderRadius: "14px", padding: "28px", border: "1px solid #eef0ee" }}>
-              <h3 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 700, margin: "0 0 4px" }}>Topografía</h3>
-              <p style={{ color: "#aaa", fontSize: "12px", margin: "0 0 12px" }}>Distribución por relieve</p>
-              {(() => {
-                const data = [
-                  { name: "Plano", value: 60, color: "#136442" },
-                  { name: "Ondulado", value: 28, color: "#4ade80" },
-                  { name: "Quebrado", value: 12, color: "#bbf7d0" },
-                ];
-                const cx = 110, cy = 100, r = 72, ri = 44;
-                let angle = -90;
-                const toRad = d => (d * Math.PI) / 180;
-                const slices = data.map(d => {
-                  const deg = (d.value / 100) * 360;
-                  const start = angle; angle += deg;
-                  return { ...d, start, end: angle };
-                });
-                const arc = (cx, cy, r, s, e) => {
-                  const x1 = cx + r * Math.cos(toRad(s)), y1 = cy + r * Math.sin(toRad(s));
-                  const x2 = cx + r * Math.cos(toRad(e)), y2 = cy + r * Math.sin(toRad(e));
-                  const large = e - s > 180 ? 1 : 0;
-                  return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
-                };
-                return (
-                  <div>
-                    <svg width="220" height="200">
-                      {slices.map((s, i) => (
-                        <path key={i}
-                          d={`${arc(cx, cy, r, s.start, s.end)} L ${cx + ri * Math.cos(toRad(s.end))} ${cy + ri * Math.sin(toRad(s.end))} A ${ri} ${ri} 0 ${s.end - s.start > 180 ? 1 : 0} 0 ${cx + ri * Math.cos(toRad(s.start))} ${cy + ri * Math.sin(toRad(s.start))} Z`}
-                          fill={s.color}
-                        />
-                      ))}
-                      <circle cx={cx} cy={cy} r={ri - 2} fill="#f8faf8" />
-                      {slices.map((s, i) => {
-                        const mid = (s.start + s.end) / 2;
-                        const lx = cx + (r * 0.65) * Math.cos(toRad(mid));
-                        const ly = cy + (r * 0.65) * Math.sin(toRad(mid));
-                        return <text key={i} x={lx} y={ly} textAnchor="middle" fontSize="10" fill="#fff" fontWeight="700" dominantBaseline="middle">{s.value}%</text>;
-                      })}
-                    </svg>
-                    <div style={{ display: "flex", justifyContent: "center", gap: "12px", marginTop: "8px" }}>
-                      {data.map(d => (
-                        <div key={d.name} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                          <div style={{ width: "8px", height: "8px", borderRadius: "2px", background: d.color }} />
-                          <span style={{ fontSize: "11px", color: "#666" }}>{d.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Barras SVG — Fuente de agua */}
-            <div style={{ background: "#f8faf8", borderRadius: "14px", padding: "28px", border: "1px solid #eef0ee" }}>
-              <h3 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 700, margin: "0 0 4px" }}>Fuente de Agua</h3>
-              <p style={{ color: "#aaa", fontSize: "12px", margin: "0 0 16px" }}>Disponibilidad hídrica</p>
-              {(() => {
-                const data = [
-                  { fuente: "Río", val: 0, color: "#136442" },
-                  { fuente: "Pozo", val: 0, color: "#1e8a5a" },
-                  { fuente: "Lluvia", val: 0, color: "#27a869" },
-                  { fuente: "Riego", val: 0, color: "#86efac" },
-                ];
-                const maxV = Math.max(...data.map(d => d.val), 1);
-                const w = 240, h = 160, padL = 8, padR = 8, padT = 10, padB = 28;
-                const barW = (w - padL - padR) / data.length;
-                return (
-                  <svg width="100%" viewBox={`0 0 ${w} ${h + padB}`}>
-                    {[0, 25, 50, 75, 100].map(v => {
-                      const y = padT + (h - padT) * (1 - v / 100);
-                      return <line key={v} x1={padL} x2={w - padR} y1={y} y2={y} stroke="#f0f0f0" strokeWidth="1" />;
-                    })}
-                    {data.map((d, i) => {
-                      const barH = Math.max(((d.val / maxV) * (h - padT - 4)), 4);
-                      const x = padL + i * barW + barW * 0.15;
-                      const bw = barW * 0.7;
-                      const y = padT + (h - padT) - barH;
-                      return (
-                        <g key={d.fuente}>
-                          <rect x={x} y={y} width={bw} height={barH} fill={d.color} rx="4" />
-                          <text x={x + bw / 2} y={h + padT + 16} textAnchor="middle" fontSize="10" fill="#999">{d.fuente}</text>
-                        </g>
-                      );
-                    })}
-                    <line x1={padL} x2={w - padR} y1={h + padT} y2={h + padT} stroke="#e0e0e0" strokeWidth="1" />
-                  </svg>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* Municipios */}
-          <div style={{ background: "#f8faf8", borderRadius: "14px", padding: "28px 32px", border: "1px solid #eef0ee" }}>
-            <h3 style={{ color: "#1b4332", fontSize: "15px", fontWeight: 700, margin: "0 0 20px" }}>
-              Municipios del estado Barinas — Cobertura del sistema
-            </h3>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-              {[
-                { nombre: "Barinas", predios: 0 },
-                { nombre: "Obispos", predios: 0 },
-                { nombre: "Cruz Paredes", predios: 0 },
-                { nombre: "Bolívar", predios: 0 },
-                { nombre: "Rojas", predios: 0 },
-                { nombre: "Pedraza", predios: 0 },
-                { nombre: "Sucre", predios: 0 },
-                { nombre: "Arismendi", predios: 0 },
-                { nombre: "Antonio José de Sucre", predios: 0 },
-                { nombre: "Sosa", predios: 0 },
-                { nombre: "Ezequiel Zamora", predios: 0 },
-              ].map((m) => (
-                <div key={m.nombre} style={{
-                  background: "#fff", border: "1px solid #d4edda", borderRadius: "20px",
-                  padding: "6px 16px", display: "flex", alignItems: "center", gap: "8px",
-                }}>
-                  <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#136442" }} />
-                  <span style={{ fontSize: "12px", color: "#136442", fontWeight: 500 }}>{m.nombre}</span>
-                  <span style={{ fontSize: "11px", color: "#aaa", borderLeft: "1px solid #eee", paddingLeft: "8px" }}>
-                    {m.predios} predios
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* FOOTER */}
-      <footer style={{
-        background: "#0a3d24", color: "rgba(255,255,255,0.45)",
-        padding: "28px 80px", display: "flex",
-        justifyContent: "space-between", alignItems: "center", fontSize: "13px",
-      }}>
-        <span>© 2026 Sistema Digital Agropecuario, Estado Barinas.</span>
-        <span style={{ fontSize: "12px" }}>Administrado por el MPPAT · Todos los dereccios reservados</span>
+      <footer style={{ background: "#fff", color: "#555", fontFamily: "'Poppins', sans-serif", borderTop: "1px solid #e8e8e8" }}>
+
+        {/* Cuerpo del footer */}
+        <div style={{
+          maxWidth: "1100px", margin: "0 auto", padding: "56px 80px 40px",
+          display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "48px",
+        }}>
+
+          {/* Columna 1 - Logo y descripción */}
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
+              <img src={logo} alt="Logo" style={{ height: 50 }} />
+              <img src={escudo} alt="Escudo" style={{ height: 40 }} />
+            </div>
+            <p style={{ fontSize: "14px", lineHeight: 1.8, color: "#777", maxWidth: "280px" }}>
+              Ecosistema digital agropecuario del estado Barinas. Plataforma oficial para el registro
+              y gestión de la actividad productiva del campo barinés.
+            </p>
+            {/* Redes sociales */}
+            <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
+              {/* Facebook */}
+              <a href="#" style={{
+                width: "36px", height: "36px", borderRadius: "8px",
+                background: "#f0f0f0", display: "flex",
+                alignItems: "center", justifyContent: "center", transition: "background 0.2s",
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = "#589e38"}
+                onMouseLeave={e => e.currentTarget.style.background = "#f0f0f0"}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#555">
+                  <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
+                </svg>
+              </a>
+              {/* Twitter/X */}
+              <a href="#" style={{
+                width: "36px", height: "36px", borderRadius: "8px",
+                background: "#f0f0f0", display: "flex",
+                alignItems: "center", justifyContent: "center", transition: "background 0.2s",
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = "#589e38"}
+                onMouseLeave={e => e.currentTarget.style.background = "#f0f0f0"}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#555">
+                  <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
+                </svg>
+              </a>
+              {/* Instagram */}
+              <a href="#" style={{
+                width: "36px", height: "36px", borderRadius: "8px",
+                background: "#f0f0f0", display: "flex",
+                alignItems: "center", justifyContent: "center", transition: "background 0.2s",
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = "#589e38"}
+                onMouseLeave={e => e.currentTarget.style.background = "#f0f0f0"}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <circle cx="17.5" cy="6.5" r="0.5" fill="#555" />
+                </svg>
+              </a>
+              {/* YouTube */}
+              <a href="#" style={{
+                width: "36px", height: "36px", borderRadius: "8px",
+                background: "#f0f0f0", display: "flex",
+                alignItems: "center", justifyContent: "center", transition: "background 0.2s",
+              }}
+                onMouseEnter={e => e.currentTarget.style.background = "#589e38"}
+                onMouseLeave={e => e.currentTarget.style.background = "#f0f0f0"}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#555">
+                  <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" />
+                  <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#fff" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          {/* Columna 2 - Navegación */}
+          <div>
+            <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 20px", textTransform: "uppercase", letterSpacing: "1px" }}>
+              Navegación
+            </h4>
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
+              {NAV_ITEMS.map(item => (
+                <li key={item.label}>
+                  <a href={item.href} style={{
+                    color: "#777", textDecoration: "none", fontSize: "14px",
+                    transition: "color 0.2s",
+                  }}
+                    onMouseEnter={e => e.target.style.color = "#589e38"}
+                    onMouseLeave={e => e.target.style.color = "#777"}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Columna 3 - Contacto rápido */}
+          <div>
+            <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 20px", textTransform: "uppercase", letterSpacing: "1px" }}>
+              Contacto
+            </h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#589e38" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: "2px", minWidth: "16px" }}>
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+                <a href="mailto:agrosistema@barinas.gob.ve" style={{ color: "#777", fontSize: "13px", textDecoration: "none" }}>
+                  agrosistema@barinas.gob.ve
+                </a>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#589e38" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ minWidth: "16px" }}>
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+                </svg>
+                <span style={{ color: "#777", fontSize: "13px" }}>(0273) 300-0000</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#589e38" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: "2px", minWidth: "16px" }}>
+                  <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span style={{ color: "#777", fontSize: "13px" }}>Barinas, Estado Barinas, Venezuela</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Línea divisora */}
+        <div style={{ borderTop: "1px solid #e8e8e8", margin: "0 80px" }} />
+
+        {/* Barra inferior */}
+        <div style={{
+          maxWidth: "1100px", margin: "0 auto", padding: "20px 80px",
+          display: "flex", justifyContent: "center", alignItems: "center",
+        }}>
+          <span style={{ fontSize: "13px", color: "#999", textAlign: "center" }}>
+            © 2026 Ecosistema Digital Agropecuario, Estado Barinas. Todos los derechos reservados.
+          </span>
+        </div>
+
       </footer>
 
     </div>
