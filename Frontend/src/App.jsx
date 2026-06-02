@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
+// Importa el nuevo componente
+import Productores from "./pages/Productores/Productores" 
 import PrediosPage from "./pages/Predios/PrediosPage"
 import ProduccionPage from "./pages/Produccion/ProduccionPage"
 import EstadisticaPage from "./pages/Estadistica/EstadisticaPage"
@@ -13,6 +15,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        {/* Agrega esta línea */}
+        <Route path="/productores" element={<Productores />} />
         <Route path="/predios" element={<PrediosPage />} />
         <Route path="/produccion" element={<ProduccionPage />} />
         <Route path="/estadística-portalinfo" element={<EstadisticaPage />} />
