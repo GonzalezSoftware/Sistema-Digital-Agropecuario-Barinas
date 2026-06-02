@@ -1,10 +1,11 @@
-from rest_framework import viewsets
-from .models import Predio
-from .serializers import PredioSerializer
-import requests
 import random
+import requests
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from .models import Predio, LicenciaHierro
+from .serializers import PredioSerializer, LicenciaHierroSerializer
+
 
 
 class PredioViewSet(viewsets.ModelViewSet):
@@ -12,6 +13,11 @@ class PredioViewSet(viewsets.ModelViewSet):
     queryset = Predio.objects.all()
 
     serializer_class = PredioSerializer
+
+class LicenciaHierroViewSet(viewsets.ModelViewSet):
+
+    queryset = LicenciaHierro.objects.all()
+    serializer_class = LicenciaHierroSerializer
 
 
 @api_view(['POST'])
@@ -53,3 +59,5 @@ No comparta este código.
 
         "respuesta_whatsapp": response.json()
     })
+    
+

@@ -6,17 +6,42 @@ from .models import (
     Productor,
     Servicio,
     PredioServicio,
+    LicenciaHierro,
     RubroVegetal,
     ExistenciaAnimal,
     Maquinaria
 )
 
+class LicenciaHierroSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LicenciaHierro
+        fields = '__all__' 
 
 # 1. Definimos primero los serializadores de las tablas hijas
 class ProductorSerializer(serializers.ModelSerializer):
+    licencias = serializers.SerializerMethodField()
+
     class Meta:
         model = Productor
-        fields = '__all__'
+        fields = ['id', 'cedula_rif', 'nombre', 'telefono', 'correo', 'licencias']
+
+    def get_licencias(self, obj):
+        """
+        obj es el Productor actual. 
+        Buscamos el predio que le pertenece a este productor, y luego 
+        traemos las licencias asociadas a ese predio.
+        """
+        # 1. Buscamos el predio asociado a este productor
+        predio = Predio.objects.filter(productor=obj).first()
+        
+        # 2. Si el productor tiene un predio, buscamos las licencias de ese predio
+        if predio:
+            licencias_queryset = LicenciaHierro.objects.filter(predio=predio)
+            return LicenciaHierroSerializer(licencias_queryset, many=True).data
+        
+        # 3. Si no tiene predio asignado aún, devolvemos el arreglo vacío
+        return []
 
 class InfraestructuraSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,6 +52,7 @@ class ProduccionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Produccion
         exclude = ['predio']
+ 
         
 class RubroVegetalSerializer(serializers.ModelSerializer):
     class Meta:
@@ -267,8 +293,8 @@ class PredioSerializer(serializers.ModelSerializer):
                 )
                 
                 
-                instance.caracterizacion_completada = True
+        instance.caracterizacion_completada = True
 
-                instance.save()
+        instance.save()
 
         return instance
