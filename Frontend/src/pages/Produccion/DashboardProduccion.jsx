@@ -194,6 +194,19 @@ export default function DashboardProduccion() {
     const [cargando, setCargando] = useState(false);
 
 
+    const [licenciaHierro, setLicenciaHierro] = useState({
+        poseeLicencia: false,
+        codigoHierro: "",
+        numeroLicencia: "",
+        expediente: "",
+        organismoEmisor: "",
+        fechaEmision: "",
+        fechaVencimiento: "",
+        observaciones: "",
+        imagenHierro: null,    // Para el campo imagen_hierro
+        certificado: null      // Para el campo certificado_pdf
+    });
+
     const [subCaracterizacion, setSubCaracterizacion] = useState("animal");
 
     const [rubrosVegetales, setRubrosVegetales] = useState([
@@ -557,6 +570,69 @@ export default function DashboardProduccion() {
         }, 2500);
     };
 
+    const guardarLicencia = async () => {
+        if (!licenciaHierro.poseeLicencia) {
+            Swal.fire({ icon: "info", title: "No se requiere registro si no posee licencia." });
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+
+            // Relación con el predio activo
+            formData.append("predio", predioActivo.id_predio);
+
+            // Mapeo exacto con las variables de Django (snake_case)
+            formData.append("codigo_hierro", licenciaHierro.codigoHierro);
+            formData.append("numero_licencia", licenciaHierro.numeroLicencia);
+            formData.append("organismo_emisor", licenciaHierro.organismoEmisor);
+            formData.append("fecha_emision", licenciaHierro.fechaEmision);
+
+            // Campos opcionales (evitamos enviar strings vacíos en fechas o textos)
+            if (licenciaHierro.expediente) {
+                formData.append("expediente", licenciaHierro.expediente);
+            }
+            if (licenciaHierro.fechaVencimiento) {
+                formData.append("fecha_vencimiento", licenciaHierro.fechaVencimiento);
+            }
+            if (licenciaHierro.observaciones) {
+                formData.append("observaciones", licenciaHierro.observaciones);
+            }
+
+            // Manejo de archivos binarios hacia Django
+            if (licenciaHierro.imagenHierro) {
+                formData.append("imagen_hierro", licenciaHierro.imagenHierro);
+            }
+            if (licenciaHierro.certificado) {
+                // Se envía bajo el nombre exacto del FileField en el modelo
+                formData.append("certificado_pdf", licenciaHierro.certificado);
+            }
+
+            await axios.post(
+                "http://127.0.0.1:8000/api/licencias-hierro/",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                }
+            );
+
+            Swal.fire({
+                icon: "success",
+                title: "Licencia registrada exitosamente"
+            });
+
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: "error",
+                title: "Error al guardar",
+                text: error.response?.data ? JSON.stringify(error.response.data) : "Consulte la consola"
+            });
+        }
+    };
+
     const guardarInventario = async () => {
 
         if (!predioActivo?.id_predio) {
@@ -906,6 +982,28 @@ export default function DashboardProduccion() {
                     />
 
                     <MenuItem
+                        label="Licencia de Hierro Ganadero"
+                        active={tabActiva === "hierro"}
+                        onClick={() => {
+                            // 1. Verificamos si el predio activo tiene un productor y si ese productor ya tiene licencias
+                            const tieneLicencia = predioActivo?.productor?.licencias?.length > 0;
+
+                            if (tieneLicencia) {
+                                Swal.fire({
+                                    icon: "warning",
+                                    title: "Licencia ya registrada",
+                                    text: "Este predio (o su productor asociado) ya posee una Licencia de Hierro registrada en el sistema."
+                                });
+                                return; // Bloquea el cambio de pestaña
+                            }
+
+                            // Si no tiene licencia, permitimos el acceso normal
+                            setTabActiva("hierro");
+                        }}
+                        icon={<IconBuscarPredio />}
+                    />
+
+                    <MenuItem
                         label="Caracterización"
                         active={tabActiva === "caracterizacion"}
                         onClick={() => {
@@ -1016,17 +1114,19 @@ export default function DashboardProduccion() {
                                 ? "Dashboard Producción"
                                 : tabActiva === "seleccionPredio"
                                     ? "Selección de Predio"
-                                    : tabActiva === "caracterizacion"
-                                        ? "Caracterización Productiva"
-                                        : tabActiva === "produccionGeneral"
-                                            ? "Producción General"
-                                            : tabActiva === "sanidad"
-                                                ? "Sanidad y Asistencia Técnica"
-                                                : tabActiva === "necesidades"
-                                                    ? "Necesidades del Productor"
-                                                    : tabActiva === "actualizacion"
-                                                        ? "Actualización Productiva"
-                                                        : "Reportes y Estadísticas"}
+                                    : tabActiva === "hierro"
+                                        ? "Licencia de Hierro Ganadero"
+                                        : tabActiva === "caracterizacion"
+                                            ? "Caracterización Productiva"
+                                            : tabActiva === "produccionGeneral"
+                                                ? "Producción General"
+                                                : tabActiva === "sanidad"
+                                                    ? "Sanidad y Asistencia Técnica"
+                                                    : tabActiva === "necesidades"
+                                                        ? "Necesidades del Productor"
+                                                        : tabActiva === "actualizacion"
+                                                            ? "Actualización Productiva"
+                                                            : "Reportes y Estadísticas"}
                         </h2>
                         <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
                             Estado Barinas • Sector Agropecuario
@@ -1076,6 +1176,8 @@ export default function DashboardProduccion() {
                         <div style={alertStyle}>¡Registro sincronizado con éxito!</div>
                     )}
 
+
+
                     {tabActiva === "inicio" && (
                         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
                             {/* ── CARDS PRINCIPALES ── */}
@@ -1098,7 +1200,7 @@ export default function DashboardProduccion() {
                                     color="#136442"
                                 />
                                 <CardStat
-                                    label="Movimientos de Inventario"
+                                    label="Movimientos de Produccion"
                                     value="0"
                                     color="#136442"
                                 />
@@ -1275,13 +1377,14 @@ export default function DashboardProduccion() {
                                         style={{
                                             backgroundColor: "#fff",
                                             width: "100%",
-                                            maxWidth: "950px",
+                                            maxWidth: "1000px",
                                             maxHeight: "95vh",
                                             borderRadius: "12px",
                                             overflowY: "auto",
                                             boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
                                             display: "flex",
                                             flexDirection: "column",
+                                            fontFamily: "sans-serif"
                                         }}
                                     >
                                         {/* HEADER */}
@@ -1298,10 +1401,10 @@ export default function DashboardProduccion() {
                                                 zIndex: 10,
                                             }}
                                         >
-                                            <h3 style={{ margin: 0, fontSize: "16px" }}>
+                                            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "bold" }}>
                                                 {editando
                                                     ? "MODO EDICIÓN ACTIVADO"
-                                                    : `FICHA TÉCNICA: ${predioSeleccionado.nombre_predio?.toUpperCase()}`}
+                                                    : `FICHA TÉCNICA INTEGRAL: ${predioSeleccionado.nombre_predio?.toUpperCase()}`}
                                             </h3>
 
                                             <button
@@ -1321,193 +1424,258 @@ export default function DashboardProduccion() {
                                             </button>
                                         </div>
 
-                                        {/* CONTENIDO */}
-                                        <div style={{ padding: "30px" }}>
+                                        {/* CONTENIDO DEL MODAL */}
+                                        <div style={{ padding: "30px", overflowY: "auto" }}>
 
-                                            {/* I. DATOS DEL PRODUCTOR */}
-                                            <div
-                                                style={{
-                                                    display: "grid",
-                                                    gridTemplateColumns: "1fr 1fr 1fr",
-                                                    gap: "25px",
-                                                    marginBottom: "35px",
-                                                }}
-                                            >
-                                                <div
-                                                    style={{
-                                                        gridColumn: "span 3",
-                                                        borderBottom: "2px solid #136442",
-                                                        paddingBottom: "5px",
-                                                    }}
-                                                >
-                                                    <strong
-                                                        style={{
-                                                            color: "#136442",
-                                                            fontSize: "14px",
-                                                        }}
-                                                    >
-                                                        I. DATOS DEL PRODUCTOR
-                                                    </strong>
+                                            {/* 🧵 SECCIÓN I: DATOS DEL PRODUCTOR */}
+                                            <div style={estiloContenedorSeccion}>
+                                                <div style={estiloTituloSeccion}>I. DATOS DEL PRODUCTOR</div>
+                                                <div style={estiloGridTresColumnas}>
+                                                    <div>
+                                                        <small style={estiloLabel}>NOMBRE COMPLETO</small>
+                                                        <p style={estiloP}>{predioSeleccionado.productor?.nombre || "N/A"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>CÉDULA / RIF</small>
+                                                        <p style={estiloP}>{predioSeleccionado.productor?.cedula_rif || "N/A"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>TELÉFONO</small>
+                                                        <p style={estiloP}>{predioSeleccionado.productor?.telefono || "N/A"}</p>
+                                                    </div>
+                                                    <div style={{ gridColumn: "span 3" }}>
+                                                        <small style={estiloLabel}>CORREO ELECTRÓNICO</small>
+                                                        <p style={estiloP}>{predioSeleccionado.productor?.correo || "N/A"}</p>
+                                                    </div>
                                                 </div>
 
-                                                <div>
-                                                    <small>NOMBRE COMPLETO</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.productor?.nombre || "N/A"}
-                                                    </p>
+                                            </div>
+
+                                            {/* 🧵 SECCIÓN I: DATOS DEL PRODUCTOR */}
+                                            <div style={estiloContenedorSeccion}>
+                                                <div style={estiloTituloSeccion}>LICENCIA DE HIERRO GANADERO ASOCIADA</div>
+                                                <div style={estiloGridTresColumnas}>
+                                                    {predioSeleccionado.productor?.licencias && predioSeleccionado.productor.licencias.length > 0 ? (
+                                                        predioSeleccionado.productor.licencias.map((lic, index) => (
+                                                            <div key={index} style={estiloGridTresColumnas}>
+                                                                <div><small style={estiloLabel}>N° LICENCIA</small><p style={estiloP}>{lic.numero_licencia}</p></div>
+                                                                <div><small style={estiloLabel}>CÓDIGO DE HIERRO</small><p style={estiloP}>{lic.codigo_hierro}</p></div>
+                                                                <div><small style={estiloLabel}>ENTE EMISOR</small><p style={estiloP}>{lic.organismo_emisor}</p></div>
+                                                                <div><small style={estiloLabel}>EMISIÓN</small><p style={estiloP}>{lic.fecha_emision}</p></div>
+                                                                <div><small style={estiloLabel}>VENCIMIENTO</small><p style={estiloP}>{lic.fecha_vencimiento}</p></div>
+                                                                <div><small style={estiloLabel}>OBSERVACIONES</small><p style={estiloP}>{lic.observaciones || "Ninguna"}</p></div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <p style={{ margin: 0, fontSize: "13px", color: "#666" }}>⚠️ No posee Licencia de Hierro registrada para este productor en el sistema.</p>
+                                                    )}
+
                                                 </div>
 
-                                                <div>
-                                                    <small>CÉDULA / RIF</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.productor?.cedula_rif || "N/A"}
-                                                    </p>
-                                                </div>
+                                            </div>
 
-                                                <div>
-                                                    <small>TELÉFONO</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.productor?.telefono || "N/A"}
-                                                    </p>
-                                                </div>
-
-                                                <div style={{ gridColumn: "span 3" }}>
-                                                    <small>CORREO ELECTRÓNICO</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.productor?.correo || "N/A"}
-                                                    </p>
+                                            {/* 🧵 SECCIÓN II: GEORREFERENCIACIÓN Y UBICACIÓN */}
+                                            <div style={estiloContenedorSeccion}>
+                                                <div style={estiloTituloSeccion}>II. GEORREFERENCIACIÓN Y UBICACIÓN</div>
+                                                <div style={estiloGridTresColumnas}>
+                                                    <div>
+                                                        <small style={estiloLabel}>MUNICIPIO</small>
+                                                        <p style={estiloP}>{predioSeleccionado.municipio || "N/A"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>PARROQUIA</small>
+                                                        <p style={estiloP}>{predioSeleccionado.parroquia || "N/A"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>COMUNIDAD</small>
+                                                        <p style={estiloP}>{predioSeleccionado.comunidad || "N/A"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>CENTRO POBLADO</small>
+                                                        <p style={estiloP}>{predioSeleccionado.centro_poblado || "N/A"}</p>
+                                                    </div>
+                                                    <div style={{ gridColumn: "span 2" }}>
+                                                        <small style={estiloLabel}>COORDENADAS GEOGRÁFICAS (LAT, LNG)</small>
+                                                        <p style={estiloP}>{predioSeleccionado.coordenadas || "N/A"}</p>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {/* II. UBICACIÓN */}
-                                            <div
-                                                style={{
-                                                    display: "grid",
-                                                    gridTemplateColumns: "1fr 1fr 1fr",
-                                                    gap: "25px",
-                                                    marginBottom: "35px",
-                                                }}
-                                            >
-                                                <div
-                                                    style={{
-                                                        gridColumn: "span 3",
-                                                        borderBottom: "2px solid #136442",
-                                                        paddingBottom: "5px",
-                                                    }}
-                                                >
-                                                    <strong
-                                                        style={{
-                                                            color: "#136442",
-                                                            fontSize: "14px",
-                                                        }}
-                                                    >
-                                                        II. GEORREFERENCIACIÓN Y UBICACIÓN
-                                                    </strong>
-                                                </div>
-
-                                                <div>
-                                                    <small>MUNICIPIO</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.municipio || "N/A"}
-                                                    </p>
-                                                </div>
-
-                                                <div>
-                                                    <small>PARROQUIA</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.parroquia || "N/A"}
-                                                    </p>
-                                                </div>
-
-                                                <div>
-                                                    <small>COMUNIDAD</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.comunidad || "N/A"}
-                                                    </p>
-                                                </div>
-
-                                                <div>
-                                                    <small>CENTRO POBLADO</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.centro_poblado || "N/A"}
-                                                    </p>
-                                                </div>
-
-                                                <div>
-                                                    <small>COORDENADAS</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.coordenadas || "N/A"}
-                                                    </p>
+                                            {/* 🧵 SECCIÓN III: IDENTIFICACIÓN Y TENENCIA */}
+                                            <div style={{ ...estiloContenedorSeccion, backgroundColor: "#f8faf9" }}>
+                                                <div style={estiloTituloSeccion}>III. IDENTIFICACIÓN Y TENENCIA</div>
+                                                <div style={estiloGridTresColumnas}>
+                                                    <div style={{ gridColumn: "span 2" }}>
+                                                        <small style={estiloLabel}>DIRECCIÓN EXACTA</small>
+                                                        <p style={estiloP}>{predioSeleccionado.direccion || "N/A"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>SUPERFICIE TOTAL</small>
+                                                        <p style={estiloP}>{predioSeleccionado.superficie || 0} Ha</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>TIPO PROPIEDAD</small>
+                                                        <p style={estiloP}>{predioSeleccionado.tipo_propiedad || "N/A"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>ESTADO DE TENENCIA</small>
+                                                        <p style={estiloP}>{predioSeleccionado.tenencia || "N/A"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>ESTADO DE VIALIDAD INTERNA/ACCESO</small>
+                                                        <p style={estiloP}>{predioSeleccionado.vialidad || "N/A"}</p>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {/* III. IDENTIFICACIÓN */}
-                                            <div
-                                                style={{
-                                                    display: "grid",
-                                                    gridTemplateColumns: "1fr 1fr 1fr",
-                                                    gap: "25px",
-                                                    marginBottom: "35px",
-                                                    padding: "20px",
-                                                    backgroundColor: "#f8faf9",
-                                                    borderRadius: "10px",
-                                                }}
-                                            >
-                                                <div
-                                                    style={{
-                                                        gridColumn: "span 3",
-                                                        borderBottom: "2px solid #ccc",
-                                                        paddingBottom: "5px",
-                                                    }}
-                                                >
-                                                    <strong
-                                                        style={{
-                                                            color: "#136442",
-                                                            fontSize: "14px",
-                                                        }}
-                                                    >
-                                                        III. IDENTIFICACIÓN Y TENENCIA
-                                                    </strong>
+                                            {/* 🧵 SECCIÓN IV: GENERALIDADES DE PRODUCCIÓN E INFRAESTRUCTURA */}
+                                            <div style={estiloContenedorSeccion}>
+                                                <div style={estiloTituloSeccion}>IV. DATOS OPERATIVOS Y SISTEMAS DE EXPLOTACIÓN</div>
+                                                <div style={estiloGridTresColumnas}>
+                                                    <div>
+                                                        <small style={estiloLabel}>SISTEMA DE EXPLOTACIÓN</small>
+                                                        <p style={estiloP}>{predioSeleccionado.produccion?.tipo_explotacion || "No caracterizado"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>REGISTROS SANITARIOS</small>
+                                                        <p style={estiloP}>{predioSeleccionado.produccion?.registro_sanitario ? "🟢 Habilitado / Posee" : "🔴 No posee"}</p>
+                                                    </div>
+                                                    <div>
+                                                        <small style={estiloLabel}>REGISTROS PRODUCTIVOS / REPRODUCTIVOS</small>
+                                                        <p style={estiloP}>
+                                                            {predioSeleccionado.produccion?.registro_productivo ? " Productivos (SÍ) " : " Productivos (NO) "} <br />
+                                                            {predioSeleccionado.produccion?.registro_reproductivo ? " Reproductivos (SÍ)" : " Reproductivos (NO)"}
+                                                        </p>
+                                                    </div>
                                                 </div>
 
-                                                <div style={{ gridColumn: "span 2" }}>
-                                                    <small>DIRECCIÓN EXACTA</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.direccion || "N/A"}
-                                                    </p>
-                                                </div>
-
-                                                <div>
-                                                    <small>SUPERFICIE</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.superficie || 0} Ha
-                                                    </p>
-                                                </div>
-
-                                                <div>
-                                                    <small>TIPO PROPIEDAD</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.tipo_propiedad || "N/A"}
-                                                    </p>
-                                                </div>
-
-                                                <div>
-                                                    <small>TENENCIA</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.tenencia || "N/A"}
-                                                    </p>
-                                                </div>
-
-                                                <div>
-                                                    <small>VIALIDAD</small>
-                                                    <p style={estiloP}>
-                                                        {predioSeleccionado.vialidad || "N/A"}
-                                                    </p>
-                                                </div>
+                                                <h4 style={estiloSubtituloInterno}> Inventario de Infraestructura Disponible</h4>
+                                                {predioSeleccionado.infraestructura ? (
+                                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px", backgroundColor: "#f9fafb", padding: "12px", borderRadius: "6px" }}>
+                                                        {Object.entries(predioSeleccionado.infraestructura).map(([key, val]) => {
+                                                            if (key === "id") return null;
+                                                            return (
+                                                                <div key={key} style={{ fontSize: "13px", borderBottom: "1px solid #e5e7eb", paddingBottom: "4px" }}>
+                                                                    <span style={{ textTransform: "capitalize", color: "#4b5563" }}>{key.replace("_", " ")}:</span> <strong>{val}</strong>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <p style={{ fontSize: "13px", color: "#666" }}>No hay registros de infraestructura.</p>
+                                                )}
                                             </div>
+
+                                            {/* 🧵 SECCIÓN V: RUBROS VEGETALES */}
+                                            <div style={estiloContenedorSeccion}>
+                                                <div style={estiloTituloSeccion}>V. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)</div>
+                                                {predioSeleccionado.rubros_vegetales && predioSeleccionado.rubros_vegetales.length > 0 ? (
+                                                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", marginTop: "10px" }}>
+                                                        <thead>
+                                                            <tr style={{ backgroundColor: "#136442", color: "#fff" }}>
+                                                                <th style={estiloTh}>Rubro</th>
+                                                                <th style={estiloTh}>Superficie (Ha)</th>
+                                                                <th style={estiloTh}>Estado</th>
+                                                                <th style={estiloTh}>Riego</th>
+                                                                <th style={estiloTh}>Ciclo</th>
+                                                                <th style={estiloTh}>Producción Estimada</th>
+                                                                <th style={estiloTh}>Destino</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {predioSeleccionado.rubros_vegetales.map((rubro, i) => (
+                                                                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
+                                                                    <td style={estiloTd}><strong>{rubro.rubro}</strong></td>
+                                                                    <td style={estiloTd}>{rubro.hectareas} Ha</td>
+                                                                    <td style={estiloTd}>{rubro.estado}</td>
+                                                                    <td style={estiloTd}>{rubro.riego}</td>
+                                                                    <td style={estiloTd}>{rubro.ciclo_productivo}</td>
+                                                                    <td style={estiloTd}>{rubro.produccion_estimada} Kg</td>
+                                                                    <td style={estiloTd}>{rubro.destino}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                ) : (
+                                                    <p style={{ fontSize: "13px", color: "#666" }}>Sin rubros vegetales declarados.</p>
+                                                )}
+                                            </div>
+
+                                            {/* 🧵 SECCIÓN VI: EXISTENCIA ANIMAL (DINÁMICA POR ESPECIE) */}
+                                            <div style={estiloContenedorSeccion}>
+                                                <div style={estiloTituloSeccion}>VI. INVENTARIO DE EXISTENCIA ANIMAL (REBAÑOS)</div>
+                                                <div style={{ marginBottom: "15px" }}>
+                                                    <span style={estiloLabel}>ESPECIES IDENTIFICADAS EN EL PREDIO: </span>
+                                                    {predioSeleccionado.existencia_animal?.especiesSeleccionadas?.map((sp, idx) => (
+                                                        <span key={idx} style={{ backgroundColor: "#dcfce7", color: "#166534", padding: "3px 8px", borderRadius: "12px", fontSize: "12px", fontWeight: "bold", marginRight: "6px" }}>
+                                                            {sp}
+                                                        </span>
+                                                    )) || "Ninguna"}
+                                                </div>
+
+                                                {/* Mapear dinámicamente el Ganado Vacuno si existe cantidades */}
+                                                {predioSeleccionado.existencia_animal?.vacunos && (
+                                                    <div style={{ border: "1px solid #e5e7eb", borderRadius: "6px", padding: "15px", marginBottom: "15px" }}>
+                                                        <h5 style={{ margin: "0 0 10px 0", color: "#111827", fontSize: "14px" }}>🐄 Desglose de Ganado Vacuno (Bovino)</h5>
+                                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px" }}>
+                                                            {Object.entries(predioSeleccionado.existencia_animal.vacunos).map(([cat, cant]) => (
+                                                                <div key={cat} style={{ backgroundColor: "#f3f4f6", padding: "8px", borderRadius: "4px", textAlign: "center" }}>
+                                                                    <small style={{ textTransform: "uppercase", fontSize: "10px", color: "#6b7280", display: "block" }}>{cat}</small>
+                                                                    <strong style={{ fontSize: "16px", color: "#1f2937" }}>{cant}</strong>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <div style={{ marginTop: "10px", fontSize: "12px", color: "#374151", backgroundColor: "#eff6ff", padding: "8px", borderRadius: "4px" }}>
+                                                            <strong>Capacidad Productiva:</strong> Sistemas: {predioSeleccionado.existencia_animal.capacidadVacuna?.sistemas?.join(", ") || "No definido"} |
+                                                            🥛 Leche Diaria: {predioSeleccionado.existencia_animal.capacidadVacuna?.leche_diaria || 0} Lts | 🥩 Carne Anual Est.: {predioSeleccionado.existencia_animal.capacidadVacuna?.carne_anual || 0} Kg
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Alerta si tiene otras especies con registros en cero para no saturar */}
+                                                <p style={{ margin: 0, fontSize: "11px", color: "#9ca3af" }}>💡 Especies secundarias (Bufalinos, Porcinos, Ovinos, Aves, Apicultura) sin existencias declaradas permanecen ocultas en la vista resumida.</p>
+                                            </div>
+
+                                            {/* 🧵 SECCIÓN VII: MAQUINARIA Y EQUIPOS DE RIEGO */}
+                                            <div style={estiloContenedorSeccion}>
+                                                <div style={estiloTituloSeccion}>VII. MECANIZACIÓN Y EQUIPOS TECNOLÓGICOS</div>
+
+                                                {predioSeleccionado.maquinaria?.maquinaria_ruedas && (
+                                                    <div style={{ marginBottom: "15px" }}>
+                                                        <h5 style={{ margin: "0 0 8px 0", fontSize: "13px", color: "#374151" }}>🚜 Maquinaria Agrícola sobre Ruedas</h5>
+                                                        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                                                            {Object.entries(predioSeleccionado.maquinaria.maquinaria_ruedas).map(([maq, num]) => {
+                                                                if (num === 0 || maq === "id") return null;
+                                                                return (
+                                                                    <span key={maq} style={{ backgroundColor: "#fef3c7", color: "#92400e", padding: "4px 10px", borderRadius: "6px", fontSize: "12px" }}>
+                                                                        <span style={{ textTransform: "capitalize" }}>{maq}:</span> <strong>{num} Unid.</strong>
+                                                                    </span>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {predioSeleccionado.maquinaria?.riego && (
+                                                    <div>
+                                                        <h5 style={{ margin: "0 0 8px 0", fontSize: "13px", color: "#374151" }}>💧 Infraestructura y Equipamientos de Riego</h5>
+                                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
+                                                            {Object.entries(predioSeleccionado.maquinaria.riego).map(([bom, cant]) => {
+                                                                if (cant === 0 || bom === "id") return null;
+                                                                return (
+                                                                    <div key={bom} style={{ border: "1px solid #bfdbfe", backgroundColor: "#eff6ff", padding: "6px", borderRadius: "4px", fontSize: "12px" }}>
+                                                                        <span style={{ textTransform: "capitalize", color: "#1e40af" }}>{bom}:</span> <strong>{cant}</strong>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
                                         </div>
 
-                                        {/* BOTONES */}
+                                        {/* BOTONES DEL MODAL */}
                                         <div
                                             style={{
                                                 padding: "20px 30px",
@@ -1518,16 +1686,6 @@ export default function DashboardProduccion() {
                                                 borderTop: "1px solid #ddd",
                                             }}
                                         >
-                                            <button
-                                                onClick={() => setEditando(!editando)}
-                                                style={{
-                                                    ...estiloBoton,
-                                                    backgroundColor: "#136442",
-                                                }}
-                                            >
-                                                {editando ? "MODO VISUALIZACIÓN" : "EDITAR FICHA"}
-                                            </button>
-
                                             <button
                                                 onClick={() => {
                                                     setMostrarModal(false);
@@ -1630,6 +1788,186 @@ export default function DashboardProduccion() {
                         </div>
                     )}
 
+                    {tabActiva === "hierro" && (
+                        <div style={{ maxWidth: "950px", margin: "0 auto" }}>
+
+                            {/* 🔴 BLOQUE DE VALIDACIÓN DE PREDIO */}
+                            {!predioActivo ? (
+                                <FormSection title="⚠️ Selección requerida">
+                                    <p style={{ color: "#64748b", margin: 0, fontSize: "14px" }}>
+                                        Debes seleccionar un predio antes de registrar una licencia de hierro ganadero.
+                                    </p>
+                                </FormSection>
+                            ) : (
+                                <>
+                                    {/* 📜 SECCIÓN PRINCIPAL: DATOS DE LA LICENCIA */}
+                                    <FormSection title="📜 Licencia o Certificado de Hierro Ganadero">
+
+
+                                        {/* Selector de condicional: Posee licencia */}
+                                        <div style={{ maxWidth: "300px", marginBottom: "20px" }}>
+                                            <label style={labelStyle}>¿Posee licencia de hierro ganadero?</label>
+                                            <select
+                                                value={licenciaHierro.poseeLicencia}
+                                                onChange={(e) =>
+                                                    setLicenciaHierro({
+                                                        ...licenciaHierro,
+                                                        poseeLicencia: e.target.value === "true"
+                                                    })
+                                                }
+                                                style={inputStyle}
+                                            >
+                                                <option value="false">No</option>
+                                                <option value="true">Sí</option>
+                                            </select>
+                                        </div>
+
+                                        {/* 🔥 Campos condicionales si el productor posee licencia */}
+                                        {licenciaHierro.poseeLicencia && (
+                                            <>
+                                                {/* Primera Fila de Campos: Código y Número */}
+                                                <div style={grid3}>
+                                                    <InputField
+                                                        label="Código del Hierro"
+                                                        type="text"
+                                                        placeholder="Ej: ABC-123"
+                                                        value={licenciaHierro.codigoHierro || ""}
+                                                        onChange={(e) =>
+                                                            setLicenciaHierro({
+                                                                ...licenciaHierro,
+                                                                codigoHierro: e.target.value
+                                                            })
+                                                        }
+                                                    />
+                                                    <InputField
+                                                        label="Número de Licencia"
+                                                        type="text"
+                                                        placeholder="Ej: 00456"
+                                                        value={licenciaHierro.numeroLicencia || ""}
+                                                        onChange={(e) =>
+                                                            setLicenciaHierro({
+                                                                ...licenciaHierro,
+                                                                numeroLicencia: e.target.value
+                                                            })
+                                                        }
+                                                    />
+                                                    <div>
+                                                        <label style={labelStyle}>
+                                                            Organismo Emisor
+                                                        </label>
+
+                                                        <select
+                                                            value={licenciaHierro.organismoEmisor || ""}
+                                                            onChange={(e) =>
+                                                                setLicenciaHierro({
+                                                                    ...licenciaHierro,
+                                                                    organismoEmisor: e.target.value
+                                                                })
+                                                            }
+                                                            style={inputStyle}
+                                                        >
+                                                            <option value="">
+                                                                Seleccione un organismo
+                                                            </option>
+
+                                                            <option value="INSAI">
+                                                                INSAI
+                                                            </option>
+
+                                                            <option value="MPPAT">
+                                                                MPPAT
+                                                            </option>
+
+                                                            <option value="Gobernación del Estado Barinas">
+                                                                Gobernación del Estado Barinas
+                                                            </option>
+
+                                                            <option value="Instituto Nacional de Salud Agrícola Integral">
+                                                                Instituto Nacional de Salud Agrícola Integral
+                                                            </option>
+
+                                                            <option value="Otro">
+                                                                Otro
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                {/* Segunda Fila de Campos: Fechas y Archivo */}
+                                                <div style={grid3}>
+                                                    <InputField
+                                                        label="Fecha de Emisión"
+                                                        type="date"
+                                                        value={licenciaHierro.fechaEmision || ""}
+                                                        onChange={(e) =>
+                                                            setLicenciaHierro({
+                                                                ...licenciaHierro,
+                                                                fechaEmision: e.target.value
+                                                            })
+                                                        }
+                                                    />
+                                                    <InputField
+                                                        label="Fecha de Vencimiento"
+                                                        type="date"
+                                                        value={licenciaHierro.fechaVencimiento || ""}
+                                                        onChange={(e) =>
+                                                            setLicenciaHierro({
+                                                                ...licenciaHierro,
+                                                                fechaVencimiento: e.target.value
+                                                            })
+                                                        }
+                                                    />
+                                                    <InputField
+                                                        label="Certificado Digital (PDF/Imagen)"
+                                                        type="file"
+                                                        accept=".pdf,.jpg,.jpeg,.png"
+                                                        onChange={(e) =>
+                                                            setLicenciaHierro({
+                                                                ...licenciaHierro,
+                                                                certificado: e.target.files[0]
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+
+                                                {/* Área de Observaciones */}
+                                                <div style={{ marginBottom: "15px" }}>
+                                                    <label style={labelStyle}>Observaciones</label>
+                                                    <textarea
+                                                        rows="4"
+                                                        placeholder="Añada detalles adicionales sobre la vigencia o estado del herraje..."
+                                                        value={licenciaHierro.observaciones || ""}
+                                                        onChange={(e) =>
+                                                            setLicenciaHierro({
+                                                                ...licenciaHierro,
+                                                                observaciones: e.target.value
+                                                            })
+                                                        }
+                                                        style={{
+                                                            ...inputStyle,
+                                                            resize: "vertical"
+                                                        }}
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+                                    </FormSection>
+
+                                    {/* 💾 BOTÓN GUARDAR (Usa tu estilo estandarizado btnPrincipal) */}
+                                    <div style={{ textAlign: "right", paddingBottom: "40px" }}>
+                                        <button
+                                            onClick={guardarLicencia}
+                                            style={btnPrincipal}
+                                        >
+                                            Guardar Licencia
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
+
+
                     {tabActiva === "caracterizacion" && (
                         <div style={{ maxWidth: "950px", margin: "0 auto" }}>
                             {/* 🔴 BLOQUE DE VALIDACIÓN */}
@@ -1649,6 +1987,7 @@ export default function DashboardProduccion() {
                                             marginBottom: "25px",
                                         }}
                                     >
+
                                         <button onClick={() => setSubCaracterizacion("animal")}
                                             style={btnPrincipal}>
                                             Existencia Animal
@@ -1664,6 +2003,7 @@ export default function DashboardProduccion() {
                                             Maquinarias
                                         </button>
                                     </div>
+
 
                                     {subCaracterizacion === "animal" && (
                                         <FormSection title="Existencia Animal">
@@ -1710,6 +2050,8 @@ export default function DashboardProduccion() {
                                         </FormSection>
 
                                     )}
+
+
 
                                     {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Vacuno",) && (
                                         <FormSection title="Vacunos" >
@@ -4008,4 +4350,62 @@ const Spinner = ({ color = "#136442" }) => {
 };
 
 
+
+
+
+
+
+
+
+const estiloContenedorSeccion = {
+    marginBottom: "30px",
+    border: "1px solid #e5e7eb",
+    borderRadius: "8px",
+    padding: "20px",
+    backgroundColor: "#fff"
+};
+
+const estiloTituloSeccion = {
+    color: "#136442",
+    fontSize: "14px",
+    fontWeight: "bold",
+    borderBottom: "2px solid #136442",
+    paddingBottom: "6px",
+    marginBottom: "15px",
+    textTransform: "uppercase"
+};
+
+const estiloSubtituloInterno = {
+    margin: "15px 0 10px 0",
+    fontSize: "13px",
+    color: "#1f2937",
+    fontWeight: "600"
+};
+
+const estiloGridTresColumnas = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "20px"
+};
+
+const estiloLabel = {
+    color: "#4b5563",
+    fontSize: "11px",
+    fontWeight: "600",
+    display: "block",
+    marginBottom: "4px"
+};
+
+
+const estiloTh = {
+    padding: "10px",
+    textAlign: "left",
+    borderBottom: "2px solid #115e59"
+};
+
+const estiloTd = {
+    padding: "10px",
+    borderBottom: "1px solid #e5e7eb",
+    color: "#374151"
+};
 
