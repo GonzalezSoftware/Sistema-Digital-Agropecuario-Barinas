@@ -3,7 +3,7 @@ import bannerImg from "../assets/banner2.jpg";
 import escudo from "../assets/logo2.jpg";
 
 const NAV_ITEMS = [
-  { label: "Sobre Nosotros", href: "#sobre-nosotros" },
+  { label: "Productores", href: "/productores" },
   { label: "Registro de Predios", href: "/predios", isRoute: true },
   { label: "Producción Animal y Vegetal", href: "/produccion", isRoute: true },
   { label: "Estadísticas Generales", href: "/estadística-portalinfo", isRoute: true },
