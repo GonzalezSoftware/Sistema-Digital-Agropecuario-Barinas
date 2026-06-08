@@ -37,6 +37,23 @@ const IconBuscarPredio = () => (
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
 );
+const IconLicencia = () => (
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <circle cx="12" cy="15" r="2"></circle>
+        <path d="M10.8 16.8L10 20l2-1 2 1-.8-3.2"></path>
+    </svg>
+);
 const IconCaracterizacion = () => (
     <svg
         width="20"
@@ -573,6 +590,7 @@ export default function DashboardProduccion() {
     const guardarLicencia = async () => {
         if (!licenciaHierro.poseeLicencia) {
             Swal.fire({ icon: "info", title: "No se requiere registro si no posee licencia." });
+
             return;
         }
 
@@ -620,7 +638,13 @@ export default function DashboardProduccion() {
 
             Swal.fire({
                 icon: "success",
-                title: "Licencia registrada exitosamente"
+                title: "Licencia registrada exitosamente",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) {
+                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }
             });
 
         } catch (error) {
@@ -628,7 +652,13 @@ export default function DashboardProduccion() {
             Swal.fire({
                 icon: "error",
                 title: "Error al guardar",
-                text: error.response?.data ? JSON.stringify(error.response.data) : "Consulte la consola"
+                text: error.response?.data ? JSON.stringify(error.response.data) : "Consulte la consola",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) {
+                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }
             });
         }
     };
@@ -664,7 +694,14 @@ export default function DashboardProduccion() {
 
             cancelButtonText: "Cancelar",
 
-            confirmButtonColor: "#136442"
+            confirmButtonColor: "#136442",
+
+            didOpen: () => {
+                const popup = Swal.getPopup();
+                if (popup) {
+                    popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                }
+            }
         });
 
         if (!confirmacion.isConfirmed) return;
@@ -708,7 +745,14 @@ export default function DashboardProduccion() {
             title: "Código enviado",
 
             text:
-                "El código fue enviado al WhatsApp del productor"
+                "El código fue enviado al WhatsApp del productor",
+
+            didOpen: () => {
+                const popup = Swal.getPopup();
+                if (popup) {
+                    popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                }
+            }
         });
 
 
@@ -730,14 +774,27 @@ export default function DashboardProduccion() {
 
             confirmButtonColor: "#136442",
 
-            showCancelButton: true
+            showCancelButton: true,
+
+            didOpen: () => {
+                const popup = Swal.getPopup();
+                if (popup) {
+                    popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                }
+            }
         });
 
         if (!codigoUsuario) {
 
             Swal.fire({
                 icon: "warning",
-                title: "Proceso cancelado"
+                title: "Proceso cancelado",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) {
+                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }
             });
 
             return;
@@ -752,7 +809,13 @@ export default function DashboardProduccion() {
             Swal.fire({
                 icon: "error",
                 title: "Código incorrecto",
-                text: "No se pudo validar al productor"
+                text: "No se pudo validar al productor",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) {
+                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }
             });
 
             return;
@@ -864,7 +927,14 @@ export default function DashboardProduccion() {
 
                 title: "Caracterización guardada",
 
-                text: "La información fue validada por el productor"
+                text: "La información fue validada por el productor",
+
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) {
+                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }
             });
 
         } catch (error) {
@@ -882,7 +952,14 @@ export default function DashboardProduccion() {
 
                 title: "Error al guardar",
 
-                text: "Ocurrió un problema en el servidor"
+                text: "Ocurrió un problema en el servidor",
+
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) {
+                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }
             });
         }
     };
@@ -992,7 +1069,13 @@ export default function DashboardProduccion() {
                                 Swal.fire({
                                     icon: "warning",
                                     title: "Licencia ya registrada",
-                                    text: "Este predio (o su productor asociado) ya posee una Licencia de Hierro registrada en el sistema."
+                                    text: "Este predio (o su productor asociado) ya posee una Licencia de Hierro registrada en el sistema.",
+                                    didOpen: () => {
+                                        const popup = Swal.getPopup();
+                                        if (popup) {
+                                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                                        }
+                                    }
                                 });
                                 return; // Bloquea el cambio de pestaña
                             }
@@ -1000,7 +1083,7 @@ export default function DashboardProduccion() {
                             // Si no tiene licencia, permitimos el acceso normal
                             setTabActiva("hierro");
                         }}
-                        icon={<IconBuscarPredio />}
+                        icon={<IconLicencia />}
                     />
 
                     <MenuItem
@@ -1019,7 +1102,13 @@ export default function DashboardProduccion() {
                                     title: "Caracterización ya realizada",
 
                                     text:
-                                        "Este predio ya posee una caracterización productiva registrada. Debe utilizar la opción de Actualización Productiva."
+                                        "Este predio ya posee una caracterización productiva registrada. Debe utilizar la opción de Actualización Productiva.",
+                                    didOpen: () => {
+                                        const popup = Swal.getPopup();
+                                        if (popup) {
+                                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                                        }
+                                    }
                                 });
 
                                 return;
