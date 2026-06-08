@@ -3,9 +3,21 @@ import requests
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Predio, LicenciaHierro
+from .models import Predio, LicenciaHierro, Productor
 from .serializers import PredioSerializer, LicenciaHierroSerializer
 
+@api_view(['GET'])
+def buscar_productor(request, cedula):
+    cedula_limpia = cedula.strip().upper()
+    try:
+        productor = Productor.objects.get(cedula_rif=cedula_limpia)
+        # Asegúrate de incluir 'existe' aquí también
+        return Response({
+            "existe": True, 
+            "nombre": productor.nombre
+        })
+    except Productor.DoesNotExist:
+        return Response({"existe": False}, status=404)
 
 
 class PredioViewSet(viewsets.ModelViewSet):
