@@ -625,13 +625,13 @@ export default function Dashboard() {
         }
         if (name === "productor_cedula") {
             // V- exige 7 a 8 dígitos | E- permite desde 5 hasta 8 dígitos
-            const regexCedula = prefijoCedula === "V-" ? /^[0-9]{7,8}$/ : /^[0-9]{5,8}$/;
+            const regexCedula = prefijoCedula === "V-" ? /^[0-9]{6,8}$/ : /^[0-9]{5,8}$/;
 
             if (value === "") {
                 mensaje = "";
             } else if (!regexCedula.test(value)) {
                 mensaje = prefijoCedula === "V-"
-                    ? "La cédula venezolana debe tener 7 u 8 números"
+                    ? "La cédula venezolana debe tener 6 u 8 números"
                     : "La cédula extranjera debe tener entre 5 y 8 números";
             } else {
                 // Mandamos SOLO el número puro a buscar en la lista local
