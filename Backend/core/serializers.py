@@ -21,6 +21,8 @@ class LicenciaHierroSerializer(serializers.ModelSerializer):
 # 1. Definimos primero los serializadores de las tablas hijas
 class ProductorSerializer(serializers.ModelSerializer):
     licencias = serializers.SerializerMethodField()
+    # Definimos explícitamente para controlar la validación
+    cedula_rif = serializers.CharField(validators=[])
 
     class Meta:
         model = Productor
@@ -71,72 +73,57 @@ class MaquinariaSerializer(serializers.ModelSerializer):
 
 # 2. Definimos al final el serializador principal que usa a los anteriores
 class PredioSerializer(serializers.ModelSerializer):
-    productor = ProductorSerializer()
-    infraestructura = InfraestructuraSerializer()
-    produccion = ProduccionSerializer()
-    rubros_vegetales = RubroVegetalSerializer(many=True)
-    existencia_animal = ExistenciaAnimalSerializer()
-    maquinaria = MaquinariaSerializer()
-    # Cambiamos a required=False para que no dé error si no los mandas en el PATCH
+    # Agrega 'required=False' a los campos anidados
+    productor = ProductorSerializer(required=False)
+    infraestructura = InfraestructuraSerializer(required=False)
+    produccion = ProduccionSerializer(required=False)
+    rubros_vegetales = RubroVegetalSerializer(many=True, required=False)
+    existencia_animal = ExistenciaAnimalSerializer(required=False)
+    maquinaria = MaquinariaSerializer(required=False)
     servicios = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-
 
     class Meta:
         model = Predio
         fields = '__all__'
 
     def create(self, validated_data):
-        # ... (Tu código de create se mantiene igual) ...
-        rubros_data = validated_data.pop(
-        'rubros_vegetales',
-        []
-        )
-        existencia_data = validated_data.pop(
-        'existencia_animal',
-        {}
-        )
-        maquinaria_data = validated_data.pop(
-        'maquinaria',
-        {}
-        )
+        # 1. Extracción de datos anidados
+        rubros_data = validated_data.pop('rubros_vegetales', [])
+        existencia_data = validated_data.pop('existencia_animal', {})
+        maquinaria_data = validated_data.pop('maquinaria', {})
         productor_data = validated_data.pop('productor')
         infra_data = validated_data.pop('infraestructura')
         prod_data = validated_data.pop('produccion')
         servicios_nombres = validated_data.pop('servicios', [])
 
+        # 2. Gestión segura del productor
+        # Extraemos la cédula para filtrar y usamos el resto en 'defaults'
+        cedula = productor_data.pop('cedula_rif')
         productor, _ = Productor.objects.update_or_create(
-            cedula_rif=productor_data.get('cedula_rif'),
+            cedula_rif=cedula,
             defaults=productor_data
         )
 
+        # 3. Creación del predio principal
         predio = Predio.objects.create(productor=productor, **validated_data)
 
+        # 4. Procesamiento de relaciones
         for nombre in servicios_nombres:
             servicio_obj, _ = Servicio.objects.get_or_create(nombre_servicio=nombre)
             PredioServicio.objects.create(predio=predio, servicio=servicio_obj)
             
         for rubro in rubros_data:
-         RubroVegetal.objects.create(
-         predio=predio,
-         **rubro
-         )    
-         
+            RubroVegetal.objects.create(predio=predio, **rubro)
+            
         if existencia_data:
-
-             ExistenciaAnimal.objects.create(
-             predio=predio,
-             **existencia_data
-             )
-         
+            ExistenciaAnimal.objects.create(predio=predio, **existencia_data)
+        
         if maquinaria_data:
-
-             Maquinaria.objects.create(
-             predio=predio,
-             **maquinaria_data
-              )
+            Maquinaria.objects.create(predio=predio, **maquinaria_data)
 
         Infraestructura.objects.create(predio=predio, **infra_data)
         Produccion.objects.create(predio=predio, **prod_data)
+        
         return predio
 
     # ── AQUÍ ESTÁ LA SOLUCIÓN: MÉTODO UPDATE ──
