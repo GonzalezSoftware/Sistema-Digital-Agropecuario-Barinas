@@ -281,9 +281,5 @@ class PredioSerializer(serializers.ModelSerializer):
                     servicio=servicio_obj
                 )
                 
-                
-        instance.caracterizacion_completada = True
-
-        instance.save()
 
         return instance
