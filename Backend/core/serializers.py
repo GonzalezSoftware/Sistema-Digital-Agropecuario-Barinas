@@ -73,13 +73,13 @@ class MaquinariaSerializer(serializers.ModelSerializer):
 
 # 2. Definimos al final el serializador principal que usa a los anteriores
 class PredioSerializer(serializers.ModelSerializer):
-    # Agrega 'required=False' a los campos anidados
+    # Agregamos allow_null=True para permitir actualizaciones parciales sin conflictos
     productor = ProductorSerializer(required=False)
-    infraestructura = InfraestructuraSerializer(required=False)
-    produccion = ProduccionSerializer(required=False)
-    rubros_vegetales = RubroVegetalSerializer(many=True, required=False)
-    existencia_animal = ExistenciaAnimalSerializer(required=False)
-    maquinaria = MaquinariaSerializer(required=False)
+    infraestructura = InfraestructuraSerializer(required=False, allow_null=True)
+    produccion = ProduccionSerializer(required=False, allow_null=True)
+    rubros_vegetales = RubroVegetalSerializer(many=True, required=False, allow_null=True)
+    existencia_animal = ExistenciaAnimalSerializer(required=False, allow_null=True)
+    maquinaria = MaquinariaSerializer(required=False, allow_null=True)
     servicios = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
 
     class Meta:
@@ -97,7 +97,6 @@ class PredioSerializer(serializers.ModelSerializer):
         servicios_nombres = validated_data.pop('servicios', [])
 
         # 2. Gestión segura del productor
-        # Extraemos la cédula para filtrar y usamos el resto en 'defaults'
         cedula = productor_data.pop('cedula_rif')
         productor, _ = Productor.objects.update_or_create(
             cedula_rif=cedula,
@@ -126,6 +125,9 @@ class PredioSerializer(serializers.ModelSerializer):
         
         return predio
 
+    # Tu método update ya está definido y funcionará correctamente 
+    # una vez que el Serializador deje pasar los datos nulos/parciales.
+    
     # ── AQUÍ ESTÁ LA SOLUCIÓN: MÉTODO UPDATE ──
     def update(self, instance, validated_data):
 
