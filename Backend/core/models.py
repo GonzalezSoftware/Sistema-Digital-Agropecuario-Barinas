@@ -148,11 +148,11 @@ class ExistenciaAnimal(models.Model):
 
     especiesSeleccionadas = models.JSONField(default=list)
 
-    vacunos = models.JSONField(default=dict)
-    capacidadVacuna = models.JSONField(default=dict)
+    bovinos = models.JSONField(default=dict)
+    capacidadBovina = models.JSONField(default=dict)
 
-    bufalinos = models.JSONField(default=dict)
-    capacidadBufalina = models.JSONField(default=dict)
+    bubalinos = models.JSONField(default=dict)
+    capacidadBubalina = models.JSONField(default=dict)
 
     equinos = models.JSONField(default=dict)
     capacidadEquina = models.JSONField(default=dict)
@@ -166,14 +166,14 @@ class ExistenciaAnimal(models.Model):
     caprinos = models.JSONField(default=dict)
     capacidadCaprino = models.JSONField(default=dict)
 
-    conejos = models.JSONField(default=dict)
+    cunicola = models.JSONField(default=dict)
     capacidadCunicola = models.JSONField(default=dict)
 
-    aves = models.JSONField(default=dict)
-    capacidadAvesCorral = models.JSONField(default=dict)
+    avicola = models.JSONField(default=dict)
+    capacidadAvicola = models.JSONField(default=dict)
 
-    apicultura = models.JSONField(default=dict)
-    capacidadApicultura = models.JSONField(default=dict)
+    apicola = models.JSONField(default=dict)
+    capacidadApicola = models.JSONField(default=dict)
 
     class Meta:
         db_table = 'existencia_animal'
