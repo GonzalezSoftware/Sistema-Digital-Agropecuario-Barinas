@@ -609,7 +609,7 @@ export default function Dashboard() {
             }));
         }
     };
-    const validarCampoProductor = (name, value) => {
+    const validarCampoProductor = (name, value,) => {
         let mensaje = "";
 
         if (name === "productor_nombre") {
@@ -825,6 +825,8 @@ export default function Dashboard() {
         setErrors(prev => ({ ...prev, [name]: mensaje }));
     };
 
+
+
     const manejarCambio = (e) => {
         const { name, value } = e.target;
 
@@ -840,6 +842,12 @@ export default function Dashboard() {
     };
     //-----------------------------------------------------------------------------------------------
 
+
+
+
+
+
+    
     //GRÁFICOS
     const datosGrafico = useMemo(() => {
         if (!listaPredios || listaPredios.length === 0) return [];
@@ -1161,7 +1169,7 @@ export default function Dashboard() {
 
     const guardarCambiosReal = async () => {
         setCargandoAccion(true);
-        console.log("Enviando al servidor - Campo:", campo, "Valor:", valor);
+        
         try {
             const datosAEnviar = JSON.parse(JSON.stringify(predioSeleccionado));
 
