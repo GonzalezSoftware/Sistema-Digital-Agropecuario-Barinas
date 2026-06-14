@@ -283,7 +283,7 @@ export default function DashboardProduccion() {
     const [inventarioInicial, setInventarioInicial] = useState({
         especiesSeleccionadas: [],
 
-        vacunos: {
+        bovinos: {
             toro_reproductor: 0,
             toro_ceba: 0,
             vaca: 0,
@@ -295,13 +295,13 @@ export default function DashboardProduccion() {
             becerro: 0,
         },
 
-        capacidadVacuna: {
+        capacidadBovina: {
             leche_diaria: 0,
             carne_anual: 0,
             sistemas: [],
         },
 
-        bufalinos: {
+        bubalinos: {
             butoro_reproductor: 0,
             butoro_ceba: 0,
             bufala: 0,
@@ -313,7 +313,7 @@ export default function DashboardProduccion() {
             bucerro: 0,
         },
 
-        capacidadBufalina: {
+        capacidadBubalina: {
             leche_diaria: 0,
             carne_anual: 0,
             partos_anuales: 0,
@@ -399,7 +399,7 @@ export default function DashboardProduccion() {
             carne_anual: 0,
         },
 
-        conejos: {
+        cunicola: {
             macho: 0,
             madre: 0,
             gazapo: 0,
@@ -412,7 +412,7 @@ export default function DashboardProduccion() {
             carne_anual: 0
         },
 
-        aves: {
+        avicola: {
             pollos_engorde: 0,
             gallinas_ponedoras: 0,
             gallinas_descarte: 0,
@@ -424,18 +424,18 @@ export default function DashboardProduccion() {
             otros: 0,
         },
 
-        capacidadAvesCorral: {
+        capacidadAvicola: {
             sistemas: [],
             capacidad_alojamiento: 0,
             produccion_huevos: 0,
             capacidad_lote: 0,
         },
 
-        apicultura: {
+        apicola: {
             colmenas: 0,
         },
 
-        capacidadApicultura: {
+        capacidadApicola: {
             sistemas: [],
             colmenas_activas: 0,
             miel_anual: 0,
@@ -836,16 +836,16 @@ export default function DashboardProduccion() {
                     especiesSeleccionadas:
                         inventarioInicial.especiesSeleccionadas,
 
-                    vacunos:
-                        inventarioInicial.vacunos,
+                    bovinos:
+                        inventarioInicial.bovinos,
 
-                    capacidadVacuna:
-                        inventarioInicial.capacidadVacuna,
+                    capacidadBovina:
+                        inventarioInicial.capacidadBovina,
 
-                    bufalinos:
+                    bubalinos:
                         inventarioInicial.bufalinos,
 
-                    capacidadBufalina:
+                    capacidadBubalina:
                         inventarioInicial.capacidadBufalina,
 
                     equinos:
@@ -872,23 +872,23 @@ export default function DashboardProduccion() {
                     capacidadCaprino:
                         inventarioInicial.capacidadCaprino,
 
-                    conejos:
-                        inventarioInicial.conejos,
+                    cunicola:
+                        inventarioInicial.cunicola,
 
                     capacidadCunicola:
                         inventarioInicial.capacidadCunicola,
 
-                    aves:
-                        inventarioInicial.aves,
+                    avicola:
+                        inventarioInicial.avicola,
 
-                    capacidadAvesCorral:
-                        inventarioInicial.capacidadAvesCorral,
+                    capacidadAvicola:
+                        inventarioInicial.capacidadAvicola,
 
-                    apicultura:
-                        inventarioInicial.apicultura,
+                    apicola:
+                        inventarioInicial.apicola,
 
-                    capacidadApicultura:
-                        inventarioInicial.capacidadApicultura,
+                    capacidadApicola:
+                        inventarioInicial.capacidadApicola,
                 },
 
                 maquinaria: {
@@ -2098,15 +2098,15 @@ export default function DashboardProduccion() {
                                         <FormSection title="Existencia Animal">
                                             <div style={gridCheck}>
                                                 {[
-                                                    "Vacuno",
-                                                    "Bufalino",
+                                                    "Bovino",
+                                                    "Bubalino",
                                                     "Equino",
                                                     "Ovino",
                                                     "Porcino",
                                                     "Caprino",
-                                                    "Conejo",
-                                                    "Aves de corral",
-                                                    "Apicultura",
+                                                    "Cunicola",
+                                                    "Avicola",
+                                                    "Apicola",
                                                 ].map((item) => (
                                                     <label key={item} style={radioLabel}>
                                                         <input
@@ -2142,20 +2142,20 @@ export default function DashboardProduccion() {
 
 
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Vacuno",) && (
-                                        <FormSection title="Vacunos" >
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Bovino",) && (
+                                        <FormSection title="Bovinos" >
                                             <div style={grid3}>
-                                                {Object.keys(inventarioInicial.vacunos).map((item) => (
+                                                {Object.keys(inventarioInicial.bovinos).map((item) => (
                                                     <InputField
                                                         key={item}
                                                         label={item.replaceAll("_", " ").toUpperCase()}
                                                         type="number"
-                                                        value={inventarioInicial.vacunos[item]}
+                                                        value={inventarioInicial.bovinos[item]}
                                                         onChange={(e) => {
                                                             setInventarioInicial((prev) => ({
                                                                 ...prev,
-                                                                vacunos: {
-                                                                    ...prev.vacunos,
+                                                                bovinos: {
+                                                                    ...prev.bovinos,
                                                                     [item]: parseInt(e.target.value) || 0,
                                                                 },
                                                             }));
@@ -2170,8 +2170,8 @@ export default function DashboardProduccion() {
                                                     marginTop: "15px",
                                                 }}
                                             >
-                                                Total Vacunos:{" "}
-                                                {Object.values(inventarioInicial.vacunos).reduce(
+                                                Total Bovinos:{" "}
+                                                {Object.values(inventarioInicial.bovinos).reduce(
                                                     (a, b) => a + b,
                                                     0,
                                                 )}
@@ -2179,8 +2179,8 @@ export default function DashboardProduccion() {
                                         </FormSection>
                                     )}
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Vacuno",) && (
-                                        <FormSection title="Capacidad Productiva Vacuna">
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Bovino",) && (
+                                        <FormSection title="Capacidad Productiva Bovina">
                                             {/* SISTEMAS PRODUCTIVOS */}
                                             <div>
                                                 <p
@@ -2205,27 +2205,27 @@ export default function DashboardProduccion() {
                                                         <label key={item} style={radioLabel}>
                                                             <input
                                                                 type="checkbox"
-                                                                checked={inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                                checked={inventarioInicial.capacidadBovina.sistemas.includes(
                                                                     item,
                                                                 )}
                                                                 onChange={() => {
                                                                     const existe =
-                                                                        inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                                        inventarioInicial.capacidadBovina.sistemas.includes(
                                                                             item,
                                                                         );
 
                                                                     setInventarioInicial((prev) => ({
                                                                         ...prev,
 
-                                                                        capacidadVacuna: {
-                                                                            ...prev.capacidadVacuna,
+                                                                        capacidadBovina: {
+                                                                            ...prev.capacidadBovina,
 
                                                                             sistemas: existe
-                                                                                ? prev.capacidadVacuna.sistemas.filter(
+                                                                                ? prev.capacidadBovina.sistemas.filter(
                                                                                     (s) => s !== item,
                                                                                 )
                                                                                 : [
-                                                                                    ...prev.capacidadVacuna.sistemas,
+                                                                                    ...prev.capacidadBovina.sistemas,
                                                                                     item,
                                                                                 ],
                                                                         },
@@ -2247,10 +2247,10 @@ export default function DashboardProduccion() {
                                             >
                                                 <div style={grid3}>
                                                     {/* LECHE */}
-                                                    {(inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                    {(inventarioInicial.capacidadBovina.sistemas.includes(
                                                         "Lechería",
                                                     ) ||
-                                                        inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                        inventarioInicial.capacidadBovina.sistemas.includes(
                                                             "Doble propósito",
                                                         )) && (
                                                             <InputField
@@ -2259,8 +2259,8 @@ export default function DashboardProduccion() {
                                                                 onChange={(e) => {
                                                                     setInventarioInicial((prev) => ({
                                                                         ...prev,
-                                                                        capacidadVacuna: {
-                                                                            ...prev.capacidadVacuna,
+                                                                        capacidadBovina: {
+                                                                            ...prev.capacidadBovina,
                                                                             leche_diaria: parseInt(e.target.value) || 0,
                                                                         },
                                                                     }));
@@ -2269,10 +2269,10 @@ export default function DashboardProduccion() {
                                                         )}
 
                                                     {/* CARNE */}
-                                                    {(inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                    {(inventarioInicial.capacidadBovina.sistemas.includes(
                                                         "Ceba",
                                                     ) ||
-                                                        inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                        inventarioInicial.capacidadBovina.sistemas.includes(
                                                             "Doble propósito",
                                                         )) && (
                                                             <InputField
@@ -2281,8 +2281,8 @@ export default function DashboardProduccion() {
                                                                 onChange={(e) => {
                                                                     setInventarioInicial((prev) => ({
                                                                         ...prev,
-                                                                        capacidadVacuna: {
-                                                                            ...prev.capacidadVacuna,
+                                                                        capacidadBovina: {
+                                                                            ...prev.capacidadBovina,
                                                                             carne_anual: parseInt(e.target.value) || 0,
                                                                         },
                                                                     }));
@@ -2291,7 +2291,7 @@ export default function DashboardProduccion() {
                                                         )}
 
                                                     {/* CRÍA */}
-                                                    {inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                    {inventarioInicial.capacidadBovina.sistemas.includes(
                                                         "Cría",
                                                     ) && (
                                                             <InputField
@@ -2301,7 +2301,7 @@ export default function DashboardProduccion() {
                                                         )}
 
                                                     {/* GENÉTICA */}
-                                                    {inventarioInicial.capacidadVacuna.sistemas.includes(
+                                                    {inventarioInicial.capacidadBovina.sistemas.includes(
                                                         "Genética",
                                                     ) && (
                                                             <InputField
@@ -2315,21 +2315,21 @@ export default function DashboardProduccion() {
                                         </FormSection>
                                     )}
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Bufalino",) && (
-                                        <FormSection title="Bufalinos">
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Bubalino",) && (
+                                        <FormSection title="Bubalinos">
                                             <div style={grid3}>
-                                                {Object.keys(inventarioInicial.bufalinos).map(
+                                                {Object.keys(inventarioInicial.bubalinos).map(
                                                     (item) => (
                                                         <InputField
                                                             key={item}
                                                             label={item.replaceAll("_", " ").toUpperCase()}
                                                             type="number"
-                                                            value={inventarioInicial.bufalinos[item]}
+                                                            value={inventarioInicial.bubalinos[item]}
                                                             onChange={(e) => {
                                                                 setInventarioInicial((prev) => ({
                                                                     ...prev,
-                                                                    bufalinos: {
-                                                                        ...prev.bufalinos,
+                                                                    bubalinos: {
+                                                                        ...prev.bubalinos,
                                                                         [item]: parseInt(e.target.value) || 0,
                                                                     },
                                                                 }));
@@ -2346,8 +2346,8 @@ export default function DashboardProduccion() {
                                                     marginTop: "15px",
                                                 }}
                                             >
-                                                Total Bufalinos:{" "}
-                                                {Object.values(inventarioInicial.bufalinos).reduce(
+                                                Total Bubalinos:{" "}
+                                                {Object.values(inventarioInicial.bubalinos).reduce(
                                                     (a, b) => a + b,
                                                     0,
                                                 )}
@@ -2355,8 +2355,8 @@ export default function DashboardProduccion() {
                                         </FormSection>
                                     )}
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Bufalino",) && (
-                                        <FormSection title="Capacidad Productiva Bufalina">
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Bubalino",) && (
+                                        <FormSection title="Capacidad Productiva Bubalina">
                                             {/* SISTEMAS PRODUCTIVOS */}
                                             <div>
                                                 <p
@@ -2381,27 +2381,27 @@ export default function DashboardProduccion() {
                                                         <label key={item} style={radioLabel}>
                                                             <input
                                                                 type="checkbox"
-                                                                checked={inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                                checked={inventarioInicial.capacidadBubalina.sistemas.includes(
                                                                     item,
                                                                 )}
                                                                 onChange={() => {
                                                                     const existe =
-                                                                        inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                                        inventarioInicial.capacidadBubalina.sistemas.includes(
                                                                             item,
                                                                         );
 
                                                                     setInventarioInicial((prev) => ({
                                                                         ...prev,
 
-                                                                        capacidadBufalina: {
-                                                                            ...prev.capacidadBufalina,
+                                                                        capacidadBubalina: {
+                                                                            ...prev.capacidadBubalina,
 
                                                                             sistemas: existe
-                                                                                ? prev.capacidadBufalina.sistemas.filter(
+                                                                                ? prev.capacidadBubalina.sistemas.filter(
                                                                                     (s) => s !== item,
                                                                                 )
                                                                                 : [
-                                                                                    ...prev.capacidadBufalina.sistemas,
+                                                                                    ...prev.capacidadBubalina.sistemas,
                                                                                     item,
                                                                                 ],
                                                                         },
@@ -2423,10 +2423,10 @@ export default function DashboardProduccion() {
                                             >
                                                 <div style={grid3}>
                                                     {/* LECHE */}
-                                                    {(inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                    {(inventarioInicial.capacidadBubalina.sistemas.includes(
                                                         "Lechería",
                                                     ) ||
-                                                        inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                        inventarioInicial.capacidadBubalina.sistemas.includes(
                                                             "Doble propósito",
                                                         )) && (
                                                             <InputField
@@ -2435,8 +2435,8 @@ export default function DashboardProduccion() {
                                                                 onChange={(e) => {
                                                                     setInventarioInicial((prev) => ({
                                                                         ...prev,
-                                                                        capacidadBufalina: {
-                                                                            ...prev.capacidadBufalina,
+                                                                        capacidadBubalina: {
+                                                                            ...prev.capacidadBubalina,
                                                                             leche_diaria: parseInt(e.target.value) || 0,
                                                                         },
                                                                     }));
@@ -2445,10 +2445,10 @@ export default function DashboardProduccion() {
                                                         )}
 
                                                     {/* CARNE */}
-                                                    {(inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                    {(inventarioInicial.capacidadBubalina.sistemas.includes(
                                                         "Ceba",
                                                     ) ||
-                                                        inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                        inventarioInicial.capacidadBubalina.sistemas.includes(
                                                             "Doble propósito",
                                                         )) && (
                                                             <InputField
@@ -2457,8 +2457,8 @@ export default function DashboardProduccion() {
                                                                 onChange={(e) => {
                                                                     setInventarioInicial((prev) => ({
                                                                         ...prev,
-                                                                        capacidadBufalina: {
-                                                                            ...prev.capacidadBufalina,
+                                                                        capacidadBubalina: {
+                                                                            ...prev.capacidadBubalina,
                                                                             carne_anual: parseInt(e.target.value) || 0,
                                                                         },
                                                                     }));
@@ -2467,7 +2467,7 @@ export default function DashboardProduccion() {
                                                         )}
 
                                                     {/* CRÍA */}
-                                                    {inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                    {inventarioInicial.capacidadBubalina.sistemas.includes(
                                                         "Cría",
                                                     ) && (
                                                             <InputField
@@ -2476,8 +2476,8 @@ export default function DashboardProduccion() {
                                                                 onChange={(e) => {
                                                                     setInventarioInicial((prev) => ({
                                                                         ...prev,
-                                                                        capacidadBufalina: {
-                                                                            ...prev.capacidadBufalina,
+                                                                        capacidadBubalina: {
+                                                                            ...prev.capacidadBubalina,
                                                                             partos_anuales:
                                                                                 parseInt(e.target.value) || 0,
                                                                         },
@@ -2487,7 +2487,7 @@ export default function DashboardProduccion() {
                                                         )}
 
                                                     {/* GENÉTICA */}
-                                                    {inventarioInicial.capacidadBufalina.sistemas.includes(
+                                                    {inventarioInicial.capacidadBubalina.sistemas.includes(
                                                         "Genética",
                                                     ) && (
                                                             <InputField
@@ -2496,8 +2496,8 @@ export default function DashboardProduccion() {
                                                                 onChange={(e) => {
                                                                     setInventarioInicial((prev) => ({
                                                                         ...prev,
-                                                                        capacidadBufalina: {
-                                                                            ...prev.capacidadBufalina,
+                                                                        capacidadBubalina: {
+                                                                            ...prev.capacidadBubalina,
                                                                             reproductores:
                                                                                 parseInt(e.target.value) || 0,
                                                                         },
@@ -3358,20 +3358,20 @@ export default function DashboardProduccion() {
                                         </FormSection>
                                     )}
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Conejo",) && (
-                                        <FormSection title="Conejos">
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Cunicola",) && (
+                                        <FormSection title="Cunícola">
                                             <div style={grid3}>
-                                                {Object.keys(inventarioInicial.conejos).map((item) => (
+                                                {Object.keys(inventarioInicial.cunicola).map((item) => (
                                                     <InputField
                                                         key={item}
                                                         label={item.replaceAll("_", " ").toUpperCase()}
                                                         type="number"
-                                                        value={inventarioInicial.conejos[item]}
+                                                        value={inventarioInicial.cunicola[item]}
                                                         onChange={(e) => {
                                                             setInventarioInicial((prev) => ({
                                                                 ...prev,
-                                                                conejos: {
-                                                                    ...prev.conejos,
+                                                                cunicola: {
+                                                                    ...prev.cunicola,
                                                                     [item]: parseInt(e.target.value) || 0,
                                                                 },
                                                             }));
@@ -3387,8 +3387,8 @@ export default function DashboardProduccion() {
                                                     marginTop: "15px",
                                                 }}
                                             >
-                                                Total Conejos:{" "}
-                                                {Object.values(inventarioInicial.conejos).reduce(
+                                                Total Cunícola:{" "}
+                                                {Object.values(inventarioInicial.cunicola).reduce(
                                                     (a, b) => a + b,
                                                     0,
                                                 )}
@@ -3396,8 +3396,8 @@ export default function DashboardProduccion() {
                                         </FormSection>
                                     )}
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Conejo") && (
-                                        <FormSection title="Capacidad Productiva Cunícola (Conejos)">
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Cunicola") && (
+                                        <FormSection title="Capacidad Productiva Cunícola">
                                             {/* SISTEMAS PRODUCTIVOS */}
                                             <div>
                                                 <p style={{ fontWeight: "700", color: "#136442", marginBottom: "15px", fontSize: "15px" }}>
@@ -3471,20 +3471,20 @@ export default function DashboardProduccion() {
                                         </FormSection>
                                     )}
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Aves de corral",) && (
-                                        <FormSection title="Aves">
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Avicola",) && (
+                                        <FormSection title="Avícola">
                                             <div style={grid3}>
-                                                {Object.keys(inventarioInicial.aves).map((item) => (
+                                                {Object.keys(inventarioInicial.avicola).map((item) => (
                                                     <InputField
                                                         key={item}
                                                         label={item.replaceAll("_", " ").toUpperCase()}
                                                         type="number"
-                                                        value={inventarioInicial.aves[item]}
+                                                        value={inventarioInicial.avicola[item]}
                                                         onChange={(e) => {
                                                             setInventarioInicial((prev) => ({
                                                                 ...prev,
-                                                                aves: {
-                                                                    ...prev.aves,
+                                                                avicola: {
+                                                                    ...prev.avicola,
                                                                     [item]: parseInt(e.target.value) || 0,
                                                                 },
                                                             }));
@@ -3500,8 +3500,8 @@ export default function DashboardProduccion() {
                                                     marginTop: "15px",
                                                 }}
                                             >
-                                                Total Aves de Corral:{" "}
-                                                {Object.values(inventarioInicial.aves).reduce(
+                                                Total Avícola:{" "}
+                                                {Object.values(inventarioInicial.avicola).reduce(
                                                     (a, b) => a + b,
                                                     0,
                                                 )}
@@ -3509,8 +3509,8 @@ export default function DashboardProduccion() {
                                         </FormSection>
                                     )}
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Aves de corral") && (
-                                        <FormSection title="Capacidad Productiva Aves de Corral">
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Avicola") && (
+                                        <FormSection title="Capacidad Productiva Avícola">
                                             {/* SISTEMAS PRODUCTIVOS */}
                                             <div>
                                                 <p style={{ fontWeight: "700", color: "#136442", marginBottom: "15px", fontSize: "15px" }}>
@@ -3526,16 +3526,16 @@ export default function DashboardProduccion() {
                                                         <label key={item} style={radioLabel}>
                                                             <input
                                                                 type="checkbox"
-                                                                checked={inventarioInicial.capacidadAvesCorral.sistemas.includes(item)}
+                                                                checked={inventarioInicial.capacidadAvicola.sistemas.includes(item)}
                                                                 onChange={() => {
-                                                                    const existe = inventarioInicial.capacidadAvesCorral.sistemas.includes(item);
+                                                                    const existe = inventarioInicial.capacidadAvicola.sistemas.includes(item);
                                                                     setInventarioInicial(prev => ({
                                                                         ...prev,
-                                                                        capacidadAvesCorral: {
-                                                                            ...prev.capacidadAvesCorral,
+                                                                        capacidadAvicola: {
+                                                                            ...prev.capacidadAvicola,
                                                                             sistemas: existe
-                                                                                ? prev.capacidadAvesCorral.sistemas.filter(s => s !== item)
-                                                                                : [...prev.capacidadAvesCorral.sistemas, item]
+                                                                                ? prev.capacidadAvicola.sistemas.filter(s => s !== item)
+                                                                                : [...prev.capacidadAvicola.sistemas, item]
                                                                         }
                                                                     }));
                                                                 }}
@@ -3549,36 +3549,36 @@ export default function DashboardProduccion() {
                                             {/* CAMPOS DINÁMICOS */}
                                             <div style={{ marginTop: "25px" }}>
                                                 <div style={grid3}>
-                                                    {inventarioInicial.capacidadAvesCorral.sistemas.includes("Producción de Huevo (Postura)") && (
+                                                    {inventarioInicial.capacidadAvicola.sistemas.includes("Producción de Huevo (Postura)") && (
                                                         <>
                                                             <InputField
-                                                                label="Capacidad de alojamiento (Aves)"
+                                                                label="Capacidad de alojamiento (Avícola)"
                                                                 type="number"
-                                                                value={inventarioInicial.capacidadAvesCorral.capacidad_alojamiento || ""}
+                                                                value={inventarioInicial.capacidadAvicola.capacidad_alojamiento || ""}
                                                                 onChange={(e) => setInventarioInicial(prev => ({
                                                                     ...prev,
-                                                                    capacidadAvesCorral: { ...prev.capacidadAvesCorral, capacidad_alojamiento: parseInt(e.target.value) || 0 }
+                                                                    capacidadAvicola: { ...prev.capacidadAvicola, capacidad_alojamiento: parseInt(e.target.value) || 0 }
                                                                 }))}
                                                             />
                                                             <InputField
                                                                 label="Producción diaria (Cartones/Huevos)"
                                                                 type="number"
-                                                                value={inventarioInicial.capacidadAvesCorral.produccion_huevos || ""}
+                                                                value={inventarioInicial.capacidadAvicola.produccion_huevos || ""}
                                                                 onChange={(e) => setInventarioInicial(prev => ({
                                                                     ...prev,
-                                                                    capacidadAvesCorral: { ...prev.capacidadAvesCorral, produccion_huevos: parseInt(e.target.value) || 0 }
+                                                                    capacidadAvicola: { ...prev.capacidadAvicola, produccion_huevos: parseInt(e.target.value) || 0 }
                                                                 }))}
                                                             />
                                                         </>
                                                     )}
-                                                    {inventarioInicial.capacidadAvesCorral.sistemas.includes("Pollo de Engorde") && (
+                                                    {inventarioInicial.capacidadAvicola.sistemas.includes("Pollo de Engorde") && (
                                                         <InputField
                                                             label="Capacidad por ciclo / lote"
                                                             type="number"
-                                                            value={inventarioInicial.capacidadAvesCorral.capacidad_lote || ""}
+                                                            value={inventarioInicial.capacidadAvicola.capacidad_lote || ""}
                                                             onChange={(e) => setInventarioInicial(prev => ({
                                                                 ...prev,
-                                                                capacidadAvesCorral: { ...prev.capacidadAvesCorral, capacidad_lote: parseInt(e.target.value) || 0 }
+                                                                capacidadAvicola: { ...prev.capacidadAvicola, capacidad_lote: parseInt(e.target.value) || 0 }
                                                             }))}
                                                         />
                                                     )}
@@ -3587,21 +3587,21 @@ export default function DashboardProduccion() {
                                         </FormSection>
                                     )}
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Apicultura",) && (
-                                        <FormSection title="Apicultura">
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Apicola",) && (
+                                        <FormSection title="Apícola">
                                             <div style={grid3}>
-                                                {Object.keys(inventarioInicial.apicultura).map(
+                                                {Object.keys(inventarioInicial.apicola).map(
                                                     (item) => (
                                                         <InputField
                                                             key={item}
                                                             label={item.replaceAll("_", " ").toUpperCase()}
                                                             type="number"
-                                                            value={inventarioInicial.apicultura[item]}
+                                                            value={inventarioInicial.apicola[item]}
                                                             onChange={(e) => {
                                                                 setInventarioInicial((prev) => ({
                                                                     ...prev,
-                                                                    apicultura: {
-                                                                        ...prev.apicultura,
+                                                                    apicola: {
+                                                                        ...prev.apicola,
                                                                         [item]: parseInt(e.target.value) || 0,
                                                                     },
                                                                 }));
@@ -3619,7 +3619,7 @@ export default function DashboardProduccion() {
                                                 }}
                                             >
                                                 Total Colmenas:{" "}
-                                                {Object.values(inventarioInicial.apicultura).reduce(
+                                                {Object.values(inventarioInicial.apicola).reduce(
                                                     (a, b) => a + b,
                                                     0,
                                                 )}
@@ -3627,7 +3627,7 @@ export default function DashboardProduccion() {
                                         </FormSection>
                                     )}
 
-                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Apicultura") && (
+                                    {subCaracterizacion === "animal" && inventarioInicial.especiesSeleccionadas.includes("Apicola") && (
                                         <FormSection title="Capacidad Productiva Apícola">
                                             {/* SISTEMAS PRODUCTIVOS */}
                                             <div>
@@ -3643,16 +3643,16 @@ export default function DashboardProduccion() {
                                                         <label key={item} style={radioLabel}>
                                                             <input
                                                                 type="checkbox"
-                                                                checked={inventarioInicial.capacidadApicultura.sistemas.includes(item)}
+                                                                checked={inventarioInicial.capacidadApicola.sistemas.includes(item)}
                                                                 onChange={() => {
-                                                                    const existe = inventarioInicial.capacidadApicultura.sistemas.includes(item);
+                                                                    const existe = inventarioInicial.capacidadApicola.sistemas.includes(item);
                                                                     setInventarioInicial(prev => ({
                                                                         ...prev,
-                                                                        capacidadApicultura: {
-                                                                            ...prev.capacidadApicultura,
+                                                                        capacidadApicola: {
+                                                                            ...prev.capacidadApicola,
                                                                             sistemas: existe
-                                                                                ? prev.capacidadApicultura.sistemas.filter(s => s !== item)
-                                                                                : [...prev.capacidadApicultura.sistemas, item]
+                                                                                ? prev.capacidadApicola.sistemas.filter(s => s !== item)
+                                                                                : [...prev.capacidadApicola.sistemas, item]
                                                                         }
                                                                     }));
                                                                 }}
@@ -3669,31 +3669,31 @@ export default function DashboardProduccion() {
                                                     <InputField
                                                         label="Número de colmenas activas"
                                                         type="number"
-                                                        value={inventarioInicial.capacidadApicultura.colmenas_activas || ""}
+                                                        value={inventarioInicial.capacidadApicola.colmenas_activas || ""}
                                                         onChange={(e) => setInventarioInicial(prev => ({
                                                             ...prev,
-                                                            capacidadApicultura: { ...prev.capacidadApicultura, colmenas_activas: parseInt(e.target.value) || 0 }
+                                                            capacidadApicola: { ...prev.capacidadApicola, colmenas_activas: parseInt(e.target.value) || 0 }
                                                         }))}
                                                     />
-                                                    {inventarioInicial.capacidadApicultura.sistemas.includes("Producción de Miel") && (
+                                                    {inventarioInicial.capacidadApicola.sistemas.includes("Producción de Miel") && (
                                                         <InputField
                                                             label="Producción estimada anual (Kg/Litros)"
                                                             type="number"
-                                                            value={inventarioInicial.capacidadApicultura.miel_anual || ""}
+                                                            value={inventarioInicial.capacidadApicola.miel_anual || ""}
                                                             onChange={(e) => setInventarioInicial(prev => ({
                                                                 ...prev,
-                                                                capacidadApicultura: { ...prev.capacidadApicultura, miel_anual: parseInt(e.target.value) || 0 }
+                                                                capacidadApicola: { ...prev.capacidadApicola, miel_anual: parseInt(e.target.value) || 0 }
                                                             }))}
                                                         />
                                                     )}
-                                                    {inventarioInicial.capacidadApicultura.sistemas.includes("Crianza de Reinas y Núcleos") && (
+                                                    {inventarioInicial.capacidadApicola.sistemas.includes("Crianza de Reinas y Núcleos") && (
                                                         <InputField
                                                             label="Núcleos producidos por año"
                                                             type="number"
-                                                            value={inventarioInicial.capacidadApicultura.nucleos_anuales || ""}
+                                                            value={inventarioInicial.capacidadApicola.nucleos_anuales || ""}
                                                             onChange={(e) => setInventarioInicial(prev => ({
                                                                 ...prev,
-                                                                capacidadApicultura: { ...prev.capacidadApicultura, nucleos_anuales: parseInt(e.target.value) || 0 }
+                                                                capacidadApicola: { ...prev.capacidadApicola, nucleos_anuales: parseInt(e.target.value) || 0 }
                                                             }))}
                                                         />
                                                     )}
