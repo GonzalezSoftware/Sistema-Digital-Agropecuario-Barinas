@@ -955,13 +955,20 @@ export default function Dashboard() {
 
         listaPredios.forEach(p => {
             const mun = p.municipio || "Otros";
-            // El tipo de explotación viene de p.produccion.tipo_explotacion
+            // Obtenemos el valor de la base de datos
             const tipo = p.produccion?.tipo_explotacion || "No Definido";
 
             if (!municipiosMap[mun]) {
-                municipiosMap[mun] = { municipio: mun, Intensivo: 0, "Semi-Intensivo": 0, Extensivo: 0 };
+                // Asegúrate de que las claves coincidan exactamente con el string de la DB
+                municipiosMap[mun] = {
+                    municipio: mun,
+                    "Intensivo": 0,
+                    "Semi Intensivo": 0, // Cambiado de "Semi-Intensivo" a "Semi Intensivo"
+                    "Extensivo": 0
+                };
             }
 
+            // Si la clave existe en el objeto, incrementamos
             if (municipiosMap[mun].hasOwnProperty(tipo)) {
                 municipiosMap[mun][tipo]++;
             }
@@ -1878,8 +1885,6 @@ export default function Dashboard() {
                                                         tick={{ fill: '#666', fontSize: 11 }}
                                                         allowDecimals={false}
                                                         dx={-10}
-                                                        // Ajuste dinámico: si el máximo es 1, el tope es 1. 
-                                                        // Si es mayor, le suma un pequeño margen para que no choque con el borde.
                                                         domain={[0, dataMax => (dataMax <= 1 ? 1 : dataMax + 0.5)]}
                                                     />
                                                     <Tooltip
@@ -1898,24 +1903,24 @@ export default function Dashboard() {
                                                         wrapperStyle={{ fontSize: '11px', paddingBottom: '10px' }}
                                                     />
 
-                                                    {/* Barras Apiladas con los Verdes de Gonzalez Software */}
+                                                    {/* Al añadir stackId="a" a todas, Recharts las une en una sola barra por municipio */}
                                                     <Bar
                                                         dataKey="Intensivo"
-                                                        stackId="a"
                                                         fill="#136442"
                                                         barSize={35}
-                                                        radius={[6, 6, 0, 0]}
+                                                        radius={[6, 6, 6, 6]}
                                                     />
                                                     <Bar
-                                                        dataKey="Semi-Intensivo"
-                                                        stackId="a"
+                                                        dataKey="Semi Intensivo"
                                                         fill="#4CAF50"
+                                                        barSize={35}
+                                                        radius={[6, 6, 6, 6]}
                                                     />
                                                     <Bar
                                                         dataKey="Extensivo"
-                                                        stackId="a"
                                                         fill="#82ca9d"
-                                                        radius={[6, 6, 0, 0]} // Redondeado solo en la cima del grupo
+                                                        barSize={35}
+                                                        radius={[6, 6, 6, 6]}
                                                     />
                                                 </BarChart>
                                             </ResponsiveContainer>
@@ -2408,7 +2413,8 @@ export default function Dashboard() {
                                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                                     <thead>
                                         <tr style={{ borderBottom: "2px solid #136442", color: "#136442" }}>
-                                            <th style={{ fontSize: "14px", padding: "12px" }}>ID</th>
+                                            {/* Cambiado de ID a # */}
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>#</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Nombre del Predio</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Productor</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Municipio</th>
@@ -2423,11 +2429,11 @@ export default function Dashboard() {
                                                     key={p.id_predio}
                                                     style={{
                                                         borderBottom: "1px solid #f0f0f0",
-                                                        // Alterna el fondo: las filas pares van en blanco, las impares en gris claro
                                                         backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
                                                     }}
                                                 >
-                                                    <td style={{ fontSize: "13px", padding: "12px" }}>#{p.id_predio}</td>
+                                                    {/* Aquí usamos index + 1 para el contador */}
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>{index + 1}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
