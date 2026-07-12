@@ -13,10 +13,12 @@ from .models import (
 )
 
 class LicenciaHierroSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = LicenciaHierro
-        fields = '__all__' 
+        fields = [
+            'id', 'predio', 'fecha_emision', 'fecha_vencimiento', 
+            'observaciones', 'certificado_pdf', 'activa' # <-- Asegúrate de incluirlo aquí
+        ]
 
 # 1. Definimos primero los serializadores de las tablas hijas
 class ProductorSerializer(serializers.ModelSerializer):

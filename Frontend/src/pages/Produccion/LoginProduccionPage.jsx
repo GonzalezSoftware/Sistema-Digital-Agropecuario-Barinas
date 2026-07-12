@@ -32,7 +32,11 @@ export default function LoginProduccionPage() {
 
     if (encontrado) {
       sessionStorage.setItem("usuario_produccion", JSON.stringify(encontrado));
-      navigate("/produccion/DashboardP");
+      if (encontrado.usuario === "admin") {
+        navigate("/produccion/DashboardP2");
+      } else {
+        navigate("/produccion/DashboardP");
+      }
     } else {
       setError("Usuario o contraseña incorrectos.");
       setCargando(false);
