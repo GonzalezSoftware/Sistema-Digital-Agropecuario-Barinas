@@ -841,11 +841,6 @@ export default function Dashboard() {
     //-----------------------------------------------------------------------------------------------
 
 
-
-
-
-
-
     //GRÁFICOS
     const datosGrafico = useMemo(() => {
         if (!listaPredios || listaPredios.length === 0) return [];
@@ -1155,11 +1150,46 @@ export default function Dashboard() {
 
     // Handlers de Actualización Visual (Tiempo Real en el Modal)
     const actualizarProductor = (campo, valor) => {
-        setPredioSeleccionado(prev => ({ ...prev, productor: { ...prev.productor, [campo]: valor } }));
+        // 1. Actualizamos el estado de la interfaz
+        setPredioSeleccionado(prev => ({
+            ...prev,
+            productor: { ...prev.productor, [campo]: valor }
+        }));
+
+        // 2. Definimos el mapeo para que coincida con tus validaciones (productor_nombre, productor_cedula, etc.)
+        const mapaValidacion = {
+            nombre: "productor_nombre",
+            cedula_rif: "productor_cedula",
+            telefono: "productor_telefono",
+            correo: "productor_correo"
+        };
+
+        // 3. Ejecutamos la validación solo si el campo es uno de los que validamos
+        if (mapaValidacion[campo]) {
+            validarCampoProductor(mapaValidacion[campo], valor);
+        }
     };
 
     const actualizarPredio = (campo, valor) => {
-        setPredioSeleccionado(prev => ({ ...prev, [campo]: valor }));
+        // Definimos qué campos tienen prohibido cambiar
+        const camposInmutables = ['municipio', 'parroquia', 'comunidad', 'coordenadas', 'centro_poblado'];
+
+        // Si el campo que intentan editar está en la lista negra, simplemente retornamos (no hacemos nada)
+        if (camposInmutables.includes(campo)) {
+            console.warn(`Intento de edición bloqueado: ${campo} es inmutable.`);
+            return;
+        }
+
+        // Si es un campo permitido, actualizamos el estado normalmente
+        setPredioSeleccionado(prev => ({
+            ...prev,
+            [campo]: valor
+        }));
+
+        // Aquí mantienes tu lógica de validación para los otros campos que SÍ son editables
+        if (errors[campo]) {
+            validarCampoPredio(campo, valor);
+        }
     };
 
     const actualizarInfraestructura = (campo, valor) => {
@@ -2505,20 +2535,22 @@ export default function Dashboard() {
                                                     )}
                                                 </div>
 
-                                                {/* CÉDULA / RIF */}
+                                                {/* CÉDULA / RIF - Deshabilitado para evitar cambios */}
                                                 <div>
                                                     {editando ? (
                                                         <InputField
                                                             label="Cédula / RIF"
-                                                            name="cedula_rif"
+                                                            name="productor_cedula"
                                                             value={predioSeleccionado.productor?.cedula_rif || ""}
                                                             onChange={(e) => actualizarProductor('cedula_rif', e.target.value)}
                                                             error={errors?.productor_cedula}
+                                                            disabled={true} // <--- Esto inhabilita el campo
+                                                            style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }} // Estilo opcional para indicar que no es editable
                                                         />
                                                     ) : (
                                                         <InputField
                                                             label="Cédula / RIF"
-                                                            name="cedula_rif"
+                                                            name="productor_cedula"
                                                             value={predioSeleccionado.productor?.cedula_rif || "N/A"}
                                                             disabled
                                                         />
@@ -2566,111 +2598,58 @@ export default function Dashboard() {
                                                 </div>
                                             </div>
 
-                                            {/* II. GEORREFERENCIACIÓN Y UBICACIÓN UNIFICADOS CON DISEÑO DE EDICIÓN */}
+                                            {/* II. GEORREFERENCIACIÓN Y UBICACIÓN - MODO BLOQUEADO */}
                                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "25px", marginBottom: "35px" }}>
                                                 <div style={{ gridColumn: "span 3", borderBottom: "2px solid #136442", paddingBottom: "5px" }}>
                                                     <strong style={{ color: "#136442", fontSize: "14px" }}>II. GEORREFERENCIACIÓN Y UBICACIÓN</strong>
                                                 </div>
 
-                                                {/* MUNICIPIO */}
+                                                {/* MUNICIPIO, PARROQUIA, COMUNIDAD, COORDENADAS, CENTRO POBLADO */}
+                                                {/* Todos estos campos se muestran igual tanto si es modo 'editando' o 'visualización' */}
+
                                                 <div>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Municipio"
-                                                            name="municipio"
-                                                            value={predioSeleccionado.municipio || ""}
-                                                            onChange={(e) => actualizarPredio('municipio', e.target.value)}
-                                                            error={errors?.municipio}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Municipio"
-                                                            name="municipio"
-                                                            value={predioSeleccionado.municipio || "N/A"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Municipio"
+                                                        name="municipio"
+                                                        value={predioSeleccionado.municipio || "N/A"}
+                                                        disabled={true} // Siempre deshabilitado
+                                                    />
                                                 </div>
 
-                                                {/* PARROQUIA */}
                                                 <div>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Parroquia"
-                                                            name="parroquia"
-                                                            value={predioSeleccionado.parroquia || ""}
-                                                            onChange={(e) => actualizarPredio('parroquia', e.target.value)}
-                                                            error={errors?.parroquia}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Parroquia"
-                                                            name="parroquia"
-                                                            value={predioSeleccionado.parroquia || "N/A"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Parroquia"
+                                                        name="parroquia"
+                                                        value={predioSeleccionado.parroquia || "N/A"}
+                                                        disabled={true}
+                                                    />
                                                 </div>
 
-                                                {/* COMUNIDAD / SECTOR */}
                                                 <div>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Comunidad / Sector"
-                                                            name="comunidad"
-                                                            value={predioSeleccionado.comunidad || ""}
-                                                            onChange={(e) => actualizarPredio('comunidad', e.target.value)}
-                                                            error={errors?.comunidad}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Comunidad / Sector"
-                                                            name="comunidad"
-                                                            value={predioSeleccionado.comunidad || "N/A"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Comunidad / Sector"
+                                                        name="comunidad"
+                                                        value={predioSeleccionado.comunidad || "N/A"}
+                                                        disabled={true}
+                                                    />
                                                 </div>
 
-                                                {/* COORDENADAS (LATITUD Y LONGITUD) */}
                                                 <div style={{ gridColumn: "span 2" }}>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Coordenadas (Latitud y Longitud)"
-                                                            name="coordenadas"
-                                                            placeholder="Ej: 8.097364, -69.312631"
-                                                            value={predioSeleccionado.coordenadas || ""}
-                                                            onChange={(e) => actualizarPredio('coordenadas', e.target.value)}
-                                                            error={errors?.coordenadas}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Coordenadas (Latitud y Longitud)"
-                                                            name="coordenadas"
-                                                            value={predioSeleccionado.coordenadas || "Sin coordenadas registradas"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Coordenadas (Latitud y Longitud)"
+                                                        name="coordenadas"
+                                                        value={predioSeleccionado.coordenadas || "Sin coordenadas registradas"}
+                                                        disabled={true}
+                                                    />
                                                 </div>
 
-                                                {/* CENTRO POBLADO */}
                                                 <div>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Centro Poblado"
-                                                            name="centro_poblado"
-                                                            value={predioSeleccionado.centro_poblado || ""}
-                                                            onChange={(e) => actualizarPredio('centro_poblado', e.target.value)}
-                                                            error={errors?.centro_poblado}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Centro Poblado"
-                                                            name="centro_poblado"
-                                                            value={predioSeleccionado.centro_poblado || "N/A"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Centro Poblado"
+                                                        name="centro_poblado"
+                                                        value={predioSeleccionado.centro_poblado || "N/A"}
+                                                        disabled={true}
+                                                    />
                                                 </div>
                                             </div>
 
