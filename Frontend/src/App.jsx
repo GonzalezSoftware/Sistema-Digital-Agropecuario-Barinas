@@ -9,6 +9,7 @@ import LoginPrediosPage from "./pages/Predios/LoginPrediosPage";
 import Dashboard from "./pages/Predios/Dashboard";
 import LoginProduccionPage from "./pages/Produccion/LoginProduccionPage"
 import DashboardProduccion from "./pages/Produccion/DashboardProduccion"
+import DashboardProduccion2 from "./pages/Produccion/DashboardProduccion2"
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/predios/Dashboard" element={<Dashboard />} />
         <Route path="/produccion/login" element={<LoginProduccionPage />} />
         <Route path="/produccion/DashboardP" element={<DashboardProduccion />} />
+        <Route path="/produccion/DashboardP2" element={<DashboardProduccion2 />} />
       </Routes>
     </BrowserRouter>
   )
