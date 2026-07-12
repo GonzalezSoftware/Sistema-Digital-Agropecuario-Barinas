@@ -3,6 +3,7 @@ import escudo from "../../assets/logo2.jpg";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import axios from "axios";
+import FormHierro from "../../components/FormHierro";
 
 // ── ICONOS SVG DEL DASHBOARD PRODUCCIÓN ──────────────────
 const IconInicio = () => (
@@ -707,53 +708,42 @@ export default function DashboardProduccion() {
         if (!confirmacion.isConfirmed) return;
 
         // ─────────────────────────────
-        // GENERAR CÓDIGO
+        // ENVIAR WHATSAPP (Django genera el código)
         // ─────────────────────────────
+        let codigoServidor = "";
+        try {
+            const telefono = predioActivo?.productor?.telefono;
 
-        const codigo = Math.floor(
-            100000 + Math.random() * 900000
-        ).toString();
+            const envio = await axios.post(
+                "http://127.0.0.1:8000/api/enviar-codigo/",
+                { telefono }
+            );
 
-        setCodigoGenerado(codigo);
+            // Capturamos el código real generado por views.py
+            codigoServidor = envio.data.codigo.toString();
+            setCodigoGenerado(codigoServidor);
+            console.log("CÓDIGO RECIBIDO DEL SERVIDOR:", codigoServidor);
 
-        console.log("CÓDIGO GENERADO:", codigo);
-
-        // ─────────────────────────────
-        // ENVIAR  WHATSAPP
-        // ─────────────────────────────
-        const telefono =
-            predioActivo?.productor?.telefono;
-
-        const envio = await axios.post(
-
-            "http://127.0.0.1:8000/api/enviar-codigo/",
-
-            {
-                telefono
-            }
-        );
-
-        const codigoServidor =
-            envio.data.codigo;
-
-        setCodigoGenerado(codigoServidor);
-
-        Swal.fire({
-
-            icon: "success",
-
-            title: "Código enviado",
-
-            text:
-                "El código fue enviado al WhatsApp del productor",
-
-            didOpen: () => {
-                const popup = Swal.getPopup();
-                if (popup) {
-                    popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+            Swal.fire({
+                icon: "success",
+                title: "Código enviado",
+                text: "El código fue enviado al WhatsApp del productor",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) {
+                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
                 }
-            }
-        });
+            });
+        } catch (error) {
+            console.error("Error enviando WhatsApp:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error de comunicación",
+                text: "No se pudo enviar el código de validación."
+            });
+            return;
+        }
 
 
         // ─────────────────────────────
@@ -843,10 +833,10 @@ export default function DashboardProduccion() {
                         inventarioInicial.capacidadBovina,
 
                     bubalinos:
-                        inventarioInicial.bufalinos,
+                        inventarioInicial.bubalinos,
 
                     capacidadBubalina:
-                        inventarioInicial.capacidadBufalina,
+                        inventarioInicial.capacidadBubalina,
 
                     equinos:
                         inventarioInicial.equinos,
@@ -1878,182 +1868,15 @@ export default function DashboardProduccion() {
                     )}
 
                     {tabActiva === "hierro" && (
-                        <div style={{ maxWidth: "950px", margin: "0 auto" }}>
-
-                            {/* 🔴 BLOQUE DE VALIDACIÓN DE PREDIO */}
-                            {!predioActivo ? (
-                                <FormSection title="⚠️ Selección requerida">
-                                    <p style={{ color: "#64748b", margin: 0, fontSize: "14px" }}>
-                                        Debes seleccionar un predio antes de registrar una licencia de hierro ganadero.
-                                    </p>
-                                </FormSection>
-                            ) : (
-                                <>
-                                    {/* 📜 SECCIÓN PRINCIPAL: DATOS DE LA LICENCIA */}
-                                    <FormSection title="📜 Licencia o Certificado de Hierro Ganadero">
-
-
-                                        {/* Selector de condicional: Posee licencia */}
-                                        <div style={{ maxWidth: "300px", marginBottom: "20px" }}>
-                                            <label style={labelStyle}>¿Posee licencia de hierro ganadero?</label>
-                                            <select
-                                                value={licenciaHierro.poseeLicencia}
-                                                onChange={(e) =>
-                                                    setLicenciaHierro({
-                                                        ...licenciaHierro,
-                                                        poseeLicencia: e.target.value === "true"
-                                                    })
-                                                }
-                                                style={inputStyle}
-                                            >
-                                                <option value="false">No</option>
-                                                <option value="true">Sí</option>
-                                            </select>
-                                        </div>
-
-                                        {/* 🔥 Campos condicionales si el productor posee licencia */}
-                                        {licenciaHierro.poseeLicencia && (
-                                            <>
-                                                {/* Primera Fila de Campos: Código y Número */}
-                                                <div style={grid3}>
-                                                    <InputField
-                                                        label="Código del Hierro"
-                                                        type="text"
-                                                        placeholder="Ej: ABC-123"
-                                                        value={licenciaHierro.codigoHierro || ""}
-                                                        onChange={(e) =>
-                                                            setLicenciaHierro({
-                                                                ...licenciaHierro,
-                                                                codigoHierro: e.target.value
-                                                            })
-                                                        }
-                                                    />
-                                                    <InputField
-                                                        label="Número de Licencia"
-                                                        type="text"
-                                                        placeholder="Ej: 00456"
-                                                        value={licenciaHierro.numeroLicencia || ""}
-                                                        onChange={(e) =>
-                                                            setLicenciaHierro({
-                                                                ...licenciaHierro,
-                                                                numeroLicencia: e.target.value
-                                                            })
-                                                        }
-                                                    />
-                                                    <div>
-                                                        <label style={labelStyle}>
-                                                            Organismo Emisor
-                                                        </label>
-
-                                                        <select
-                                                            value={licenciaHierro.organismoEmisor || ""}
-                                                            onChange={(e) =>
-                                                                setLicenciaHierro({
-                                                                    ...licenciaHierro,
-                                                                    organismoEmisor: e.target.value
-                                                                })
-                                                            }
-                                                            style={inputStyle}
-                                                        >
-                                                            <option value="">
-                                                                Seleccione un organismo
-                                                            </option>
-
-                                                            <option value="INSAI">
-                                                                INSAI
-                                                            </option>
-
-                                                            <option value="MPPAT">
-                                                                MPPAT
-                                                            </option>
-
-                                                            <option value="Gobernación del Estado Barinas">
-                                                                Gobernación del Estado Barinas
-                                                            </option>
-
-                                                            <option value="Instituto Nacional de Salud Agrícola Integral">
-                                                                Instituto Nacional de Salud Agrícola Integral
-                                                            </option>
-
-                                                            <option value="Otro">
-                                                                Otro
-                                                            </option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                {/* Segunda Fila de Campos: Fechas y Archivo */}
-                                                <div style={grid3}>
-                                                    <InputField
-                                                        label="Fecha de Emisión"
-                                                        type="date"
-                                                        value={licenciaHierro.fechaEmision || ""}
-                                                        onChange={(e) =>
-                                                            setLicenciaHierro({
-                                                                ...licenciaHierro,
-                                                                fechaEmision: e.target.value
-                                                            })
-                                                        }
-                                                    />
-                                                    <InputField
-                                                        label="Fecha de Vencimiento"
-                                                        type="date"
-                                                        value={licenciaHierro.fechaVencimiento || ""}
-                                                        onChange={(e) =>
-                                                            setLicenciaHierro({
-                                                                ...licenciaHierro,
-                                                                fechaVencimiento: e.target.value
-                                                            })
-                                                        }
-                                                    />
-                                                    <InputField
-                                                        label="Certificado Digital (PDF/Imagen)"
-                                                        type="file"
-                                                        accept=".pdf,.jpg,.jpeg,.png"
-                                                        onChange={(e) =>
-                                                            setLicenciaHierro({
-                                                                ...licenciaHierro,
-                                                                certificado: e.target.files[0]
-                                                            })
-                                                        }
-                                                    />
-                                                </div>
-
-                                                {/* Área de Observaciones */}
-                                                <div style={{ marginBottom: "15px" }}>
-                                                    <label style={labelStyle}>Observaciones</label>
-                                                    <textarea
-                                                        rows="4"
-                                                        placeholder="Añada detalles adicionales sobre la vigencia o estado del herraje..."
-                                                        value={licenciaHierro.observaciones || ""}
-                                                        onChange={(e) =>
-                                                            setLicenciaHierro({
-                                                                ...licenciaHierro,
-                                                                observaciones: e.target.value
-                                                            })
-                                                        }
-                                                        style={{
-                                                            ...inputStyle,
-                                                            resize: "vertical"
-                                                        }}
-                                                    />
-                                                </div>
-                                            </>
-                                        )}
-                                    </FormSection>
-
-                                    {/* 💾 BOTÓN GUARDAR (Usa tu estilo estandarizado btnPrincipal) */}
-                                    <div style={{ textAlign: "right", paddingBottom: "40px" }}>
-                                        <button
-                                            onClick={guardarLicencia}
-                                            style={btnPrincipal}
-                                        >
-                                            Guardar Licencia
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                        <FormHierro
+                            predioActivo={predioActivo}
+                            licenciaHierro={licenciaHierro}
+                            setLicenciaHierro={setLicenciaHierro}
+                            guardarLicencia={guardarLicencia}
+                            FormSection={FormSection}
+                            InputField={InputField}
+                            styles={{ labelStyle, inputStyle, grid3, btnPrincipal }}
+                        />
                     )}
 
 

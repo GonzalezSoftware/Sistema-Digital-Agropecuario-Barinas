@@ -609,7 +609,7 @@ export default function Dashboard() {
             }));
         }
     };
-    const validarCampoProductor = (name, value) => {
+    const validarCampoProductor = (name, value,) => {
         let mensaje = "";
 
         if (name === "productor_nombre") {
@@ -839,6 +839,12 @@ export default function Dashboard() {
         validarCampoProductor(name, value);
     };
     //-----------------------------------------------------------------------------------------------
+
+
+
+
+
+
 
     //GRÁFICOS
     const datosGrafico = useMemo(() => {
@@ -1161,7 +1167,7 @@ export default function Dashboard() {
 
     const guardarCambiosReal = async () => {
         setCargandoAccion(true);
-        console.log("Enviando al servidor - Campo:", campo, "Valor:", valor);
+
         try {
             const datosAEnviar = JSON.parse(JSON.stringify(predioSeleccionado));
 
@@ -1349,6 +1355,19 @@ export default function Dashboard() {
     };
 
     const guardarEnDjango = async () => {
+
+        // 1. ANIMACIÓN DE CARGA INICIAL
+        Swal.fire({
+            title: 'Procesando...',
+            text: 'Guardando datos en el servidor, por favor espere.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                const popup = Swal.getPopup();
+                if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+            }
+        });
+
         try {
             // 1. Limpieza y formateo del teléfono del productor
             const numeroLimpio = formData.productor_telefono ? formData.productor_telefono.replace(/\D/g, '') : '';
@@ -1417,6 +1436,8 @@ export default function Dashboard() {
                 maquinaria: formData.maquinaria || {}
             };
 
+            console.log("Payload que se envía al servidor:", JSON.stringify(payload, null, 2));
+
             // 7. Despacho de la petición HTTP
             const response = await fetch('http://127.0.0.1:8000/api/predios/', {
                 method: 'POST',
@@ -1436,13 +1457,14 @@ export default function Dashboard() {
                     confirmButtonText: 'Aceptar',
                     didOpen: () => {
                         const popup = Swal.getPopup();
-                        if (popup) {
-                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                        }
+                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }).then((result) => {
+                    // Esta función se ejecuta cuando el usuario hace clic en "Aceptar"
+                    if (result.isConfirmed) {
+                        window.location.reload(); // Recarga la página automáticamente
                     }
                 });
-
-                // Aquí podrías opcionalmente limpiar el formulario o redirigir al usuario
             } else {
                 // Extracción detallada de errores devueltos por los serializadores de Django
                 const errorData = await response.json();
@@ -1466,7 +1488,12 @@ export default function Dashboard() {
             }
         } catch (error) {
             console.error("Error de red:", error);
-            alert("No se pudo conectar con el servidor.");
+            // Cerramos el loading y mostramos error de red
+            Swal.fire({
+                title: 'Error de conexión',
+                text: 'No se pudo conectar con el servidor.',
+                icon: 'error'
+            });
         }
     };
     const cerrarSesion = () => {
@@ -3161,7 +3188,7 @@ export default function Dashboard() {
                                                                 // Esto asegura que el PDF reciba un array, incluso si está vacío, evitando errores
                                                                 generarPDFPredio(predioParaPDF);
                                                             }}
-                                                            style={{ /* ...tus estilos */ }}
+                                                            style={{ backgroundColor: "#f0fdf4", color: "#136442", border: "1px solid #136442", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}
                                                         >
                                                             Generar Ficha PDF
                                                         </button>

@@ -73,31 +73,41 @@ class MaquinariaSerializer(serializers.ModelSerializer):
 
 # 2. Definimos al final el serializador principal que usa a los anteriores
 class PredioSerializer(serializers.ModelSerializer):
-    # Agrega 'required=False' a los campos anidados
+    # Esto le dice a DRF que cree este campo al hacer GET
+    servicios_lectura = serializers.SerializerMethodField()
+
+    # Agregamos allow_null=True para permitir actualizaciones parciales sin conflictos
     productor = ProductorSerializer(required=False)
-    infraestructura = InfraestructuraSerializer(required=False)
-    produccion = ProduccionSerializer(required=False)
-    rubros_vegetales = RubroVegetalSerializer(many=True, required=False)
-    existencia_animal = ExistenciaAnimalSerializer(required=False)
-    maquinaria = MaquinariaSerializer(required=False)
+    infraestructura = InfraestructuraSerializer(required=False, allow_null=True)
+    produccion = ProduccionSerializer(required=False, allow_null=True)
+    rubros_vegetales = RubroVegetalSerializer(many=True, required=False, allow_null=True)
+    existencia_animal = ExistenciaAnimalSerializer(required=False, allow_null=True)
+    maquinaria = MaquinariaSerializer(required=False, allow_null=True)
     servicios = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
 
     class Meta:
         model = Predio
         fields = '__all__'
 
+    def get_servicios_lectura(self, obj):
+        # Usamos 'prefetch_related' o una consulta directa sobre el objeto ya creado
+        # 'obj' es el objeto Predio que acabamos de guardar
+        return [ps.servicio.nombre_servicio for ps in obj.predioservicio_set.all()]
+
     def create(self, validated_data):
         # 1. Extracción de datos anidados
+        servicios_nombres = validated_data.pop('servicios', [])
+        print(f"DEBUG: Nombres de servicios recibidos: {servicios_nombres}")
+
         rubros_data = validated_data.pop('rubros_vegetales', [])
         existencia_data = validated_data.pop('existencia_animal', {})
         maquinaria_data = validated_data.pop('maquinaria', {})
         productor_data = validated_data.pop('productor')
         infra_data = validated_data.pop('infraestructura')
         prod_data = validated_data.pop('produccion')
-        servicios_nombres = validated_data.pop('servicios', [])
+        
 
         # 2. Gestión segura del productor
-        # Extraemos la cédula para filtrar y usamos el resto en 'defaults'
         cedula = productor_data.pop('cedula_rif')
         productor, _ = Productor.objects.update_or_create(
             cedula_rif=cedula,
@@ -107,8 +117,8 @@ class PredioSerializer(serializers.ModelSerializer):
         # 3. Creación del predio principal
         predio = Predio.objects.create(productor=productor, **validated_data)
 
-        # 4. Procesamiento de relaciones
         for nombre in servicios_nombres:
+            print(f"DEBUG: Entrando al bucle con: {nombre}")
             servicio_obj, _ = Servicio.objects.get_or_create(nombre_servicio=nombre)
             PredioServicio.objects.create(predio=predio, servicio=servicio_obj)
             
@@ -126,6 +136,9 @@ class PredioSerializer(serializers.ModelSerializer):
         
         return predio
 
+    # Tu método update ya está definido y funcionará correctamente 
+    # una vez que el Serializador deje pasar los datos nulos/parciales.
+    
     # ── AQUÍ ESTÁ LA SOLUCIÓN: MÉTODO UPDATE ──
     def update(self, instance, validated_data):
 
@@ -279,9 +292,5 @@ class PredioSerializer(serializers.ModelSerializer):
                     servicio=servicio_obj
                 )
                 
-                
-        instance.caracterizacion_completada = True
-
-        instance.save()
 
         return instance
