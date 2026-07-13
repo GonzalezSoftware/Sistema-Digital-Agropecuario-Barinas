@@ -14,15 +14,15 @@ def buscar_productor(request, cedula):
     cedula_limpia = cedula.strip().upper()
     try:
         productor = Productor.objects.get(cedula_rif=cedula_limpia)
-        # Asegúrate de incluir 'existe' aquí también
+        # Agregamos el teléfono en la respuesta exitosa
         return Response({
             "existe": True, 
-            "nombre": productor.nombre
+            "nombre": productor.nombre,
+            "telefono": productor.telefono  # <-- ¡AGREGA ESTA LÍNEA!
         })
     except Productor.DoesNotExist:
         return Response({"existe": False}, status=404)
-
-
+    
 class PredioViewSet(viewsets.ModelViewSet):
 
     queryset = Predio.objects.all()
