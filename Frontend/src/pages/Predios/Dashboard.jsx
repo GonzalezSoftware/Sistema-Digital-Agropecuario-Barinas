@@ -1206,52 +1206,46 @@ export default function Dashboard() {
         setCargandoAccion(true);
 
         try {
-            const datosAEnviar = JSON.parse(JSON.stringify(predioSeleccionado));
+            // 1. Clonamos el objeto para no modificar el estado original
+            const data = JSON.parse(JSON.stringify(predioSeleccionado));
 
-            // Eliminamos la cédula para que el serializador de Django no intente validarla
-            if (datosAEnviar.productor) {
-                delete datosAEnviar.productor.cedula_rif;
-            }
+            // 2. Función para limpiar objetos anidados (quitar IDs y campos de solo lectura)
+            const limpiar = (obj) => {
+                if (!obj || typeof obj !== 'object') return obj;
+                delete obj.id; // Elimina el ID que Django a veces rechaza en PATCH anidados
+                delete obj.fecha_registro; // Elimina campos que suelen ser solo lectura
+                return obj;
+            };
+
+            // 3. Limpiamos cada sección
+            data.productor = limpiar(data.productor);
+            data.infraestructura = limpiar(data.infraestructura);
+            data.produccion = limpiar(data.produccion);
+            data.existencia_animal = limpiar(data.existencia_animal);
+            data.maquinaria = limpiar(data.maquinaria);
+
+            // 4. Limpiamos el objeto principal
+            delete data.id_predio;
+            delete data.fecha_registro;
+
+            console.log("Enviando a Django (formato diccionario):", data);
 
             const response = await fetch(`http://127.0.0.1:8000/api/predios/${predioSeleccionado.id_predio}/`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datosAEnviar)
+                body: JSON.stringify(data)
             });
 
+            const resultado = await response.json();
+
             if (response.ok) {
-                // Alerta de Éxito - González Software
-                Swal.fire({
-                    title: '¡Actualización Exitosa!',
-                    text: 'El predio ha sido actualizado con éxito en el sistema.',
-                    icon: 'success',
-                    confirmButtonColor: '#10b981', // El verde esmeralda de tu UI
-                    confirmButtonText: 'Aceptar',
-                    didOpen: () => {
-                        const popup = Swal.getPopup();
-                        if (popup) {
-                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                        }
-                    }
-                });
+                Swal.fire('¡Actualización Exitosa!', 'El predio ha sido guardado.', 'success');
             } else {
-                // Alerta de Error - González Software
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Por favor, verifique los datos',
-                    icon: 'error',
-                    confirmButtonColor: '#d32f2f', // Rojo de alerta
-                    confirmButtonText: 'Entendido',
-                    didOpen: () => {
-                        const popup = Swal.getPopup();
-                        if (popup) {
-                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                        }
-                    }
-                });
+                console.error("Error detallado:", resultado);
+                Swal.fire('Error', JSON.stringify(resultado), 'error');
             }
         } catch (error) {
-            alert("Error crítico: El servidor de Barinas no responde o hay un error en el código Django.");
+            console.error("Error:", error);
         } finally {
             setCargandoAccion(false);
         }
@@ -1259,29 +1253,36 @@ export default function Dashboard() {
 
     // 2. ELIMINAR DEFINITIVO (DELETE)
     const eliminarDefinitivoReal = async () => {
-        // Alerta de confirmación previa con SweetAlert2
+        // Alerta de confirmación previa
         const resultado = await Swal.fire({
             title: '¿ESTÁS SEGURO?',
             text: `Esta acción eliminará permanentemente el predio "${predioSeleccionado.nombre_predio}" de la base de datos.`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ce3a3a', // Rojo destructivo
-            cancelButtonColor: '#cdced0', // Gris neutral
+            confirmButtonColor: '#ce3a3a',
+            cancelButtonColor: '#cdced0',
             confirmButtonText: 'Sí, eliminar permanentemente',
             cancelButtonText: 'Cancelar',
-            reverseButtons: true, // Ubica el botón de confirmar a la derecha
+            reverseButtons: true,
             didOpen: () => {
                 const popup = Swal.getPopup();
-                if (popup) {
-                    popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                }
+                if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
             }
         });
 
-        // Si el usuario cancela o cierra la alerta, se frena la ejecución
-        if (!resultado.isConfirmed) {
-            return;
-        }
+        if (!resultado.isConfirmed) return;
+
+        // 1. ANIMACIÓN DE CARGA INICIAL
+        Swal.fire({
+            title: 'Eliminando...',
+            text: 'Procesando la eliminación del predio, por favor espere.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                const popup = Swal.getPopup();
+                if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+            }
+        });
 
         setCargandoAccion(true);
         try {
@@ -1290,57 +1291,52 @@ export default function Dashboard() {
             });
 
             if (response.ok) {
-                // Alerta de Éxito - González Software
+                // Alerta de Éxito con recarga
                 Swal.fire({
                     title: '¡Eliminación Exitosa!',
                     text: 'El predio ha sido eliminado con éxito en el sistema.',
                     icon: 'success',
-                    confirmButtonColor: '#10b981', // Verde esmeralda de la UI
+                    confirmButtonColor: '#10b981',
                     confirmButtonText: 'Aceptar',
                     didOpen: () => {
                         const popup = Swal.getPopup();
-                        if (popup) {
-                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                        }
+                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload(); // Recarga la página después de aceptar
                     }
                 });
             } else {
-                // Alerta de Error - González Software
                 Swal.fire({
                     title: 'Error',
-                    text: 'Por favor, verifique los datos o los permisos del sistema.',
+                    text: 'Por favor, verifique los permisos del sistema.',
                     icon: 'error',
-                    confirmButtonColor: '#ce3a3a', // Rojo de alerta
+                    confirmButtonColor: '#ce3a3a',
                     confirmButtonText: 'Entendido',
                     didOpen: () => {
                         const popup = Swal.getPopup();
-                        if (popup) {
-                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                        }
+                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
                     }
                 });
             }
         } catch (error) {
             console.error("Error Red:", error);
-            // También unificada la alerta del catch para evitar el uso del alert nativo del navegador
             Swal.fire({
                 title: 'Error de Red',
-                text: 'No se pudo establecer conexión con el servidor para procesar la eliminación.',
+                text: 'No se pudo conectar con el servidor para procesar la eliminación.',
                 icon: 'error',
                 confirmButtonColor: '#d32f2f',
                 confirmButtonText: 'Entendido',
                 didOpen: () => {
                     const popup = Swal.getPopup();
-                    if (popup) {
-                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                    }
+                    if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
                 }
             });
         } finally {
             setCargandoAccion(false);
         }
     };
-
     // ── MANEJADORES DE EVENTOS (SIN RETRASOS NI ESTADOS PEGADOS) ──────────────────────────────
 
 
@@ -2972,8 +2968,14 @@ export default function Dashboard() {
 
                                             <button
                                                 onClick={() => editando ? guardarCambiosReal() : setEditando(true)}
-                                                disabled={cargandoAccion}
-                                                style={{ ...estiloBoton, backgroundColor: editando ? "#136442" : "#136442", opacity: cargandoAccion ? 0.5 : 1 }}
+                                                // Se añade 'true' para deshabilitar el botón, manteniendo el estado de carga
+                                                disabled={true}
+                                                style={{
+                                                    ...estiloBoton,
+                                                    backgroundColor: "#808080", // Opcional: un color gris para indicar que está inactivo
+                                                    opacity: 0.6,
+                                                    cursor: "not-allowed"
+                                                }}
                                             >
                                                 {cargandoAccion ? "PROCESANDO..." : editando ? "CONFIRMAR CAMBIOS" : "EDITAR FICHA"}
                                             </button>
