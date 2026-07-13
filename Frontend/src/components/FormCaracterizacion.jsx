@@ -25,8 +25,8 @@ export default function FormCaracterizacion({
     setSubCaracterizacion,
 }) {
 
-        const [codigoGenerado, setCodigoGenerado] = useState("");
-        const [codigoIngresado, setCodigoIngresado] = useState("");
+    const [codigoGenerado, setCodigoGenerado] = useState("");
+    const [codigoIngresado, setCodigoIngresado] = useState("");
     // ── COMPONENTE DE INPUT NUMÉRICO CON TIPOGRAFÍA HEREDADA ──────────────────
     const NumericInputField = ({
         label,
@@ -217,6 +217,11 @@ export default function FormCaracterizacion({
                 icon: "warning",
                 title: "Predio no seleccionado",
                 text: "Debe seleccionar un predio",
+                confirmButtonColor: '#136442',
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
+                },
             });
             return;
         }
@@ -234,9 +239,7 @@ export default function FormCaracterizacion({
             confirmButtonColor: "#136442",
             didOpen: () => {
                 const popup = Swal.getPopup();
-                if (popup) {
-                    popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                }
+                if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
             },
         });
 
@@ -254,15 +257,14 @@ export default function FormCaracterizacion({
             setCodigoGenerado(codigoServidor);
             console.log("CÓDIGO RECIBIDO DEL SERVIDOR:", codigoServidor);
 
-            Swal.fire({
+            await Swal.fire({
                 icon: "success",
                 title: "Código enviado",
                 text: "El código fue enviado al WhatsApp del productor",
+                confirmButtonColor: "#136442",
                 didOpen: () => {
                     const popup = Swal.getPopup();
-                    if (popup) {
-                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                    }
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                 },
             });
         } catch (error) {
@@ -271,6 +273,11 @@ export default function FormCaracterizacion({
                 icon: "error",
                 title: "Error de comunicación",
                 text: "No se pudo enviar el código de validación.",
+                confirmButtonColor: "#d32f2f",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
+                },
             });
             return;
         }
@@ -288,9 +295,7 @@ export default function FormCaracterizacion({
             showCancelButton: true,
             didOpen: () => {
                 const popup = Swal.getPopup();
-                if (popup) {
-                    popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                }
+                if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
             },
         });
 
@@ -298,11 +303,10 @@ export default function FormCaracterizacion({
             Swal.fire({
                 icon: "warning",
                 title: "Proceso cancelado",
+                confirmButtonColor: "#136442",
                 didOpen: () => {
                     const popup = Swal.getPopup();
-                    if (popup) {
-                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                    }
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                 },
             });
             return;
@@ -316,23 +320,35 @@ export default function FormCaracterizacion({
                 icon: "error",
                 title: "Código incorrecto",
                 text: "No se pudo validar al productor",
+                confirmButtonColor: "#d32f2f",
                 didOpen: () => {
                     const popup = Swal.getPopup();
-                    if (popup) {
-                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                    }
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                 },
             });
             return;
         }
 
         // ─────────────────────────────
+        // ANIMACIÓN DE CARGA (Evita el doble envío al procesar con Django)
+        // ─────────────────────────────
+        Swal.fire({
+            title: 'Procesando...',
+            text: 'Guardando caracterización en el servidor, por favor espere.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                const popup = Swal.getPopup();
+                if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+            }
+        });
+
+        // ─────────────────────────────
         // DATA PARA DJANGO
         // ─────────────────────────────
         try {
             const data = {
-                // ── CAMBIO CRUCIAL AQUÍ ──
-                caracterizacion_completada: true, // Envía el flag para cambiar el estado en la base de datos
+                caracterizacion_completada: true,
 
                 rubros_vegetales: rubrosVegetales,
                 existencia_animal: {
@@ -374,32 +390,42 @@ export default function FormCaracterizacion({
 
             console.log(response.data);
 
+            // ─────────────────────────────
+            // ÉXITO Y ACTUALIZACIÓN DE PÁGINA
+            // ─────────────────────────────
             Swal.fire({
                 icon: "success",
                 title: "Caracterización guardada",
                 text: "La información fue validada por el productor",
+                confirmButtonColor: "#136442",
+                confirmButtonText: "Aceptar",
                 didOpen: () => {
                     const popup = Swal.getPopup();
-                    if (popup) {
-                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                    }
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                 },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.reload(); // Recarga la página inmediatamente
+                }
             });
+
         } catch (error) {
             console.error("ERROR:", error.response?.data || error.message);
+
             Swal.fire({
                 icon: "error",
                 title: "Error al guardar",
-                text: "Ocurrió un problema en el servidor",
+                text: "Ocurrió un problema en el servidor al procesar el inventario.",
+                confirmButtonColor: "#d32f2f",
+                confirmButtonText: "Entendido",
                 didOpen: () => {
                     const popup = Swal.getPopup();
-                    if (popup) {
-                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                    }
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                 },
             });
         }
     };
+
     return (
         <div style={{ maxWidth: "950px", margin: "0 auto" }}>
             {/* 🔴 BLOQUE DE VALIDACIÓN */}
@@ -2016,328 +2042,347 @@ export default function FormCaracterizacion({
                             </FormSection>
                         )}
 
-{subCaracterizacion === "vegetal" && (
-    <FormSection title="Producción Vegetal">
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "24px",
-                marginBottom: "20px",
-            }}
-        >
-            {rubrosVegetales.map((item, index) => {
-                // Base de estilos estilizada para los select de esta sección
-                const selectStyleBase = {
-                    ...inputStyle,
-                    appearance: "none",
-                    WebkitAppearance: "none",
-                    MozAppearance: "none",
-                    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right 12px center",
-                    backgroundSize: "16px",
-                    paddingRight: "40px",
-                    cursor: "pointer",
-                    backgroundColor: "#ffffff",
-                    borderRadius: "10px",
-                    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-                };
-
-                return (
-                    <div
-                        key={index}
-                        style={{
-                            border: "1px solid #e2e8f0",
-                            borderRadius: "14px",
-                            padding: "20px",
-                            background: "#ffffff",
-                            position: "relative",
-                            boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-                        }}
-                    >
-                        {/* Encabezado del ítem */}
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                marginBottom: "15px",
-                            }}
-                        >
-                            <span
-                                style={{
-                                    fontWeight: "600",
-                                    color: "#475569",
-                                    fontSize: "14px",
-                                }}
-                            >
-                                Rubro #{index + 1}
-                            </span>
-                        </div>
-
-                        {/* Grid estructurado simétricamente */}
-                        <div style={grid3}>
-                            {/* 1. Campo Rubro como SELECT */}
-                            <div>
-                                <label style={labelStyle}>Rubro</label>
-                                <select
-                                    style={{
-                                        ...selectStyleBase,
-                                        borderColor: erroresFilas[`${index}-rubro`] ? "#dc2626" : "#e2e8f0",
-                                    }}
-                                    value={item.rubro}
-                                    onChange={(e) =>
-                                        actualizarRubroVegetal(index, "rubro", e.target.value)
-                                    }
-                                >
-                                    <option value="">Seleccione un Rubro</option>
-                                    {LISTA_RUBROS_VEGETALES.map((rubroNombre) => (
-                                        <option key={rubroNombre} value={rubroNombre}>
-                                            {rubroNombre}
-                                        </option>
-                                    ))}
-                                </select>
-                                {erroresFilas[`${index}-rubro`] && (
-                                    <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
-                                        {erroresFilas[`${index}-rubro`]}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* 2. Campo Hectáreas */}
-                            <div>
-                                <InputField
-                                    label="Hectáreas Sembradas (ha)"
-                                    type="number"
-                                    min="0" 
-                                    value={item.hectareas}
-                                    onChange={(e) =>
-                                        actualizarRubroVegetal(index, "hectareas", e.target.value)
-                                    }
-                                    style={{
-                                        borderColor: erroresFilas[`${index}-hectareas`] ? "#dc2626" : "#e2e8f0",
-                                    }}
-                                />
-                                {erroresFilas[`${index}-hectareas`] && (
-                                    <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
-                                        {erroresFilas[`${index}-hectareas`]}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* 3. Estado del Cultivo */}
-                            <div>
-                                <label style={labelStyle}>Estado del Cultivo</label>
-                                <select
-                                    style={{
-                                        ...selectStyleBase,
-                                        borderColor: erroresFilas[`${index}-estado`] ? "#dc2626" : "#e2e8f0",
-                                    }}
-                                    value={item.estado}
-                                    onChange={(e) =>
-                                        actualizarRubroVegetal(index, "estado", e.target.value)
-                                    }
-                                >
-                                    <option value="">Seleccione</option>
-                                    <option value="Excelente">Excelente</option>
-                                    <option value="Bueno">Bueno</option>
-                                    <option value="Regular">Regular</option>
-                                    <option value="Malo">Malo</option>
-                                </select>
-                                {erroresFilas[`${index}-estado`] && (
-                                    <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
-                                        {erroresFilas[`${index}-estado`]}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* 4. Tipo de Riego */}
-                            <div>
-                                <label style={labelStyle}>Tipo de Riego</label>
-                                <select
-                                    style={{
-                                        ...selectStyleBase,
-                                        borderColor: erroresFilas[`${index}-riego`] ? "#dc2626" : "#e2e8f0",
-                                    }}
-                                    value={item.riego}
-                                    onChange={(e) =>
-                                        actualizarRubroVegetal(index, "riego", e.target.value)
-                                    }
-                                >
-                                    <option value="">Seleccione</option>
-                                    <option value="Secano">Secano</option>
-                                    <option value="Goteo">Goteo</option>
-                                    <option value="Aspersión">Aspersión</option>
-                                    <option value="Inundación">Inundación</option>
-                                </select>
-                                {erroresFilas[`${index}-riego`] && (
-                                    <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
-                                        {erroresFilas[`${index}-riego`]}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* 5. Ciclo Productivo */}
-                            <div>
-                                <label style={labelStyle}>Ciclo Productivo</label>
-                                <select
-                                    style={{
-                                        ...selectStyleBase,
-                                        borderColor: erroresFilas[`${index}-ciclo_productivo`] ? "#dc2626" : "#e2e8f0",
-                                    }}
-                                    value={item.ciclo_productivo}
-                                    onChange={(e) =>
-                                        actualizarRubroVegetal(index, "ciclo_productivo", e.target.value)
-                                    }
-                                >
-                                    <option value="">Seleccione</option>
-                                    <option value="Corto">Corto</option>
-                                    <option value="Semipermanente">Semipermanente</option>
-                                    <option value="Permanente">Permanente</option>
-                                    <option value="Anual">Anual</option>
-                                </select>
-                                {erroresFilas[`${index}-ciclo_productivo`] && (
-                                    <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
-                                        {erroresFilas[`${index}-ciclo_productivo`]}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* 6. Tipo de Producción */}
-                            <div>
-                                <label style={labelStyle}>Tipo de Producción</label>
-                                <select
-                                    style={{
-                                        ...selectStyleBase,
-                                        borderColor: erroresFilas[`${index}-tipo_produccion`] ? "#dc2626" : "#e2e8f0",
-                                    }}
-                                    value={item.tipo_produccion}
-                                    onChange={(e) =>
-                                        actualizarRubroVegetal(index, "tipo_produccion", e.target.value)
-                                    }
-                                >
-                                    <option value="">Seleccione</option>
-                                    <option value="Tradicional">Tradicional</option>
-                                    <option value="Tecnificada">Tecnificada</option>
-                                    <option value="Orgánica">Orgánica</option>
-                                    <option value="Intensiva">Intensiva</option>
-                                    <option value="Extensiva">Extensiva</option>
-                                </select>
-                                {erroresFilas[`${index}-tipo_produccion`] && (
-                                    <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
-                                        {erroresFilas[`${index}-tipo_produccion`]}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* 7. Campo Producción Estimada */}
-                            <div>
-                                <InputField
-                                    label="Producción Estimada (Kg)"
-                                    type="number"
-                                    min="0" 
-                                    value={item.produccion_estimada}
-                                    onChange={(e) =>
-                                        actualizarRubroVegetal(index, "produccion_estimada", e.target.value)
-                                    }
-                                    style={{
-                                        borderColor: erroresFilas[`${index}-produccion_estimada`] ? "#dc2626" : "#e2e8f0",
-                                    }}
-                                />
-                                {erroresFilas[`${index}-produccion_estimada`] && (
-                                    <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
-                                        {erroresFilas[`${index}-produccion_estimada`]}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* 8. Destino de Producción */}
-                            <div>
-                                <label style={labelStyle}>Destino de Producción</label>
-                                <select
-                                    style={{
-                                        ...selectStyleBase,
-                                        borderColor: erroresFilas[`${index}-destino`] ? "#dc2626" : "#e2e8f0",
-                                    }}
-                                    value={item.destino}
-                                    onChange={(e) =>
-                                        actualizarRubroVegetal(index, "destino", e.target.value)
-                                    }
-                                >
-                                    <option value="">Seleccione</option>
-                                    <option value="Consumo">Consumo</option>
-                                    <option value="Venta">Venta</option>
-                                    <option value="Mixto">Mixto</option>
-                                    <option value="Industrial">Industrial</option>
-                                </select>
-                                {erroresFilas[`${index}-destino`] && (
-                                    <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
-                                        {erroresFilas[`${index}-destino`]}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* Contenedor del botón eliminar */}
+                    {subCaracterizacion === "vegetal" && (
+                        <FormSection title="Producción Vegetal">
                             <div
                                 style={{
                                     display: "flex",
-                                    alignItems: "flex-end",
-                                    height: "100%",
+                                    flexDirection: "column",
+                                    gap: "24px",
+                                    marginBottom: "20px",
                                 }}
                             >
-                                <button
-                                    type="button"
-                                    onClick={() => eliminarRubroVegetal(index)}
-                                    style={{
-                                        background: "#dc2626",
-                                        color: "#fff",
-                                        border: "none",
-                                        padding: "10px 20px",
-                                        borderRadius: "10px",
+                                {rubrosVegetales.map((item, index) => {
+                                    // Base de estilos estilizada para los select de esta sección
+                                    const selectStyleBase = {
+                                        ...inputStyle,
+                                        appearance: "none",
+                                        WebkitAppearance: "none",
+                                        MozAppearance: "none",
+                                        backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+                                        backgroundRepeat: "no-repeat",
+                                        backgroundPosition: "right 12px center",
+                                        backgroundSize: "16px",
+                                        paddingRight: "40px",
                                         cursor: "pointer",
-                                        width: "100%",
-                                        height: "42px",
-                                        fontWeight: "500",
-                                        marginBottom: "15px",
-                                        transition: "background 0.2s ease",
-                                    }}
-                                    onMouseOver={(e) => e.currentTarget.style.background = "#b91c1c"}
-                                    onMouseOut={(e) => e.currentTarget.style.background = "#dc2626"}
-                                >
-                                    Eliminar Rubro
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
+                                        backgroundColor: "#ffffff",
+                                        borderRadius: "10px",
+                                        transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+                                    };
 
-        {/* Botón principal de agregar */}
-        <button
-            type="button"
-            onClick={agregarRubroVegetal}
-            style={{
-                background: "#136442",
-                color: "#fff",
-                border: "none",
-                padding: "12px 20px",
-                borderRadius: "12px",
-                cursor: "pointer",
-                fontWeight: "600",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                transition: "background 0.2s ease",
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = "#0f5235"}
-            onMouseOut={(e) => e.currentTarget.style.background = "#136442"}
-        >
-            <span style={{ fontSize: "16px" }}>+</span> Agregar Rubro
-        </button>
-    </FormSection>
-)}
+                                    return (
+                                        <div
+                                            key={index}
+                                            style={{
+                                                border: "1px solid #e2e8f0",
+                                                borderRadius: "14px",
+                                                padding: "20px",
+                                                background: "#ffffff",
+                                                position: "relative",
+                                                boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+                                            }}
+                                        >
+                                            {/* Encabezado del ítem */}
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center",
+                                                    marginBottom: "15px",
+                                                }}
+                                            >
+                                                <span
+                                                    style={{
+                                                        fontWeight: "600",
+                                                        color: "#475569",
+                                                        fontSize: "14px",
+                                                    }}
+                                                >
+                                                    Rubro #{index + 1}
+                                                </span>
+                                            </div>
+
+                                            {/* Grid estructurado simétricamente */}
+                                            <div style={grid3}>
+                                                {/* 1. Campo Rubro como SELECT */}
+                                                <div>
+                                                    <label style={labelStyle}>Rubro</label>
+                                                    <select
+                                                        style={{
+                                                            ...selectStyleBase,
+                                                            borderColor: erroresFilas[`${index}-rubro`] ? "#dc2626" : "#e2e8f0",
+                                                        }}
+                                                        value={item.rubro}
+                                                        onChange={(e) =>
+                                                            actualizarRubroVegetal(index, "rubro", e.target.value)
+                                                        }
+                                                    >
+                                                        <option value="">Seleccione un Rubro</option>
+                                                        {LISTA_RUBROS_VEGETALES.map((rubroNombre) => (
+                                                            <option key={rubroNombre} value={rubroNombre}>
+                                                                {rubroNombre}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    {erroresFilas[`${index}-rubro`] && (
+                                                        <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
+                                                            {erroresFilas[`${index}-rubro`]}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* 2. Campo Hectáreas */}
+                                                <div>
+                                                    <InputField
+                                                        label="Hectáreas Sembradas (ha)"
+                                                        type="number"
+                                                        min="0"
+                                                        value={item.hectareas}
+                                                        onChange={(e) => {
+                                                            const valorIngresado = parseFloat(e.target.value) || 0;
+                                                            const superficieTotal = parseFloat(predioActivo?.superficie) || 0;
+
+                                                            // Actualizamos el estado normalmente
+                                                            actualizarRubroVegetal(index, "hectareas", e.target.value);
+
+                                                            // Validación en tiempo real sobre el objeto de errores de la fila
+                                                            if (valorIngresado > superficieTotal) {
+                                                                setErroresFilas(prev => ({
+                                                                    ...prev,
+                                                                    [`${index}-hectareas`]: `No puede superar la superficie total del predio (${superficieTotal} ha).`
+                                                                }));
+                                                            } else {
+                                                                // Si el valor es correcto, removemos el error de este campo
+                                                                setErroresFilas(prev => {
+                                                                    const copiaErrores = { ...prev };
+                                                                    delete copiaErrores[`${index}-hectareas`];
+                                                                    return copiaErrores;
+                                                                });
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            borderColor: erroresFilas[`${index}-hectareas`] ? "#dc2626" : "#e2e8f0",
+                                                        }}
+                                                    />
+                                                    {erroresFilas[`${index}-hectareas`] && (
+                                                        <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px", fontWeight: "500" }}>
+                                                            {erroresFilas[`${index}-hectareas`]}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* 3. Estado del Cultivo */}
+                                                <div>
+                                                    <label style={labelStyle}>Estado del Cultivo</label>
+                                                    <select
+                                                        style={{
+                                                            ...selectStyleBase,
+                                                            borderColor: erroresFilas[`${index}-estado`] ? "#dc2626" : "#e2e8f0",
+                                                        }}
+                                                        value={item.estado}
+                                                        onChange={(e) =>
+                                                            actualizarRubroVegetal(index, "estado", e.target.value)
+                                                        }
+                                                    >
+                                                        <option value="">Seleccione</option>
+                                                        <option value="Excelente">Excelente</option>
+                                                        <option value="Bueno">Bueno</option>
+                                                        <option value="Regular">Regular</option>
+                                                        <option value="Malo">Malo</option>
+                                                    </select>
+                                                    {erroresFilas[`${index}-estado`] && (
+                                                        <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
+                                                            {erroresFilas[`${index}-estado`]}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* 4. Tipo de Riego */}
+                                                <div>
+                                                    <label style={labelStyle}>Tipo de Riego</label>
+                                                    <select
+                                                        style={{
+                                                            ...selectStyleBase,
+                                                            borderColor: erroresFilas[`${index}-riego`] ? "#dc2626" : "#e2e8f0",
+                                                        }}
+                                                        value={item.riego}
+                                                        onChange={(e) =>
+                                                            actualizarRubroVegetal(index, "riego", e.target.value)
+                                                        }
+                                                    >
+                                                        <option value="">Seleccione</option>
+                                                        <option value="Secano">Secano</option>
+                                                        <option value="Goteo">Goteo</option>
+                                                        <option value="Aspersión">Aspersión</option>
+                                                        <option value="Inundación">Inundación</option>
+                                                    </select>
+                                                    {erroresFilas[`${index}-riego`] && (
+                                                        <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
+                                                            {erroresFilas[`${index}-riego`]}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* 5. Ciclo Productivo */}
+                                                <div>
+                                                    <label style={labelStyle}>Ciclo Productivo</label>
+                                                    <select
+                                                        style={{
+                                                            ...selectStyleBase,
+                                                            borderColor: erroresFilas[`${index}-ciclo_productivo`] ? "#dc2626" : "#e2e8f0",
+                                                        }}
+                                                        value={item.ciclo_productivo}
+                                                        onChange={(e) =>
+                                                            actualizarRubroVegetal(index, "ciclo_productivo", e.target.value)
+                                                        }
+                                                    >
+                                                        <option value="">Seleccione</option>
+                                                        <option value="Corto">Corto</option>
+                                                        <option value="Semipermanente">Semipermanente</option>
+                                                        <option value="Permanente">Permanente</option>
+                                                        <option value="Anual">Anual</option>
+                                                    </select>
+                                                    {erroresFilas[`${index}-ciclo_productivo`] && (
+                                                        <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
+                                                            {erroresFilas[`${index}-ciclo_productivo`]}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* 6. Tipo de Producción */}
+                                                <div>
+                                                    <label style={labelStyle}>Tipo de Producción</label>
+                                                    <select
+                                                        style={{
+                                                            ...selectStyleBase,
+                                                            borderColor: erroresFilas[`${index}-tipo_produccion`] ? "#dc2626" : "#e2e8f0",
+                                                        }}
+                                                        value={item.tipo_produccion}
+                                                        onChange={(e) =>
+                                                            actualizarRubroVegetal(index, "tipo_produccion", e.target.value)
+                                                        }
+                                                    >
+                                                        <option value="">Seleccione</option>
+                                                        <option value="Tradicional">Tradicional</option>
+                                                        <option value="Tecnificada">Tecnificada</option>
+                                                        <option value="Orgánica">Orgánica</option>
+                                                        <option value="Intensiva">Intensiva</option>
+                                                        <option value="Extensiva">Extensiva</option>
+                                                    </select>
+                                                    {erroresFilas[`${index}-tipo_produccion`] && (
+                                                        <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
+                                                            {erroresFilas[`${index}-tipo_produccion`]}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* 7. Campo Producción Estimada */}
+                                                <div>
+                                                    <InputField
+                                                        label="Producción Estimada (Kg)"
+                                                        type="number"
+                                                        min="0"
+                                                        value={item.produccion_estimada}
+                                                        onChange={(e) =>
+                                                            actualizarRubroVegetal(index, "produccion_estimada", e.target.value)
+                                                        }
+                                                        style={{
+                                                            borderColor: erroresFilas[`${index}-produccion_estimada`] ? "#dc2626" : "#e2e8f0",
+                                                        }}
+                                                    />
+                                                    {erroresFilas[`${index}-produccion_estimada`] && (
+                                                        <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
+                                                            {erroresFilas[`${index}-produccion_estimada`]}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* 8. Destino de Producción */}
+                                                <div>
+                                                    <label style={labelStyle}>Destino de Producción</label>
+                                                    <select
+                                                        style={{
+                                                            ...selectStyleBase,
+                                                            borderColor: erroresFilas[`${index}-destino`] ? "#dc2626" : "#e2e8f0",
+                                                        }}
+                                                        value={item.destino}
+                                                        onChange={(e) =>
+                                                            actualizarRubroVegetal(index, "destino", e.target.value)
+                                                        }
+                                                    >
+                                                        <option value="">Seleccione</option>
+                                                        <option value="Consumo">Consumo</option>
+                                                        <option value="Venta">Venta</option>
+                                                        <option value="Mixto">Mixto</option>
+                                                        <option value="Industrial">Industrial</option>
+                                                    </select>
+                                                    {erroresFilas[`${index}-destino`] && (
+                                                        <span style={{ color: "#dc2626", fontSize: "11px", display: "block", marginTop: "4px" }}>
+                                                            {erroresFilas[`${index}-destino`]}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Contenedor del botón eliminar */}
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        alignItems: "flex-end",
+                                                        height: "100%",
+                                                    }}
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => eliminarRubroVegetal(index)}
+                                                        style={{
+                                                            background: "#dc2626",
+                                                            color: "#fff",
+                                                            border: "none",
+                                                            padding: "10px 20px",
+                                                            borderRadius: "10px",
+                                                            cursor: "pointer",
+                                                            width: "100%",
+                                                            height: "42px",
+                                                            fontWeight: "500",
+                                                            marginBottom: "15px",
+                                                            transition: "background 0.2s ease",
+                                                        }}
+                                                        onMouseOver={(e) => e.currentTarget.style.background = "#b91c1c"}
+                                                        onMouseOut={(e) => e.currentTarget.style.background = "#dc2626"}
+                                                    >
+                                                        Eliminar Rubro
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Botón principal de agregar */}
+                            <button
+                                type="button"
+                                onClick={agregarRubroVegetal}
+                                style={{
+                                    background: "#136442",
+                                    color: "#fff",
+                                    border: "none",
+                                    padding: "12px 20px",
+                                    borderRadius: "12px",
+                                    cursor: "pointer",
+                                    fontWeight: "600",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    transition: "background 0.2s ease",
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.background = "#0f5235"}
+                                onMouseOut={(e) => e.currentTarget.style.background = "#136442"}
+                            >
+                                <span style={{ fontSize: "16px" }}>+</span> Agregar Rubro
+                            </button>
+                        </FormSection>
+                    )}
 
                     {subCaracterizacion === "maquinaria" && (
                         <FormSection title="Maquinarias y Equipos">

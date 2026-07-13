@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import React from "react";
 
 const USUARIOS = [
-  { usuario: "admin", clave: "admin123", rol: "Administrador", nombre: "Carlos Pérez" },
-  { usuario: "empleado", clave: "empleado123", rol: "Empleado MPPAT", nombre: "María González" },
+  { usuario: "admin", clave: "admin123", rol: "Administrador", nombre: "Isaías González" },
+  { usuario: "empleado", clave: "empleado123", rol: "Empleado MPPAT", nombre: "José González" },
 ];
 
 export default function LoginProduccionPage() {
@@ -33,7 +33,7 @@ export default function LoginProduccionPage() {
     if (encontrado) {
       sessionStorage.setItem("usuario_produccion", JSON.stringify(encontrado));
       if (encontrado.usuario === "admin") {
-        navigate("/produccion/DashboardP2");
+        navigate("/produccion/DashboardP");
       } else {
         navigate("/produccion/DashboardP");
       }

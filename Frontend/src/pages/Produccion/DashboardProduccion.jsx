@@ -233,8 +233,8 @@ const generarPDFPredio = (predio) => {
         margin: { left: 12, right: 12 }
     });
 
- // ────────────────────────────────────────────────────────
-    // SECCIÓN II: EXISTENCIA ANIMAL (REVISIÓN COMPLETA Y DINÁMICA)
+    // ────────────────────────────────────────────────────────
+    // SECCIÓN II: EXISTENCIA ANIMAL
     // ────────────────────────────────────────────────────────
     let currentY = doc.lastAutoTable.finalY + 6;
     doc.setFont("helvetica", "bold");
@@ -245,10 +245,9 @@ const generarPDFPredio = (predio) => {
     const extAnimal = predio.existencia_animal || {};
     let bodyAnimales = [];
 
-    // Mapeo estructurado para iterar sobre todas las posibles especies de tu modelo Django
     const mapeoEspecies = [
         { clave: "bovinos", capacidad: "capacidadBovina", etiqueta: "GANADO BOVINO (VACUNO)" },
-        { clave: "vacunos", capacidad: "capacidadVacuna", etiqueta: "GANADO BOVINO (VACUNO)" }, // Compatibilidad por si acaso
+        { clave: "vacunos", capacidad: "capacidadVacuna", etiqueta: "GANADO BOVINO (VACUNO)" },
         { clave: "bubalinos", capacidad: "capacidadBubalina", etiqueta: "GANADO BUBALINO" },
         { clave: "equinos", capacidad: "capacidadEquina", etiqueta: "GANADO EQUINO" },
         { clave: "ovinos", capacidad: "capacidadOvina", etiqueta: "GANADO OVINO" },
@@ -261,12 +260,8 @@ const generarPDFPredio = (predio) => {
 
     mapeoEspecies.forEach(esp => {
         const datosEspecie = extAnimal[esp.clave];
-        
-        // Verificamos si existe el objeto de la especie y si contiene registros
         if (datosEspecie && typeof datosEspecie === 'object' && Object.keys(datosEspecie).length > 0) {
             const capData = extAnimal[esp.capacidad] || {};
-            
-            // Construimos un string legible de la capacidad registrada para esa especie
             let capTexto = "No especificada";
             if (Object.keys(capData).length > 0) {
                 capTexto = Object.entries(capData)
@@ -275,10 +270,8 @@ const generarPDFPredio = (predio) => {
                     .join(" | ");
             }
 
-            // Recorremos cada subcategoría interna (ej: vacas, toros, mantes, etc.)
             Object.entries(datosEspecie).forEach(([subcat, cant]) => {
-                if (subcat === "id" || cant === 0 || cant === "0") return; // Omitimos llaves de id o vacías
-                
+                if (subcat === "id" || cant === 0 || cant === "0") return;
                 bodyAnimales.push([
                     esp.etiqueta,
                     subcat.replace(/_/g, " ").toUpperCase(),
@@ -303,6 +296,7 @@ const generarPDFPredio = (predio) => {
         columnStyles: { 0: { width: 45 }, 1: { width: 45 }, 2: { width: 25 }, 3: { width: 82 } },
         margin: { left: 12, right: 12 }
     });
+
     // ────────────────────────────────────────────────────────
     // SECCIÓN III: INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)
     // ────────────────────────────────────────────────────────
@@ -335,7 +329,7 @@ const generarPDFPredio = (predio) => {
     });
 
     // ────────────────────────────────────────────────────────
-    // SECCIÓN IV: MECANIZACIÓN Y MAQUINARIAS (IGUAL A LA DE RUBROS)
+    // SECCIÓN IV: MECANIZACIÓN Y MAQUINARIAS (CON OTROS EQUIPOS)
     // ────────────────────────────────────────────────────────
     currentY = doc.lastAutoTable.finalY + 6;
     doc.setFont("helvetica", "bold");
@@ -346,9 +340,9 @@ const generarPDFPredio = (predio) => {
     let bodyMaquinarias = [];
 
     // 1. Procesar Maquinaria Agrícola sobre Ruedas
-    if (maquinaria.maquinaria_ruedas) {
+    if (maquinaria.maquinaria_ruedas && typeof maquinaria.maquinaria_ruedas === 'object') {
         Object.entries(maquinaria.maquinaria_ruedas).forEach(([maq, num]) => {
-            if (num === 0 || maq === "id") return;
+            if (num === 0 || num === "0" || maq === "id") return;
             bodyMaquinarias.push([
                 "MAQUINARIA SOBRE RUEDAS",
                 maq.replace(/_/g, " ").toUpperCase(),
@@ -357,13 +351,37 @@ const generarPDFPredio = (predio) => {
         });
     }
 
-    // 2. Procesar Equipamientos de Riego
-    if (maquinaria.riego) {
+    // 2. Procesar Implementos
+    if (maquinaria.implementos && typeof maquinaria.implementos === 'object') {
+        Object.entries(maquinaria.implementos).forEach(([imp, num]) => {
+            if (num === 0 || num === "0" || imp === "id") return;
+            bodyMaquinarias.push([
+                "IMPLEMENTOS AGRÍCOLAS",
+                imp.replace(/_/g, " ").toUpperCase(),
+                `${num} Unid.`
+            ]);
+        });
+    }
+
+    // 3. Procesar Equipamientos de Riego
+    if (maquinaria.riego && typeof maquinaria.riego === 'object') {
         Object.entries(maquinaria.riego).forEach(([bom, cant]) => {
-            if (cant === 0 || bom === "id") return;
+            if (cant === 0 || cant === "0" || bom === "id") return;
             bodyMaquinarias.push([
                 "EQUIPOS DE RIEGO",
                 bom.replace(/_/g, " ").toUpperCase(),
+                `${cant} Unid.`
+            ]);
+        });
+    }
+
+    // 4. Procesar Otros Equipos (Agregado para solventar la omisión)
+    if (maquinaria.otros_equipos && typeof maquinaria.otros_equipos === 'object') {
+        Object.entries(maquinaria.otros_equipos).forEach(([eq, cant]) => {
+            if (cant === 0 || cant === "0" || eq === "id") return;
+            bodyMaquinarias.push([
+                "OTROS EQUIPOS / TECNOLOGÍA",
+                eq.replace(/_/g, " ").toUpperCase(),
                 `${cant} Unid.`
             ]);
         });
@@ -712,9 +730,30 @@ const generarPDFPredio = (predio) => {
         const licenciaData = datosActualizados || licenciaHierro;
 
         if (!licenciaData.poseeLicencia) {
-            Swal.fire({ icon: "info", title: "No se requiere registro si no posee licencia." });
+            Swal.fire({
+                icon: "info",
+                title: "No se requiere registro",
+                text: "No se requiere registro si no posee licencia.",
+                confirmButtonColor: '#3085d6',
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                }
+            });
             return;
         }
+
+        // 1. ANIMACIÓN DE CARGA INICIAL (Evita doble envío bloqueando la interfaz)
+        Swal.fire({
+            title: 'Procesando...',
+            text: 'Guardando datos de la licencia, por favor espere.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                const popup = Swal.getPopup();
+                if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+            }
+        });
 
         try {
             const formData = new FormData();
@@ -726,7 +765,6 @@ const generarPDFPredio = (predio) => {
             formData.append("fecha_emision", licenciaData.fechaEmision);
 
             // --- NUEVA ADICIÓN: Campo booleano 'activa' ---
-            // Se envía de forma explícita el valor booleano derivado de la validación
             formData.append("activa", licenciaData.activa ?? true);
 
             // Campos opcionales (evitamos enviar strings vacíos en fechas o textos)
@@ -742,10 +780,10 @@ const generarPDFPredio = (predio) => {
                 formData.append("imagen_hierro", licenciaData.imagenHierro);
             }
             if (licenciaData.certificado) {
-                // Se envía bajo el nombre exacto del FileField en el modelo
                 formData.append("certificado_pdf", licenciaData.certificado);
             }
 
+            // Despacho de la petición HTTP con Axios
             await axios.post(
                 "http://127.0.0.1:8000/api/licencias-hierro/",
                 formData,
@@ -756,28 +794,41 @@ const generarPDFPredio = (predio) => {
                 }
             );
 
+            // 2. ALERTA DE ÉXITO Y ACTUALIZACIÓN AUTOMÁTICA
             Swal.fire({
-                icon: "success",
-                title: "Licencia registrada exitosamente",
+                title: '¡Registro Exitoso!',
+                text: 'La licencia ha sido registrada con éxito en el sistema.',
+                icon: 'success',
+                confirmButtonColor: '#10b981',
+                confirmButtonText: 'Aceptar',
                 didOpen: () => {
                     const popup = Swal.getPopup();
-                    if (popup) {
-                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                    }
+                    if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                }
+            }).then((result) => {
+                // Se ejecuta al hacer clic en "Aceptar" para mostrar los datos de inmediato
+                if (result.isConfirmed) {
+                    window.location.reload();
                 }
             });
 
         } catch (error) {
-            console.error(error);
+            console.error("Errores de validación o red:", error);
+
+            // Extraemos detalles del error de Django si existen
+            const errorData = error.response?.data;
+            console.log("Cuerpo del error:", errorData);
+
+            // 3. MANEJO DE ERRORES (Cierra el loading y alerta al usuario)
             Swal.fire({
-                icon: "error",
-                title: "Error al guardar",
-                text: error.response?.data ? JSON.stringify(error.response.data) : "Consulte la consola",
+                title: 'Error al guardar',
+                text: errorData ? 'Por favor, verifique los datos introducidos e intente nuevamente.' : 'No se pudo conectar con el servidor.',
+                icon: 'error',
+                confirmButtonColor: '#d32f2f',
+                confirmButtonText: 'Entendido',
                 didOpen: () => {
                     const popup = Swal.getPopup();
-                    if (popup) {
-                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                    }
+                    if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
                 }
             });
         }
@@ -1138,52 +1189,8 @@ const generarPDFPredio = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* Gráfico 3 - Radar: Flujo del Sistema / Tecnología */}
-                                <div style={chartCard}>
-                                    <h3 style={chartTitle}>Uso Tecnológico y Maquinaria (%)</h3>
-                                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
-                                        {!statsProduccion?.graficos?.flujo_sistema ? (
-                                            <div style={chartPlaceholder}>Sin datos de infraestructura</div>
-                                        ) : (
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <RadarChart cx="50%" cy="50%" outerRadius="65%" data={statsProduccion.graficos.flujo_sistema}>
-                                                    <PolarGrid stroke="#e0e0e0" />
-                                                    {/* dataKey="subject" tomará los nuevos strings enviados por el backend */}
-                                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 10, fontWeight: 'bold' }} />
-                                                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} axisLine={false} />
-                                                    <Radar name="Adopción" dataKey="A" stroke="#136442" fill="#136442" fillOpacity={0.5} />
-                                                    <Tooltip
-                                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                                        formatter={(value) => [`${value.toFixed(1)}%`, "Porcentaje"]}
-                                                    />
-                                                </RadarChart>
-                                            </ResponsiveContainer>
-                                        )}
-                                    </div>
-                                </div>
 
-                                {/* Gráfico 4 - Bar Horizontal: Capacidad Productiva por Especie */}
-                                <div style={chartCard}>
-                                    <h3 style={chartTitle}>Capacidad Productiva por Especie</h3>
-                                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
-                                        {!statsProduccion?.graficos?.estado_sistema ? (
-                                            <div style={chartPlaceholder}>Sin datos de volumen</div>
-                                        ) : (
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                {/* Agregamos margen izquierdo para que no se corten los nombres de las especies */}
-                                                <BarChart layout="vertical" data={statsProduccion.graficos.estado_sistema} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
-                                                    <CartesianGrid strokeDasharray="3 3" vertical={true} horizontal={false} />
-                                                    {/* Dejamos el XAxis visible pero discreto para mejor lectura de capacidades */}
-                                                    <XAxis type="number" stroke="#999" fontSize={11} />
-                                                    {/* Cambiado dataKey a "especie" y width a 110 para textos largos */}
-                                                    <YAxis dataKey="especie" type="category" tick={{ fill: '#444', fontSize: 11, fontWeight: 'bold' }} width={110} />
-                                                    <Tooltip cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }} contentStyle={{ borderRadius: '10px' }} />
-                                                    <Bar dataKey="cantidad" radius={[0, 5, 5, 0]} barSize={20} fill="#338261" />
-                                                </BarChart>
-                                            </ResponsiveContainer>
-                                        )}
-                                    </div>
-                                </div>
+
 
                             </div>
                         </div>
@@ -1782,7 +1789,7 @@ const generarPDFPredio = (predio) => {
                                 </div>
                             </div>
 
-                            {/* ── TABLA DE REGISTROS (Exactamente igual al historial) ── */}
+                            {/* ── TABLA DE REGISTROS ── */}
                             <div style={{
                                 backgroundColor: "#fff", padding: "20px", borderRadius: "12px",
                                 boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
@@ -1790,7 +1797,8 @@ const generarPDFPredio = (predio) => {
                                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                                     <thead>
                                         <tr style={{ borderBottom: "2px solid #136442", color: "#136442" }}>
-                                            <th style={{ fontSize: "14px", padding: "12px" }}>ID</th>
+                                            {/* Cambiado de ID a # */}
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>#</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Nombre del Predio</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Productor</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Municipio</th>
@@ -1799,7 +1807,6 @@ const generarPDFPredio = (predio) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/* Nota: Si usas 'prediosFiltrados' para las búsquedas de este módulo, se mantendrá sincronizado perfectamente */}
                                         {prediosFiltrados.length > 0 ? (
                                             prediosFiltrados.map((p, index) => (
                                                 <tr
@@ -1809,25 +1816,20 @@ const generarPDFPredio = (predio) => {
                                                         backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
                                                     }}
                                                 >
-                                                    <td style={{ fontSize: "13px", padding: "12px" }}>#{p.id_predio}</td>
+                                                    {/* Aquí usamos index + 1 para el contador */}
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>{index + 1}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>
-                                                        {/* Única diferencia: El botón ejecuta la función del PDF usando los mismos estilos del botón de detalles */}
                                                         <button
                                                             onClick={() => {
-                                                                // Buscamos si existe la propiedad, si no, devolvemos un array vacío por defecto
                                                                 const servicios = p.servicios_lectura || [];
-
-                                                                // Creamos un objeto "seguro" que el PDF entenderá
                                                                 const predioParaPDF = {
                                                                     ...p,
-                                                                    servicios_lectura: servicios // Forzamos que siempre exista
+                                                                    servicios_lectura: servicios
                                                                 };
-
-                                                                // Esto asegura que el PDF reciba un array, incluso si está vacío, evitando errores
                                                                 generarPDFPredio(predioParaPDF);
                                                             }}
                                                             style={{ backgroundColor: "#f0fdf4", color: "#136442", border: "1px solid #136442", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}
@@ -1838,11 +1840,7 @@ const generarPDFPredio = (predio) => {
                                                 </tr>
                                             ))
                                         ) : (
-                                            <tr>
-                                                <td colSpan="6" style={{ textAlign: "center", padding: "40px", color: "#999" }}>
-                                                    No se encontraron registros.
-                                                </td>
-                                            </tr>
+                                            <tr><td colSpan="6" style={{ textAlign: "center", padding: "40px", color: "#999" }}>No se encontraron registros.</td></tr>
                                         )}
                                     </tbody>
                                 </table>
