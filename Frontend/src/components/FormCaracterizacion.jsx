@@ -12,7 +12,7 @@ import {
     labelStyle,
     inputStyle,
     SelectField,
-} from "../pages/Produccion/DashboardProduccion2";
+} from "../pages/Produccion/DashboardProduccion";
 
 export default function FormCaracterizacion({
     predioActivo,
@@ -24,6 +24,9 @@ export default function FormCaracterizacion({
     subCaracterizacion,
     setSubCaracterizacion,
 }) {
+
+        const [codigoGenerado, setCodigoGenerado] = useState("");
+        const [codigoIngresado, setCodigoIngresado] = useState("");
     // ── COMPONENTE DE INPUT NUMÉRICO CON TIPOGRAFÍA HEREDADA ──────────────────
     const NumericInputField = ({
         label,
@@ -215,37 +218,24 @@ export default function FormCaracterizacion({
                 title: "Predio no seleccionado",
                 text: "Debe seleccionar un predio",
             });
-
             return;
         }
 
         // ─────────────────────────────
         // CONFIRMACIÓN
         // ─────────────────────────────
-
         const confirmacion = await Swal.fire({
             title: "¿Guardar caracterización?",
-
             text: "Se enviará un código de validación al productor.",
-
             icon: "question",
-
             showCancelButton: true,
-
             confirmButtonText: "Sí, continuar",
-
             cancelButtonText: "Cancelar",
-
             confirmButtonColor: "#136442",
-
             didOpen: () => {
                 const popup = Swal.getPopup();
                 if (popup) {
-                    popup.style.setProperty(
-                        "font-family",
-                        "'Poppins', sans-serif",
-                        "important",
-                    );
+                    popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                 }
             },
         });
@@ -258,13 +248,8 @@ export default function FormCaracterizacion({
         let codigoServidor = "";
         try {
             const telefono = predioActivo?.productor?.telefono;
+            const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo/", { telefono });
 
-            const envio = await axios.post(
-                "http://127.0.0.1:8000/api/enviar-codigo/",
-                { telefono },
-            );
-
-            // Capturamos el código real generado por views.py
             codigoServidor = envio.data.codigo.toString();
             setCodigoGenerado(codigoServidor);
             console.log("CÓDIGO RECIBIDO DEL SERVIDOR:", codigoServidor);
@@ -276,11 +261,7 @@ export default function FormCaracterizacion({
                 didOpen: () => {
                     const popup = Swal.getPopup();
                     if (popup) {
-                        popup.style.setProperty(
-                            "font-family",
-                            "'Poppins', sans-serif",
-                            "important",
-                        );
+                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                     }
                 },
             });
@@ -297,30 +278,18 @@ export default function FormCaracterizacion({
         // ─────────────────────────────
         // PEDIR CÓDIGO
         // ─────────────────────────────
-
         const { value: codigoUsuario } = await Swal.fire({
             title: "Validación del Productor",
-
             input: "text",
-
             inputLabel: "Ingrese el código enviado al WhatsApp del productor",
-
             inputPlaceholder: "Ingrese el código",
-
             confirmButtonText: "Validar",
-
             confirmButtonColor: "#136442",
-
             showCancelButton: true,
-
             didOpen: () => {
                 const popup = Swal.getPopup();
                 if (popup) {
-                    popup.style.setProperty(
-                        "font-family",
-                        "'Poppins', sans-serif",
-                        "important",
-                    );
+                    popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                 }
             },
         });
@@ -332,22 +301,16 @@ export default function FormCaracterizacion({
                 didOpen: () => {
                     const popup = Swal.getPopup();
                     if (popup) {
-                        popup.style.setProperty(
-                            "font-family",
-                            "'Poppins', sans-serif",
-                            "important",
-                        );
+                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                     }
                 },
             });
-
             return;
         }
 
         // ─────────────────────────────
         // VALIDAR CÓDIGO
         // ─────────────────────────────
-
         if (codigoUsuario !== codigoServidor) {
             Swal.fire({
                 icon: "error",
@@ -356,75 +319,48 @@ export default function FormCaracterizacion({
                 didOpen: () => {
                     const popup = Swal.getPopup();
                     if (popup) {
-                        popup.style.setProperty(
-                            "font-family",
-                            "'Poppins', sans-serif",
-                            "important",
-                        );
+                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                     }
                 },
             });
-
             return;
         }
 
         // ─────────────────────────────
         // DATA PARA DJANGO
         // ─────────────────────────────
-
         try {
             const data = {
-                rubros_vegetales: rubrosVegetales,
+                // ── CAMBIO CRUCIAL AQUÍ ──
+                caracterizacion_completada: true, // Envía el flag para cambiar el estado en la base de datos
 
+                rubros_vegetales: rubrosVegetales,
                 existencia_animal: {
                     especiesSeleccionadas: inventarioInicial.especiesSeleccionadas,
-
                     bovinos: inventarioInicial.bovinos,
-
                     capacidadBovina: inventarioInicial.capacidadBovina,
-
                     bubalinos: inventarioInicial.bubalinos,
-
                     capacidadBubalina: inventarioInicial.capacidadBubalina,
-
                     equinos: inventarioInicial.equinos,
-
                     capacidadEquina: inventarioInicial.capacidadEquina,
-
                     ovinos: inventarioInicial.ovinos,
-
                     capacidadOvina: inventarioInicial.capacidadOvina,
-
                     porcinos: inventarioInicial.porcinos,
-
                     capacidadPorcina: inventarioInicial.capacidadPorcina,
-
                     caprinos: inventarioInicial.caprinos,
-
                     capacidadCaprino: inventarioInicial.capacidadCaprino,
-
                     cunicola: inventarioInicial.cunicola,
-
                     capacidadCunicola: inventarioInicial.capacidadCunicola,
-
                     avicola: inventarioInicial.avicola,
-
                     capacidadAvicola: inventarioInicial.capacidadAvicola,
-
                     apicola: inventarioInicial.apicola,
-
                     capacidadApicola: inventarioInicial.capacidadApicola,
                 },
-
                 maquinaria: {
                     maquinariaSeleccionada: inventarioInicial.maquinariaSeleccionada,
-
                     maquinaria_ruedas: inventarioInicial.maquinaria_ruedas,
-
                     implementos: inventarioInicial.implementos,
-
                     riego: inventarioInicial.riego,
-
                     otros_equipos: inventarioInicial.otros_equipos,
                 },
             };
@@ -433,7 +369,6 @@ export default function FormCaracterizacion({
 
             const response = await axios.patch(
                 `http://127.0.0.1:8000/api/predios/${predioActivo.id_predio}/`,
-
                 data,
             );
 
@@ -441,50 +376,30 @@ export default function FormCaracterizacion({
 
             Swal.fire({
                 icon: "success",
-
                 title: "Caracterización guardada",
-
                 text: "La información fue validada por el productor",
-
                 didOpen: () => {
                     const popup = Swal.getPopup();
                     if (popup) {
-                        popup.style.setProperty(
-                            "font-family",
-                            "'Poppins', sans-serif",
-                            "important",
-                        );
+                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                     }
                 },
             });
         } catch (error) {
-            console.error(
-                "ERROR:",
-
-                error.response?.data || error.message,
-            );
-
+            console.error("ERROR:", error.response?.data || error.message);
             Swal.fire({
                 icon: "error",
-
                 title: "Error al guardar",
-
                 text: "Ocurrió un problema en el servidor",
-
                 didOpen: () => {
                     const popup = Swal.getPopup();
                     if (popup) {
-                        popup.style.setProperty(
-                            "font-family",
-                            "'Poppins', sans-serif",
-                            "important",
-                        );
+                        popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
                     }
                 },
             });
         }
     };
-
     return (
         <div style={{ maxWidth: "950px", margin: "0 auto" }}>
             {/* 🔴 BLOQUE DE VALIDACIÓN */}

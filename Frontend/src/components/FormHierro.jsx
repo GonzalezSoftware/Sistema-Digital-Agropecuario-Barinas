@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { btnPrincipal, grid3, labelStyle, inputStyle } from "../pages/Produccion/DashboardProduccion2";
+import { btnPrincipal, grid3, labelStyle, inputStyle } from "../pages/Produccion/DashboardProduccion";
 
 // Componente ModernSelectField estilizado
 const ModernSelectField = ({ label, value, onChange, error, children }) => {

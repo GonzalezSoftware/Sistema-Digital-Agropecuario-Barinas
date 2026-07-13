@@ -3125,7 +3125,7 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* ── TABLA DE REGISTROS (Exactamente igual al historial) ── */}
+                            {/* ── TABLA DE REGISTROS (Reportes con numeración dinámica) ── */}
                             <div style={{
                                 backgroundColor: "#fff", padding: "20px", borderRadius: "12px",
                                 boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
@@ -3133,7 +3133,8 @@ export default function Dashboard() {
                                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                                     <thead>
                                         <tr style={{ borderBottom: "2px solid #136442", color: "#136442" }}>
-                                            <th style={{ fontSize: "14px", padding: "12px" }}>ID</th>
+                                            {/* Cambiado de ID a # para indicar numeración */}
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>#</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Nombre del Predio</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Productor</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Municipio</th>
@@ -3142,7 +3143,6 @@ export default function Dashboard() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/* Nota: Si usas 'prediosFiltrados' para las búsquedas de este módulo, se mantendrá sincronizado perfectamente */}
                                         {prediosFiltrados.length > 0 ? (
                                             prediosFiltrados.map((p, index) => (
                                                 <tr
@@ -3152,25 +3152,20 @@ export default function Dashboard() {
                                                         backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
                                                     }}
                                                 >
-                                                    <td style={{ fontSize: "13px", padding: "12px" }}>#{p.id_predio}</td>
+                                                    {/* Se usa index + 1 para enumerar desde 1 */}
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>{index + 1}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>
-                                                        {/* Única diferencia: El botón ejecuta la función del PDF usando los mismos estilos del botón de detalles */}
                                                         <button
                                                             onClick={() => {
-                                                                // Buscamos si existe la propiedad, si no, devolvemos un array vacío por defecto
                                                                 const servicios = p.servicios_lectura || [];
-
-                                                                // Creamos un objeto "seguro" que el PDF entenderá
                                                                 const predioParaPDF = {
                                                                     ...p,
-                                                                    servicios_lectura: servicios // Forzamos que siempre exista
+                                                                    servicios_lectura: servicios
                                                                 };
-
-                                                                // Esto asegura que el PDF reciba un array, incluso si está vacío, evitando errores
                                                                 generarPDFPredio(predioParaPDF);
                                                             }}
                                                             style={{ backgroundColor: "#f0fdf4", color: "#136442", border: "1px solid #136442", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}
