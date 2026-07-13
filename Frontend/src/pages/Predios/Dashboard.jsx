@@ -1529,6 +1529,7 @@ export default function Dashboard() {
             });
         }
     };
+    
     const cerrarSesion = () => {
         sessionStorage.removeItem("usuario_predios");
         navigate("/predios/login");
