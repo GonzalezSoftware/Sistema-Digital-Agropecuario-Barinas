@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import React from "react";
 
 const USUARIOS = [
-  { usuario: "admin", clave: "admin123", rol: "Administrador", nombre: "Carlos Pérez" },
-  { usuario: "empleado", clave: "empleado123", rol: "Empleado MPPAT", nombre: "María González" },
+  { usuario: "admin", clave: "admin123", rol: "Administrador", nombre: "José González" },
+  { usuario: "empleado", clave: "empleado123", rol: "Empleado MPPAT", nombre: "Esteban González" },
 ];
 
 export default function LoginPrediosPage() {

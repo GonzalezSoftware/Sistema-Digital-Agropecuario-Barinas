@@ -582,32 +582,75 @@ export default function Dashboard() {
         coordenadas: ""
     });
 
+    const [camposBloqueados, setCamposBloqueados] = useState(false);
+
     const verificarCedulaDuplicada = (cedula) => {
-        // 1. Nos aseguramos de tener el string numérico limpio que viene del input
-        const cedulaLimpia = String(cedula).trim();
+        if (!cedula) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atención',
+                text: 'Por favor, ingrese una cédula para buscar.',
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                }
+            });
+            return;
+        }
 
-        // 2. Buscamos en la lista filtrando cualquier letra que pueda tener la BD por descarte
-        const existe = listaPredios.some(p => {
-            const cedulaEnDB = p.productor?.cedula_rif;
-            if (!cedulaEnDB) return false;
-
-            // .replace(/\D/g, '') elimina "V-", "E-" o espacios si existieran en la base de datos
-            const numerosEnDB = String(cedulaEnDB).replace(/\D/g, '').trim();
-
-            return numerosEnDB === cedulaLimpia;
+        // Animación de carga mientras busca
+        Swal.fire({
+            title: 'Buscando...',
+            text: 'Consultando registros del productor, por favor espere.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                const popup = Swal.getPopup();
+                if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+            }
         });
 
-        if (existe) {
-            setErrors(prev => ({
-                ...prev,
-                productor_cedula: "Esta cédula ya se encuentra registrada"
-            }));
-        } else {
-            setErrors(prev => ({
-                ...prev,
-                productor_cedula: ""
-            }));
-        }
+        const cedulaLimpia = String(cedula).trim();
+        const registroEncontrado = listaPredios.find(p => {
+            const cedulaEnDB = String(p.productor?.cedula_rif || "").replace(/\D/g, '').trim();
+            return cedulaEnDB === cedulaLimpia;
+        });
+
+        setTimeout(() => { // Pequeña pausa para que se aprecie la animación
+            if (registroEncontrado) {
+                const prod = registroEncontrado.productor;
+
+                setFormData(prev => ({
+                    ...prev,
+                    productor_nombre: prod.nombre || "",
+                    productor_telefono: prod.telefono || "",
+                    productor_correo: prod.correo || ""
+                }));
+
+                setCamposBloqueados(true);
+                setErrors(prev => ({ ...prev, productor_cedula: "" }));
+
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Productor encontrado!',
+                    text: 'Información cargada exitosamente.',
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'No registrado',
+                    text: 'Esta cédula no tiene registros previos. Puede continuar con el registro manualmente.',
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                });
+            }
+        }, 600);
     };
     const validarCampoProductor = (name, value,) => {
         let mensaje = "";
@@ -624,24 +667,32 @@ export default function Dashboard() {
             }
         }
         if (name === "productor_cedula") {
-            // V- exige 7 a 8 dígitos | E- permite desde 5 hasta 8 dígitos
-            const regexCedula = prefijoCedula === "V-" ? /^[0-9]{6,8}$/ : /^[0-9]{5,8}$/;
+            const esV = prefijoCedula === "V-";
+            const min = esV ? 6 : 5;
+            const max = 8;
+            const soloNumeros = /^[0-9]*$/;
+
+            const existeEnDB = listaPredios.some(p => {
+                const cedulaEnDB = String(p.productor?.cedula_rif || "").replace(/\D/g, '').trim();
+                return cedulaEnDB === value.trim();
+            });
 
             if (value === "") {
-                mensaje = "";
-            } else if (!regexCedula.test(value)) {
-                mensaje = prefijoCedula === "V-"
-                    ? "La cédula venezolana debe tener 6 u 8 números"
-                    : "La cédula extranjera debe tener entre 5 y 8 números";
+                mensaje = "La cédula es requerida";
+            } else if (!soloNumeros.test(value)) {
+                mensaje = "Solo se permiten números";
+            } else if (value.length < min || value.length > max) {
+                mensaje = esV ? `La cédula debe tener entre 6 y 8 dígitos` : `La cédula debe tener entre 5 y 8 dígitos`;
+            } else if (existeEnDB) {
+                mensaje = "Esta cédula ya está registrada. Presione la lupa para cargar sus datos.";
             } else {
-                // Mandamos SOLO el número puro a buscar en la lista local
-                verificarCedulaDuplicada(value);
-                return;
+                mensaje = "";
             }
 
             setErrors(prev => ({ ...prev, [name]: mensaje }));
         }
         if (name === "productor_telefono") {
+            // 1. Validaciones de formato
             if (value === "") {
                 mensaje = "";
             } else if (!/^[0-9]+$/.test(value)) {
@@ -651,6 +702,24 @@ export default function Dashboard() {
             } else if (!/^(414|424|416|426|412)[0-9]{7}$/.test(value)) {
                 mensaje = "El número debe comenzar con una operadora válida (414, 424, 416, 426, 412)";
             }
+            // 2. Validación de duplicados (Ajustada para comparar con el prefijo 58)
+            else {
+                const telefonoConPrefijo = `58${value.trim()}`;
+
+                const telefonoYaRegistrado = listaPredios.some(p => {
+                    // Convertimos a string y quitamos posibles espacios para comparar
+                    const telEnDB = String(p.productor?.telefono || "").trim();
+                    return telEnDB === telefonoConPrefijo;
+                });
+
+                if (telefonoYaRegistrado) {
+                    mensaje = "Este número de teléfono ya está registrado.";
+                } else {
+                    mensaje = ""; // Todo correcto
+                }
+            }
+
+            setErrors(prev => ({ ...prev, [name]: mensaje }));
         }
 
         if (name === "productor_correo") {
@@ -660,7 +729,7 @@ export default function Dashboard() {
                 // 1. Validación de formato y dominios permitidos
                 const regexDominiosPermitidos = /^[^\s@]+@(gmail\.com|hotmail\.com)$/i;
 
-                // 2. Validación anti-patrones comunes de correos falsos (letras repetidas de teclado)
+                // 2. Validación anti-patrones comunes de correos falsos
                 const esCorreoSospechoso = /(.)\1{4,}/i.test(value.split('@')[0]) ||
                     /asdasd|12345|qwerty/i.test(value);
 
@@ -670,6 +739,19 @@ export default function Dashboard() {
                     mensaje = "El correo parece falso o inválido. Por favor, verifícalo.";
                 } else if (value.split('@')[0].length < 4) {
                     mensaje = "El nombre de usuario del correo es demasiado corto";
+                }
+                // 3. Validación de duplicados: Comparamos con otros productores registrados
+                else {
+                    const correoYaRegistrado = listaPredios.some(p => {
+                        const correoEnDB = String(p.productor?.correo || "").toLowerCase().trim();
+                        return correoEnDB === value.toLowerCase().trim();
+                    });
+
+                    if (correoYaRegistrado) {
+                        mensaje = "Este correo electrónico ya está registrado.";
+                    } else {
+                        mensaje = ""; // Todo correcto
+                    }
                 }
             }
 
@@ -705,7 +787,7 @@ export default function Dashboard() {
             const municipioSeleccionado = datosEnTiempoReal.municipio;
             const valorLimpio = coordenadasActuales ? coordenadasActuales.trim() : "";
 
-            // Si lo que estamos evaluando es el campo coordenadas y está vacío
+            // 1. Validación de campo vacío
             if (name === "coordenadas" && valorLimpio === "") {
                 setErrors(prev => ({ ...prev, coordenadas: "Pegue las coordenadas de Google Maps" }));
                 return;
@@ -717,35 +799,43 @@ export default function Dashboard() {
                 if (!regexCoords.test(valorLimpio)) {
                     setErrors(prev => ({ ...prev, coordenadas: "Formato inválido. Use: 8.123, -70.123" }));
                     return;
-                } else {
-                    const partes = valorLimpio.split(",");
-                    const lat = parseFloat(partes[0].trim());
-                    const lng = parseFloat(partes[1].trim());
+                }
 
-                    if (!municipioSeleccionado) {
-                        setErrors(prev => ({ ...prev, coordenadas: "⚠️ Seleccione primero un Municipio para verificar los límites." }));
+                // 2. NUEVA VALIDACIÓN: Verificar si las coordenadas ya existen en otros predios
+                const coordYaRegistrada = listaPredios.some(p => {
+                    // Aseguramos comparar strings limpiando espacios
+                    return String(p.coordenadas || "").trim() === valorLimpio;
+                });
+
+                if (coordYaRegistrada) {
+                    setErrors(prev => ({ ...prev, coordenadas: "Estas coordenadas ya pertenecen a un predio registrado." }));
+                    return;
+                }
+
+                // 3. Validación geográfica (Existente)
+                const partes = valorLimpio.split(",");
+                const lat = parseFloat(partes[0].trim());
+                const lng = parseFloat(partes[1].trim());
+
+                if (!municipioSeleccionado) {
+                    setErrors(prev => ({ ...prev, coordenadas: "Seleccione primero un Municipio para verificar los límites." }));
+                    return;
+                }
+
+                const poligono = POLIGONOS_MUNICIPIOS[municipioSeleccionado];
+                if (poligono) {
+                    const estaAdentro = comprobarPuntoEnPoligono([lng, lat], poligono);
+
+                    if (!estaAdentro) {
+                        setErrors(prev => ({
+                            ...prev,
+                            municipio: name === "municipio" && value === "" ? "Este campo es obligatorio" : "",
+                            coordenadas: `Las coordenadas no corresponden geográficamente al Municipio ${municipioSeleccionado}.`
+                        }));
                         return;
                     } else {
-                        // Buscamos el polígono cartográfico del municipio seleccionado
-                        const poligono = POLIGONOS_MUNICIPIOS[municipioSeleccionado];
-
-                        if (poligono) {
-                            // Enviamos [Longitud, Latitud] al algoritmo geométrico estándar
-                            const estaAdentro = comprobarPuntoEnPoligono([lng, lat], poligono);
-
-                            if (!estaAdentro) {
-                                // Si no pasa la contención, mandamos el error directo a coordenadas
-                                setErrors(prev => ({
-                                    ...prev,
-                                    municipio: name === "municipio" && value === "" ? "Este campo es obligatorio" : "",
-                                    coordenadas: `Las coordenadas no corresponden geográficamente al Municipio ${municipioSeleccionado}.`
-                                }));
-                                return;
-                            } else {
-                                // Coordenada perfecta: Limpiamos alertas de error inmediatamente
-                                setErrors(prev => ({ ...prev, coordenadas: "" }));
-                            }
-                        }
+                        // Todo correcto: Limpiamos errores
+                        setErrors(prev => ({ ...prev, coordenadas: "", municipio: "" }));
                     }
                 }
             }
@@ -1275,7 +1365,7 @@ export default function Dashboard() {
         // 1. ANIMACIÓN DE CARGA INICIAL
         Swal.fire({
             title: 'Eliminando...',
-            text: 'Procesando la eliminación del predio, por favor espere.',
+            text: 'Procesando la eliminación del predio, por favor espere un momento.',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
@@ -1392,7 +1482,7 @@ export default function Dashboard() {
         // 1. ANIMACIÓN DE CARGA INICIAL
         Swal.fire({
             title: 'Procesando...',
-            text: 'Guardando datos en el servidor, por favor espere.',
+            text: 'Guardando datos en el servidor, por favor espere un momento.',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
@@ -2120,40 +2210,32 @@ export default function Dashboard() {
 
                             <FormSection title="I. Datos del Productor">
                                 <div style={grid3}>
+                                    {/* Nombre Completo */}
                                     <InputField
                                         label="Nombre Completo"
                                         name="productor_nombre"
                                         value={formData.productor_nombre}
                                         onChange={manejarCambio}
                                         error={errors.productor_nombre}
+                                        disabled={camposBloqueados}
                                     />
 
-                                    {/* Cédula con el estilo del select de antes que te gustó */}
+                                    {/* Cédula */}
                                     <InputField
                                         label="Cédula"
                                         name="productor_cedula"
                                         value={formData.productor_cedula}
                                         onChange={(e) => {
-                                            // Bloquea cualquier carácter que no sea número de inmediato
                                             e.target.value = e.target.value.replace(/\D/g, '');
                                             manejarCambio(e);
                                         }}
                                         error={errors.productor_cedula}
+                                        disabled={camposBloqueados}
                                         maxLength={8}
                                         prefix={
                                             <select
                                                 value={prefijoCedula}
-                                                onChange={(e) => {
-                                                    const nuevoPrefijo = e.target.value;
-                                                    setPrefijoCedula(nuevoPrefijo);
-
-                                                    manejarCambio({
-                                                        target: {
-                                                            name: "productor_cedula",
-                                                            value: formData.productor_cedula
-                                                        }
-                                                    });
-                                                }}
+                                                onChange={(e) => setPrefijoCedula(e.target.value)}
                                                 style={{
                                                     backgroundColor: "transparent",
                                                     border: "none",
@@ -2172,18 +2254,18 @@ export default function Dashboard() {
                                         }
                                     />
 
-                                    {/* 📞 TELÉFONO REUTILIZANDO TU INPUTFIELD CON PREFIJO FIJO */}
+                                    {/* Teléfono */}
                                     <InputField
                                         label="Teléfono"
                                         name="productor_telefono"
                                         value={formData.productor_telefono}
                                         onChange={(e) => {
-                                            // Filtramos aquí directo para que solo deje escribir números antes de ir al validador
                                             e.target.value = e.target.value.replace(/\D/g, '');
                                             manejarCambio(e);
                                         }}
                                         error={errors.productor_telefono}
-                                        maxLength={10} // Limita a los 10 dígitos (4141234567)
+                                        disabled={camposBloqueados}
+                                        maxLength={10}
                                         placeholder="4141234567"
                                         prefix={
                                             <div style={{
@@ -2203,13 +2285,54 @@ export default function Dashboard() {
                                         }
                                     />
 
+                                    {/* Correo (Columna 1) */}
                                     <InputField
                                         label="Correo (Opcional)"
                                         name="productor_correo"
                                         value={formData.productor_correo}
                                         onChange={manejarCambio}
                                         error={errors.productor_correo}
+                                        disabled={camposBloqueados}
                                     />
+
+                                    {/* Descripción y Lupa (Columnas 2 y 3 invertidas) */}
+                                    <div style={{
+                                        gridColumn: "span 2",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "flex-end", // Empuja todo hacia la derecha
+                                        gap: "12px",
+                                        marginTop: "24px"
+                                    }}>
+                                        <span style={{ fontSize: "12px", color: "#64748b", fontStyle: "italic" }}>
+                                            Si el productor ya se encuentra registrado, presionar la lupa para cargar sus datos.
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => verificarCedulaDuplicada(formData.productor_cedula)}
+                                            disabled={camposBloqueados}
+                                            title="Buscar productor"
+                                            style={{
+                                                padding: "8px",
+                                                backgroundColor: "transparent",
+                                                color: camposBloqueados ? "#cbd5e1" : "#16a34a",
+                                                border: "1px solid #16a34a",
+                                                borderRadius: "50%",
+                                                cursor: camposBloqueados ? "not-allowed" : "pointer",
+                                                height: "42px",
+                                                width: "42px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                transition: "transform 0.2s"
+                                            }}
+                                        >
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </FormSection>
 
