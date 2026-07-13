@@ -252,7 +252,7 @@ const exportarFichaConValidacion = async () => {
 
 // Función encargada estrictamente de la ejecución del PDF
 const generarFichaProductor = (predio) => {
-    console.log("DATOS REALES DEL PREDIO EN EL PDF:", predio);
+    console.log("FICHA TECNICA DEL PREDIO EN EL PDF:", predio);
 
     if (!predio || !predio.caracterizacion_completada) {
         alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
