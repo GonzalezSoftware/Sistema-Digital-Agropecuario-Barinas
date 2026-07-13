@@ -137,6 +137,7 @@ export default function Productores() {
         validarCampoProductor(valorNumerico);
     };
 
+
 const exportarFichaConValidacion = async () => {
     // 1. Extraemos el teléfono directamente del resultado que ya devolvió la búsqueda
     const telefonoProductor = resultado?.telefono;
@@ -247,11 +248,11 @@ const exportarFichaConValidacion = async () => {
     }
 
     // 6. ¡Éxito! Ejecutar la descarga de la ficha técnica
-    generarFichaProductor();
+    GenerarFichaProductor();
 };
 
 // Función encargada estrictamente de la ejecución del PDF
-const generarFichaProductor = (predio) => {
+const GenerarFichaProductor = (predio) => {
     console.log("FICHA TECNICA DEL PREDIO EN EL PDF:", predio);
 
     if (!predio || !predio.caracterizacion_completada) {
