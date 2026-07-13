@@ -841,11 +841,6 @@ export default function Dashboard() {
     //-----------------------------------------------------------------------------------------------
 
 
-
-
-
-
-
     //GRÁFICOS
     const datosGrafico = useMemo(() => {
         if (!listaPredios || listaPredios.length === 0) return [];
@@ -955,13 +950,20 @@ export default function Dashboard() {
 
         listaPredios.forEach(p => {
             const mun = p.municipio || "Otros";
-            // El tipo de explotación viene de p.produccion.tipo_explotacion
+            // Obtenemos el valor de la base de datos
             const tipo = p.produccion?.tipo_explotacion || "No Definido";
 
             if (!municipiosMap[mun]) {
-                municipiosMap[mun] = { municipio: mun, Intensivo: 0, "Semi-Intensivo": 0, Extensivo: 0 };
+                // Asegúrate de que las claves coincidan exactamente con el string de la DB
+                municipiosMap[mun] = {
+                    municipio: mun,
+                    "Intensivo": 0,
+                    "Semi Intensivo": 0, // Cambiado de "Semi-Intensivo" a "Semi Intensivo"
+                    "Extensivo": 0
+                };
             }
 
+            // Si la clave existe en el objeto, incrementamos
             if (municipiosMap[mun].hasOwnProperty(tipo)) {
                 municipiosMap[mun][tipo]++;
             }
@@ -1148,11 +1150,46 @@ export default function Dashboard() {
 
     // Handlers de Actualización Visual (Tiempo Real en el Modal)
     const actualizarProductor = (campo, valor) => {
-        setPredioSeleccionado(prev => ({ ...prev, productor: { ...prev.productor, [campo]: valor } }));
+        // 1. Actualizamos el estado de la interfaz
+        setPredioSeleccionado(prev => ({
+            ...prev,
+            productor: { ...prev.productor, [campo]: valor }
+        }));
+
+        // 2. Definimos el mapeo para que coincida con tus validaciones (productor_nombre, productor_cedula, etc.)
+        const mapaValidacion = {
+            nombre: "productor_nombre",
+            cedula_rif: "productor_cedula",
+            telefono: "productor_telefono",
+            correo: "productor_correo"
+        };
+
+        // 3. Ejecutamos la validación solo si el campo es uno de los que validamos
+        if (mapaValidacion[campo]) {
+            validarCampoProductor(mapaValidacion[campo], valor);
+        }
     };
 
     const actualizarPredio = (campo, valor) => {
-        setPredioSeleccionado(prev => ({ ...prev, [campo]: valor }));
+        // Definimos qué campos tienen prohibido cambiar
+        const camposInmutables = ['municipio', 'parroquia', 'comunidad', 'coordenadas', 'centro_poblado'];
+
+        // Si el campo que intentan editar está en la lista negra, simplemente retornamos (no hacemos nada)
+        if (camposInmutables.includes(campo)) {
+            console.warn(`Intento de edición bloqueado: ${campo} es inmutable.`);
+            return;
+        }
+
+        // Si es un campo permitido, actualizamos el estado normalmente
+        setPredioSeleccionado(prev => ({
+            ...prev,
+            [campo]: valor
+        }));
+
+        // Aquí mantienes tu lógica de validación para los otros campos que SÍ son editables
+        if (errors[campo]) {
+            validarCampoPredio(campo, valor);
+        }
     };
 
     const actualizarInfraestructura = (campo, valor) => {
@@ -1169,52 +1206,46 @@ export default function Dashboard() {
         setCargandoAccion(true);
 
         try {
-            const datosAEnviar = JSON.parse(JSON.stringify(predioSeleccionado));
+            // 1. Clonamos el objeto para no modificar el estado original
+            const data = JSON.parse(JSON.stringify(predioSeleccionado));
 
-            // Eliminamos la cédula para que el serializador de Django no intente validarla
-            if (datosAEnviar.productor) {
-                delete datosAEnviar.productor.cedula_rif;
-            }
+            // 2. Función para limpiar objetos anidados (quitar IDs y campos de solo lectura)
+            const limpiar = (obj) => {
+                if (!obj || typeof obj !== 'object') return obj;
+                delete obj.id; // Elimina el ID que Django a veces rechaza en PATCH anidados
+                delete obj.fecha_registro; // Elimina campos que suelen ser solo lectura
+                return obj;
+            };
+
+            // 3. Limpiamos cada sección
+            data.productor = limpiar(data.productor);
+            data.infraestructura = limpiar(data.infraestructura);
+            data.produccion = limpiar(data.produccion);
+            data.existencia_animal = limpiar(data.existencia_animal);
+            data.maquinaria = limpiar(data.maquinaria);
+
+            // 4. Limpiamos el objeto principal
+            delete data.id_predio;
+            delete data.fecha_registro;
+
+            console.log("Enviando a Django (formato diccionario):", data);
 
             const response = await fetch(`http://127.0.0.1:8000/api/predios/${predioSeleccionado.id_predio}/`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(datosAEnviar)
+                body: JSON.stringify(data)
             });
 
+            const resultado = await response.json();
+
             if (response.ok) {
-                // Alerta de Éxito - González Software
-                Swal.fire({
-                    title: '¡Actualización Exitosa!',
-                    text: 'El predio ha sido actualizado con éxito en el sistema.',
-                    icon: 'success',
-                    confirmButtonColor: '#10b981', // El verde esmeralda de tu UI
-                    confirmButtonText: 'Aceptar',
-                    didOpen: () => {
-                        const popup = Swal.getPopup();
-                        if (popup) {
-                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                        }
-                    }
-                });
+                Swal.fire('¡Actualización Exitosa!', 'El predio ha sido guardado.', 'success');
             } else {
-                // Alerta de Error - González Software
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Por favor, verifique los datos',
-                    icon: 'error',
-                    confirmButtonColor: '#d32f2f', // Rojo de alerta
-                    confirmButtonText: 'Entendido',
-                    didOpen: () => {
-                        const popup = Swal.getPopup();
-                        if (popup) {
-                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                        }
-                    }
-                });
+                console.error("Error detallado:", resultado);
+                Swal.fire('Error', JSON.stringify(resultado), 'error');
             }
         } catch (error) {
-            alert("Error crítico: El servidor de Barinas no responde o hay un error en el código Django.");
+            console.error("Error:", error);
         } finally {
             setCargandoAccion(false);
         }
@@ -1222,29 +1253,36 @@ export default function Dashboard() {
 
     // 2. ELIMINAR DEFINITIVO (DELETE)
     const eliminarDefinitivoReal = async () => {
-        // Alerta de confirmación previa con SweetAlert2
+        // Alerta de confirmación previa
         const resultado = await Swal.fire({
             title: '¿ESTÁS SEGURO?',
             text: `Esta acción eliminará permanentemente el predio "${predioSeleccionado.nombre_predio}" de la base de datos.`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ce3a3a', // Rojo destructivo
-            cancelButtonColor: '#cdced0', // Gris neutral
+            confirmButtonColor: '#ce3a3a',
+            cancelButtonColor: '#cdced0',
             confirmButtonText: 'Sí, eliminar permanentemente',
             cancelButtonText: 'Cancelar',
-            reverseButtons: true, // Ubica el botón de confirmar a la derecha
+            reverseButtons: true,
             didOpen: () => {
                 const popup = Swal.getPopup();
-                if (popup) {
-                    popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                }
+                if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
             }
         });
 
-        // Si el usuario cancela o cierra la alerta, se frena la ejecución
-        if (!resultado.isConfirmed) {
-            return;
-        }
+        if (!resultado.isConfirmed) return;
+
+        // 1. ANIMACIÓN DE CARGA INICIAL
+        Swal.fire({
+            title: 'Eliminando...',
+            text: 'Procesando la eliminación del predio, por favor espere.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+                const popup = Swal.getPopup();
+                if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+            }
+        });
 
         setCargandoAccion(true);
         try {
@@ -1253,57 +1291,52 @@ export default function Dashboard() {
             });
 
             if (response.ok) {
-                // Alerta de Éxito - González Software
+                // Alerta de Éxito con recarga
                 Swal.fire({
                     title: '¡Eliminación Exitosa!',
                     text: 'El predio ha sido eliminado con éxito en el sistema.',
                     icon: 'success',
-                    confirmButtonColor: '#10b981', // Verde esmeralda de la UI
+                    confirmButtonColor: '#10b981',
                     confirmButtonText: 'Aceptar',
                     didOpen: () => {
                         const popup = Swal.getPopup();
-                        if (popup) {
-                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                        }
+                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload(); // Recarga la página después de aceptar
                     }
                 });
             } else {
-                // Alerta de Error - González Software
                 Swal.fire({
                     title: 'Error',
-                    text: 'Por favor, verifique los datos o los permisos del sistema.',
+                    text: 'Por favor, verifique los permisos del sistema.',
                     icon: 'error',
-                    confirmButtonColor: '#ce3a3a', // Rojo de alerta
+                    confirmButtonColor: '#ce3a3a',
                     confirmButtonText: 'Entendido',
                     didOpen: () => {
                         const popup = Swal.getPopup();
-                        if (popup) {
-                            popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                        }
+                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
                     }
                 });
             }
         } catch (error) {
             console.error("Error Red:", error);
-            // También unificada la alerta del catch para evitar el uso del alert nativo del navegador
             Swal.fire({
                 title: 'Error de Red',
-                text: 'No se pudo establecer conexión con el servidor para procesar la eliminación.',
+                text: 'No se pudo conectar con el servidor para procesar la eliminación.',
                 icon: 'error',
                 confirmButtonColor: '#d32f2f',
                 confirmButtonText: 'Entendido',
                 didOpen: () => {
                     const popup = Swal.getPopup();
-                    if (popup) {
-                        popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-                    }
+                    if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
                 }
             });
         } finally {
             setCargandoAccion(false);
         }
     };
-
     // ── MANEJADORES DE EVENTOS (SIN RETRASOS NI ESTADOS PEGADOS) ──────────────────────────────
 
 
@@ -1878,8 +1911,6 @@ export default function Dashboard() {
                                                         tick={{ fill: '#666', fontSize: 11 }}
                                                         allowDecimals={false}
                                                         dx={-10}
-                                                        // Ajuste dinámico: si el máximo es 1, el tope es 1. 
-                                                        // Si es mayor, le suma un pequeño margen para que no choque con el borde.
                                                         domain={[0, dataMax => (dataMax <= 1 ? 1 : dataMax + 0.5)]}
                                                     />
                                                     <Tooltip
@@ -1898,24 +1929,24 @@ export default function Dashboard() {
                                                         wrapperStyle={{ fontSize: '11px', paddingBottom: '10px' }}
                                                     />
 
-                                                    {/* Barras Apiladas con los Verdes de Gonzalez Software */}
+                                                    {/* Al añadir stackId="a" a todas, Recharts las une en una sola barra por municipio */}
                                                     <Bar
                                                         dataKey="Intensivo"
-                                                        stackId="a"
                                                         fill="#136442"
                                                         barSize={35}
-                                                        radius={[6, 6, 0, 0]}
+                                                        radius={[6, 6, 6, 6]}
                                                     />
                                                     <Bar
-                                                        dataKey="Semi-Intensivo"
-                                                        stackId="a"
+                                                        dataKey="Semi Intensivo"
                                                         fill="#4CAF50"
+                                                        barSize={35}
+                                                        radius={[6, 6, 6, 6]}
                                                     />
                                                     <Bar
                                                         dataKey="Extensivo"
-                                                        stackId="a"
                                                         fill="#82ca9d"
-                                                        radius={[6, 6, 0, 0]} // Redondeado solo en la cima del grupo
+                                                        barSize={35}
+                                                        radius={[6, 6, 6, 6]}
                                                     />
                                                 </BarChart>
                                             </ResponsiveContainer>
@@ -2408,7 +2439,8 @@ export default function Dashboard() {
                                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                                     <thead>
                                         <tr style={{ borderBottom: "2px solid #136442", color: "#136442" }}>
-                                            <th style={{ fontSize: "14px", padding: "12px" }}>ID</th>
+                                            {/* Cambiado de ID a # */}
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>#</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Nombre del Predio</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Productor</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Municipio</th>
@@ -2423,11 +2455,11 @@ export default function Dashboard() {
                                                     key={p.id_predio}
                                                     style={{
                                                         borderBottom: "1px solid #f0f0f0",
-                                                        // Alterna el fondo: las filas pares van en blanco, las impares en gris claro
                                                         backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
                                                     }}
                                                 >
-                                                    <td style={{ fontSize: "13px", padding: "12px" }}>#{p.id_predio}</td>
+                                                    {/* Aquí usamos index + 1 para el contador */}
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>{index + 1}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
@@ -2499,20 +2531,22 @@ export default function Dashboard() {
                                                     )}
                                                 </div>
 
-                                                {/* CÉDULA / RIF */}
+                                                {/* CÉDULA / RIF - Deshabilitado para evitar cambios */}
                                                 <div>
                                                     {editando ? (
                                                         <InputField
                                                             label="Cédula / RIF"
-                                                            name="cedula_rif"
+                                                            name="productor_cedula"
                                                             value={predioSeleccionado.productor?.cedula_rif || ""}
                                                             onChange={(e) => actualizarProductor('cedula_rif', e.target.value)}
                                                             error={errors?.productor_cedula}
+                                                            disabled={true} // <--- Esto inhabilita el campo
+                                                            style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }} // Estilo opcional para indicar que no es editable
                                                         />
                                                     ) : (
                                                         <InputField
                                                             label="Cédula / RIF"
-                                                            name="cedula_rif"
+                                                            name="productor_cedula"
                                                             value={predioSeleccionado.productor?.cedula_rif || "N/A"}
                                                             disabled
                                                         />
@@ -2560,111 +2594,58 @@ export default function Dashboard() {
                                                 </div>
                                             </div>
 
-                                            {/* II. GEORREFERENCIACIÓN Y UBICACIÓN UNIFICADOS CON DISEÑO DE EDICIÓN */}
+                                            {/* II. GEORREFERENCIACIÓN Y UBICACIÓN - MODO BLOQUEADO */}
                                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "25px", marginBottom: "35px" }}>
                                                 <div style={{ gridColumn: "span 3", borderBottom: "2px solid #136442", paddingBottom: "5px" }}>
                                                     <strong style={{ color: "#136442", fontSize: "14px" }}>II. GEORREFERENCIACIÓN Y UBICACIÓN</strong>
                                                 </div>
 
-                                                {/* MUNICIPIO */}
+                                                {/* MUNICIPIO, PARROQUIA, COMUNIDAD, COORDENADAS, CENTRO POBLADO */}
+                                                {/* Todos estos campos se muestran igual tanto si es modo 'editando' o 'visualización' */}
+
                                                 <div>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Municipio"
-                                                            name="municipio"
-                                                            value={predioSeleccionado.municipio || ""}
-                                                            onChange={(e) => actualizarPredio('municipio', e.target.value)}
-                                                            error={errors?.municipio}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Municipio"
-                                                            name="municipio"
-                                                            value={predioSeleccionado.municipio || "N/A"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Municipio"
+                                                        name="municipio"
+                                                        value={predioSeleccionado.municipio || "N/A"}
+                                                        disabled={true} // Siempre deshabilitado
+                                                    />
                                                 </div>
 
-                                                {/* PARROQUIA */}
                                                 <div>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Parroquia"
-                                                            name="parroquia"
-                                                            value={predioSeleccionado.parroquia || ""}
-                                                            onChange={(e) => actualizarPredio('parroquia', e.target.value)}
-                                                            error={errors?.parroquia}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Parroquia"
-                                                            name="parroquia"
-                                                            value={predioSeleccionado.parroquia || "N/A"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Parroquia"
+                                                        name="parroquia"
+                                                        value={predioSeleccionado.parroquia || "N/A"}
+                                                        disabled={true}
+                                                    />
                                                 </div>
 
-                                                {/* COMUNIDAD / SECTOR */}
                                                 <div>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Comunidad / Sector"
-                                                            name="comunidad"
-                                                            value={predioSeleccionado.comunidad || ""}
-                                                            onChange={(e) => actualizarPredio('comunidad', e.target.value)}
-                                                            error={errors?.comunidad}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Comunidad / Sector"
-                                                            name="comunidad"
-                                                            value={predioSeleccionado.comunidad || "N/A"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Comunidad / Sector"
+                                                        name="comunidad"
+                                                        value={predioSeleccionado.comunidad || "N/A"}
+                                                        disabled={true}
+                                                    />
                                                 </div>
 
-                                                {/* COORDENADAS (LATITUD Y LONGITUD) */}
                                                 <div style={{ gridColumn: "span 2" }}>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Coordenadas (Latitud y Longitud)"
-                                                            name="coordenadas"
-                                                            placeholder="Ej: 8.097364, -69.312631"
-                                                            value={predioSeleccionado.coordenadas || ""}
-                                                            onChange={(e) => actualizarPredio('coordenadas', e.target.value)}
-                                                            error={errors?.coordenadas}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Coordenadas (Latitud y Longitud)"
-                                                            name="coordenadas"
-                                                            value={predioSeleccionado.coordenadas || "Sin coordenadas registradas"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Coordenadas (Latitud y Longitud)"
+                                                        name="coordenadas"
+                                                        value={predioSeleccionado.coordenadas || "Sin coordenadas registradas"}
+                                                        disabled={true}
+                                                    />
                                                 </div>
 
-                                                {/* CENTRO POBLADO */}
                                                 <div>
-                                                    {editando ? (
-                                                        <InputField
-                                                            label="Centro Poblado"
-                                                            name="centro_poblado"
-                                                            value={predioSeleccionado.centro_poblado || ""}
-                                                            onChange={(e) => actualizarPredio('centro_poblado', e.target.value)}
-                                                            error={errors?.centro_poblado}
-                                                        />
-                                                    ) : (
-                                                        <InputField
-                                                            label="Centro Poblado"
-                                                            name="centro_poblado"
-                                                            value={predioSeleccionado.centro_poblado || "N/A"}
-                                                            disabled
-                                                        />
-                                                    )}
+                                                    <InputField
+                                                        label="Centro Poblado"
+                                                        name="centro_poblado"
+                                                        value={predioSeleccionado.centro_poblado || "N/A"}
+                                                        disabled={true}
+                                                    />
                                                 </div>
                                             </div>
 
@@ -2987,8 +2968,14 @@ export default function Dashboard() {
 
                                             <button
                                                 onClick={() => editando ? guardarCambiosReal() : setEditando(true)}
-                                                disabled={cargandoAccion}
-                                                style={{ ...estiloBoton, backgroundColor: editando ? "#136442" : "#136442", opacity: cargandoAccion ? 0.5 : 1 }}
+                                                // Se añade 'true' para deshabilitar el botón, manteniendo el estado de carga
+                                                disabled={true}
+                                                style={{
+                                                    ...estiloBoton,
+                                                    backgroundColor: "#808080", // Opcional: un color gris para indicar que está inactivo
+                                                    opacity: 0.6,
+                                                    cursor: "not-allowed"
+                                                }}
                                             >
                                                 {cargandoAccion ? "PROCESANDO..." : editando ? "CONFIRMAR CAMBIOS" : "EDITAR FICHA"}
                                             </button>
@@ -3140,7 +3127,7 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* ── TABLA DE REGISTROS (Exactamente igual al historial) ── */}
+                            {/* ── TABLA DE REGISTROS (Reportes con numeración dinámica) ── */}
                             <div style={{
                                 backgroundColor: "#fff", padding: "20px", borderRadius: "12px",
                                 boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
@@ -3148,7 +3135,8 @@ export default function Dashboard() {
                                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
                                     <thead>
                                         <tr style={{ borderBottom: "2px solid #136442", color: "#136442" }}>
-                                            <th style={{ fontSize: "14px", padding: "12px" }}>ID</th>
+                                            {/* Cambiado de ID a # para indicar numeración */}
+                                            <th style={{ fontSize: "14px", padding: "12px" }}>#</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Nombre del Predio</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Productor</th>
                                             <th style={{ fontSize: "14px", padding: "12px" }}>Municipio</th>
@@ -3157,7 +3145,6 @@ export default function Dashboard() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/* Nota: Si usas 'prediosFiltrados' para las búsquedas de este módulo, se mantendrá sincronizado perfectamente */}
                                         {prediosFiltrados.length > 0 ? (
                                             prediosFiltrados.map((p, index) => (
                                                 <tr
@@ -3167,25 +3154,20 @@ export default function Dashboard() {
                                                         backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
                                                     }}
                                                 >
-                                                    <td style={{ fontSize: "13px", padding: "12px" }}>#{p.id_predio}</td>
+                                                    {/* Se usa index + 1 para enumerar desde 1 */}
+                                                    <td style={{ fontSize: "13px", padding: "12px" }}>{index + 1}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
                                                     <td style={{ fontSize: "13px", padding: "12px" }}>
-                                                        {/* Única diferencia: El botón ejecuta la función del PDF usando los mismos estilos del botón de detalles */}
                                                         <button
                                                             onClick={() => {
-                                                                // Buscamos si existe la propiedad, si no, devolvemos un array vacío por defecto
                                                                 const servicios = p.servicios_lectura || [];
-
-                                                                // Creamos un objeto "seguro" que el PDF entenderá
                                                                 const predioParaPDF = {
                                                                     ...p,
-                                                                    servicios_lectura: servicios // Forzamos que siempre exista
+                                                                    servicios_lectura: servicios
                                                                 };
-
-                                                                // Esto asegura que el PDF reciba un array, incluso si está vacío, evitando errores
                                                                 generarPDFPredio(predioParaPDF);
                                                             }}
                                                             style={{ backgroundColor: "#f0fdf4", color: "#136442", border: "1px solid #136442", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}
