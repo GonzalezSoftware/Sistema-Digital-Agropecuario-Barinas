@@ -8,7 +8,7 @@ import EstadisticaPage from "./pages/Estadistica/EstadisticaPage"
 import LoginPrediosPage from "./pages/Predios/LoginPrediosPage";
 import Dashboard from "./pages/Predios/Dashboard";
 import LoginProduccionPage from "./pages/Produccion/LoginProduccionPage"
-import DashboardProduccion from "./pages/Produccion/DashboardProduccion"
+import DashboardProduccion2 from "./pages/Produccion/DashboardProduccion"
 
 function App() {
   return (

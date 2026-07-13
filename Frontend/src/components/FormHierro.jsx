@@ -1,4 +1,41 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { btnPrincipal, grid3, labelStyle, inputStyle } from "../pages/Produccion/DashboardProduccion";
+
+// Componente ModernSelectField estilizado
+const ModernSelectField = ({ label, value, onChange, error, children }) => {
+    return (
+        <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            <label style={labelStyle}>{label}</label>
+            <select
+                value={value}
+                onChange={onChange}
+                style={{
+                    ...inputStyle,
+                    border: error ? "1px solid #ef4444" : "1px solid #cbd5e1",
+                    appearance: "none",
+                    WebkitAppearance: "none",
+                    MozAppearance: "none",
+                    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 12px center",
+                    backgroundSize: "16px",
+                    paddingRight: "40px",
+                    cursor: "pointer",
+                    backgroundColor: "#fff",
+                    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+                }}
+                onFocus={(e) => {
+                    if (!error) e.target.style.borderColor = "#136442";
+                }}
+                onBlur={(e) => {
+                    if (!error) e.target.style.borderColor = "#cbd5e1";
+                }}
+            >
+                {children}
+            </select>
+        </div>
+    );
+};
 
 export default function FormHierro({
     predioActivo,
@@ -7,31 +44,133 @@ export default function FormHierro({
     guardarLicencia,
     FormSection,
     InputField,
-    styles: { labelStyle, inputStyle, grid3, btnPrincipal }
 }) {
-    // Obtener la fecha actual en formato YYYY-MM-DD para las validaciones
+    // Estado local para capturar los errores en tiempo real
+    const [errores, setErrores] = useState({});
+
+    // Obtener la fecha actual en formato YYYY-MM-DD
     const hoy = new Date().toISOString().split("T")[0];
 
-    // Validación de estado de vencimiento
+    // Validación de estado de vencimiento reactiva
     const estaVencida = licenciaHierro.fechaVencimiento && licenciaHierro.fechaVencimiento < hoy;
 
-    // Manejador del cambio en Número de Licencia (Solo números y máximo 15 dígitos)
+    // Efecto para limpiar o re-evaluar errores generales si cambia la condicional principal
+    useEffect(() => {
+        if (!licenciaHierro.poseeLicencia) {
+            setErrores({}); // Limpia errores si selecciona "No" posee licencia
+        }
+    }, [licenciaHierro.poseeLicencia]);
+
+    // Función validadora en tiempo real por campo
+    const validarCampo = (campo, valor) => {
+        let mensajeError = "";
+
+        if (licenciaHierro.poseeLicencia) {
+
+            if (campo === "fechaEmision") {
+                if (!valor) {
+                    mensajeError = "La fecha de emisión es obligatoria.";
+                } else if (valor > hoy) {
+                    mensajeError = "La fecha de emisión no puede ser futura.";
+                }
+            }
+
+            if (campo === "fechaVencimiento") {
+                if (!valor) {
+                    mensajeError = "La fecha de vencimiento es obligatoria.";
+                } else if (licenciaHierro.fechaEmision && valor < licenciaHierro.fechaEmision) {
+                    mensajeError = "No puede ser menor que la fecha de emisión.";
+                }
+            }
+        }
+
+        setErrores((prev) => ({
+            ...prev,
+            [campo]: mensajeError,
+        }));
+    };
+
+    // Manejador genérico para actualizar valores y validar al mismo tiempo
+    const handleInputChange = (campo, valor) => {
+        setLicenciaHierro({
+            ...licenciaHierro,
+            [campo]: valor
+        });
+        validarCampo(campo, valor);
+    };
+
+    // Manejador del cambio en Número de Licencia (Solo números)
     const handleNumeroLicenciaChange = (e) => {
         const valor = e.target.value;
-        // Expresión regular para permitir únicamente dígitos numéricos
         if (valor === "" || /^\d+$/.test(valor)) {
             if (valor.length <= 15) {
-                setLicenciaHierro({
-                    ...licenciaHierro,
-                    numeroLicencia: valor
-                });
+                handleInputChange("numeroLicencia", valor);
             }
         }
     };
 
+// Interceptor del botón guardar para comprobar validez completa antes de enviar
+const handleGuardarClick = (e) => {
+    let estadoActiva = false; // Por defecto es false (si no posee licencia o está vencida)
+
+    if (licenciaHierro.poseeLicencia) {
+        const camposAValidar = ["fechaEmision", "fechaVencimiento"];
+        let tieneErrores = false;
+        let nuevosErrores = {};
+
+        camposAValidar.forEach((campo) => {
+            const valor = licenciaHierro[campo] || "";
+            let mensajeError = "";
+
+            if (campo === "fechaEmision" && !valor) mensajeError = "La fecha de emisión es obligatoria.";
+            if (campo === "fechaVencimiento" && !valor) mensajeError = "La fecha de vencimiento es obligatoria.";
+            if (campo === "fechaVencimiento" && licenciaHierro.fechaEmision && valor < licenciaHierro.fechaEmision) {
+                mensajeError = "No puede ser menor que la fecha de emisión.";
+            }
+
+            if (mensajeError) {
+                nuevosErrores[campo] = mensajeError;
+                tieneErrores = true;
+            }
+        });
+
+        if (tieneErrores || estaVencida) {
+            setErrores(nuevosErrores);
+            return;
+        }
+
+        // Si posee licencia y pasó las validaciones (no está vencida), entonces está activa
+        estadoActiva = true;
+    }
+
+    // Actualizamos el estado global/padre agregando el campo 'activa' para el backend
+    setLicenciaHierro((prev) => {
+        const licenciaActualizada = {
+            ...prev,
+            activa: estadoActiva
+        };
+        
+        // Ejecutamos el guardado usando un setTimeout para asegurar que 
+        // el estado de React se haya procesado correctamente
+        setTimeout(() => {
+            guardarLicencia(licenciaActualizada); 
+        }, 0);
+
+        return licenciaActualizada;
+    });
+};
+
+    const estiloError = {
+        color: "#ef4444",
+        display: "block",
+        marginTop: "-8px",
+        marginBottom: "10px",
+        fontSize: "12px",
+        fontWeight: "500"
+    };
+
     return (
         <div style={{ maxWidth: "950px", margin: "0 auto" }}>
-            {/* 🔴 BLOQUE DE VALIDACIÓN DE PREDIO */}
             {!predioActivo ? (
                 <FormSection title="⚠️ Selección requerida">
                     <p style={{ color: "#64748b", margin: 0, fontSize: "14px" }}>
@@ -40,163 +179,198 @@ export default function FormHierro({
                 </FormSection>
             ) : (
                 <>
-                    {/* 📜 SECCIÓN PRINCIPAL: DATOS DE LA LICENCIA */}
                     <FormSection title="📜 Licencia o Certificado de Hierro Ganadero">
+                        <div style={{ marginBottom: "20px" }}>
+                            <label style={{ ...labelStyle, display: "block", marginBottom: "10px" }}>
+                                ¿Posee licencia de hierro ganadero?
+                            </label>
 
-                        {/* Selector de condicional: Posee licencia */}
-                        <div style={{ maxWidth: "300px", marginBottom: "20px" }}>
-                            <label style={labelStyle}>¿Posee licencia de hierro ganadero?</label>
-                            <select
-                                value={licenciaHierro.poseeLicencia}
-                                onChange={(e) =>
-                                    setLicenciaHierro({
-                                        ...licenciaHierro,
-                                        poseeLicencia: e.target.value === "true"
-                                    })
-                                }
-                                style={inputStyle}
-                            >
-                                <option value="false">No</option>
-                                <option value="true">Sí</option>
-                            </select>
-                        </div>
-
-                        {/* 🔥 Campos condicionales si el productor posee licencia */}
-                        {licenciaHierro.poseeLicencia && (
-                            <>
-                                {/* Primera Fila de Campos: Código y Número */}
-                                <div style={grid3}>
-                                    <div>
-                                        <InputField
-                                            label="Código del Hierro"
-                                            type="text"
-                                            placeholder="Ej: ABC-123"
-                                            value={licenciaHierro.codigoHierro || ""}
-                                            onChange={(e) => {
-                                                // Límite de 12 caracteres para el código
-                                                if (e.target.value.length <= 12) {
-                                                    setLicenciaHierro({
-                                                        ...licenciaHierro,
-                                                        codigoHierro: e.target.value
-                                                    });
-                                                }
-                                            }}
-                                        />
-                                        <small style={{ color: "#64748b", display: "block", marginTop: "-10px", marginBottom: "10px", fontSize: "11px" }}>
-                                            Máx. 12 caracteres ({licenciaHierro.codigoHierro?.length || 0}/12)
-                                        </small>
-                                    </div>
-
-                                    <div>
-                                        <InputField
-                                            label="Número de Licencia"
-                                            type="text"
-                                            placeholder="Ej: 00456"
-                                            value={licenciaHierro.numeroLicencia || ""}
-                                            onChange={handleNumeroLicenciaChange}
-                                        />
-                                        <small style={{ color: "#64748b", display: "block", marginTop: "-10px", marginBottom: "10px", fontSize: "11px" }}>
-                                            Solo números. Máx. 15 dígitos
-                                        </small>
-                                    </div>
-
-                                    <div>
-                                        <label style={labelStyle}>Organismo Emisor</label>
-                                        <select
-                                            value={licenciaHierro.organismoEmisor || ""}
-                                            onChange={(e) =>
-                                                setLicenciaHierro({
-                                                    ...licenciaHierro,
-                                                    organismoEmisor: e.target.value
-                                                })
-                                            }
-                                            style={inputStyle}
-                                        >
-                                            <option value="">Seleccione un organismo</option>
-                                            <option value="INSAI">INSAI</option>
-                                            <option value="MPPAT">MPPAT</option>
-                                            <option value="Gobernación del Estado Barinas">Gobernación del Estado Barinas</option>
-                                            <option value="Instituto Nacional de Salud Agrícola Integral">Instituto Nacional de Salud Agrícola Integral</option>
-                                            <option value="Otro">Otro</option>
-                                        </select>
-                                    </div>
+                            <div style={{ display: "flex", gap: "15px", maxWidth: "400px" }}>
+                                <div
+                                    onClick={() => setLicenciaHierro({ ...licenciaHierro, poseeLicencia: true })}
+                                    style={{
+                                        flex: 1,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                        padding: "12px 16px",
+                                        border: licenciaHierro.poseeLicencia === true ? "2px solid #136442" : "1px solid #cbd5e1",
+                                        backgroundColor: licenciaHierro.poseeLicencia === true ? "#f0fdf4" : "#fff",
+                                        borderRadius: "10px",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s ease"
+                                    }}
+                                >
+                                    <div style={{
+                                        width: "18px",
+                                        height: "18px",
+                                        borderRadius: "50%",
+                                        border: licenciaHierro.poseeLicencia === true ? "5px solid #136442" : "2px solid #cbd5e1",
+                                        backgroundColor: "#fff",
+                                        boxSizing: "border-box"
+                                    }} />
+                                    <span style={{ fontSize: "14px", fontWeight: "500", color: "#334155" }}>Sí</span>
                                 </div>
 
-                                {/* Segunda Fila de Campos: Fechas y Archivo */}
+                                <div
+                                    onClick={() => setLicenciaHierro({ ...licenciaHierro, poseeLicencia: false })}
+                                    style={{
+                                        flex: 1,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                        padding: "12px 16px",
+                                        border: licenciaHierro.poseeLicencia === false ? "2px solid #136442" : "1px solid #cbd5e1",
+                                        backgroundColor: licenciaHierro.poseeLicencia === false ? "#f0fdf4" : "#fff",
+                                        borderRadius: "10px",
+                                        cursor: "pointer",
+                                        transition: "all 0.2s ease"
+                                    }}
+                                >
+                                    <div style={{
+                                        width: "18px",
+                                        height: "18px",
+                                        borderRadius: "50%",
+                                        border: licenciaHierro.poseeLicencia === false ? "5px solid #136442" : "2px solid #cbd5e1",
+                                        backgroundColor: "#fff",
+                                        boxSizing: "border-box"
+                                    }} />
+                                    <span style={{ fontSize: "14px", fontWeight: "500", color: "#334155" }}>No</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {licenciaHierro.poseeLicencia && (
+                            <>
+
                                 <div style={grid3}>
                                     <div>
                                         <InputField
                                             label="Fecha de Emisión"
                                             type="date"
-                                            max={hoy} // Impide mediante el calendario nativo seleccionar fechas futuras
+                                            max={hoy}
                                             value={licenciaHierro.fechaEmision || ""}
                                             onChange={(e) => {
                                                 const nuevaEmision = e.target.value;
-                                                // Validación: No permitir fechas futuras
                                                 if (nuevaEmision <= hoy) {
                                                     setLicenciaHierro({
                                                         ...licenciaHierro,
                                                         fechaEmision: nuevaEmision,
-                                                        // Si la nueva fecha de emisión supera a la de vencimiento actual, la limpiamos
                                                         fechaVencimiento: licenciaHierro.fechaVencimiento && licenciaHierro.fechaVencimiento < nuevaEmision ? "" : licenciaHierro.fechaVencimiento
                                                     });
+                                                    validarCampo("fechaEmision", nuevaEmision);
                                                 }
                                             }}
                                         />
+                                        {errores.fechaEmision && <span style={estiloError}> {errores.fechaEmision}</span>}
                                     </div>
 
                                     <div>
                                         <InputField
                                             label="Fecha de Vencimiento"
                                             type="date"
-                                            // El mínimo permitido será el día de hoy o la fecha de emisión (la que sea más avanzada)
                                             min={licenciaHierro.fechaEmision && licenciaHierro.fechaEmision > hoy ? licenciaHierro.fechaEmision : hoy}
                                             value={licenciaHierro.fechaVencimiento || ""}
                                             onChange={(e) => {
                                                 const nuevaVencimiento = e.target.value;
-                                                const emision = licenciaHierro.fechaEmision || "";
-                                                
-                                                // Validaciones: No menor que emisión, ni menor que el día de hoy
-                                                if (nuevaVencimiento >= emision) {
-                                                    setLicenciaHierro({
-                                                        ...licenciaHierro,
-                                                        fechaVencimiento: nuevaVencimiento
-                                                    });
-                                                }
+                                                setLicenciaHierro({
+                                                    ...licenciaHierro,
+                                                    fechaVencimiento: nuevaVencimiento
+                                                });
+                                                validarCampo("fechaVencimiento", nuevaVencimiento);
                                             }}
                                         />
-                                        {/* Mensaje de alerta reactivo si la licencia seleccionada está vencida */}
                                         {estaVencida && (
-                                            <small style={{ color: "#ef4444", display: "block", marginTop: "-10px", marginBottom: "10px", fontSize: "12px", fontWeight: "bold" }}>
-                                                ⚠️ La licencia está vencida
-                                            </small>
+                                            <span style={estiloError}> La licencia está vencida</span>
+                                        )}
+                                        {errores.fechaVencimiento && !estaVencida && (
+                                            <span style={estiloError}> {errores.fechaVencimiento}</span>
                                         )}
                                     </div>
 
-                                    <InputField
-                                        label="Certificado Digital (PDF/Imagen)"
-                                        type="file"
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        onChange={(e) =>
-                                            setLicenciaHierro({
-                                                ...licenciaHierro,
-                                                certificado: e.target.files[0]
-                                            })
-                                        }
-                                    />
+                                    <div>
+                                        <label style={{ ...labelStyle, display: "block", marginBottom: "8px" }}>
+                                            Certificado Digital (PDF/Imagen)
+                                        </label>
+
+                                        <label
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: "10px",
+                                                backgroundColor: "#f8fafc",
+                                                border: "2px dashed #cbd5e1",
+                                                borderRadius: "10px",
+                                                padding: "10px 16px",
+                                                cursor: "pointer",
+                                                transition: "all 0.2s ease",
+                                                height: "42px",
+                                                boxSizing: "border-box",
+                                                width: "100%"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = "#f1f5f9";
+                                                e.currentTarget.style.borderColor = "#136442";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = "#f8fafc";
+                                                e.currentTarget.style.borderColor = "#cbd5e1";
+                                            }}
+                                        >
+                                            <svg
+                                                width="18"
+                                                height="18"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke={licenciaHierro.certificado ? "#136442" : "#64748b"}
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
+                                                <polyline points="17 8 12 3 7 8" />
+                                                <line x1="12" y1="3" x2="12" y2="15" />
+                                            </svg>
+
+                                            <span style={{
+                                                fontSize: "14px",
+                                                fontWeight: "500",
+                                                color: licenciaHierro.certificado ? "#136442" : "#64748b",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                whiteSpace: "nowrap",
+                                                maxWidth: "200px"
+                                            }}>
+                                                {licenciaHierro.certificado
+                                                    ? licenciaHierro.certificado.name
+                                                    : "Seleccionar archivo..."}
+                                            </span>
+
+                                            <input
+                                                type="file"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                style={{ display: "none" }}
+                                                onChange={(e) => {
+                                                    if (e.target.files && e.target.files[0]) {
+                                                        setLicenciaHierro({
+                                                            ...licenciaHierro,
+                                                            certificado: e.target.files[0]
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                    </div>
                                 </div>
 
-                                {/* Área de Observaciones */}
                                 <div style={{ marginBottom: "15px" }}>
-                                    <div style={{ display: "flex", justifyContent: "between", alignItems: "center" }}>
-                                        <label style={labelStyle}>Observaciones</label>
-                                    </div>
+                                    <label style={labelStyle}>Observaciones</label>
                                     <textarea
                                         rows="4"
                                         placeholder="Añada detalles adicionales sobre la vigencia o estado del herraje..."
                                         value={licenciaHierro.observaciones || ""}
                                         onChange={(e) => {
-                                            // Límite de 250 caracteres para las observaciones
                                             if (e.target.value.length <= 250) {
                                                 setLicenciaHierro({
                                                     ...licenciaHierro,
@@ -217,12 +391,14 @@ export default function FormHierro({
                         )}
                     </FormSection>
 
-                    {/* 💾 BOTÓN GUARDAR */}
                     <div style={{ textAlign: "right", paddingBottom: "40px" }}>
-                        <button 
-                            onClick={guardarLicencia} 
-                            style={btnPrincipal}
-                            // Opcional: Deshabilita el botón si la licencia cargada está vencida
+                        <button
+                            onClick={handleGuardarClick}
+                            style={{
+                                ...btnPrincipal,
+                                opacity: (estaVencida || Object.values(errores).some(e => e)) ? 0.6 : 1,
+                                cursor: (estaVencida || Object.values(errores).some(e => e)) ? "not-allowed" : "pointer"
+                            }}
                             disabled={estaVencida}
                         >
                             Guardar Licencia

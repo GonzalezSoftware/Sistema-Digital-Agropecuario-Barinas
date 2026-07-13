@@ -99,13 +99,11 @@ class PredioServicio(models.Model):
 class LicenciaHierro(models.Model):
 
     predio = models.ForeignKey('Predio', on_delete=models.CASCADE) # o como se llame tu modelo Predio
-    codigo_hierro = models.CharField(max_length=100)
-    numero_licencia = models.CharField(max_length=100)
-    organismo_emisor = models.CharField(max_length=100)
     fecha_emision = models.DateField()
     fecha_vencimiento = models.DateField()
     observaciones = models.TextField(blank=True, null=True)
     certificado_pdf = models.FileField(upload_to='certificados/', blank=True, null=True)
+    activa = models.BooleanField(default=True, help_text="Indica si la licencia está vigente y aprobada")
     
     class Meta:
         db_table = "licencias_hierro"
