@@ -4,6 +4,8 @@ import logo from "../../assets/gobierno.jpg";
 import escudo from "../../assets/logo2.jpg";
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // 1. AÑADIMOS EL COMPONENTE SPINNER
 const Spinner = ({ color = "#136442" }) => {
@@ -138,388 +140,534 @@ export default function Productores() {
     };
 
 
-const exportarFichaConValidacion = async () => {
-    // 1. Extraemos el teléfono directamente del resultado que ya devolvió la búsqueda
-    const telefonoProductor = resultado?.telefono;
+    const exportarFichaConValidacion = async () => {
+        // 1. Extraemos el teléfono directamente del resultado que ya devolvió la búsqueda
+        const telefonoProductor = resultado?.productor?.telefono || resultado?.telefono;
 
-    if (!resultado || !telefonoProductor) {
-        Swal.fire({
-            icon: "warning",
-            title: "Datos incompletos",
-            text: "El productor no posee un número de teléfono registrado en el sistema para realizar la validación.",
-            confirmButtonColor: '#136442',
-            didOpen: () => {
-                const popup = Swal.getPopup();
-                if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-            },
-        });
-        return;
-    }
+        if (!resultado || !telefonoProductor) {
+            Swal.fire({
+                icon: "warning",
+                title: "Datos incompletos",
+                text: "El productor no posee un número de teléfono registrado en el sistema para realizar la validación.",
+                confirmButtonColor: '#136442',
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
+                },
+            });
+            return;
+        }
 
-    // 2. Confirmación inicial de la exportación
-    const confirmacion = await Swal.fire({
-        title: "¿Exportar ficha técnica?",
-        text: `Se enviará un código de validación al WhatsApp registrado del productor (${telefonoProductor}).`,
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Sí, enviar código",
-        cancelButtonText: "Cancelar",
-        confirmButtonColor: "#136442",
-        didOpen: () => {
-            const popup = Swal.getPopup();
-            if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-        },
-    });
-
-    if (!confirmacion.isConfirmed) return;
-
-    // 3. Enviar código a Django vía WhatsApp
-    let codigoServidor = "";
-    try {
-        const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo/", { telefono: telefonoProductor });
-        codigoServidor = envio.data.codigo.toString();
-
-        await Swal.fire({
-            icon: "success",
-            title: "Código enviado",
-            text: "El código de seguridad fue enviado al WhatsApp del productor",
+        // 2. Confirmación inicial de la exportación
+        const confirmacion = await Swal.fire({
+            title: "¿Exportar ficha técnica?",
+            text: `Se enviará un código de validación al WhatsApp registrado del productor`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí, enviar código",
+            cancelButtonText: "Cancelar",
             confirmButtonColor: "#136442",
             didOpen: () => {
                 const popup = Swal.getPopup();
                 if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
             },
         });
-    } catch (error) {
-        console.error("Error enviando WhatsApp:", error);
-        Swal.fire({
-            icon: "error",
-            title: "Error de comunicación",
-            text: "No se pudo despachar el código de validación.",
-            confirmButtonColor: "#d32f2f",
-            didOpen: () => {
-                const popup = Swal.getPopup();
-                if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-            },
-        });
-        return;
-    }
 
-    // 4. Solicitar el código introducido por el usuario
-    const { value: codigoUsuario } = await Swal.fire({
-        title: "Validación de Seguridad",
-        input: "text",
-        inputLabel: "Ingrese el código recibido por el productor",
-        inputPlaceholder: "Código de verificación",
-        confirmButtonText: "Verificar y Descargar",
-        confirmButtonColor: "#136442",
-        showCancelButton: true,
-        didOpen: () => {
-            const popup = Swal.getPopup();
-            if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-        },
-    });
+        if (!confirmacion.isConfirmed) return;
 
-    if (!codigoUsuario) {
-        Swal.fire({
-            icon: "warning",
-            title: "Validación cancelada",
+        // 3. Enviar código a Django vía WhatsApp
+        let codigoServidor = "";
+        try {
+            const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo/", { telefono: telefonoProductor });
+            codigoServidor = envio.data.codigo.toString();
+
+            await Swal.fire({
+                icon: "success",
+                title: "Código enviado",
+                text: "El código de seguridad fue enviado al WhatsApp del productor",
+                confirmButtonColor: "#136442",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
+                },
+            });
+        } catch (error) {
+            console.error("Error enviando WhatsApp:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error de comunicación",
+                text: "No se pudo despachar el código de validación.",
+                confirmButtonColor: "#d32f2f",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
+                },
+            });
+            return;
+        }
+
+        // 4. Solicitar el código introducido por el usuario
+        const { value: codigoUsuario } = await Swal.fire({
+            title: "Validación de Seguridad",
+            input: "text",
+            inputLabel: "Ingrese el código recibido por el productor",
+            inputPlaceholder: "Código de verificación",
+            confirmButtonText: "Verificar y Descargar",
             confirmButtonColor: "#136442",
+            showCancelButton: true,
             didOpen: () => {
                 const popup = Swal.getPopup();
                 if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
             },
         });
-        return;
-    }
 
-    // 5. Comparar códigos
-    if (codigoUsuario !== codigoServidor) {
-        Swal.fire({
-            icon: "error",
-            title: "Código inválido",
-            text: "El código ingresado no coincide con el enviado.",
-            confirmButtonColor: "#d32f2f",
-            didOpen: () => {
-                const popup = Swal.getPopup();
-                if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-            },
-        });
-        return;
-    }
+        if (!codigoUsuario) {
+            Swal.fire({
+                icon: "warning",
+                title: "Validación cancelada",
+                confirmButtonColor: "#136442",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
+                },
+            });
+            return;
+        }
 
-    // 6. ¡Éxito! Ejecutar la descarga de la ficha técnica
-    GenerarFichaProductor();
-};
+        // 5. Comparar códigos
+        if (codigoUsuario !== codigoServidor) {
+            Swal.fire({
+                icon: "error",
+                title: "Código inválido",
+                text: "El código ingresado no coincide con el enviado.",
+                confirmButtonColor: "#d32f2f",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
+                },
+            });
+            return;
+        }
 
-// Función encargada estrictamente de la ejecución del PDF
-const GenerarFichaProductor = (predio) => {
-    console.log("FICHA TECNICA DEL PREDIO EN EL PDF:", predio);
+        // 6. ¡Éxito! Buscar el predio completo y ejecutar la descarga
+        try {
+            const cedula = resultado?.cedula_rif;
 
-    if (!predio || !predio.caracterizacion_completada) {
-        alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
-        return;
-    }
+            // Animación de carga con tu diseño específico
+            Swal.fire({
+                title: 'Buscando...',
+                text: 'Consultando registros del productor, por favor espere.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                }
+            });
 
-    const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "letter"
-    });
+            const { data } = await axios.get(`http://127.0.0.1:8000/api/predios/`, {
+                params: { cedula }
+            });
 
-    const verdeBarinas = [19, 100, 66];
-    const grisOscuro = [40, 40, 40];
+            const listaPredios = Array.isArray(data) ? data : data.results;
 
-    // ────────────────────────────────────────────────────────
-    // CINTILLO INSTITUCIONAL
-    // ────────────────────────────────────────────────────────
-    try {
-        doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
-    } catch (error) {
-        console.warn("Logos institucionales omitidos.");
-    }
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.setTextColor(...verdeBarinas);
-    doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
-
-    const fechaEmision = predio.fecha_registro
-        ? new Date(predio.fecha_registro).toLocaleDateString()
-        : new Date().toLocaleDateString();
-    doc.text(`Fecha de Registro: ${fechaEmision}`, 204, 18, { align: "right" });
-
-    doc.setDrawColor(...verdeBarinas);
-    doc.setLineWidth(0.6);
-    doc.line(12, 25, 204, 25);
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(...verdeBarinas);
-    doc.text(`FICHA TÉCNICA DE CARACTERIZACIÓN AGROPECUARIA: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`, 12, 33);
-
-    // ────────────────────────────────────────────────────────
-    // SECCIÓN I: IDENTIFICACIÓN GENERAL
-    // ────────────────────────────────────────────────────────
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("I. IDENTIFICACIÓN GENERAL", 12, 42);
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.3);
-    doc.line(12, 44, 204, 44);
-
-    const infoGeneral = [
-        ["Productor:", predio.productor?.nombre || "N/A", "Cédula / RIF:", predio.productor?.cedula_rif || "N/A"],
-        ["Municipio:", predio.municipio || "N/A", "Parroquia:", predio.parroquia || "N/A"],
-        ["Superficie Total:", predio.superficie ? `${predio.superficie} Ha` : "0.00 Ha", "Coordenadas UTM:", predio.coordenadas || "N/A"]
-    ];
-
-    autoTable(doc, {
-        startY: 46,
-        body: infoGeneral,
-        theme: "plain",
-        styles: { fontSize: 8.5, cellPadding: 1.8, font: "helvetica" },
-        columnStyles: {
-            0: { fontStyle: "bold", width: 28, textColor: grisOscuro },
-            1: { width: 72 },
-            2: { fontStyle: "bold", width: 28, textColor: grisOscuro },
-            3: { width: 64 }
-        },
-        margin: { left: 12, right: 12 }
-    });
-
-    // ────────────────────────────────────────────────────────
-    // SECCIÓN II: EXISTENCIA ANIMAL
-    // ────────────────────────────────────────────────────────
-    let currentY = doc.lastAutoTable.finalY + 6;
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...verdeBarinas);
-    doc.text("II. INVENTARIO DE EXISTENCIA ANIMAL (REBAÑOS)", 12, currentY);
-    doc.line(12, currentY + 2, 204, currentY + 2);
-
-    const extAnimal = predio.existencia_animal || {};
-    let bodyAnimales = [];
-
-    const mapeoEspecies = [
-        { clave: "bovinos", capacidad: "capacidadBovina", etiqueta: "GANADO BOVINO (VACUNO)" },
-        { clave: "vacunos", capacidad: "capacidadVacuna", etiqueta: "GANADO BOVINO (VACUNO)" },
-        { clave: "bubalinos", capacidad: "capacidadBubalina", etiqueta: "GANADO BUBALINO" },
-        { clave: "equinos", capacidad: "capacidadEquina", etiqueta: "GANADO EQUINO" },
-        { clave: "ovinos", capacidad: "capacidadOvina", etiqueta: "GANADO OVINO" },
-        { clave: "porcinos", capacidad: "capacidadPorcina", etiqueta: "GANADO PORCINO" },
-        { clave: "caprinos", capacidad: "capacidadCaprino", etiqueta: "GANADO CAPRINO" },
-        { clave: "cunicola", capacidad: "capacidadCunicola", etiqueta: "CUNÍCULA" },
-        { clave: "avicola", capacidad: "capacidadAvicola", etiqueta: "AVÍCOLA" },
-        { clave: "apicola", capacidad: "capacidadApicola", etiqueta: "APÍCOLA" }
-    ];
-
-    mapeoEspecies.forEach(esp => {
-        const datosEspecie = extAnimal[esp.clave];
-        if (datosEspecie && typeof datosEspecie === 'object' && Object.keys(datosEspecie).length > 0) {
-            const capData = extAnimal[esp.capacidad] || {};
-            let capTexto = "No especificada";
-            if (Object.keys(capData).length > 0) {
-                capTexto = Object.entries(capData)
-                    .filter(([k]) => k !== "id")
-                    .map(([k, v]) => `${k.replace(/_/g, " ").toUpperCase()}: ${Array.isArray(v) ? v.join(", ") : v}`)
-                    .join(" | ");
+            if (!listaPredios || listaPredios.length === 0) {
+                Swal.close();
+                Swal.fire({
+                    icon: "error",
+                    title: "Predio no encontrado",
+                    text: "Este productor no tiene un predio registrado.",
+                    confirmButtonColor: "#d32f2f",
+                    didOpen: () => {
+                        const popup = Swal.getPopup();
+                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                    }
+                });
+                return;
             }
 
-            Object.entries(datosEspecie).forEach(([subcat, cant]) => {
-                if (subcat === "id" || cant === 0 || cant === "0") return;
-                bodyAnimales.push([
-                    esp.etiqueta,
-                    subcat.replace(/_/g, " ").toUpperCase(),
-                    `${cant} Unid.`,
-                    capTexto
-                ]);
+            const predioCompleto = listaPredios[0];
+
+            // Ejecutamos la generación
+            await GenerarFichaProductor(predioCompleto);
+
+            // Cierre de éxito
+            Swal.close();
+
+        } catch (error) {
+            Swal.close();
+            console.error("Error obteniendo la ficha completa del predio:", error);
+
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Hubo un problema al intentar generar el PDF.",
+                confirmButtonColor: "#d32f2f",
+                didOpen: () => {
+                    const popup = Swal.getPopup();
+                    if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                }
             });
         }
-    });
+        
+    };
 
-    if (bodyAnimales.length === 0) {
-        bodyAnimales = [["Sin existencias animales declaradas o registradas.", "", "", ""]];
-    }
+    // Función encargada estrictamente de la ejecución del PDF
+    const GenerarFichaProductor = (predio) => {
+        console.log("FICHA TECNICA DEL PREDIO EN EL PDF:", predio);
 
-    autoTable(doc, {
-        startY: currentY + 4,
-        head: [["Especie", "Subtipo / Categoría", "Cantidad", "Capacidad Productiva"]],
-        body: bodyAnimales,
-        theme: "striped",
-        headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
-        styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
-        columnStyles: { 0: { width: 45 }, 1: { width: 45 }, 2: { width: 25 }, 3: { width: 82 } },
-        margin: { left: 12, right: 12 }
-    });
 
-    // ────────────────────────────────────────────────────────
-    // SECCIÓN III: INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)
-    // ────────────────────────────────────────────────────────
-    currentY = doc.lastAutoTable.finalY + 6;
-    doc.setFont("helvetica", "bold");
-    doc.text("III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)", 12, currentY);
-    doc.line(12, currentY + 2, 204, currentY + 2);
 
-    const rubros = predio.rubros_vegetales || [];
-    const bodyRubros = rubros.length > 0
-        ? rubros.map(r => [
-            r.rubro || "N/A",
-            r.hectareas ? `${r.hectareas} Ha` : "0 Ha",
-            r.estado || "N/A",
-            r.riego || "N/A",
-            r.ciclo_productivo || "N/A",
-            r.produccion_estimada ? `${r.produccion_estimada} Kg` : "0 Kg",
-            r.destino || "N/A"
-          ])
-        : [["Sin rubros vegetales declarados.", "", "", "", "", "", ""]];
-
-    autoTable(doc, {
-        startY: currentY + 4,
-        head: [["Rubro", "Superficie", "Estado", "Riego", "Ciclo", "Prod. Estimada", "Destino"]],
-        body: bodyRubros,
-        theme: "striped",
-        headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
-        styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
-        margin: { left: 12, right: 12 }
-    });
-
-    // ────────────────────────────────────────────────────────
-    // SECCIÓN IV: MECANIZACIÓN Y MAQUINARIAS (CON OTROS EQUIPOS)
-    // ────────────────────────────────────────────────────────
-    currentY = doc.lastAutoTable.finalY + 6;
-    doc.setFont("helvetica", "bold");
-    doc.text("IV. MECANIZACIÓN Y EQUIPOS TECNOLÓGICOS", 12, currentY);
-    doc.line(12, currentY + 2, 204, currentY + 2);
-
-    const maquinaria = predio.maquinaria || {};
-    let bodyMaquinarias = [];
-
-    // 1. Procesar Maquinaria Agrícola sobre Ruedas
-    if (maquinaria.maquinaria_ruedas && typeof maquinaria.maquinaria_ruedas === 'object') {
-        Object.entries(maquinaria.maquinaria_ruedas).forEach(([maq, num]) => {
-            if (num === 0 || num === "0" || maq === "id") return;
-            bodyMaquinarias.push([
-                "MAQUINARIA SOBRE RUEDAS",
-                maq.replace(/_/g, " ").toUpperCase(),
-                `${num} Unid.`
-            ]);
+        const doc = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "letter"
         });
-    }
 
-    // 2. Procesar Implementos
-    if (maquinaria.implementos && typeof maquinaria.implementos === 'object') {
-        Object.entries(maquinaria.implementos).forEach(([imp, num]) => {
-            if (num === 0 || num === "0" || imp === "id") return;
-            bodyMaquinarias.push([
-                "IMPLEMENTOS AGRÍCOLAS",
-                imp.replace(/_/g, " ").toUpperCase(),
-                `${num} Unid.`
-            ]);
-        });
-    }
+        const verdeBarinas = [19, 100, 66];
+        const grisOscuro = [40, 40, 40];
+        const grisSuave = [245, 247, 246];
 
-    // 3. Procesar Equipamientos de Riego
-    if (maquinaria.riego && typeof maquinaria.riego === 'object') {
-        Object.entries(maquinaria.riego).forEach(([bom, cant]) => {
-            if (cant === 0 || cant === "0" || bom === "id") return;
-            bodyMaquinarias.push([
-                "EQUIPOS DE RIEGO",
-                bom.replace(/_/g, " ").toUpperCase(),
-                `${cant} Unid.`
-            ]);
-        });
-    }
+        // ────────────────────────────────────────────────────────
+        // CINTILLO INSTITUCIONAL
+        // ────────────────────────────────────────────────────────
+        try {
+            doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
+            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+        } catch (error) {
+            console.warn("Logos institucionales omitidos.");
+        }
 
-    // 4. Procesar Otros Equipos (Agregado para solventar la omisión)
-    if (maquinaria.otros_equipos && typeof maquinaria.otros_equipos === 'object') {
-        Object.entries(maquinaria.otros_equipos).forEach(([eq, cant]) => {
-            if (cant === 0 || cant === "0" || eq === "id") return;
-            bodyMaquinarias.push([
-                "OTROS EQUIPOS / TECNOLOGÍA",
-                eq.replace(/_/g, " ").toUpperCase(),
-                `${cant} Unid.`
-            ]);
-        });
-    }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
 
-    if (bodyMaquinarias.length === 0) {
-        bodyMaquinarias = [["No se registraron maquinarias o equipos tecnológicos.", "", ""]];
-    }
-
-    autoTable(doc, {
-        startY: currentY + 4,
-        head: [["Categoría", "Nombre de la Maquinaria / Equipo", "Cantidad"]],
-        body: bodyMaquinarias,
-        theme: "striped",
-        headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
-        styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
-        columnStyles: { 0: { width: 60 }, 1: { width: 95 }, 2: { width: 37 } },
-        margin: { left: 12, right: 12 }
-    });
-
-    // ────────────────────────────────────────────────────────
-    // PIE DE PÁGINA
-    // ────────────────────────────────────────────────────────
-    const totalPaginas = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= totalPaginas; i++) {
-        doc.setPage(i);
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
-        doc.setTextColor(140, 140, 140);
-        doc.setDrawColor(220, 220, 220);
-        doc.setLineWidth(0.3);
-        doc.line(12, 268, 204, 268);
-        doc.text("Ficha Técnica de Caracterización Territorial y Productiva — UTMPPAPT.", 12, 272);
-        doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
-    }
+        doc.setTextColor(100, 100, 100);
+        doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
 
-    const fileSanitizado = `Ficha_Caracterizacion_Limpia_${(predio.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`;
-    doc.save(fileSanitizado);
-};
+        const fechaEmision = predio.fecha_registro
+            ? new Date(predio.fecha_registro).toLocaleDateString()
+            : new Date().toLocaleDateString();
+        doc.text(`Fecha de Registro: ${fechaEmision}`, 204, 18, { align: "right" });
+
+        doc.setDrawColor(...verdeBarinas);
+        doc.setLineWidth(0.6);
+        doc.line(12, 25, 204, 25);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.setTextColor(...verdeBarinas);
+        doc.text(`FICHA TÉCNICA DE CARACTERIZACIÓN AGROPECUARIA: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`, 12, 33);
+
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN I: DATOS DEL PRODUCTOR + IDENTIFICACIÓN GENERAL
+        // ────────────────────────────────────────────────────────
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("I. IDENTIFICACIÓN GENERAL Y DATOS DEL PRODUCTOR", 12, 42);
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(12, 44, 204, 44);
+
+        const infoGeneral = [
+            ["Productor:", predio.productor?.nombre || "N/A", "Cédula / RIF:", predio.productor?.cedula_rif || "N/A"],
+            ["Teléfono:", predio.productor?.telefono || "N/A", "Correo:", predio.productor?.correo || "N/A"],
+            ["Municipio:", predio.municipio || "N/A", "Parroquia:", predio.parroquia || "N/A"],
+            ["Comunidad / Sector:", predio.comunidad || "N/A", "Centro Poblado:", predio.centro_poblado || "N/A"],
+            ["Superficie Total:", predio.superficie ? `${predio.superficie} Ha` : "0.00 Ha", "Coordenadas UTM:", predio.coordenadas || "N/A"],
+            ["Tipo de Propiedad:", predio.tipo_propiedad || "N/A", "Tenencia:", predio.tenencia || "N/A"],
+            ["Vialidad Interna:", predio.vialidad || "N/A", "Dirección:", predio.direccion || "N/A"]
+        ];
+
+        autoTable(doc, {
+            startY: 46,
+            body: infoGeneral,
+            theme: "plain",
+            styles: { fontSize: 8.5, cellPadding: 1.8, font: "helvetica" },
+            columnStyles: {
+                0: { fontStyle: "bold", width: 30, textColor: grisOscuro },
+                1: { width: 70 },
+                2: { fontStyle: "bold", width: 30, textColor: grisOscuro },
+                3: { width: 62 }
+            },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN II: INFRAESTRUCTURA
+        // ────────────────────────────────────────────────────────
+        let currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...verdeBarinas);
+        doc.text("II. INFRAESTRUCTURA Y ESTRUCTURAS DISPONIBLES", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const infra = predio.infraestructura || {};
+        const infraData = [
+            ["Corrales:", infra.corrales || 0, "Galpones:", infra.galpones || 0, "Vaqueras:", infra.vaqueras || 0],
+            ["Cochineras:", infra.cochineras || 0, "Silos:", infra.silos || 0, "Caballerizas:", infra.caballerizas || 0],
+            ["Feedlot:", infra.feedlot || 0, "Lagunas:", infra.lagunas || 0, "Salas de Ordeño:", infra.salas_ordeno || 0],
+            ["Queseras:", infra.queseras || 0, "Casas:", infra.casas || 0, "Trapiches:", infra.trapiches || 0],
+            ["Establos:", infra.establos || 0, "", "", "", ""]
+        ];
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            body: infraData,
+            theme: "plain",
+            styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
+            willDrawCell: (data) => {
+                if (data.column.index % 2 === 0) {
+                    doc.setFillColor(...grisSuave);
+                    doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, "F");
+                }
+            },
+            columnStyles: {
+                0: { fontStyle: "bold", textColor: verdeBarinas, width: 34 },
+                1: { width: 24, halign: "center" },
+                2: { fontStyle: "bold", textColor: verdeBarinas, width: 34 },
+                3: { width: 24, halign: "center" },
+                4: { fontStyle: "bold", textColor: verdeBarinas, width: 34 },
+                5: { width: 24, halign: "center" }
+            },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN III: RÉGIMEN DE PRODUCCIÓN
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("III. RÉGIMEN SOCIO-PRODUCTIVO Y CONTROLES", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const prod = predio.produccion || {};
+        const datosProduccion = [
+            ["Tipo de Explotación principal:", prod.tipo_explotacion || "N/A"],
+            ["Registro Sanitario Vigente:", prod.registro_sanitario ? "SÍ" : "NO"],
+            ["Registro de Control Productivo:", prod.registro_productivo ? "SÍ" : "NO"],
+            ["Registro de Control Reproductivo:", prod.registro_reproductivo ? "SÍ" : "NO"],
+            ["Registro Financiero / Contable:", prod.registro_financiero ? "SÍ" : "NO"]
+        ];
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            body: datosProduccion,
+            theme: "striped",
+            headStyles: { fillColor: verdeBarinas },
+            styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
+            columnStyles: {
+                0: { fontStyle: "bold", width: 130, textColor: grisOscuro },
+                1: { halign: "center", fontStyle: "bold", textColor: verdeBarinas, width: 62 }
+            },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN IV: EXISTENCIA ANIMAL
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("IV. INVENTARIO DE EXISTENCIA ANIMAL (REBAÑOS)", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const extAnimal = predio.existencia_animal || {};
+        let bodyAnimales = [];
+
+        const mapeoEspecies = [
+            { clave: "bovinos", capacidad: "capacidadBovina", etiqueta: "GANADO BOVINO (VACUNO)" },
+            { clave: "bubalinos", capacidad: "capacidadBubalina", etiqueta: "GANADO BUBALINO" },
+            { clave: "equinos", capacidad: "capacidadEquina", etiqueta: "GANADO EQUINO" },
+            { clave: "ovinos", capacidad: "capacidadOvina", etiqueta: "GANADO OVINO" },
+            { clave: "porcinos", capacidad: "capacidadPorcina", etiqueta: "GANADO PORCINO" },
+            { clave: "caprinos", capacidad: "capacidadCaprino", etiqueta: "GANADO CAPRINO" },
+            { clave: "cunicola", capacidad: "capacidadCunicola", etiqueta: "CUNÍCULA" },
+            { clave: "avicola", capacidad: "capacidadAvicola", etiqueta: "AVÍCOLA" },
+            { clave: "apicola", capacidad: "capacidadApicola", etiqueta: "APÍCOLA" }
+        ];
+
+        mapeoEspecies.forEach(esp => {
+            const datosEspecie = extAnimal[esp.clave];
+            if (datosEspecie && typeof datosEspecie === 'object' && Object.keys(datosEspecie).length > 0) {
+                const capData = extAnimal[esp.capacidad] || {};
+                let capTexto = "No especificada";
+                if (Object.keys(capData).length > 0) {
+                    capTexto = Object.entries(capData)
+                        .filter(([k]) => k !== "id")
+                        .map(([k, v]) => `${k.replace(/_/g, " ").toUpperCase()}: ${Array.isArray(v) ? v.join(", ") : v}`)
+                        .join(" | ");
+                }
+
+                Object.entries(datosEspecie).forEach(([subcat, cant]) => {
+                    if (subcat === "id" || cant === 0 || cant === "0") return;
+                    bodyAnimales.push([
+                        esp.etiqueta,
+                        subcat.replace(/_/g, " ").toUpperCase(),
+                        `${cant} Unid.`,
+                        capTexto
+                    ]);
+                });
+            }
+        });
+
+        if (bodyAnimales.length === 0) {
+            bodyAnimales = [["Sin existencias animales declaradas o registradas.", "", "", ""]];
+        }
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Especie", "Subtipo / Categoría", "Cantidad", "Capacidad Productiva"]],
+            body: bodyAnimales,
+            theme: "striped",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
+            styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
+            columnStyles: { 0: { width: 45 }, 1: { width: 45 }, 2: { width: 25 }, 3: { width: 82 } },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN V: RUBROS VEGETALES
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("V. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const rubros = predio.rubros_vegetales || [];
+        const bodyRubros = rubros.length > 0
+            ? rubros.map(r => [
+                r.rubro || "N/A",
+                r.hectareas ? `${r.hectareas} Ha` : "0 Ha",
+                r.estado || "N/A",
+                r.riego || "N/A",
+                r.ciclo_productivo || "N/A",
+                r.produccion_estimada ? `${r.produccion_estimada} Kg` : "0 Kg",
+                r.destino || "N/A"
+            ])
+            : [["Sin rubros vegetales declarados.", "", "", "", "", "", ""]];
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Rubro", "Superficie", "Estado", "Riego", "Ciclo", "Prod. Estimada", "Destino"]],
+            body: bodyRubros,
+            theme: "striped",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
+            styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN VI: MECANIZACIÓN Y MAQUINARIAS
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("VI. MECANIZACIÓN Y EQUIPOS TECNOLÓGICOS", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const maquinaria = predio.maquinaria || {};
+        let bodyMaquinarias = [];
+
+        if (maquinaria.maquinaria_ruedas && typeof maquinaria.maquinaria_ruedas === 'object') {
+            Object.entries(maquinaria.maquinaria_ruedas).forEach(([maq, num]) => {
+                if (num === 0 || num === "0" || maq === "id") return;
+                bodyMaquinarias.push(["MAQUINARIA SOBRE RUEDAS", maq.replace(/_/g, " ").toUpperCase(), `${num} Unid.`]);
+            });
+        }
+
+        if (maquinaria.implementos && typeof maquinaria.implementos === 'object') {
+            Object.entries(maquinaria.implementos).forEach(([imp, num]) => {
+                if (num === 0 || num === "0" || imp === "id") return;
+                bodyMaquinarias.push(["IMPLEMENTOS AGRÍCOLAS", imp.replace(/_/g, " ").toUpperCase(), `${num} Unid.`]);
+            });
+        }
+
+        if (maquinaria.riego && typeof maquinaria.riego === 'object') {
+            Object.entries(maquinaria.riego).forEach(([bom, cant]) => {
+                if (cant === 0 || cant === "0" || bom === "id") return;
+                bodyMaquinarias.push(["EQUIPOS DE RIEGO", bom.replace(/_/g, " ").toUpperCase(), `${cant} Unid.`]);
+            });
+        }
+
+        if (maquinaria.otros_equipos && typeof maquinaria.otros_equipos === 'object') {
+            Object.entries(maquinaria.otros_equipos).forEach(([eq, cant]) => {
+                if (cant === 0 || cant === "0" || eq === "id") return;
+                bodyMaquinarias.push(["OTROS EQUIPOS / TECNOLOGÍA", eq.replace(/_/g, " ").toUpperCase(), `${cant} Unid.`]);
+            });
+        }
+
+        if (bodyMaquinarias.length === 0) {
+            bodyMaquinarias = [["No se registraron maquinarias o equipos tecnológicos.", "", ""]];
+        }
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Categoría", "Nombre de la Maquinaria / Equipo", "Cantidad"]],
+            body: bodyMaquinarias,
+            theme: "striped",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
+            styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
+            columnStyles: { 0: { width: 60 }, 1: { width: 95 }, 2: { width: 37 } },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN VII: SERVICIOS BÁSICOS
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("VII. SERVICIOS BÁSICOS INSTALADOS EN EL PREDIO", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const serviciosFinales = predio.servicios_lectura || [];
+        const serviciosProcesados = serviciosFinales.map(s => {
+            if (!s) return "";
+            const str = s.toString();
+            return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+        });
+
+        const listaServiciosText = serviciosProcesados.length > 0
+            ? serviciosProcesados.join("   |   ")
+            : "Ningún servicio básico declarado en el registro territorial.";
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            body: [[listaServiciosText]],
+            theme: "plain",
+            styles: {
+                fontSize: 8.5,
+                cellPadding: 4,
+                font: "helvetica",
+                fontStyle: serviciosFinales.length > 0 ? "normal" : "italic",
+                textColor: serviciosFinales.length > 0 ? [20, 20, 20] : [110, 110, 110]
+            },
+            willDrawCell: (data) => {
+                doc.setFillColor(...grisSuave);
+                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, "F");
+            },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // PIE DE PÁGINA
+        // ────────────────────────────────────────────────────────
+        const totalPaginas = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPaginas; i++) {
+            doc.setPage(i);
+            doc.setFontSize(7);
+            doc.setTextColor(140, 140, 140);
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(0.3);
+            doc.line(12, 268, 204, 268);
+            doc.text("Ficha Técnica de Caracterización Territorial y Productiva — UTMPPAPT.", 12, 272);
+            doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
+        }
+
+        const fileSanitizado = `Ficha_Caracterizacion_${(predio.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`;
+        doc.save(fileSanitizado);
+    };
 
 
     return (

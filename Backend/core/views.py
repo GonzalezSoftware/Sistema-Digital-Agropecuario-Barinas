@@ -14,20 +14,32 @@ def buscar_productor(request, cedula):
     cedula_limpia = cedula.strip().upper()
     try:
         productor = Productor.objects.get(cedula_rif=cedula_limpia)
-        # Agregamos el teléfono en la respuesta exitosa
         return Response({
-            "existe": True, 
+            "existe": True,
             "nombre": productor.nombre,
-            "telefono": productor.telefono  # <-- ¡AGREGA ESTA LÍNEA!
+            "telefono": productor.telefono,
+            "cedula_rif": productor.cedula_rif  # <-- agregado
         })
     except Productor.DoesNotExist:
         return Response({"existe": False}, status=404)
     
 class PredioViewSet(viewsets.ModelViewSet):
-
-    queryset = Predio.objects.all()
-
     serializer_class = PredioSerializer
+    queryset = Predio.objects.all() 
+    serializer_class = PredioSerializer
+
+    def get_queryset(self):
+        queryset = Predio.objects.select_related(
+            'productor', 'infraestructura', 'produccion', 'existencia_animal', 'maquinaria'
+        ).prefetch_related(
+            'rubros_vegetales', 'predioservicio_set__servicio'
+        )
+
+        cedula = self.request.query_params.get('cedula')
+        if cedula:
+            queryset = queryset.filter(productor__cedula_rif=cedula.strip().upper())
+
+        return queryset
 
 class LicenciaHierroViewSet(viewsets.ModelViewSet):
 
