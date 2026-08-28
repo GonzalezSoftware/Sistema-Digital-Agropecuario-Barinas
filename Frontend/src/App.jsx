@@ -9,6 +9,9 @@ import LoginPrediosPage from "./pages/Predios/LoginPrediosPage";
 import Dashboard from "./pages/Predios/Dashboard";
 import LoginProduccionPage from "./pages/Produccion/LoginProduccionPage"
 import DashboardProduccion from "./pages/Produccion/DashboardProduccion"
+import AdminConfigPage from "./pages/Predios/AdminConfigPage";
+import AdminPrediosDashboard from "./pages/Predios/AdminPrediosDashboard";
+
 
 function App() {
   return (
@@ -24,6 +27,8 @@ function App() {
         <Route path="/predios/Dashboard" element={<Dashboard />} />
         <Route path="/produccion/login" element={<LoginProduccionPage />} />
         <Route path="/produccion/DashboardP" element={<DashboardProduccion />} />
+        <Route path="/predios/admin-secreto" element={<AdminConfigPage />} />
+        <Route path="/admin/dashboard" element={<AdminPrediosDashboard />} />
       </Routes>
     </BrowserRouter>
   )

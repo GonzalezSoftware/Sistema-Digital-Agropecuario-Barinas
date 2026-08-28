@@ -202,4 +202,17 @@ class Maquinaria(models.Model):
     class Meta:
         db_table = 'maquinarias'
         
-        
+
+# ─────────────────────────────
+# ADMINISTRADORES / USUARIOS DEL SISTEMA
+# ─────────────────────────────
+class AdministradorSistema(models.Model):
+    nombre = models.CharField(max_length=150)
+    municipio = models.CharField(max_length=100, unique=True, null=True, blank=True) # Identificador único del municipio (ej: "alberto_arvelo")
+    usuario = models.CharField(max_length=100, unique=True)
+    clave = models.CharField(max_length=255) # Contraseña encriptada
+    rol = models.CharField(max_length=100, default="Administrador Municipal")
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'administradores_sistema'
