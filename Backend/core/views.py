@@ -8,6 +8,12 @@ from rest_framework.response import Response
 from .models import Predio, LicenciaHierro, Productor
 from .serializers import PredioSerializer, LicenciaHierroSerializer
 from .models import Predio, RubroVegetal, ExistenciaAnimal, Maquinaria
+from rest_framework import status
+from django.contrib.auth.hashers import make_password, check_password
+from .models import AdministradorSistema
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 
 @api_view(['GET'])
 def buscar_productor(request, cedula):
@@ -340,3 +346,101 @@ def dashboard_produccion_stats(request):
             "estado_sistema": datos_estado
         }
     })
+
+@api_view(['GET', 'POST'])
+def configurar_o_login_admin(request):
+    # Ver si ya existe algún administrador configurado en la BD
+    admin_existe = AdministradorSistema.objects.exists()
+
+    if request.method == 'GET':
+        # Indicamos a React si ya está configurado o no
+        return Response({
+            "configurado": admin_existe
+        }, status=status.HTTP_200_OK)
+
+    if request.method == 'POST':
+        data = request.data
+        usuario = data.get('usuario')
+        clave = data.get('clave')
+        nombre = data.get('nombre', '')
+
+        if not admin_existe:
+            # ── REGISTRO ÚNICO (Primer administrador) ──
+            if not usuario or not clave or not nombre:
+                return Response({"error": "Todos los campos son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Guardamos la contraseña cifrada por seguridad
+            nuevo_admin = AdministradorSistema.objects.create(
+                nombre=nombre,
+                usuario=usuario,
+                clave=make_password(clave),
+                rol="Administrador Maestro"
+            )
+            return Response({
+                "mensaje": "Administrador registrado con éxito",
+                "usuario": {
+                    "nombre": nuevo_admin.nombre,
+                    "usuario": nuevo_admin.usuario,
+                    "rol": nuevo_admin.rol
+                }
+            }, status=status.HTTP_201_CREATED)
+        else:
+            # ── INICIO DE SESIÓN ──
+            try:
+                admin = AdministradorSistema.objects.get(usuario=usuario)
+                # Verificamos la contraseña
+                if check_password(clave, admin.clave):
+                    return Response({
+                        "mensaje": "Login exitoso",
+                        "usuario": {
+                            "nombre": admin.nombre,
+                            "usuario": admin.usuario,
+                            "rol": admin.rol
+                        }
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "Credenciales incorrectas."}, status=status.HTTP_400_BAD_REQUEST)
+            except AdministradorSistema.DoesNotExist:
+                return Response({"error": "El usuario no existe."}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+@api_view(['POST'])
+def guardar_credencial_municipio(request):
+    municipio_id = request.data.get('municipio_id')
+    nombre_mun = request.data.get('nombre_municipio')
+    usuario = request.data.get('usuario')
+    clave = request.data.get('clave')
+
+    if not municipio_id or not usuario or not clave:
+        return Response({"error": "Faltan datos obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if len(clave) < 8:
+        return Response({"error": "La contraseña debe tener al menos 8 caracteres."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Hashear la contraseña por seguridad
+    clave_encriptada = make_password(clave)
+
+    # Guarda o actualiza el registro de forma única por municipio
+    admin_mun, creado = AdministradorSistema.objects.update_or_create(
+        municipio=municipio_id,
+        defaults={
+            'nombre': f"Admin {nombre_mun}",
+            'usuario': usuario,
+            'clave': clave_encriptada,
+            'rol': f"Municipio {nombre_mun}"
+        }
+    )
+
+    return Response({
+        "mensaje": "¡Credenciales guardadas exitosamente en la base de datos!",
+        "usuario": admin_mun.usuario
+    }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def obtener_credenciales_municipios(request):
+    # Retorna la lista de municipios que ya tienen credenciales configuradas
+    credenciales = AdministradorSistema.objects.filter(municipio__isnull=False).values('municipio', 'usuario')
+    data = {item['municipio']: {"creado": True, "usuario": item['usuario']} for item in credenciales}
+    return Response(data)
+

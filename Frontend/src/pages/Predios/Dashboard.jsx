@@ -2164,7 +2164,7 @@ export default function Dashboard() {
                                     </p>
                                 </div>
 
-                                {/* Gráfico 2 - Treemap de Tenencia de Tierras (González Software) */}
+                                {/* Gráfico 7 - Treemap de Tenencia de Tierras (González Software) */}
                                 <div style={chartCard}>
                                     <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
                                     <div style={{ width: '100%', height: 350, marginTop: '20px' }}>

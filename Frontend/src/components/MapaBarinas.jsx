@@ -18,8 +18,8 @@ L.Marker.prototype.options.icon = DefaultIcon;
 const MapaBarinas = ({ predios }) => {
     // AJUSTE FINO: Se amplió solo un poco hacia los lados (Longitud)
     const boundsBarinas = [
-        [7.10, -71.70], // Suroeste (Un poco más a la izquierda de -71.40)
-        [9.20, -67.60]  // Noreste (Un poco más a la derecha de -67.90)
+        [7.10, -71.70], // Suroeste
+        [9.20, -67.60]  // Noreste
     ];
 
     return (
@@ -31,10 +31,10 @@ const MapaBarinas = ({ predios }) => {
             maxBoundsViscosity={1.0} 
             style={{ height: '100%', width: '100%' }}
         >
-            {/* Capa de mapa minimalista (CartoDB Positron) */}
+            {/* 🛠️ Solución: Usar la capa oficial y gratuita de OpenStreetMap */}
             <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                attribution='&copy; OpenStreetMap contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
 
             {predios.map((p, idx) => {
