@@ -2,7 +2,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from .views import PredioViewSet, LicenciaHierroViewSet, enviar_codigo_whatsapp, buscar_productor, dashboard_produccion_stats, configurar_o_login_admin, guardar_credencial_municipio,   obtener_credenciales_municipios 
+from .views import PredioViewSet, LicenciaHierroViewSet, enviar_codigo_whatsapp, buscar_productor, dashboard_produccion_stats, configurar_o_login_admin, guardar_credencial_municipio,   obtener_credenciales_municipios, login_admin_api
 
 
 router = DefaultRouter()
@@ -19,6 +19,7 @@ urlpatterns = [
     # ── Rutas para la gestión de credenciales por municipio ──
     path('guardar-credencial/', guardar_credencial_municipio, name='guardar_credencial_municipio'),
     path('credenciales-municipios/', obtener_credenciales_municipios, name='credenciales_municipios'),
+    path('login-admin/', login_admin_api, name='login_admin_api'),
 ]
 
 # Servir archivos subidos por el usuario en desarrollo local
