@@ -11,7 +11,7 @@ export const AdminHeader = ({ vistaActiva, escudo }) => {
             paddingBottom: "10px"
         }}>
             <div>
-               <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#242525", margin: 0 }}>
+               <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#242525", margin: 0 }}>
     {vistaActiva === "inicio"
         ? "Dashboard Administrativo"
         : vistaActiva === "credenciales"
