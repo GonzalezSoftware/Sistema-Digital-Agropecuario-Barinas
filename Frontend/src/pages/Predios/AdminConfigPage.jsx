@@ -210,28 +210,28 @@ export default function AdminConfigPage() {
             }}>
               <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4ade80" }} />
               <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.8)" }}>
-                Base de Datos Real (Django)
+                Acceso Restringido
               </span>
             </div>
           </div>
 
           <div style={{ position: "relative", zIndex: 2 }}>
             <h1 style={{ color: "#fff", fontSize: "30px", fontWeight: 700, lineHeight: 1.2, margin: "0 0 16px" }}>
-              {!adminRegistrado ? "Registro Único del" : "Control de Acceso del"}<br />
-              <span style={{ color: "#86efac" }}>Administrador del Sistema</span>
+              {!adminRegistrado ? "Registro Único del" : "Login de acceso"}<br />
+              <span style={{ color: "#86efac" }}>Administrador General</span>
             </h1>
             <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "14px", lineHeight: 1.8, margin: 0, maxWidth: "380px" }}>
               {!adminRegistrado 
                 ? "Establece las credenciales maestras que se guardarán de forma segura en tu base de datos relacional."
-                : "Ingresa con tu usuario y contraseña de administrador maestro para gestionar el sistema."}
+                : "Área exclusiva para el administrador autorizado por el MPPAT en el estado Barinas. Ingresa tus credenciales institucionales para acceder al sistema."}
             </p>
           </div>
 
           <div style={{ position: "relative", zIndex: 2, display: "flex", gap: "14px" }}>
             {[
-              { num: "Admin", label: "Control Total" },
-              { num: "Django", label: "DB Conectada" },
-              { num: "Seguro", label: "Hash Pass" },
+              { num: "12", label: "Municipios" },
+              { num: "100%", label: "Verificado" },
+              { num: "Admin", label: "Gestión Municipal General" },
             ].map(item => (
               <div key={item.label} style={{
                 background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
@@ -260,10 +260,10 @@ export default function AdminConfigPage() {
                 </svg>
               </div>
               <h2 style={{ color: "#1b4332", fontSize: "24px", fontWeight: 700, margin: "0 0 6px" }}>
-                {!adminRegistrado ? "Configurar Administrador" : "Iniciar Sesión (Admin)"}
+                {!adminRegistrado ? "Configurar Administrador" : "Login de acceso Administrador"}
               </h2>
               <p style={{ color: "#888", fontSize: "14px", margin: 0 }}>
-                {!adminRegistrado ? "Completa los datos para guardarlos en la BD" : "Introduce tus credenciales maestras"}
+                {!adminRegistrado ? "Completa los datos para guardarlos en la BD" : "Ingresa con las credenciales asignadas"}
               </p>
             </div>
 
@@ -295,14 +295,14 @@ export default function AdminConfigPage() {
               {/* Usuario */}
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
-                  Usuario de Administrador
+                  Usuario
                 </label>
                 <input
                   type="text"
                   className="input-login"
                   value={usuario}
                   onChange={e => { setUsuario(e.target.value); setError(""); }}
-                  placeholder="Ej. admin_master"
+                  placeholder="Nombre de usuario"
                   autoComplete="username"
                   style={{
                     width: "100%", padding: "11px 14px",
@@ -316,7 +316,7 @@ export default function AdminConfigPage() {
               {/* Contraseña */}
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
-                  Contraseña Segura
+                  Contraseña 
                 </label>
                 <div style={{ position: "relative" }}>
                   <input
@@ -324,7 +324,7 @@ export default function AdminConfigPage() {
                     className="input-login"
                     value={clave}
                     onChange={e => { setClave(e.target.value); setError(""); }}
-                    placeholder="••••••••••••"
+                    placeholder="Contraseña"
                     autoComplete="current-password"
                     style={{
                       width: "100%", padding: "11px 42px 11px 14px",
@@ -375,13 +375,13 @@ export default function AdminConfigPage() {
                   fontFamily: "'Poppins', sans-serif", cursor: "pointer",
                   transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
                 }}>
-                {cargando ? "Procesando..." : (!adminRegistrado ? "Registrar en Base de Datos" : "Ingresar al Panel Admin")}
+                {cargando ? "Procesando..." : (!adminRegistrado ? "Registrar en Base de Datos" : "Aceptar")}
               </button>
             </form>
 
             <p style={{ marginTop: "24px", textAlign: "center", fontSize: "11px", color: "#ccc", lineHeight: 1.6 }}>
               Sistema Digital Agropecuario · Estado Barinas<br />
-              © 2026 ASOGABA · Base de Datos Conectada
+              © 2026 MPPAT · Solo personal autorizado
             </p>
           </div>
         </div>
