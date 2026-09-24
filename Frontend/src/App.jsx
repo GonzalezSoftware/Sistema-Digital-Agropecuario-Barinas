@@ -13,6 +13,7 @@ import AdminPrediosDashboard from "./pages/Predios/AdminPrediosDashboard";
 import Empleados from "./pages/Predios/Empleados"
 
 import EmpleadoDashboard from "./components/EmpleadoDashboard";
+import NoticiasDashboard from "./components/NoticiasDashboard"; // 📰 SIN llaves porque usa export default
 
 function App() {
   return (
@@ -30,9 +31,10 @@ function App() {
         <Route path="/predios/admin-secreto" element={<AdminConfigPage />} />
         <Route path="/admin/dashboard" element={<AdminPrediosDashboard />} />
         <Route path="/predios/Empleados" element={<Empleados />} />
-
-        {/* 2. Agrega la ruta que te está dando error */}
         <Route path="/predios/EmpleadoDashboard" element={<EmpleadoDashboard />} />
+        
+        {/* 📰 Ruta para el panel del empleado de noticias */}
+        <Route path="/predios/noticias-dashboard" element={<NoticiasDashboard />} />
       </Routes>
     </BrowserRouter>
   )

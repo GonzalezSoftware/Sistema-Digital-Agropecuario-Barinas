@@ -1,8 +1,13 @@
-# Ubicación: Backend/config/urls.py (o el urls.py principal que ves en tu imagen)
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('core.urls')), # Esto conecta con core/urls.py
+    path('api/', include('core.urls')), # O la ruta donde tengas enlazadas tus APIs de core
 ]
+
+# Esto permite que Django exponga las URLs de las imágenes subidas
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

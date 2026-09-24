@@ -5,7 +5,7 @@ from django.db.models import Sum
 from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Predio, LicenciaHierro, Productor
+from .models import Predio, LicenciaHierro, Productor, Noticia
 from .serializers import PredioSerializer, LicenciaHierroSerializer
 from .models import Predio, RubroVegetal, ExistenciaAnimal, Maquinaria
 from rest_framework import status
@@ -456,24 +456,20 @@ def login_admin_api(request):
     try:
         admin = AdministradorSistema.objects.get(usuario=usuario)
         
-        # 🚫 RESTRICCIÓN: Bloqueamos si es el Administrador Maestro o si no tiene municipio asignado
-        if admin.rol == "Administrador Maestro" or not admin.municipio:
-            return Response({"success": False, "message": "Este acceso es exclusivo para usuarios municipales."}, status=status.HTTP_403_FORBIDDEN)
+        # 🚫 Solo bloqueamos si es el Administrador Maestro
+        if admin.rol == "Administrador Maestro":
+            return Response({"success": False, "message": "Este acceso no está disponible para el Administrador Maestro."}, status=status.HTTP_403_FORBIDDEN)
 
         # Validamos la contraseña encriptada
         if check_password(clave, admin.clave):
-            municipio_nombre = admin.municipio.replace('_', ' ').upper()
-            mensaje_acceso = f"Accediste al municipio {municipio_nombre}"
-
             return Response({
                 "success": True,
-                "message": mensaje_acceso,
                 "usuario": {
                     "id": admin.id,
                     "nombre": admin.nombre,
                     "usuario": admin.usuario,
                     "rol": admin.rol,
-                    "municipio": admin.municipio
+                    "municipio": admin.municipio or ""
                 }
             }, status=status.HTTP_200_OK)
         else:
@@ -481,3 +477,95 @@ def login_admin_api(request):
             
     except AdministradorSistema.DoesNotExist:
         return Response({"success": False, "message": "Usuario o contraseña incorrectos."}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET', 'PUT'])
+def gestionar_credenciales_noticias(request):
+    if request.method == 'GET':
+        try:
+            admin_noticias = AdministradorSistema.objects.get(rol="Empleado de Noticias")
+            return Response({
+                "usuario": admin_noticias.usuario,
+                "activo": True
+            }, status=status.HTTP_200_OK)
+        except AdministradorSistema.DoesNotExist:
+            return Response({"activo": False}, status=status.HTTP_200_OK)
+
+    elif request.method == 'PUT':
+        usuario = request.data.get('usuario')
+        password = request.data.get('password')
+
+        if not usuario or not password:
+            return Response({"error": "El usuario y la contraseña son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if len(password) < 8:
+            return Response({"error": "La contraseña debe tener al menos 8 caracteres."}, status=status.HTTP_400_BAD_REQUEST)
+
+        clave_encriptada = make_password(password)
+
+        admin_noticias, creado = AdministradorSistema.objects.update_or_create(
+            rol="Empleado de Noticias",
+            defaults={
+                'nombre': "Empleado de Noticias",
+                'usuario': usuario,
+                'clave': clave_encriptada,
+            }
+        )
+
+        return Response({
+            "mensaje": "¡Credenciales del empleado de noticias actualizadas correctamente!",
+            "usuario": admin_noticias.usuario,
+            "activo": True
+        }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', 'POST'])
+def gestionar_noticias(request):
+    if request.method == 'POST':
+        titulo = request.data.get('titulo')
+        descripcion = request.data.get('descripcion')
+        imagen = request.FILES.get('imagen')
+
+        if not titulo or not descripcion:
+            return Response({"error": "El título y la descripción son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+
+        noticia = Noticia.objects.create(titulo=titulo, descripcion=descripcion, imagen=imagen)
+        return Response({"mensaje": "¡Noticia registrada con éxito!"}, status=status.HTTP_201_CREATED)
+
+    elif request.method == 'GET':
+        noticias = Noticia.objects.all().order_by('-fecha_creacion')
+        data = [
+            {
+                "id": n.id,
+                "titulo": n.titulo,
+                "descripcion": n.descripcion,
+                "imagen": request.build_absolute_uri(n.imagen.url) if n.imagen else None,
+                "fecha": n.fecha_creacion
+            }
+            for n in noticias
+        ]
+        return Response(data, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT', 'DELETE'])
+def detalle_noticia(request, pk):
+    try:
+        noticia = Noticia.objects.get(pk=pk)
+    except Noticia.DoesNotExist:
+        return Response({"error": "Noticia no encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        titulo = request.data.get('titulo', noticia.titulo)
+        descripcion = request.data.get('descripcion', noticia.descripcion)
+        imagen = request.FILES.get('imagen')
+
+        noticia.titulo = titulo
+        noticia.descripcion = descripcion
+        if imagen:
+            noticia.imagen = imagen
+        noticia.save()
+
+        return Response({"mensaje": "¡Noticia actualizada con éxito!"}, status=status.HTTP_200_OK)
+
+    elif request.method == 'DELETE':
+        noticia.delete()
+        return Response({"mensaje": "¡Noticia eliminada con éxito!"}, status=status.HTTP_200_OK)

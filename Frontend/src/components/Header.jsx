@@ -24,9 +24,11 @@ export const AdminHeader = ({ vistaActiva, escudo }) => {
                         ? "Georreferenciación de Predios"
                         : vistaActiva === "reportes"
                             ? "Reportes del Sistema"
-                            : vistaActiva === "configuracion"
-                                ? "Configuración del Sistema"
-                                : "Historial de Actividad"}
+                            : vistaActiva === "noticias"
+                                ? "Asignar Credenciales Noticias"
+                                : vistaActiva === "configuracion"
+                                    ? "Configuración del Sistema"
+                                    : "Historial de Actividad"}
 </h2>
                 <p style={{ margin: "0px 0 0 0", fontSize: "13px", color: "#64748b" }}>Admin Predios • Estado Barinas</p>
             </div>

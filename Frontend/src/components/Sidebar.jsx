@@ -4,6 +4,7 @@ import MapPinIcon from "@heroicons/react/24/solid/MapPinIcon";
 import DocumentChartBarIcon from "@heroicons/react/24/solid/DocumentChartBarIcon"; 
 import Cog6ToothIcon from "@heroicons/react/24/solid/Cog6ToothIcon";
 import ClipboardDocumentListIcon from "@heroicons/react/24/solid/ClipboardDocumentListIcon"; 
+import NewspaperIcon from "@heroicons/react/24/solid/NewspaperIcon";
 
 export const AdminSidebar = ({
     adminData,
@@ -188,7 +189,6 @@ export const AdminSidebar = ({
                                 <span>Historial</span>
                             </div>
 
-                            {/* Bitácora ubicada debajo de Historial */}
                             <div
                                 onClick={() => setVistaActiva("bitacora")}
                                 style={{
@@ -238,6 +238,31 @@ export const AdminSidebar = ({
                             </div>
                         </div>
                     )}
+                </div>
+
+                {/* MENÚ PRINCIPAL: Noticias (Afuera de los demás menús) */}
+                <div>
+                    <div
+                        onClick={() => setVistaActiva("noticias")}
+                        style={{
+                            display: "flex", alignItems: "center", gap: "12px",
+                            padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
+                            transition: "all 0.25s ease",
+                            backgroundColor: vistaActiva === "noticias" ? "rgba(255,255,255,0.15)" : "transparent",
+                            color: vistaActiva === "noticias" ? "#ffffff" : "#86efac",
+                            fontWeight: vistaActiva === "noticias" ? 600 : 500,
+                            fontSize: "14px"
+                        }}
+                        onMouseEnter={(e) => {
+                            if (vistaActiva !== "noticias") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                        }}
+                        onMouseLeave={(e) => {
+                            if (vistaActiva !== "noticias") e.currentTarget.style.backgroundColor = "transparent";
+                        }}
+                    >
+                        <NewspaperIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
+                        <span>Credenciales Noticias</span>
+                    </div>
                 </div>
 
                 {/* MENÚ PRINCIPAL: Configuración */}
