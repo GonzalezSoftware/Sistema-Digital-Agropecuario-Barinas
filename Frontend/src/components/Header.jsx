@@ -11,18 +11,22 @@ export const AdminHeader = ({ vistaActiva, escudo }) => {
             paddingBottom: "10px"
         }}>
             <div>
-               <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#242525", margin: 0 }}>
+               <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#242525", margin: 0 }}>
     {vistaActiva === "inicio"
-        ? "Panel Administrativo"
+        ? "Dashboard Administrativo"
         : vistaActiva === "credenciales"
             ? "Credenciales de Usuarios"
-            : vistaActiva === "georreferenciacion"
-                ? "Georreferenciación de Predios"
-                : vistaActiva === "reportes"
-                    ? "Reportes del Sistema"
-                    : vistaActiva === "configuracion"
-                        ? "Configuración del Sistema"
-                        : "Historial de Actividad"}
+            : vistaActiva === "historial"
+                ? "Historial de Actividad"
+                : vistaActiva === "bitacora"
+                    ? "Bitácora de Cambios"
+                    : vistaActiva === "georreferenciacion"
+                        ? "Georreferenciación de Predios"
+                        : vistaActiva === "reportes"
+                            ? "Reportes del Sistema"
+                            : vistaActiva === "configuracion"
+                                ? "Configuración del Sistema"
+                                : "Historial de Actividad"}
 </h2>
                 <p style={{ margin: "0px 0 0 0", fontSize: "13px", color: "#64748b" }}>Admin Predios • Estado Barinas</p>
             </div>

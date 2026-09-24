@@ -4,8 +4,7 @@ import escudo from "../assets/logo2.jpg";
 
 const NAV_ITEMS = [
   { label: "Productores", href: "/productores" },
-  { label: "Registro de Predios", href: "/predios", isRoute: true },
-  { label: "Producción Animal y Vegetal", href: "/produccion", isRoute: true },
+  { label: "Predios y Producción", href: "/predios", isRoute: true },
   { label: "Estadísticas Generales", href: "/estadística-portalinfo", isRoute: true },
   { label: "Contactos", href: "#contactos" },
 ];
@@ -40,10 +39,10 @@ export default function HomePage() {
           <strong style={{ color: "#589e38", fontStyle: "normal" }}>Venezuela</strong>
         </span>
 
-        {/* Links centrados */}
+        {/* Links alineados a la izquierda */}
         <ul style={{
           display: "flex", gap: "8px", listStyle: "none",
-          margin: 0, padding: 0, flex: 1, justifyContent: "flex-end",
+          margin: 0, padding: 0, flex: 1, justifyContent: "flex-start",
         }}>
           {NAV_ITEMS.map((item) => (
             <li key={item.label}>

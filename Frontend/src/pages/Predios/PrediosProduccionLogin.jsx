@@ -2,11 +2,7 @@ import logo from "../../assets/gobierno.jpg";
 import escudo from "../../assets/logo2.jpg";
 import { useNavigate } from "react-router-dom";
 import React from "react";
-
-const USUARIOS = [
-  { usuario: "admin", clave: "admin123", rol: "Administrador", nombre: "José González" },
-  { usuario: "empleado", clave: "empleado123", rol: "Empleado MPPAT", nombre: "Esteban González" },
-];
+import Swal from "sweetalert2"; // 🔔 Importamos SweetAlert2 para las alertas
 
 export default function LoginPrediosPage() {
   const navigate = useNavigate();
@@ -22,14 +18,74 @@ export default function LoginPrediosPage() {
     if (!usuario.trim()) { setError("Ingresa tu usuario."); return; }
     if (!clave.trim()) { setError("Ingresa tu contraseña."); return; }
     setCargando(true);
-    await new Promise(r => setTimeout(r, 900));
-    const encontrado = USUARIOS.find(u => u.usuario === usuario.trim() && u.clave === clave);
-    if (encontrado) {
-      sessionStorage.setItem("usuario_predios", JSON.stringify(encontrado));
-      navigate("/predios/Dashboard");
-    } else {
-      setError("Usuario o contraseña incorrectos.");
+
+    try {
+      // 🔓 Validación rápida para el acceso secreto predeterminado
+      if (usuario.trim() === "admin_secreto" && clave === "admin_secreto123") {
+        await new Promise(r => setTimeout(r, 600)); // Retardo visual elegante
+        setCargando(false);
+
+        await Swal.fire({
+          icon: "success",
+          title: "¡Acceso Autorizado!",
+          text: "Ingresando al panel de administrador secreto.",
+          confirmButtonColor: "#136442",
+          timer: 2500,
+          timerProgressBar: true
+        });
+
+        window.location.href = "http://localhost:5173/predios/admin-secreto";
+        return;
+      }
+
+      // Petición al backend de Django para validar credenciales en la tabla AdministradorSistema
+      const response = await fetch("http://localhost:8000/api/login-admin/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ usuario: usuario.trim(), clave: clave }),
+      });
+
+      const data = await response.json();
+      await new Promise(r => setTimeout(r, 600)); // Retardo visual elegante
+
+      if (response.ok && data.success) {
+        setCargando(false);
+
+        // Guardamos los datos del usuario en sessionStorage
+        sessionStorage.setItem("usuario_predios", JSON.stringify(data.usuario));
+
+        // Determinamos el mensaje y el municipio para enviarlo por state
+        const municipioRaw = data.usuario.municipio || "";
+        const destinoTexto = municipioRaw
+          ? `el municipio ${municipioRaw.replace(/_/g, ' ').toUpperCase()}`
+          : `el sistema general (${data.usuario.rol})`;
+
+        // Alerta con SweetAlert2 indicando dónde accedió y posterior redirección
+        await Swal.fire({
+          icon: "success",
+          title: "¡Credenciales Correctas!",
+          text: `Accediste a ${destinoTexto}.`,
+          confirmButtonColor: "#136442",
+          timer: 3500,
+          timerProgressBar: true
+        });
+
+        // Redirección al nuevo dashboard general pasando el municipio o rol por state
+        navigate("/predios/Empleados", {
+          state: {
+            municipio: municipioRaw ? municipioRaw.replace(/_/g, ' ').toUpperCase() : data.usuario.rol
+          }
+        });
+
+      } else {
+        setCargando(false);
+        setError(data.message || "Usuario o contraseña incorrectos.");
+      }
+    } catch (err) {
       setCargando(false);
+      setError("Error de conexión con el servidor. Inténtalo de nuevo.");
     }
   };
 
@@ -68,12 +124,11 @@ export default function LoginPrediosPage() {
         gap: "24px", flexShrink: 0,
       }}>
         <div style={{
-          display: "flex", alignItems: "center", gap: "20px", ap: "20px",
+          display: "flex", alignItems: "center", gap: "20px",
           marginLeft: "-30px"
         }}>
           <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 45 }} />
           <img src={escudo} alt="Logo MPPAT" style={{ height: 35 }} />
-
         </div>
         <span style={{
           fontSize: "12px", color: "#888", fontStyle: "italic",
@@ -82,6 +137,7 @@ export default function LoginPrediosPage() {
           Estado Barinas<br />
           <strong style={{ color: "#136442", fontStyle: "normal" }}>Venezuela</strong>
         </span>
+
         <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "12px" }}>
           <button className="nav-btn-primary" style={{
             background: "#136442", border: "none", color: "#fff",
@@ -143,24 +199,24 @@ export default function LoginPrediosPage() {
               color: "#fff", fontSize: "30px", fontWeight: 700,
               lineHeight: 1.2, margin: "0 0 16px"
             }}>
-              Registro y Caracterización<br />
-              <span style={{ color: "#86efac" }}>de Predios Agropecuarios</span>
+              Login de acceso<br />
+              <span style={{ color: "#86efac" }}>Predios y Producción</span>
             </h1>
             <p style={{
               color: "rgba(255,255,255,0.65)", fontSize: "14px",
               lineHeight: 1.8, margin: 0, maxWidth: "380px"
             }}>
-              Área exclusiva para personal autorizado de ASOGABA.
-              Ingresa tus credenciales para acceder al sistema de gestión territorial.
+              Área exclusiva para personal autorizado de los municipios de Barinas.
+              Ingresa tus credenciales institucionales para acceder a los módulos.
             </p>
           </div>
 
           {/* Stats */}
           <div style={{ position: "relative", zIndex: 2, display: "flex", gap: "14px" }}>
             {[
-              { num: "11", label: "Municipios" },
+              { num: "12", label: "Municipios" },
               { num: "100%", label: "Verificado" },
-              { num: "2", label: "Roles de acceso" },
+              { num: "Empleados", label: "Gestión Municipal" },
             ].map(item => (
               <div key={item.label} style={{
                 background: "rgba(255,255,255,0.08)",
@@ -195,10 +251,10 @@ export default function LoginPrediosPage() {
                 </svg>
               </div>
               <h2 style={{ color: "#1b4332", fontSize: "24px", fontWeight: 700, margin: "0 0 6px" }}>
-                Iniciar sesión
+                Login de Acceso Empleados
               </h2>
               <p style={{ color: "#888", fontSize: "14px", margin: 0 }}>
-                Ingresa tus credenciales de acceso
+                Ingresa con las credenciales de tu municipio
               </p>
             </div>
 
@@ -228,7 +284,7 @@ export default function LoginPrediosPage() {
                     className="input-login"
                     value={usuario}
                     onChange={e => { setUsuario(e.target.value); setError(""); }}
-                    placeholder="Tu nombre de usuario"
+                    placeholder="Nombre de usuario"
                     autoComplete="username"
                     style={{
                       width: "100%", padding: "11px 14px 11px 42px",
@@ -264,7 +320,7 @@ export default function LoginPrediosPage() {
                     className="input-login"
                     value={clave}
                     onChange={e => { setClave(e.target.value); setError(""); }}
-                    placeholder="Tu contraseña"
+                    placeholder="Contraseña"
                     autoComplete="current-password"
                     style={{
                       width: "100%", padding: "11px 42px 11px 42px",
@@ -333,30 +389,18 @@ export default function LoginPrediosPage() {
                       style={{ animation: "spin 1s linear infinite" }}>
                       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                     </svg>
-                    Verificando...
+                    Verificando credenciales...
                   </>
-                ) : "Ingresar al sistema"}
+                ) : "Aceptar"}
               </button>
             </form>
-
-            {/* Volver */}
-            <div style={{ marginTop: "20px", textAlign: "center" }}>
-              <button onClick={() => navigate("/predios")} className="link-volver"
-                style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  fontSize: "13px", color: "#aaa", fontFamily: "'Poppins', sans-serif",
-                  transition: "color 0.2s",
-                }}>
-                ← Volver al módulo de predios
-              </button>
-            </div>
 
             <p style={{
               marginTop: "24px", textAlign: "center",
               fontSize: "11px", color: "#ccc", lineHeight: 1.6
             }}>
               Sistema Digital Agropecuario · Estado Barinas<br />
-              © 2026 ASOGABA · Solo personal autorizado
+              © 2026 MPPAT · Solo personal autorizado
             </p>
           </div>
         </div>

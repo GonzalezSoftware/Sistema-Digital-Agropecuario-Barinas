@@ -1,34 +1,27 @@
 import React, { useState } from 'react';
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import MapPinIcon from "@heroicons/react/24/solid/MapPinIcon"; 
-import DocumentChartBarIcon from "@heroicons/react/24/solid/DocumentChartBarIcon"; 
-import Cog6ToothIcon from "@heroicons/react/24/solid/Cog6ToothIcon";
-import ClipboardDocumentListIcon from "@heroicons/react/24/solid/ClipboardDocumentListIcon"; 
+import { 
+    ChevronDownIcon, 
+    PresentationChartBarIcon as DefaultChartIcon,
+    MapIcon,
+    ClipboardDocumentListIcon,
+    ChartBarIcon,
+    CircleStackIcon // Nuevo icono moderno para el menú principal de Producción
+} from "@heroicons/react/24/outline";
 
-export const AdminSidebar = ({
-    adminData,
+export const EmpleadoSidebar = ({
+    empleadoData,
     vistaActiva,
     setVistaActiva,
     cerrarSesion,
-    PresentationChartBarIcon,
-    KeyIcon,
-    ClockIcon,
+    PresentationChartBarIcon = DefaultChartIcon,
     PowerIcon,
 }) => {
-    // Estado para controlar si el menú desplegable de Predios está abierto o cerrado
+    // Estados para controlar los menús desplegables de manera independiente
     const [prediosAbierto, setPrediosAbierto] = useState(
-        vistaActiva === "inicio" || 
-        vistaActiva === "credenciales" || 
-        vistaActiva === "historial" || 
-        vistaActiva === "bitacora" || 
-        vistaActiva === "georreferenciacion" || 
-        vistaActiva === "reportes" || 
-        vistaActiva === "predios"
+        vistaActiva === "inicio" || vistaActiva?.startsWith("predios")
     );
-
-    // Estado para controlar si el menú desplegable de Configuración está abierto o cerrado
-    const [configuracionAbierto, setConfiguracionAbierto] = useState(
-        vistaActiva === "configuracion"
+    const [produccionAbierto, setProduccionAbierto] = useState(
+        vistaActiva?.startsWith("produccion")
     );
 
     return (
@@ -45,7 +38,7 @@ export const AdminSidebar = ({
             boxSizing: "border-box",
             overflow: "hidden"
         }}>
-            {/* Encabezado: Info del Usuario (Fijo arriba) */}
+            {/* Encabezado: Info del Empleado (Fijo arriba) */}
             <div style={{
                 display: "flex",
                 alignItems: "center",
@@ -61,8 +54,8 @@ export const AdminSidebar = ({
                 }}>
                     <img
                         src={
-                            adminData?.foto ||
-                            `https://ui-avatars.com/api/?name=${adminData?.nombre || adminData?.usuario || "Admin"}&background=0f4d34&color=ffffff&bold=true`
+                            empleadoData?.foto ||
+                            `https://ui-avatars.com/api/?name=${empleadoData?.nombre || empleadoData?.usuario || "Empleado"}&background=0f4d34&color=ffffff&bold=true`
                         }
                         alt="Profile"
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -70,6 +63,7 @@ export const AdminSidebar = ({
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                    {/* Línea Superior: Muestra el nombre limpio */}
                     <span style={{
                         fontSize: "14px",
                         fontWeight: "700",
@@ -78,14 +72,18 @@ export const AdminSidebar = ({
                         overflow: "hidden",
                         textOverflow: "ellipsis"
                     }}>
-                        {adminData?.nombre || adminData?.usuario || "Administrador"}
+                        {empleadoData?.nombre || empleadoData?.usuario || "Empleado"}
                     </span>
 
+                    {/* Línea Inferior: Muestra el Municipio correspondiente */}
                     <span style={{
                         fontSize: "11px",
-                        color: "#86efac"
+                        color: "#86efac",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
                     }}>
-                        {adminData?.rol || "Administrador"}
+                        {empleadoData?.municipio ? `Municipio ${empleadoData.municipio}` : "Municipio Asignado"}
                     </span>
                 </div>
             </div>
@@ -99,7 +97,7 @@ export const AdminSidebar = ({
                 overflowY: "auto",
                 paddingRight: "4px"
             }}>
-                {/* MENÚ PRINCIPAL: Predios */}
+                {/* 1. PREDIOS */}
                 <div>
                     <div
                         onClick={() => setPrediosAbierto(!prediosAbierto)}
@@ -116,7 +114,7 @@ export const AdminSidebar = ({
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                     >
                         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                            {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />}
+                            <MapIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
                             <span>Predios</span>
                         </div>
                         
@@ -140,6 +138,7 @@ export const AdminSidebar = ({
                             marginBottom: "8px",
                             borderLeft: "2px solid rgba(134, 239, 172, 0.2)"
                         }}>
+                            {/* Opción Inicio */}
                             <div
                                 onClick={() => setVistaActiva("inicio")}
                                 style={{
@@ -152,98 +151,34 @@ export const AdminSidebar = ({
                                     transition: "background 0.2s"
                                 }}
                             >
-                                {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
-                                <span>Dashboard</span>
+                                <ChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                <span>Inicio</span>
                             </div>
 
+                            {/* Opción Registro */}
                             <div
-                                onClick={() => setVistaActiva("credenciales")}
+                                onClick={() => setVistaActiva("predios_registro")}
                                 style={{
                                     display: "flex", alignItems: "center", gap: "10px",
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "credenciales" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "credenciales" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "credenciales" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
-                                }}
-                            >
-                                {KeyIcon && <KeyIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
-                                <span>Credenciales Usuarios</span>
-                            </div>
-
-                            <div
-                                onClick={() => setVistaActiva("historial")}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: "10px",
-                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "historial" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "historial" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "historial" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
-                                }}
-                            >
-                                {ClockIcon && <ClockIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
-                                <span>Historial</span>
-                            </div>
-
-                            {/* Bitácora ubicada debajo de Historial */}
-                            <div
-                                onClick={() => setVistaActiva("bitacora")}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: "10px",
-                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "bitacora" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "bitacora" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "bitacora" ? 600 : 400,
+                                    backgroundColor: vistaActiva === "predios_registro" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "predios_registro" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "predios_registro" ? 600 : 400,
                                     fontSize: "13px",
                                     transition: "background 0.2s"
                                 }}
                             >
                                 <ClipboardDocumentListIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
-                                <span>Bitácora de Cambios</span>
-                            </div>
-
-                            <div
-                                onClick={() => setVistaActiva("georreferenciacion")}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: "10px",
-                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "georreferenciacion" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "georreferenciacion" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "georreferenciacion" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
-                                }}
-                            >
-                                <MapPinIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
-                                <span>Georreferenciación</span>
-                            </div>
-
-                            <div
-                                onClick={() => setVistaActiva("reportes")}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: "10px",
-                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "reportes" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "reportes" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "reportes" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
-                                }}
-                            >
-                                <DocumentChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
-                                <span>Reportes</span>
+                                <span>Registro</span>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* MENÚ PRINCIPAL: Configuración */}
+                {/* 2. PRODUCCIÓN (Menú Principal con CircleStackIcon) */}
                 <div>
                     <div
-                        onClick={() => setConfiguracionAbierto(!configuracionAbierto)}
+                        onClick={() => setProduccionAbierto(!produccionAbierto)}
                         style={{
                             display: "flex", alignItems: "center", justifyContent: "space-between",
                             padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
@@ -257,44 +192,44 @@ export const AdminSidebar = ({
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                     >
                         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                            <Cog6ToothIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
-                            <span>Configuración</span>
+                            <CircleStackIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
+                            <span>Producción</span>
                         </div>
                         
                         <ChevronDownIcon style={{
                             width: "17px",
                             height: "17px",
                             color: "#86efac",
-                            transform: configuracionAbierto ? "rotate(180deg)" : "rotate(0deg)",
+                            transform: produccionAbierto ? "rotate(180deg)" : "rotate(0deg)",
                             transition: "transform 0.25s ease"
                         }} />
                     </div>
 
-                    {/* Submenú desplegable de Configuración */}
-                    {configuracionAbierto && (
+                    {/* Submenú desplegable de Producción */}
+                    {produccionAbierto && (
                         <div style={{
                             display: "flex",
                             flexDirection: "column",
                             gap: "6px",
                             paddingLeft: "20px",
                             marginTop: "4px",
-                            marginBottom: "28px",
+                            marginBottom: "8px",
                             borderLeft: "2px solid rgba(134, 239, 172, 0.2)"
                         }}>
                             <div
-                                onClick={() => setVistaActiva("configuracion")}
+                                onClick={() => setVistaActiva("produccion_inicio")}
                                 style={{
                                     display: "flex", alignItems: "center", gap: "10px",
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "configuracion" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "configuracion" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "configuracion" ? 600 : 400,
+                                    backgroundColor: vistaActiva === "produccion_inicio" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "produccion_inicio" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "produccion_inicio" ? 600 : 400,
                                     fontSize: "13px",
                                     transition: "background 0.2s"
                                 }}
                             >
-                                <Cog6ToothIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
-                                <span>Ajustes Generales</span>
+                                <ChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                <span>Inicio</span>
                             </div>
                         </div>
                     )}

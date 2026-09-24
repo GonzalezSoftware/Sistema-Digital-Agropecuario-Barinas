@@ -444,3 +444,40 @@ def obtener_credenciales_municipios(request):
     data = {item['municipio']: {"creado": True, "usuario": item['usuario']} for item in credenciales}
     return Response(data)
 
+@api_view(['POST'])
+def login_admin_api(request):
+    data = request.data
+    usuario = data.get('usuario')
+    clave = data.get('clave')
+
+    if not usuario or not clave:
+        return Response({"success": False, "message": "Usuario y contraseña obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        admin = AdministradorSistema.objects.get(usuario=usuario)
+        
+        # 🚫 RESTRICCIÓN: Bloqueamos si es el Administrador Maestro o si no tiene municipio asignado
+        if admin.rol == "Administrador Maestro" or not admin.municipio:
+            return Response({"success": False, "message": "Este acceso es exclusivo para usuarios municipales."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Validamos la contraseña encriptada
+        if check_password(clave, admin.clave):
+            municipio_nombre = admin.municipio.replace('_', ' ').upper()
+            mensaje_acceso = f"Accediste al municipio {municipio_nombre}"
+
+            return Response({
+                "success": True,
+                "message": mensaje_acceso,
+                "usuario": {
+                    "id": admin.id,
+                    "nombre": admin.nombre,
+                    "usuario": admin.usuario,
+                    "rol": admin.rol,
+                    "municipio": admin.municipio
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({"success": False, "message": "Usuario o contraseña incorrectos."}, status=status.HTTP_400_BAD_REQUEST)
+            
+    except AdministradorSistema.DoesNotExist:
+        return Response({"success": False, "message": "Usuario o contraseña incorrectos."}, status=status.HTTP_404_NOT_FOUND)

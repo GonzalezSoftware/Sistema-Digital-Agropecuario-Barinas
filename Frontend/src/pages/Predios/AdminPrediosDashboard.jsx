@@ -22,6 +22,7 @@ import { CredencialesMunicipios } from '../../components/CredencialesMunicipios'
 import { AdminHeader } from '../../components/Header';
 import { AdminSidebar } from '../../components/Sidebar';
 import VistaMapaPredios from "../../components/VistaMapaPredios";
+import { ReportesView } from '../../components/ReportesView';
 
 //Estilos UI
 import {
@@ -29,7 +30,7 @@ import {
     chartCard, chartTitle, chartPlaceholder, avatarWrapper
 } from "../../components/ui/AdminUI";
 
-/// Importación de iconos
+// Importación de iconos
 import PresentationChartBarIcon from "@heroicons/react/24/solid/PresentationChartBarIcon";
 import KeyIcon from "@heroicons/react/24/solid/KeyIcon";
 import PowerIcon from "@heroicons/react/24/solid/PowerIcon";
@@ -40,6 +41,9 @@ import UserIcon from "@heroicons/react/24/solid/UserIcon";
 import LockClosedIcon from "@heroicons/react/24/solid/LockClosedIcon";
 import ClockIcon from "@heroicons/react/24/solid/ClockIcon";
 import MapPinIcon from "@heroicons/react/24/solid/MapPinIcon";
+import DocumentChartBarIcon from "@heroicons/react/24/solid/DocumentChartBarIcon";
+import Cog6ToothIcon from "@heroicons/react/24/solid/Cog6ToothIcon";
+import ClipboardDocumentListIcon from "@heroicons/react/24/solid/ClipboardDocumentListIcon"; // <--- Nuevo icono para Bitácora
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
 // Importación de las 12 fotos de los municipios desde Frontend/src/assets/
@@ -88,17 +92,6 @@ export default function AdminPrediosDashboard() {
         "Arismendi", "Barinas", "Bolívar", "Cruz Paredes",
         "Ezequiel Zamora", "Obispos", "Pedraza", "Rojas", "Sosa"
     ];
-
-
-
-
-
-
-
-
-
-
-
 
     // ---------------------------------------- DASHBOARD ------------------------------------------------------
 
@@ -267,6 +260,8 @@ export default function AdminPrediosDashboard() {
                             listaPredios={listaPredios}
                             municipios={MUNICIPIOS}
                         />
+                    ) : vistaActiva === "reportes" ? (
+                        <ReportesView predios={listaPredios} />
                     ) : (
                         /* --- VISTA POR DEFECTO (Si el estado no coincide con ninguna) --- */
                         <div>
