@@ -23,6 +23,7 @@ import { AdminHeader } from '../../components/Header';
 import { AdminSidebar } from '../../components/Sidebar';
 import VistaMapaPredios from "../../components/VistaMapaPredios";
 import { ReportesView } from '../../components/ReportesView';
+import { AdminCredencialesNoticias } from '../../components/AdminCredencialesNoticias';
 
 //Estilos UI
 import {
@@ -66,10 +67,14 @@ export default function AdminPrediosDashboard() {
     const [adminData, setAdminData] = useState(null);
     const [vistaActiva, setVistaActiva] = useState("inicio");
 
-    // Estado de credenciales por municipio
+    // Estado de credenciales por municipio (Existente)
     const [credenciales, setCredenciales] = useState({});
     const [cargando, setCargando] = useState(false);
     const [cargandoDatos, setCargandoDatos] = useState(false);
+
+    // NUEVO: Estado específico para las credenciales de noticias por municipio
+    const [credencialesNoticias, setCredencialesNoticias] = useState({});
+    const [cargandoNoticiasDatos, setCargandoNoticiasDatos] = useState(false);
 
     // Listado oficial de los 12 municipios de Barinas vinculados a su respectiva imagen
     const MUNICIPIOS_BARINAS = [
@@ -137,7 +142,6 @@ export default function AdminPrediosDashboard() {
         fetch("/api/predios/") // Ajusta la ruta según tu URL de Django DRF
             .then(res => res.json())
             .then(data => {
-                // Si tu ViewSet usa paginación, puede venir en data.results, si no, es data directamente
                 setListaPredios(Array.isArray(data) ? data : data.results || []);
                 setCargando(false);
             })
@@ -168,6 +172,23 @@ export default function AdminPrediosDashboard() {
                 .catch(err => {
                     console.log("Error cargando credenciales:", err);
                     setCargandoDatos(false);
+                });
+        }
+    }, [vistaActiva]);
+
+    // NUEVO: Efecto para cargar credenciales de noticias cuando se selecciona esa vista
+    useEffect(() => {
+        if (vistaActiva === "credenciales-noticias") {
+            setCargandoNoticiasDatos(true);
+            fetch("/api/credenciales-noticias-municipios/") // Cambia esta ruta por la de tu endpoint en Django si aplica
+                .then(res => res.json())
+                .then(data => {
+                    setCredencialesNoticias(data);
+                    setCargandoNoticiasDatos(false);
+                })
+                .catch(err => {
+                    console.log("Error cargando credenciales de noticias:", err);
+                    setCargandoNoticiasDatos(false);
                 });
         }
     }, [vistaActiva]);
@@ -231,6 +252,20 @@ export default function AdminPrediosDashboard() {
                             UserIcon={UserIcon}
                             LockClosedIcon={LockClosedIcon}
                         />
+                    ) : vistaActiva === "noticias" ? (
+                        /* NUEVA VISTA PARA CREDENCIALES DE NOTICIAS */
+                        <AdminCredencialesNoticias
+                            MUNICIPIOS_BARINAS={MUNICIPIOS_BARINAS}
+                            credenciales={credencialesNoticias}
+                            setCredenciales={setCredencialesNoticias}
+                            cargandoDatos={cargandoNoticiasDatos}
+                            CheckCircleIcon={CheckCircleIcon}
+                            ExclamationCircleIcon={ExclamationCircleIcon}
+                            KeyIcon={KeyIcon}
+                            XMarkIcon={XMarkIcon}
+                            UserIcon={UserIcon}
+                            LockClosedIcon={LockClosedIcon}
+                        />
                     ) : vistaActiva === "historial" ? (
                         <HistorialPredios
                             tabActiva={vistaActiva}
@@ -273,4 +308,3 @@ export default function AdminPrediosDashboard() {
         </div>
     );
 }
-

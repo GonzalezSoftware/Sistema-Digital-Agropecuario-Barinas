@@ -216,3 +216,12 @@ class AdministradorSistema(models.Model):
 
     class Meta:
         db_table = 'administradores_sistema'
+
+class Noticia(models.Model):
+    titulo = models.CharField(max_length=255)
+    descripcion = models.TextField()
+    imagen = models.ImageField(upload_to='noticias/', blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.titulo

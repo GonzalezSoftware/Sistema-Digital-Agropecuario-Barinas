@@ -56,13 +56,28 @@ export default function LoginPrediosPage() {
         // Guardamos los datos del usuario en sessionStorage
         sessionStorage.setItem("usuario_predios", JSON.stringify(data.usuario));
 
-        // Determinamos el mensaje y el municipio para enviarlo por state
+        // 📰 CASO ESPECÍFICO: Si es Empleado de Noticias muestra la alerta y redirige al Dashboard de Noticias
+        if (data.usuario.rol === "Empleado de Noticias") {
+          await Swal.fire({
+            icon: "success",
+            title: "¡Acceso Autorizado!",
+            text: "Accediste a la sección de noticias",
+            confirmButtonColor: "#136442",
+            timer: 2500,
+            timerProgressBar: true
+          });
+
+          // Redirige a la ruta asignada para el panel de noticias
+          navigate("/predios/noticias-dashboard"); // Ajusta esta ruta según tu App.js / routes
+          return;
+        }
+
+        // CASO GENERAL: Empleados Municipales
         const municipioRaw = data.usuario.municipio || "";
         const destinoTexto = municipioRaw
           ? `el municipio ${municipioRaw.replace(/_/g, ' ').toUpperCase()}`
           : `el sistema general (${data.usuario.rol})`;
 
-        // Alerta con SweetAlert2 indicando dónde accedió y posterior redirección
         await Swal.fire({
           icon: "success",
           title: "¡Credenciales Correctas!",
@@ -72,7 +87,7 @@ export default function LoginPrediosPage() {
           timerProgressBar: true
         });
 
-        // Redirección al nuevo dashboard general pasando el municipio o rol por state
+        // Redirección al dashboard general
         navigate("/predios/Empleados", {
           state: {
             municipio: municipioRaw ? municipioRaw.replace(/_/g, ' ').toUpperCase() : data.usuario.rol
