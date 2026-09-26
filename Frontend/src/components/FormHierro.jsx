@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { btnPrincipal, grid3, labelStyle, inputStyle } from "../pages/Produccion/DashboardProduccion";
+import { FormSection, btnPrincipal, grid3, labelStyle, inputStyle } from "../pages/Produccion/DashboardProduccion";
 
 // Componente ModernSelectField estilizado
 const ModernSelectField = ({ label, value, onChange, error, children }) => {
@@ -173,8 +173,8 @@ const handleGuardarClick = (e) => {
         <div style={{ maxWidth: "950px", margin: "0 auto" }}>
             {!predioActivo ? (
                 <FormSection title="⚠️ Selección requerida">
-                    <p style={{ color: "#64748b", margin: 0, fontSize: "14px" }}>
-                        Debes seleccionar un predio antes de registrar una licencia de hierro ganadero.
+                    <p style={{ color: "#64748b" }}>
+                        Debes seleccionar un predio antes de registrar inventario.
                     </p>
                 </FormSection>
             ) : (

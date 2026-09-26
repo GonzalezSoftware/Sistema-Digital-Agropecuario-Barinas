@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import MapPinIcon from "@heroicons/react/24/solid/MapPinIcon"; 
-import DocumentChartBarIcon from "@heroicons/react/24/solid/DocumentChartBarIcon"; 
+import MapPinIcon from "@heroicons/react/24/solid/MapPinIcon";
+import DocumentChartBarIcon from "@heroicons/react/24/solid/DocumentChartBarIcon";
 import Cog6ToothIcon from "@heroicons/react/24/solid/Cog6ToothIcon";
-import ClipboardDocumentListIcon from "@heroicons/react/24/solid/ClipboardDocumentListIcon"; 
+import ClipboardDocumentListIcon from "@heroicons/react/24/solid/ClipboardDocumentListIcon";
 import NewspaperIcon from "@heroicons/react/24/solid/NewspaperIcon";
 import ArrowPathIcon from "@heroicons/react/24/solid/ArrowPathIcon";
 
@@ -19,25 +19,24 @@ export const AdminSidebar = ({
 }) => {
     // Estado para controlar si el menú desplegable de Predios está abierto o cerrado
     const [prediosAbierto, setPrediosAbierto] = useState(
-        vistaActiva === "inicio" || 
-        vistaActiva === "credenciales" || 
-        vistaActiva === "historial" || 
-        vistaActiva === "bitacora" || 
-        vistaActiva === "georreferenciacion" || 
-        vistaActiva === "reportes" || 
+        vistaActiva === "inicio" ||
+        vistaActiva === "historial" ||
+        vistaActiva === "georreferenciacion" ||
+        vistaActiva === "reportes" ||
         vistaActiva === "predios"
     );
 
     // Estado para controlar si el menú desplegable de Producción está abierto o cerrado
     const [produccionAbierto, setProduccionAbierto] = useState(
-        vistaActiva === "produccion_dashboard" || 
-        vistaActiva === "produccion_seleccionar_predio" || 
+        vistaActiva === "produccion_dashboard" ||
         vistaActiva === "produccion_reportes"
     );
 
     // Estado para controlar si el menú desplegable de Configuración está abierto o cerrado
     const [configuracionAbierto, setConfiguracionAbierto] = useState(
-        vistaActiva === "configuracion"
+        vistaActiva === "configuracion" ||
+        vistaActiva === "credenciales"||
+        vistaActiva === "bitacora"
     );
 
     return (
@@ -129,7 +128,7 @@ export const AdminSidebar = ({
                             {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />}
                             <span>Predios</span>
                         </div>
-                        
+
                         <ChevronDownIcon style={{
                             width: "17px",
                             height: "17px",
@@ -167,22 +166,6 @@ export const AdminSidebar = ({
                             </div>
 
                             <div
-                                onClick={() => setVistaActiva("credenciales")}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: "10px",
-                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "credenciales" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "credenciales" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "credenciales" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
-                                }}
-                            >
-                                {KeyIcon && <KeyIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
-                                <span>Credenciales Usuarios</span>
-                            </div>
-
-                            <div
                                 onClick={() => setVistaActiva("historial")}
                                 style={{
                                     display: "flex", alignItems: "center", gap: "10px",
@@ -196,22 +179,6 @@ export const AdminSidebar = ({
                             >
                                 {ClockIcon && <ClockIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
                                 <span>Historial</span>
-                            </div>
-
-                            <div
-                                onClick={() => setVistaActiva("bitacora")}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: "10px",
-                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "bitacora" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "bitacora" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "bitacora" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
-                                }}
-                            >
-                                <ClipboardDocumentListIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
-                                <span>Bitácora de Cambios</span>
                             </div>
 
                             <div
@@ -269,7 +236,7 @@ export const AdminSidebar = ({
                             <DocumentChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
                             <span>Producción</span>
                         </div>
-                        
+
                         <ChevronDownIcon style={{
                             width: "17px",
                             height: "17px",
@@ -305,7 +272,7 @@ export const AdminSidebar = ({
                                 {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
                                 <span>Dashboard Producción</span>
                             </div>
-                            
+
                             <div
                                 onClick={() => setVistaActiva("produccion_reportes")}
                                 style={{
@@ -323,31 +290,6 @@ export const AdminSidebar = ({
                             </div>
                         </div>
                     )}
-                </div>
-
-                {/* MENÚ PRINCIPAL: Noticias (Afuera de los demás menús) */}
-                <div>
-                    <div
-                        onClick={() => setVistaActiva("noticias")}
-                        style={{
-                            display: "flex", alignItems: "center", gap: "12px",
-                            padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
-                            transition: "all 0.25s ease",
-                            backgroundColor: vistaActiva === "noticias" ? "rgba(255,255,255,0.15)" : "transparent",
-                            color: vistaActiva === "noticias" ? "#ffffff" : "#86efac",
-                            fontWeight: vistaActiva === "noticias" ? 600 : 500,
-                            fontSize: "14px"
-                        }}
-                        onMouseEnter={(e) => {
-                            if (vistaActiva !== "noticias") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                        }}
-                        onMouseLeave={(e) => {
-                            if (vistaActiva !== "noticias") e.currentTarget.style.backgroundColor = "transparent";
-                        }}
-                    >
-                        <NewspaperIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
-                        <span>Credenciales Noticias</span>
-                    </div>
                 </div>
 
                 {/* MENÚ PRINCIPAL: Configuración */}
@@ -370,7 +312,7 @@ export const AdminSidebar = ({
                             <Cog6ToothIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
                             <span>Configuración</span>
                         </div>
-                        
+
                         <ChevronDownIcon style={{
                             width: "17px",
                             height: "17px",
@@ -406,6 +348,61 @@ export const AdminSidebar = ({
                                 <Cog6ToothIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Ajustes Generales</span>
                             </div>
+
+                            <div
+                                onClick={() => setVistaActiva("credenciales")}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: "10px",
+                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                    backgroundColor: vistaActiva === "credenciales" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "credenciales" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "credenciales" ? 600 : 400,
+                                    fontSize: "13px",
+                                    transition: "background 0.2s"
+                                }}
+                            >
+                                {KeyIcon && <KeyIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
+                                <span>Credenciales Usuarios</span>
+                            </div>
+
+                            <div
+                                onClick={() => setVistaActiva("noticias")}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: "10px",
+                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                    backgroundColor: vistaActiva === "credenciales" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "credenciales" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "credenciales" ? 600 : 400,
+                                    fontSize: "13px",
+                                    transition: "background 0.2s"
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (vistaActiva !== "noticias") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (vistaActiva !== "noticias") e.currentTarget.style.backgroundColor = "transparent";
+                                }}
+                            >
+                                <NewspaperIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
+                                <span>Credenciales Noticias</span>
+                            </div>
+
+                            <div
+                                onClick={() => setVistaActiva("bitacora")}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: "10px",
+                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                    backgroundColor: vistaActiva === "bitacora" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "bitacora" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "bitacora" ? 600 : 400,
+                                    fontSize: "13px",
+                                    transition: "background 0.2s"
+                                }}
+                            >
+                                <ClipboardDocumentListIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                <span>Bitácora de Cambios</span>
+                            </div>
+
                         </div>
                     )}
                 </div>
