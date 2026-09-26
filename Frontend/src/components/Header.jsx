@@ -28,7 +28,15 @@ export const AdminHeader = ({ vistaActiva, escudo }) => {
                                 ? "Asignar Credenciales Noticias"
                                 : vistaActiva === "configuracion"
                                     ? "Configuración del Sistema"
-                                    : "Historial de Actividad"}
+                                    : vistaActiva === "produccion_dashboard"
+                                        ? "Dashboard Producción"
+                                        : vistaActiva === "produccion_seleccionar_predio"
+                                            ? "Seleccionar Predio"
+                                            : vistaActiva === "produccion_actualizacion"
+                                                ? "Actualización Productiva"
+                                                : vistaActiva === "produccion_reportes"
+                                                    ? "Reportes de Producción"
+                                                    : "Historial de Actividad"}
 </h2>
                 <p style={{ margin: "0px 0 0 0", fontSize: "13px", color: "#64748b" }}>Admin Predios • Estado Barinas</p>
             </div>

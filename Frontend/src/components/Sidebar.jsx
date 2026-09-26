@@ -5,6 +5,7 @@ import DocumentChartBarIcon from "@heroicons/react/24/solid/DocumentChartBarIcon
 import Cog6ToothIcon from "@heroicons/react/24/solid/Cog6ToothIcon";
 import ClipboardDocumentListIcon from "@heroicons/react/24/solid/ClipboardDocumentListIcon"; 
 import NewspaperIcon from "@heroicons/react/24/solid/NewspaperIcon";
+import ArrowPathIcon from "@heroicons/react/24/solid/ArrowPathIcon";
 
 export const AdminSidebar = ({
     adminData,
@@ -25,6 +26,13 @@ export const AdminSidebar = ({
         vistaActiva === "georreferenciacion" || 
         vistaActiva === "reportes" || 
         vistaActiva === "predios"
+    );
+
+    // Estado para controlar si el menú desplegable de Producción está abierto o cerrado
+    const [produccionAbierto, setProduccionAbierto] = useState(
+        vistaActiva === "produccion_dashboard" || 
+        vistaActiva === "produccion_seleccionar_predio" || 
+        vistaActiva === "produccion_reportes"
     );
 
     // Estado para controlar si el menú desplegable de Configuración está abierto o cerrado
@@ -90,6 +98,7 @@ export const AdminSidebar = ({
                     </span>
                 </div>
             </div>
+
 
             {/* Navegación de Opciones */}
             <div style={{
@@ -229,6 +238,82 @@ export const AdminSidebar = ({
                                     backgroundColor: vistaActiva === "reportes" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "reportes" ? "#ffffff" : "#86efac",
                                     fontWeight: vistaActiva === "reportes" ? 600 : 400,
+                                    fontSize: "13px",
+                                    transition: "background 0.2s"
+                                }}
+                            >
+                                <DocumentChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                <span>Reportes</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* MENÚ PRINCIPAL: Producción */}
+                <div>
+                    <div
+                        onClick={() => setProduccionAbierto(!produccionAbierto)}
+                        style={{
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
+                            transition: "all 0.25s ease",
+                            backgroundColor: "transparent",
+                            color: "#86efac",
+                            fontWeight: 500,
+                            fontSize: "14px"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                            <DocumentChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
+                            <span>Producción</span>
+                        </div>
+                        
+                        <ChevronDownIcon style={{
+                            width: "17px",
+                            height: "17px",
+                            color: "#86efac",
+                            transform: produccionAbierto ? "rotate(180deg)" : "rotate(0deg)",
+                            transition: "transform 0.25s ease"
+                        }} />
+                    </div>
+
+                    {/* Submenú desplegable de Producción */}
+                    {produccionAbierto && (
+                        <div style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "6px",
+                            paddingLeft: "20px",
+                            marginTop: "4px",
+                            marginBottom: "8px",
+                            borderLeft: "2px solid rgba(134, 239, 172, 0.2)"
+                        }}>
+                            <div
+                                onClick={() => setVistaActiva("produccion_dashboard")}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: "10px",
+                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                    backgroundColor: vistaActiva === "produccion_dashboard" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "produccion_dashboard" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "produccion_dashboard" ? 600 : 400,
+                                    fontSize: "13px",
+                                    transition: "background 0.2s"
+                                }}
+                            >
+                                {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
+                                <span>Dashboard Producción</span>
+                            </div>
+                            
+                            <div
+                                onClick={() => setVistaActiva("produccion_reportes")}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: "10px",
+                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                    backgroundColor: vistaActiva === "produccion_reportes" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "produccion_reportes" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "produccion_reportes" ? 600 : 400,
                                     fontSize: "13px",
                                     transition: "background 0.2s"
                                 }}

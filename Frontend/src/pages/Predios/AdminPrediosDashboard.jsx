@@ -1,21 +1,13 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import escudo from "../../assets/logo2.jpg";
-import {
-    ResponsiveContainer, BarChart, Bar, PieChart, Pie, RadarChart, Radar,
-    PolarGrid, PolarAngleAxis, PolarRadiusAxis, ScatterChart, Scatter,
-    Treemap, XAxis, YAxis, CartesianGrid, Tooltip, Cell, Legend
-} from 'recharts';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
-
-//Hooks
+// Hooks
 import { useEstadisticasPredios } from "../../hooks/useEstadisticasPredios";
 import { useHistorialPredios } from '../../hooks/useHistorialPredios';
+import { useDashboardProduccion } from '../../hooks/useProduccion';
 
-//Components
+// Components
 import DashboardInicio from '../../components/DashboardInicio';
 import HistorialPredios from '../../components/HistorialPredios';
 import { CredencialesMunicipios } from '../../components/CredencialesMunicipios';
@@ -24,8 +16,10 @@ import { AdminSidebar } from '../../components/Sidebar';
 import VistaMapaPredios from "../../components/VistaMapaPredios";
 import { ReportesView } from '../../components/ReportesView';
 import { AdminCredencialesNoticias } from '../../components/AdminCredencialesNoticias';
+import AdminProduccionDashboard from '../../components/AdminProduccionDashboard';
+import SeccionReportes from "../../components/SeccionReportes";
 
-//Estilos UI
+// Estilos UI
 import {
     estiloInput, estiloBoton, InputField, Spinner, CardStat,
     chartCard, chartTitle, chartPlaceholder, avatarWrapper
@@ -41,13 +35,8 @@ import XMarkIcon from "@heroicons/react/24/solid/XMarkIcon";
 import UserIcon from "@heroicons/react/24/solid/UserIcon";
 import LockClosedIcon from "@heroicons/react/24/solid/LockClosedIcon";
 import ClockIcon from "@heroicons/react/24/solid/ClockIcon";
-import MapPinIcon from "@heroicons/react/24/solid/MapPinIcon";
-import DocumentChartBarIcon from "@heroicons/react/24/solid/DocumentChartBarIcon";
-import Cog6ToothIcon from "@heroicons/react/24/solid/Cog6ToothIcon";
-import ClipboardDocumentListIcon from "@heroicons/react/24/solid/ClipboardDocumentListIcon"; // <--- Nuevo icono para Bitácora
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
 
-// Importación de las 12 fotos de los municipios desde Frontend/src/assets/
+// Importación de las 12 fotos de los municipios
 import albertoArvelo from "../../assets/alberto_arvelo.jpg";
 import andresEloy from "../../assets/andres_eloy.jpg";
 import antonioJose from "../../assets/antonio_jose.jpg";
@@ -61,18 +50,29 @@ import pedraza from "../../assets/pedraza.jpg";
 import rojas from "../../assets/rojas.jpg";
 import sosa from "../../assets/sosa.jpg";
 
-
 export default function AdminPrediosDashboard() {
     const navigate = useNavigate();
     const [adminData, setAdminData] = useState(null);
     const [vistaActiva, setVistaActiva] = useState("inicio");
+    const [verificandoSesion, setVerificandoSesion] = useState(true);
 
-    // Estado de credenciales por municipio (Existente)
+    const productionState = useDashboardProduccion();
+    const {
+        tabActiva: tabProd,
+        setTabActiva: setTabProd,
+        predioActivo,
+        setPredioActivo,
+        busquedaCedula,        // <-- Agrega esto
+        setBusquedaCedula,     // <-- Agrega esto
+        filtrarPredios         // <-- Agrega esto
+    } = productionState;
+
+    // Estado de credenciales por municipio
     const [credenciales, setCredenciales] = useState({});
     const [cargando, setCargando] = useState(false);
     const [cargandoDatos, setCargandoDatos] = useState(false);
 
-    // NUEVO: Estado específico para las credenciales de noticias por municipio
+    // Estado específico para las credenciales de noticias por municipio
     const [credencialesNoticias, setCredencialesNoticias] = useState({});
     const [cargandoNoticiasDatos, setCargandoNoticiasDatos] = useState(false);
 
@@ -99,7 +99,6 @@ export default function AdminPrediosDashboard() {
     ];
 
     // ---------------------------------------- DASHBOARD ------------------------------------------------------
-
     const [listaPredios, setListaPredios] = useState([]);
     const {
         totalPredios,
@@ -116,7 +115,6 @@ export default function AdminPrediosDashboard() {
     } = useEstadisticasPredios(listaPredios);
 
     // ---------------------------------------- HISTORIAL --------------------------------------------------
-
     const {
         busqueda,
         setBusqueda,
@@ -139,7 +137,7 @@ export default function AdminPrediosDashboard() {
 
     useEffect(() => {
         setCargando(true);
-        fetch("/api/predios/") // Ajusta la ruta según tu URL de Django DRF
+        fetch("/api/predios/")
             .then(res => res.json())
             .then(data => {
                 setListaPredios(Array.isArray(data) ? data : data.results || []);
@@ -155,9 +153,10 @@ export default function AdminPrediosDashboard() {
         const sesion = sessionStorage.getItem("usuario_admin");
         if (!sesion) {
             navigate("/predios/admin-secreto");
-            return;
+        } else {
+            setAdminData(JSON.parse(sesion));
         }
-        setAdminData(JSON.parse(sesion));
+        setVerificandoSesion(false);
     }, [navigate]);
 
     useEffect(() => {
@@ -176,11 +175,10 @@ export default function AdminPrediosDashboard() {
         }
     }, [vistaActiva]);
 
-    // NUEVO: Efecto para cargar credenciales de noticias cuando se selecciona esa vista
     useEffect(() => {
         if (vistaActiva === "credenciales-noticias") {
             setCargandoNoticiasDatos(true);
-            fetch("/api/credenciales-noticias-municipios/") // Cambia esta ruta por la de tu endpoint en Django si aplica
+            fetch("/api/credenciales-noticias-municipios/")
                 .then(res => res.json())
                 .then(data => {
                     setCredencialesNoticias(data);
@@ -198,26 +196,32 @@ export default function AdminPrediosDashboard() {
         navigate("/predios/admin-secreto");
     };
 
+    if (verificandoSesion) {
+        return (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", backgroundColor: "#f8fafc", fontFamily: "'Poppins', sans-serif" }}>
+                <div style={{ textAlign: "center" }}>
+                    <p style={{ color: "#136442", fontWeight: "600", fontSize: "16px" }}>Verificando sesión...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div style={{ minHeight: "100vh", backgroundColor: "#f8fafc", display: "flex", fontFamily: "'Poppins', sans-serif" }}>
-
-            {/* ── CONTENEDOR PRINCIPAL ── */}
             <div style={{ display: "flex", flex: 1 }}>
-
                 <AdminSidebar
                     adminData={adminData}
                     vistaActiva={vistaActiva}
                     setVistaActiva={setVistaActiva}
                     cerrarSesion={cerrarSesion}
+                    predioSeleccionado={productionState.predioSeleccionado || predioSeleccionado} // <--- ¡Añadir esto!
                     PresentationChartBarIcon={PresentationChartBarIcon}
                     KeyIcon={KeyIcon}
                     ClockIcon={ClockIcon}
                     PowerIcon={PowerIcon}
                 />
 
-                {/* ── CONTENIDO PRINCIPAL DERECHO DINÁMICO ── */}
                 <main style={{ padding: "26px 50px", flex: 1, boxSizing: "border-box", overflowY: "auto" }}>
-
                     <AdminHeader vistaActiva={vistaActiva} escudo={escudo} />
 
                     {vistaActiva === "inicio" ? (
@@ -253,7 +257,6 @@ export default function AdminPrediosDashboard() {
                             LockClosedIcon={LockClosedIcon}
                         />
                     ) : vistaActiva === "noticias" ? (
-                        /* NUEVA VISTA PARA CREDENCIALES DE NOTICIAS */
                         <AdminCredencialesNoticias
                             MUNICIPIOS_BARINAS={MUNICIPIOS_BARINAS}
                             credenciales={credencialesNoticias}
@@ -297,8 +300,11 @@ export default function AdminPrediosDashboard() {
                         />
                     ) : vistaActiva === "reportes" ? (
                         <ReportesView predios={listaPredios} />
+                    ) : vistaActiva === "produccion_dashboard" ? (
+                        <AdminProduccionDashboard productionState={productionState} />
+                    ) : vistaActiva === "produccion_reportes" ? (
+                        <SeccionReportes listaPredios={listaPredios} />
                     ) : (
-                        /* --- VISTA POR DEFECTO (Si el estado no coincide con ninguna) --- */
                         <div>
                             <p>Selecciona una sección válida en el menú lateral.</p>
                         </div>

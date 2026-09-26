@@ -92,6 +92,21 @@ const IconReportes = () => (
         <line x1="6" y1="20" x2="6" y2="14"></line>
     </svg>
 );
+const IconActualizacion = () => (
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+    >
+        <path d="M21.5 2v6h-6"></path>
+        <path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+    </svg>
+);
 
 export default function DashboardProduccion() {
 
@@ -152,274 +167,274 @@ export default function DashboardProduccion() {
         return nombrePredio.includes(term) || nombreProductor.includes(term);
     });
 
-const generarPDFPredio = (predio) => {
-    console.log("DATOS REALES DEL PREDIO EN EL PDF:", predio);
+    const generarPDFPredio = (predio) => {
+        console.log("DATOS REALES DEL PREDIO EN EL PDF:", predio);
 
-    if (!predio || !predio.caracterizacion_completada) {
-        alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
-        return;
-    }
+        if (!predio || !predio.caracterizacion_completada) {
+            alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
+            return;
+        }
 
-    const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "letter"
-    });
+        const doc = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "letter"
+        });
 
-    const verdeBarinas = [19, 100, 66];
-    const grisOscuro = [40, 40, 40];
+        const verdeBarinas = [19, 100, 66];
+        const grisOscuro = [40, 40, 40];
 
-    // ────────────────────────────────────────────────────────
-    // CINTILLO INSTITUCIONAL
-    // ────────────────────────────────────────────────────────
-    try {
-        doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
-    } catch (error) {
-        console.warn("Logos institucionales omitidos.");
-    }
+        // ────────────────────────────────────────────────────────
+        // CINTILLO INSTITUCIONAL
+        // ────────────────────────────────────────────────────────
+        try {
+            doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
+            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+        } catch (error) {
+            console.warn("Logos institucionales omitidos.");
+        }
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(7.5);
-    doc.setTextColor(...verdeBarinas);
-    doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(100, 100, 100);
-    doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(100, 100, 100);
+        doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
 
-    const fechaEmision = predio.fecha_registro
-        ? new Date(predio.fecha_registro).toLocaleDateString()
-        : new Date().toLocaleDateString();
-    doc.text(`Fecha de Registro: ${fechaEmision}`, 204, 18, { align: "right" });
+        const fechaEmision = predio.fecha_registro
+            ? new Date(predio.fecha_registro).toLocaleDateString()
+            : new Date().toLocaleDateString();
+        doc.text(`Fecha de Registro: ${fechaEmision}`, 204, 18, { align: "right" });
 
-    doc.setDrawColor(...verdeBarinas);
-    doc.setLineWidth(0.6);
-    doc.line(12, 25, 204, 25);
+        doc.setDrawColor(...verdeBarinas);
+        doc.setLineWidth(0.6);
+        doc.line(12, 25, 204, 25);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(...verdeBarinas);
-    doc.text(`FICHA TÉCNICA DE CARACTERIZACIÓN AGROPECUARIA: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`, 12, 33);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.setTextColor(...verdeBarinas);
+        doc.text(`FICHA TÉCNICA DE CARACTERIZACIÓN AGROPECUARIA: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`, 12, 33);
 
-    // ────────────────────────────────────────────────────────
-    // SECCIÓN I: IDENTIFICACIÓN GENERAL
-    // ────────────────────────────────────────────────────────
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.text("I. IDENTIFICACIÓN GENERAL", 12, 42);
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.3);
-    doc.line(12, 44, 204, 44);
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN I: IDENTIFICACIÓN GENERAL
+        // ────────────────────────────────────────────────────────
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("I. IDENTIFICACIÓN GENERAL", 12, 42);
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(12, 44, 204, 44);
 
-    const infoGeneral = [
-        ["Productor:", predio.productor?.nombre || "N/A", "Cédula / RIF:", predio.productor?.cedula_rif || "N/A"],
-        ["Municipio:", predio.municipio || "N/A", "Parroquia:", predio.parroquia || "N/A"],
-        ["Superficie Total:", predio.superficie ? `${predio.superficie} Ha` : "0.00 Ha", "Coordenadas UTM:", predio.coordenadas || "N/A"]
-    ];
+        const infoGeneral = [
+            ["Productor:", predio.productor?.nombre || "N/A", "Cédula / RIF:", predio.productor?.cedula_rif || "N/A"],
+            ["Municipio:", predio.municipio || "N/A", "Parroquia:", predio.parroquia || "N/A"],
+            ["Superficie Total:", predio.superficie ? `${predio.superficie} Ha` : "0.00 Ha", "Coordenadas UTM:", predio.coordenadas || "N/A"]
+        ];
 
-    autoTable(doc, {
-        startY: 46,
-        body: infoGeneral,
-        theme: "plain",
-        styles: { fontSize: 8.5, cellPadding: 1.8, font: "helvetica" },
-        columnStyles: {
-            0: { fontStyle: "bold", width: 28, textColor: grisOscuro },
-            1: { width: 72 },
-            2: { fontStyle: "bold", width: 28, textColor: grisOscuro },
-            3: { width: 64 }
-        },
-        margin: { left: 12, right: 12 }
-    });
+        autoTable(doc, {
+            startY: 46,
+            body: infoGeneral,
+            theme: "plain",
+            styles: { fontSize: 8.5, cellPadding: 1.8, font: "helvetica" },
+            columnStyles: {
+                0: { fontStyle: "bold", width: 28, textColor: grisOscuro },
+                1: { width: 72 },
+                2: { fontStyle: "bold", width: 28, textColor: grisOscuro },
+                3: { width: 64 }
+            },
+            margin: { left: 12, right: 12 }
+        });
 
-    // ────────────────────────────────────────────────────────
-    // SECCIÓN II: EXISTENCIA ANIMAL
-    // ────────────────────────────────────────────────────────
-    let currentY = doc.lastAutoTable.finalY + 6;
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...verdeBarinas);
-    doc.text("II. INVENTARIO DE EXISTENCIA ANIMAL (REBAÑOS)", 12, currentY);
-    doc.line(12, currentY + 2, 204, currentY + 2);
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN II: EXISTENCIA ANIMAL
+        // ────────────────────────────────────────────────────────
+        let currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...verdeBarinas);
+        doc.text("II. INVENTARIO DE EXISTENCIA ANIMAL (REBAÑOS)", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
 
-    const extAnimal = predio.existencia_animal || {};
-    let bodyAnimales = [];
+        const extAnimal = predio.existencia_animal || {};
+        let bodyAnimales = [];
 
-    const mapeoEspecies = [
-        { clave: "bovinos", capacidad: "capacidadBovina", etiqueta: "GANADO BOVINO (VACUNO)" },
-        { clave: "vacunos", capacidad: "capacidadVacuna", etiqueta: "GANADO BOVINO (VACUNO)" },
-        { clave: "bubalinos", capacidad: "capacidadBubalina", etiqueta: "GANADO BUBALINO" },
-        { clave: "equinos", capacidad: "capacidadEquina", etiqueta: "GANADO EQUINO" },
-        { clave: "ovinos", capacidad: "capacidadOvina", etiqueta: "GANADO OVINO" },
-        { clave: "porcinos", capacidad: "capacidadPorcina", etiqueta: "GANADO PORCINO" },
-        { clave: "caprinos", capacidad: "capacidadCaprino", etiqueta: "GANADO CAPRINO" },
-        { clave: "cunicola", capacidad: "capacidadCunicola", etiqueta: "CUNÍCULA" },
-        { clave: "avicola", capacidad: "capacidadAvicola", etiqueta: "AVÍCOLA" },
-        { clave: "apicola", capacidad: "capacidadApicola", etiqueta: "APÍCOLA" }
-    ];
+        const mapeoEspecies = [
+            { clave: "bovinos", capacidad: "capacidadBovina", etiqueta: "GANADO BOVINO (VACUNO)" },
+            { clave: "vacunos", capacidad: "capacidadVacuna", etiqueta: "GANADO BOVINO (VACUNO)" },
+            { clave: "bubalinos", capacidad: "capacidadBubalina", etiqueta: "GANADO BUBALINO" },
+            { clave: "equinos", capacidad: "capacidadEquina", etiqueta: "GANADO EQUINO" },
+            { clave: "ovinos", capacidad: "capacidadOvina", etiqueta: "GANADO OVINO" },
+            { clave: "porcinos", capacidad: "capacidadPorcina", etiqueta: "GANADO PORCINO" },
+            { clave: "caprinos", capacidad: "capacidadCaprino", etiqueta: "GANADO CAPRINO" },
+            { clave: "cunicola", capacidad: "capacidadCunicola", etiqueta: "CUNÍCULA" },
+            { clave: "avicola", capacidad: "capacidadAvicola", etiqueta: "AVÍCOLA" },
+            { clave: "apicola", capacidad: "capacidadApicola", etiqueta: "APÍCOLA" }
+        ];
 
-    mapeoEspecies.forEach(esp => {
-        const datosEspecie = extAnimal[esp.clave];
-        if (datosEspecie && typeof datosEspecie === 'object' && Object.keys(datosEspecie).length > 0) {
-            const capData = extAnimal[esp.capacidad] || {};
-            let capTexto = "No especificada";
-            if (Object.keys(capData).length > 0) {
-                capTexto = Object.entries(capData)
-                    .filter(([k]) => k !== "id")
-                    .map(([k, v]) => `${k.replace(/_/g, " ").toUpperCase()}: ${Array.isArray(v) ? v.join(", ") : v}`)
-                    .join(" | ");
+        mapeoEspecies.forEach(esp => {
+            const datosEspecie = extAnimal[esp.clave];
+            if (datosEspecie && typeof datosEspecie === 'object' && Object.keys(datosEspecie).length > 0) {
+                const capData = extAnimal[esp.capacidad] || {};
+                let capTexto = "No especificada";
+                if (Object.keys(capData).length > 0) {
+                    capTexto = Object.entries(capData)
+                        .filter(([k]) => k !== "id")
+                        .map(([k, v]) => `${k.replace(/_/g, " ").toUpperCase()}: ${Array.isArray(v) ? v.join(", ") : v}`)
+                        .join(" | ");
+                }
+
+                Object.entries(datosEspecie).forEach(([subcat, cant]) => {
+                    if (subcat === "id" || cant === 0 || cant === "0") return;
+                    bodyAnimales.push([
+                        esp.etiqueta,
+                        subcat.replace(/_/g, " ").toUpperCase(),
+                        `${cant} Unid.`,
+                        capTexto
+                    ]);
+                });
             }
+        });
 
-            Object.entries(datosEspecie).forEach(([subcat, cant]) => {
-                if (subcat === "id" || cant === 0 || cant === "0") return;
-                bodyAnimales.push([
-                    esp.etiqueta,
-                    subcat.replace(/_/g, " ").toUpperCase(),
-                    `${cant} Unid.`,
-                    capTexto
+        if (bodyAnimales.length === 0) {
+            bodyAnimales = [["Sin existencias animales declaradas o registradas.", "", "", ""]];
+        }
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Especie", "Subtipo / Categoría", "Cantidad", "Capacidad Productiva"]],
+            body: bodyAnimales,
+            theme: "striped",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
+            styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
+            columnStyles: { 0: { width: 45 }, 1: { width: 45 }, 2: { width: 25 }, 3: { width: 82 } },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN III: INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const rubros = predio.rubros_vegetales || [];
+        const bodyRubros = rubros.length > 0
+            ? rubros.map(r => [
+                r.rubro || "N/A",
+                r.hectareas ? `${r.hectareas} Ha` : "0 Ha",
+                r.estado || "N/A",
+                r.riego || "N/A",
+                r.ciclo_productivo || "N/A",
+                r.produccion_estimada ? `${r.produccion_estimada} Kg` : "0 Kg",
+                r.destino || "N/A"
+            ])
+            : [["Sin rubros vegetales declarados.", "", "", "", "", "", ""]];
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Rubro", "Superficie", "Estado", "Riego", "Ciclo", "Prod. Estimada", "Destino"]],
+            body: bodyRubros,
+            theme: "striped",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
+            styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // SECCIÓN IV: MECANIZACIÓN Y MAQUINARIAS (CON OTROS EQUIPOS)
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.text("IV. MECANIZACIÓN Y EQUIPOS TECNOLÓGICOS", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const maquinaria = predio.maquinaria || {};
+        let bodyMaquinarias = [];
+
+        // 1. Procesar Maquinaria Agrícola sobre Ruedas
+        if (maquinaria.maquinaria_ruedas && typeof maquinaria.maquinaria_ruedas === 'object') {
+            Object.entries(maquinaria.maquinaria_ruedas).forEach(([maq, num]) => {
+                if (num === 0 || num === "0" || maq === "id") return;
+                bodyMaquinarias.push([
+                    "MAQUINARIA SOBRE RUEDAS",
+                    maq.replace(/_/g, " ").toUpperCase(),
+                    `${num} Unid.`
                 ]);
             });
         }
-    });
 
-    if (bodyAnimales.length === 0) {
-        bodyAnimales = [["Sin existencias animales declaradas o registradas.", "", "", ""]];
-    }
+        // 2. Procesar Implementos
+        if (maquinaria.implementos && typeof maquinaria.implementos === 'object') {
+            Object.entries(maquinaria.implementos).forEach(([imp, num]) => {
+                if (num === 0 || num === "0" || imp === "id") return;
+                bodyMaquinarias.push([
+                    "IMPLEMENTOS AGRÍCOLAS",
+                    imp.replace(/_/g, " ").toUpperCase(),
+                    `${num} Unid.`
+                ]);
+            });
+        }
 
-    autoTable(doc, {
-        startY: currentY + 4,
-        head: [["Especie", "Subtipo / Categoría", "Cantidad", "Capacidad Productiva"]],
-        body: bodyAnimales,
-        theme: "striped",
-        headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
-        styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
-        columnStyles: { 0: { width: 45 }, 1: { width: 45 }, 2: { width: 25 }, 3: { width: 82 } },
-        margin: { left: 12, right: 12 }
-    });
+        // 3. Procesar Equipamientos de Riego
+        if (maquinaria.riego && typeof maquinaria.riego === 'object') {
+            Object.entries(maquinaria.riego).forEach(([bom, cant]) => {
+                if (cant === 0 || cant === "0" || bom === "id") return;
+                bodyMaquinarias.push([
+                    "EQUIPOS DE RIEGO",
+                    bom.replace(/_/g, " ").toUpperCase(),
+                    `${cant} Unid.`
+                ]);
+            });
+        }
 
-    // ────────────────────────────────────────────────────────
-    // SECCIÓN III: INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)
-    // ────────────────────────────────────────────────────────
-    currentY = doc.lastAutoTable.finalY + 6;
-    doc.setFont("helvetica", "bold");
-    doc.text("III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)", 12, currentY);
-    doc.line(12, currentY + 2, 204, currentY + 2);
+        // 4. Procesar Otros Equipos (Agregado para solventar la omisión)
+        if (maquinaria.otros_equipos && typeof maquinaria.otros_equipos === 'object') {
+            Object.entries(maquinaria.otros_equipos).forEach(([eq, cant]) => {
+                if (cant === 0 || cant === "0" || eq === "id") return;
+                bodyMaquinarias.push([
+                    "OTROS EQUIPOS / TECNOLOGÍA",
+                    eq.replace(/_/g, " ").toUpperCase(),
+                    `${cant} Unid.`
+                ]);
+            });
+        }
 
-    const rubros = predio.rubros_vegetales || [];
-    const bodyRubros = rubros.length > 0
-        ? rubros.map(r => [
-            r.rubro || "N/A",
-            r.hectareas ? `${r.hectareas} Ha` : "0 Ha",
-            r.estado || "N/A",
-            r.riego || "N/A",
-            r.ciclo_productivo || "N/A",
-            r.produccion_estimada ? `${r.produccion_estimada} Kg` : "0 Kg",
-            r.destino || "N/A"
-          ])
-        : [["Sin rubros vegetales declarados.", "", "", "", "", "", ""]];
+        if (bodyMaquinarias.length === 0) {
+            bodyMaquinarias = [["No se registraron maquinarias o equipos tecnológicos.", "", ""]];
+        }
 
-    autoTable(doc, {
-        startY: currentY + 4,
-        head: [["Rubro", "Superficie", "Estado", "Riego", "Ciclo", "Prod. Estimada", "Destino"]],
-        body: bodyRubros,
-        theme: "striped",
-        headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
-        styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
-        margin: { left: 12, right: 12 }
-    });
-
-    // ────────────────────────────────────────────────────────
-    // SECCIÓN IV: MECANIZACIÓN Y MAQUINARIAS (CON OTROS EQUIPOS)
-    // ────────────────────────────────────────────────────────
-    currentY = doc.lastAutoTable.finalY + 6;
-    doc.setFont("helvetica", "bold");
-    doc.text("IV. MECANIZACIÓN Y EQUIPOS TECNOLÓGICOS", 12, currentY);
-    doc.line(12, currentY + 2, 204, currentY + 2);
-
-    const maquinaria = predio.maquinaria || {};
-    let bodyMaquinarias = [];
-
-    // 1. Procesar Maquinaria Agrícola sobre Ruedas
-    if (maquinaria.maquinaria_ruedas && typeof maquinaria.maquinaria_ruedas === 'object') {
-        Object.entries(maquinaria.maquinaria_ruedas).forEach(([maq, num]) => {
-            if (num === 0 || num === "0" || maq === "id") return;
-            bodyMaquinarias.push([
-                "MAQUINARIA SOBRE RUEDAS",
-                maq.replace(/_/g, " ").toUpperCase(),
-                `${num} Unid.`
-            ]);
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Categoría", "Nombre de la Maquinaria / Equipo", "Cantidad"]],
+            body: bodyMaquinarias,
+            theme: "striped",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
+            styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
+            columnStyles: { 0: { width: 60 }, 1: { width: 95 }, 2: { width: 37 } },
+            margin: { left: 12, right: 12 }
         });
-    }
 
-    // 2. Procesar Implementos
-    if (maquinaria.implementos && typeof maquinaria.implementos === 'object') {
-        Object.entries(maquinaria.implementos).forEach(([imp, num]) => {
-            if (num === 0 || num === "0" || imp === "id") return;
-            bodyMaquinarias.push([
-                "IMPLEMENTOS AGRÍCOLAS",
-                imp.replace(/_/g, " ").toUpperCase(),
-                `${num} Unid.`
-            ]);
-        });
-    }
+        // ────────────────────────────────────────────────────────
+        // PIE DE PÁGINA
+        // ────────────────────────────────────────────────────────
+        const totalPaginas = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPaginas; i++) {
+            doc.setPage(i);
+            doc.setFontSize(7);
+            doc.setTextColor(140, 140, 140);
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(0.3);
+            doc.line(12, 268, 204, 268);
+            doc.text("Ficha Técnica de Caracterización Territorial y Productiva — UTMPPAPT.", 12, 272);
+            doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
+        }
 
-    // 3. Procesar Equipamientos de Riego
-    if (maquinaria.riego && typeof maquinaria.riego === 'object') {
-        Object.entries(maquinaria.riego).forEach(([bom, cant]) => {
-            if (cant === 0 || cant === "0" || bom === "id") return;
-            bodyMaquinarias.push([
-                "EQUIPOS DE RIEGO",
-                bom.replace(/_/g, " ").toUpperCase(),
-                `${cant} Unid.`
-            ]);
-        });
-    }
-
-    // 4. Procesar Otros Equipos (Agregado para solventar la omisión)
-    if (maquinaria.otros_equipos && typeof maquinaria.otros_equipos === 'object') {
-        Object.entries(maquinaria.otros_equipos).forEach(([eq, cant]) => {
-            if (cant === 0 || cant === "0" || eq === "id") return;
-            bodyMaquinarias.push([
-                "OTROS EQUIPOS / TECNOLOGÍA",
-                eq.replace(/_/g, " ").toUpperCase(),
-                `${cant} Unid.`
-            ]);
-        });
-    }
-
-    if (bodyMaquinarias.length === 0) {
-        bodyMaquinarias = [["No se registraron maquinarias o equipos tecnológicos.", "", ""]];
-    }
-
-    autoTable(doc, {
-        startY: currentY + 4,
-        head: [["Categoría", "Nombre de la Maquinaria / Equipo", "Cantidad"]],
-        body: bodyMaquinarias,
-        theme: "striped",
-        headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
-        styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica" },
-        columnStyles: { 0: { width: 60 }, 1: { width: 95 }, 2: { width: 37 } },
-        margin: { left: 12, right: 12 }
-    });
-
-    // ────────────────────────────────────────────────────────
-    // PIE DE PÁGINA
-    // ────────────────────────────────────────────────────────
-    const totalPaginas = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= totalPaginas; i++) {
-        doc.setPage(i);
-        doc.setFontSize(7);
-        doc.setTextColor(140, 140, 140);
-        doc.setDrawColor(220, 220, 220);
-        doc.setLineWidth(0.3);
-        doc.line(12, 268, 204, 268);
-        doc.text("Ficha Técnica de Caracterización Territorial y Productiva — UTMPPAPT.", 12, 272);
-        doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
-    }
-
-    const fileSanitizado = `Ficha_Caracterizacion_Limpia_${(predio.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`;
-    doc.save(fileSanitizado);
-};
+        const fileSanitizado = `Ficha_Caracterizacion_Limpia_${(predio.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`;
+        doc.save(fileSanitizado);
+    };
 
 
     useEffect(() => {
@@ -990,6 +1005,42 @@ const generarPDFPredio = (predio) => {
                     />
 
                     <MenuItem
+                        label="Actualización Productiva"
+                        active={tabActiva === "actualizacion"}
+                        onClick={() => {
+                            // Validación: Solo se puede actualizar si el predio activo ya fue caracterizado previamente
+                            if (!predioActivo) {
+                                Swal.fire({
+                                    icon: "info",
+                                    title: "Seleccione un predio",
+                                    text: "Debe seleccionar un predio en la pestaña 'Seleccionar Predio' para poder realizar una actualización.",
+                                    didOpen: () => {
+                                        const popup = Swal.getPopup();
+                                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                                    }
+                                });
+                                return;
+                            }
+
+                            if (!predioActivo?.caracterizacion_completada) {
+                                Swal.fire({
+                                    icon: "warning",
+                                    title: "Caracterización Pendiente",
+                                    text: "Este predio no posee una caracterización inicial. Primero debe realizar la Caracterización antes de actualizar.",
+                                    didOpen: () => {
+                                        const popup = Swal.getPopup();
+                                        if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
+                                    }
+                                });
+                                return;
+                            }
+
+                            setTabActiva("actualizacion");
+                        }}
+                        icon={<IconActualizacion />}
+                    />
+
+                    <MenuItem
                         label="Reportes"
                         active={tabActiva === "reportes"}
                         onClick={() => setTabActiva("reportes")}
@@ -1033,14 +1084,7 @@ const generarPDFPredio = (predio) => {
                     }}
                 >
                     <div>
-                        <h2
-                            style={{
-                                fontSize: "20px",
-                                fontWeight: 700,
-                                color: "#0f172a",
-                                margin: 0,
-                            }}
-                        >
+                        <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#0f172a", margin: 0 }}>
                             {tabActiva === "inicio"
                                 ? "Dashboard Producción"
                                 : tabActiva === "seleccionPredio"
@@ -1049,7 +1093,9 @@ const generarPDFPredio = (predio) => {
                                         ? "Licencia de Hierro Ganadero"
                                         : tabActiva === "caracterizacion"
                                             ? "Caracterización Productiva"
-                                            : "Reportes y Estadísticas"}
+                                            : tabActiva === "actualizacion"
+                                                ? "Actualización Productiva"
+                                                : "Reportes y Estadísticas"}
                         </h2>
                         <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
                             Estado Barinas • Sector Agropecuario
@@ -1762,6 +1808,14 @@ const generarPDFPredio = (predio) => {
                             setTabActiva={setTabActiva}
                             subCaracterizacion={subCaracterizacion}
                             setSubCaracterizacion={setSubCaracterizacion}
+                        />
+                    )}
+
+                    {tabActiva === "actualizacion" && (
+                        <FormActualizacion
+                            predioActivo={predioActivo}
+                            setTabActiva={setTabActiva}
+                        // Función para refrescar la lista de predios o predio activo luego de actualizar
                         />
                     )}
 

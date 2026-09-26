@@ -1,127 +1,209 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import escudo from "../../assets/logo2.jpg";
-import logo from "../../assets/gobierno.jpg"; // <-- 1. Importado aquí
+import logo from "../../assets/gobierno.jpg";
 
-// Hooks
-import { useEstadisticasPredios } from "../../hooks/useEstadisticasPredios";
+// Hook con los datos y estados globales ya definidos
+import { useDashboardProduccion } from "../../hooks/useProduccion";
 
 // Components
-import DashboardEmpleado from '../../components/EmpleadoDashboard';
+import AdminProduccionDashboard from "../../components/AdminProduccionDashboard";
+import AdminProduccionSeleccionarPredio from "../../components/SeleccionPredio";
+import FormHierro from "../../components/FormHierro"; // 🔹 Componente de Licencia de Hierro
+import FormCaracterizacion from "../../components/FormCaracterizacion";
+import SeccionReportes from "../../components/SeccionReportes"; 
 import { EmpleadoHeader } from '../../components/EmpleadoHeader';
 import { EmpleadoSidebar } from '../../components/EmpleadoSidebar';
 
-// Estilos UI
-import {
-    estiloInput, estiloBoton, InputField, Spinner, CardStat,
-    chartCard, chartTitle, chartPlaceholder, avatarWrapper
-} from "../../components/ui/AdminUI";
+const Spinner = ({ color }) => (
+    <div style={{ width: "30px", height: "30px", border: `3px solid ${color}33`, borderTop: `3px solid ${color}`, borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+);
 
-// Importación de iconos
-import PresentationChartBarIcon from "@heroicons/react/24/solid/PresentationChartBarIcon";
-import PowerIcon from "@heroicons/react/24/solid/PowerIcon";
+const InputField = ({ label, placeholder, value, onChange, type = "text" }) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <label style={{ fontSize: "12px", fontWeight: "600", color: "#374151" }}>{label}</label>
+        <input
+            type={type}
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+            style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", fontSize: "13px" }}
+        />
+    </div>
+);
 
 export default function EmpleadoDashboard() {
     const navigate = useNavigate();
-    const [empleadoData, setEmpleadoData] = useState(null);
     const [vistaActiva, setVistaActiva] = useState("inicio");
 
-    const [cargando, setCargando] = useState(false);
-    const [listaPredios, setListaPredios] = useState([]);
-
-    // 1. Cargar datos generales de predios
-    useEffect(() => {
-        setCargando(true);
-        fetch("/api/predios/")
-            .then(res => res.json())
-            .then(data => {
-                setListaPredios(Array.isArray(data) ? data : data.results || []);
-                setCargando(false);
-            })
-            .catch(err => {
-                console.error("Error al cargar los datos:", err);
-                setCargando(false);
-            });
-    }, []);
-
-    // 2. Obtener sesión del empleado y limpiar datos si aplica
-    useEffect(() => {
-        const sesion = sessionStorage.getItem("usuario_predios");
-        if (!sesion) {
-            navigate("/predios/login");
-            return;
-        }
-        
-        const usuarioParseado = JSON.parse(sesion);
-
-        if (usuarioParseado.nombre) {
-            usuarioParseado.nombre = usuarioParseado.nombre.replace(/admin/gi, "").trim();
-            if (!usuarioParseado.nombre) usuarioParseado.nombre = "Funcionario Autorizado";
-        }
-        
-        if (usuarioParseado.usuario) {
-            usuarioParseado.usuario = usuarioParseado.usuario.replace(/admin/gi, "").trim();
-            if (!usuarioParseado.usuario) usuarioParseado.usuario = "Funcionario Autorizado";
-        }
-
-        setEmpleadoData(usuarioParseado);
-    }, [navigate]);
-
-    // 3. Filtrar los predios según el municipio asignado al empleado 
-    const nombreMunicipioAsignado = empleadoData?.municipio || empleadoData?.municipio_asignado || "Municipio Asignado";
-    
-    const prediosDelMunicipio = listaPredios.filter(p => 
-        p.municipio?.toLowerCase() === nombreMunicipioAsignado.toLowerCase()
-    );
-
-    // 4. Calcular métricas exclusivas para este municipio filtrado
-    const totalPrediosMunicipio = prediosDelMunicipio.length;
-    const superficieTotalMunicipio = prediosDelMunicipio.reduce((acc, p) => acc + (parseFloat(p.superficie) || 0), 0);
-
-    const estadisticasMunicipio = useEstadisticasPredios(prediosDelMunicipio);
-
-    const cerrarSesion = () => {
-        sessionStorage.removeItem("usuario_predios");
-        navigate("/predios/login"); 
-    };
+    // 🔹 Consumimos todo del hook, incluyendo las propiedades de la licencia de hierro
+    const {
+        usuario,
+        cargando,
+        statsProduccion,
+        cerrarSesion,
+        municipioEmpleado,
+        busquedaCedula,
+        setBusquedaCedula,
+        filtrarPredios,
+        predioActivo,
+        setPredioActivo,
+        setPredioSeleccionado,
+        setMostrarModal,
+        mostrarModal,
+        predioSeleccionado,
+        generarPDFPredio,
+        listaPredios, 
+        rubrosVegetales,
+        setRubrosVegetales,
+        inventarioInicial,
+        setInventarioInicial,
+        subCaracterizacion,
+        setSubCaracterizacion,
+        setTabActiva,
+        // Variables de Licencia de Hierro extraídas del hook
+        licenciaHierro,
+        setLicenciaHierro,
+        guardarLicencia
+    } = useDashboardProduccion();
 
     return (
         <div style={{ minHeight: "100vh", backgroundColor: "#f8fafc", display: "flex", fontFamily: "'Poppins', sans-serif" }}>
-
-            {/* ── CONTENEDOR PRINCIPAL ── */}
             <div style={{ display: "flex", flex: 1 }}>
 
                 <EmpleadoSidebar
-                    empleadoData={empleadoData}
+                    empleadoData={usuario}
                     vistaActiva={vistaActiva}
                     setVistaActiva={setVistaActiva}
                     cerrarSesion={cerrarSesion}
-                    PresentationChartBarIcon={PresentationChartBarIcon}
-                    PowerIcon={PowerIcon}
+                    predioActivo={predioActivo}
                 />
 
-                {/* ── CONTENIDO PRINCIPAL DERECHO DINÁMICO ── */}
                 <main style={{ padding: "26px 50px", flex: 1, boxSizing: "border-box", overflowY: "auto" }}>
-
-                    {/* Pasamos 'logo' (gobierno.jpg) al Header junto con el escudo */}
                     <EmpleadoHeader vistaActiva={vistaActiva} escudo={escudo} gobierno={logo} />
 
                     {vistaActiva === "inicio" ? (
-                        <DashboardEmpleado
-                            cargando={cargando}
-                            totalPrediosMunicipio={totalPrediosMunicipio}
-                            superficieTotalMunicipio={superficieTotalMunicipio}
-                            nombreMunicipio={nombreMunicipioAsignado}
-                            listaPredios={prediosDelMunicipio}
-                            datosTenencia={estadisticasMunicipio.datosTenencia}
-                            datosServicios={estadisticasMunicipio.datosServicios}
-                            datosVialidad={estadisticasMunicipio.datosVialidad}
-                            datosDispersion={estadisticasMunicipio.datosDispersion}
-                            datosLegales={estadisticasMunicipio.datosLegales}
-                            chartCard={chartCard}
-                            chartTitle={chartTitle}
-                            chartPlaceholder={chartPlaceholder}
-                        />
+                        <div>
+                            <h2>Panel General - Municipio {municipioEmpleado || "Asignado"}</h2>
+                            <p>Resumen de predios y superficies registrados en tu jurisdicción.</p>
+                        </div>
+                    ) : vistaActiva === "produccion_inicio" ? (
+                        <div>
+                            <div style={{ marginBottom: "20px" }}>
+                                <h2 style={{ color: "#1e293b", fontSize: "22px", fontWeight: "700" }}>
+                                    Dashboard de Producción - Municipio {municipioEmpleado || "Asignado"}
+                                </h2>
+                                <p style={{ color: "#64748b", fontSize: "14px" }}>
+                                    Visualización de indicadores productivos y pecuarios del municipio asignado.
+                                </p>
+                            </div>
+
+                            <AdminProduccionDashboard
+                                productionState={{
+                                    cargando: cargando,
+                                    statsProduccion: statsProduccion
+                                }}
+                            />
+                        </div>
+                    ) : vistaActiva === "produccion_seleccionar_predio" ? (
+                        <div>
+                            <div style={{ marginBottom: "20px" }}>
+                                <h2 style={{ color: "#1e293b", fontSize: "22px", fontWeight: "700" }}>
+                                    Seleccionar Predio - Municipio {municipioEmpleado || "Asignado"}
+                                </h2>
+                                <p style={{ color: "#64748b", fontSize: "14px" }}>
+                                    Busca y selecciona el predio con el que deseas trabajar en las siguientes pestañas de caracterización.
+                                </p>
+                            </div>
+
+                            <AdminProduccionSeleccionarPredio
+                                busquedaCedula={busquedaCedula}
+                                setBusquedaCedula={setBusquedaCedula}
+                                cargando={cargando}
+                                filtrarPredios={filtrarPredios} 
+                                predioActivo={predioActivo}
+                                setPredioActivo={setPredioActivo}
+                                setPredioSeleccionado={setPredioSeleccionado}
+                                setMostrarModal={setMostrarModal}
+                                mostrarModal={mostrarModal}
+                                predioSeleccionado={predioSeleccionado}
+                                generarPDFPredio={generarPDFPredio}
+                                InputField={InputField}
+                                Spinner={Spinner}
+                            />
+                        </div>
+                    ) : vistaActiva === "produccion_caracterizacion" ? (
+                        <div>
+                            <div style={{ marginBottom: "20px" }}>
+                                <h2 style={{ color: "#1e293b", fontSize: "22px", fontWeight: "700" }}>
+                                    Caracterización Productiva - Municipio {municipioEmpleado || "Asignado"}
+                                </h2>
+                                <p style={{ color: "#64748b", fontSize: "14px" }}>
+                                    Predio activo actual: <strong style={{ color: "#136442" }}>{predioActivo?.nombre_predio || "Ninguno seleccionado"}</strong>
+                                </p>
+                            </div>
+
+                            <FormCaracterizacion
+                                predioActivo={predioActivo}
+                                rubrosVegetales={rubrosVegetales}
+                                setRubrosVegetales={setRubrosVegetales}
+                                inventarioInicial={inventarioInicial}
+                                setInventarioInicial={setInventarioInicial}
+                                setTabActiva={setTabActiva}
+                                subCaracterizacion={subCaracterizacion}
+                                setSubCaracterizacion={setSubCaracterizacion}
+                            />
+                        </div>
+                    ) : vistaActiva === "produccion_hierro" ? (
+                        /* 🔹 Vista Integrada de Licencia de Hierro */
+                        <div>
+                            <div style={{ marginBottom: "20px" }}>
+                                <h2 style={{ color: "#1e293b", fontSize: "22px", fontWeight: "700" }}>
+                                    Licencia de Hierro Ganadero — Municipio {municipioEmpleado || "Asignado"}
+                                </h2>
+                                <p style={{ color: "#64748b", fontSize: "14px" }}>
+                                    Predio activo actual: <strong style={{ color: "#136442" }}>{predioActivo?.nombre_predio || "Ninguno seleccionado"}</strong>
+                                </p>
+                            </div>
+
+                            <FormHierro
+                                predioActivo={predioActivo}
+                                licenciaHierro={licenciaHierro}
+                                setLicenciaHierro={setLicenciaHierro}
+                                guardarLicencia={guardarLicencia}
+                                FormSection={({ title, children }) => (
+                                    <div style={{ background: "#ffffff", padding: "24px", borderRadius: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #e2e8f0" }}>
+                                        <h3 style={{ fontSize: "16px", fontWeight: "600", color: "#1e293b", marginBottom: "16px" }}>{title}</h3>
+                                        {children}
+                                    </div>
+                                )}
+                                InputField={InputField}
+                                styles={{
+                                    labelStyle: { fontSize: "12px", fontWeight: "600", color: "#374151" },
+                                    inputStyle: { width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", fontSize: "13px", boxSizing: "border-box" },
+                                    grid3: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px" },
+                                    btnPrincipal: { backgroundColor: "#136442", color: "#ffffff", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "600", cursor: "pointer", fontSize: "13px" },
+                                    radioLabel: { display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#374151", cursor: "pointer" }
+                                }}
+                            />
+                        </div>
+                    ) : vistaActiva === "produccion_actualizacion" ? (
+                        <div>
+                            <h3>Actualización Productiva - Municipio {municipioEmpleado}</h3>
+                        </div>
+                    ) : vistaActiva === "produccion_reportes" ? (
+                        <div>
+                            <div style={{ marginBottom: "20px" }}>
+                                <h2 style={{ color: "#1e293b", fontSize: "22px", fontWeight: "700" }}>
+                                    Reportes y Fichas Técnicas — Municipio {municipioEmpleado || "Asignado"}
+                                </h2>
+                                <p style={{ color: "#64748b", fontSize: "14px" }}>
+                                    Generación de fichas técnicas en PDF para los predios registrados en tu jurisdicción.
+                                </p>
+                            </div>
+
+                            <SeccionReportes listaPredios={listaPredios} />
+                        </div>
                     ) : (
                         <div>
                             <p>Selecciona una sección válida en el menú lateral.</p>

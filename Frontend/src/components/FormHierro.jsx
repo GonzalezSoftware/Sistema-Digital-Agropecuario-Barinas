@@ -179,7 +179,7 @@ const handleGuardarClick = (e) => {
                 </FormSection>
             ) : (
                 <>
-                    <FormSection title="📜 Licencia o Certificado de Hierro Ganadero">
+                    <FormSection title="Licencia o Certificado de Hierro Ganadero">
                         <div style={{ marginBottom: "20px" }}>
                             <label style={{ ...labelStyle, display: "block", marginBottom: "10px" }}>
                                 ¿Posee licencia de hierro ganadero?
