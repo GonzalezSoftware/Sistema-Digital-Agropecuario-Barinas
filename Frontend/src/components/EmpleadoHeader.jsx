@@ -7,6 +7,12 @@ export const EmpleadoHeader = ({ vistaActiva, escudo, gobierno }) => {
                 return "Dashboard Predios del Municipio";
             case "predios_registro":
                 return "Registro de Predios del Municipio";
+            case "predios_historial":
+                return "Historial de Predios del Municipio";
+            case "predios_georreferenciacion":
+                return "Georreferenciación de Predios del Municipio";
+            case "predios_reportes":
+                return "Reportes de Predios del Municipio";
             case "produccion_inicio":
                 return "Dashboard Producción del Municipio";
             case "produccion_registro":
