@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2'; // 🔹 Importamos SweetAlert2
 import { 
     ChevronDownIcon, 
     PresentationChartBarIcon as DefaultChartIcon,
@@ -30,6 +31,31 @@ export const EmpleadoSidebar = ({
     const [produccionAbierto, setProduccionAbierto] = useState(
         vistaActiva?.startsWith("produccion")
     );
+
+    // 🔹 Función para validar antes de entrar a Caracterización
+    const manejarClickCaracterizacion = () => {
+        if (!predioActivo) {
+            Swal.fire({
+                icon: "warning",
+                title: "Predio no seleccionado",
+                text: "Debe seleccionar un predio previamente para realizar la caracterización.",
+                confirmButtonColor: "#136442"
+            });
+            return;
+        }
+
+        if (predioActivo.caracterizacion_completada) {
+            Swal.fire({
+                icon: "info",
+                title: "Predio ya caracterizado",
+                text: `El predio "${predioActivo.nombre_predio}" ya cuenta con una caracterización registrada en el sistema.`,
+                confirmButtonColor: "#136442"
+            });
+            return;
+        }
+
+        setVistaActiva("produccion_caracterizacion");
+    };
 
     return (
         <aside style={{
@@ -205,7 +231,7 @@ export const EmpleadoSidebar = ({
                                 <CheckCircleIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Seleccionar Predio</span>
                             </div>
-                            <div onClick={() => setVistaActiva("produccion_caracterizacion")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_caracterizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_caracterizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
+                            <div onClick={manejarClickCaracterizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_caracterizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_caracterizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
                                 <DocumentTextIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Caracterización</span>
                             </div>

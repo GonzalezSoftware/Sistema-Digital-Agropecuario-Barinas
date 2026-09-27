@@ -16,14 +16,13 @@ class LicenciaHierroSerializer(serializers.ModelSerializer):
     class Meta:
         model = LicenciaHierro
         fields = [
-            'id', 'predio', 'fecha_emision', 'fecha_vencimiento', 
-            'observaciones', 'certificado_pdf', 'activa' # <-- Asegúrate de incluirlo aquí
+            'id', 'predio', 'fecha_emision', 
+            'observaciones', 'certificado_pdf', 'activa'
         ]
 
 # 1. Definimos primero los serializadores de las tablas hijas
 class ProductorSerializer(serializers.ModelSerializer):
     licencias = serializers.SerializerMethodField()
-    # Definimos explícitamente para controlar la validación
     cedula_rif = serializers.CharField(validators=[])
 
     class Meta:
@@ -31,20 +30,10 @@ class ProductorSerializer(serializers.ModelSerializer):
         fields = ['id', 'cedula_rif', 'nombre', 'telefono', 'correo', 'licencias']
 
     def get_licencias(self, obj):
-        """
-        obj es el Productor actual. 
-        Buscamos el predio que le pertenece a este productor, y luego 
-        traemos las licencias asociadas a ese predio.
-        """
-        # 1. Buscamos el predio asociado a este productor
         predio = Predio.objects.filter(productor=obj).first()
-        
-        # 2. Si el productor tiene un predio, buscamos las licencias de ese predio
         if predio:
             licencias_queryset = LicenciaHierro.objects.filter(predio=predio)
             return LicenciaHierroSerializer(licencias_queryset, many=True).data
-        
-        # 3. Si no tiene predio asignado aún, devolvemos el arreglo vacío
         return []
 
 class InfraestructuraSerializer(serializers.ModelSerializer):

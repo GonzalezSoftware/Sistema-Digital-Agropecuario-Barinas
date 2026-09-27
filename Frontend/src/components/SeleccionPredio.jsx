@@ -118,10 +118,19 @@ export default function AdminProduccionSeleccionarPredio({
                                         : "#fff",
                             }}
                         >
-                            <div>
-                                <p style={{ margin: 0, fontWeight: "700", color: "#0f172a" }}>
-                                    {p.nombre_predio}
-                                </p>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                    <p style={{ margin: 0, fontWeight: "700", color: "#0f172a" }}>
+                                        {p.nombre_predio}
+                                    </p>
+                                    <span style={{
+                                        padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "600",
+                                        backgroundColor: p.caracterizacion_completada ? "#dcfce7" : "#fee2e2",
+                                        color: p.caracterizacion_completada ? "#166534" : "#991b1b"
+                                    }}>
+                                        {p.caracterizacion_completada ? "Caracterizado" : "No Caracterizado"}
+                                    </span>
+                                </div>
                                 <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
                                     {p.productor?.nombre} - CI: {p.productor?.cedula_rif}
                                 </p>
@@ -293,33 +302,51 @@ export default function AdminProduccionSeleccionarPredio({
                                 )}
                             </div>
 
-{/* IV. CARACTERIZACIÓN DE SEMOVIENTES (INVENTARIO ANIMAL) */}
+                            {/* IV. CARACTERIZACIÓN DE SEMOVIENTES (INVENTARIO ANIMAL) */}
                             <div style={estiloContenedorSeccion}>
                                 <div style={estiloTituloSeccion}>IV. INVENTARIO DE SEMOVIENTES / GANADERÍA</div>
                                 {predioSeleccionado.existencia_animal && Object.keys(predioSeleccionado.existencia_animal).length > 0 ? (
                                     <div>
-                                        {Object.entries(predioSeleccionado.existencia_animal).map(([especie, detalleEspecie], idxEspecie) => {
-                                            // Validamos que el detalle sea un objeto con datos y con propiedades
-                                            if (!detalleEspecie || typeof detalleEspecie !== "object" || Object.keys(detalleEspecie).length === 0) {
-                                                return null;
-                                            }
+                                        {Object.entries(predioSeleccionado.existencia_animal)
+                                            .filter(([especie, detalleEspecie]) => {
+                                                if (!detalleEspecie || typeof detalleEspecie !== "object") return false;
 
-                                            return (
-                                                <div key={idxEspecie} style={{ marginBottom: "15px" }}>
-                                                    <p style={{ fontSize: "13px", fontWeight: "600", color: "#136442", marginBottom: "8px", textTransform: "capitalize" }}>
-                                                        {especie.replace(/_/g, " ")}:
-                                                    </p>
-                                                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
-                                                        {Object.entries(detalleEspecie).map(([subKey, subValue], idxSub) => (
-                                                            <div key={idxSub} style={{ background: "#fff", padding: "8px", borderRadius: "6px", border: "1px solid #e5e7eb" }}>
-                                                                <small style={{ ...estiloLabel, textTransform: "uppercase" }}>{subKey.replace(/_/g, " ")}</small>
-                                                                <p style={{ ...estiloP, fontSize: "14px" }}>{subValue !== null && subValue !== undefined ? subValue : 0}</p>
-                                                            </div>
-                                                        ))}
+                                                const tieneValores = Object.values(detalleEspecie.toObject ? detalleEspecie.toObject() : detalleEspecie).some(val => {
+                                                    if (Array.isArray(val)) return val.length > 0;
+                                                    const num = Number(val);
+                                                    return !isNaN(num) && num > 0;
+                                                });
+
+                                                return tieneValores;
+                                            })
+                                            .map(([especie, detalleEspecie], idxEspecie) => {
+
+                                                const subElementosFiltrados = Object.entries(detalleEspecie).filter(([subKey, subValue]) => {
+                                                    if (Array.isArray(subValue)) return subValue.length > 0;
+                                                    const num = Number(subValue);
+                                                    return subValue !== null && subValue !== undefined && subValue !== "" && num !== 0;
+                                                });
+
+                                                if (subElementosFiltrados.length === 0) return null;
+
+                                                return (
+                                                    <div key={idxEspecie} style={{ marginBottom: "15px" }}>
+                                                        <p style={{ fontSize: "13px", fontWeight: "600", color: "#136442", marginBottom: "8px", textTransform: "capitalize" }}>
+                                                            {especie.replace(/_/g, " ")}:
+                                                        </p>
+                                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
+                                                            {subElementosFiltrados.map(([subKey, subValue], idxSub) => (
+                                                                <div key={idxSub} style={{ background: "#fff", padding: "8px", borderRadius: "6px", border: "1px solid #e5e7eb" }}>
+                                                                    <small style={{ ...estiloLabel, textTransform: "uppercase" }}>{subKey.replace(/_/g, " ")}</small>
+                                                                    <p style={{ ...estiloP, fontSize: "14px" }}>
+                                                                        {Array.isArray(subValue) ? subValue.join(", ") : subValue}
+                                                                    </p>
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            })}
                                     </div>
                                 ) : (
                                     <p style={{ fontSize: "13px", color: "#666" }}>Sin inventario animal registrado en este predio.</p>
@@ -332,7 +359,6 @@ export default function AdminProduccionSeleccionarPredio({
                                 {predioSeleccionado.maquinaria && Object.keys(predioSeleccionado.maquinaria).length > 0 ? (
                                     <div>
                                         {Object.entries(predioSeleccionado.maquinaria).map(([tipoMaquinaria, detalleMaquinaria], idxMaq) => {
-                                            // Validamos que contenga elementos para mostrar
                                             if (!detalleMaquinaria || typeof detalleMaquinaria !== "object" || Object.keys(detalleMaquinaria).length === 0) {
                                                 return null;
                                             }
@@ -379,7 +405,6 @@ export default function AdminProduccionSeleccionarPredio({
                                 borderTop: "1px solid #ddd",
                             }}
                         >
-
                             <button
                                 onClick={() => setMostrarModal(false)}
                                 style={{

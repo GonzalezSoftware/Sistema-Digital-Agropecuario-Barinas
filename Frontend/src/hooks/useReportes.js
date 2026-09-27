@@ -20,6 +20,11 @@ export const useReportes = (prediosOriginales = []) => {
     const generarPDFPredio = (predio) => {
         console.log("DATOS REALES DEL PREDIO RECIBIDOS EN EL PDF:", predio);
 
+        if (!predio || !predio.caracterizacion_completada) {
+            alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
+            return;
+        }
+
         const doc = new jsPDF({
             orientation: "portrait",
             unit: "mm",
@@ -28,7 +33,6 @@ export const useReportes = (prediosOriginales = []) => {
 
         const verdeBarinas = [19, 100, 66];
         const grisOscuro = [40, 40, 40];
-        const grisSuave = [245, 247, 246];
 
         // Cintillo institucional superior
         try {
@@ -59,20 +63,22 @@ export const useReportes = (prediosOriginales = []) => {
 
         // Título central
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
+        doc.setFontSize(13);
         doc.setTextColor(...verdeBarinas);
         const tituloFicha = `FICHA TÉCNICA: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`;
         doc.text(tituloFicha, 12, 34);
 
-        // I. Datos del productor
+        let currentY = 42;
+
+        // I. Datos del productor (En celdas / grid)
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
+        doc.setFontSize(10);
         doc.setTextColor(...verdeBarinas);
-        doc.text("I. DATOS DEL PRODUCTOR", 12, 44);
+        doc.text("I. DATOS DEL PRODUCTOR", 12, currentY);
 
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(0.3);
-        doc.line(12, 46, 204, 46);
+        doc.line(12, currentY + 2, 204, currentY + 2);
 
         const datosProductor = [
             ["Nombre Completo:", predio.productor?.nombre || "N/A", "Cédula / RIF:", predio.productor?.cedula_rif || "N/A"],
@@ -80,23 +86,23 @@ export const useReportes = (prediosOriginales = []) => {
         ];
 
         autoTable(doc, {
-            startY: 48,
+            startY: currentY + 4,
             body: datosProductor,
-            theme: "plain",
-            styles: { fontSize: 9, cellPadding: 2.5, font: "helvetica" },
+            theme: "grid",
+            styles: { fontSize: 8.5, cellPadding: 2.5, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: {
-                0: { fontStyle: "bold", width: 32, textColor: grisOscuro },
+                0: { fontStyle: "bold", width: 32, textColor: grisOscuro, fillColor: [250, 250, 250] },
                 1: { width: 68 },
-                2: { fontStyle: "bold", width: 28, textColor: grisOscuro },
+                2: { fontStyle: "bold", width: 28, textColor: grisOscuro, fillColor: [250, 250, 250] },
                 3: { width: 64 }
             },
             margin: { left: 12, right: 12 }
         });
 
-        // II. Datos del predio
-        let currentY = doc.lastAutoTable.finalY + 7;
+        // II. Datos del predio (En celdas / grid)
+        currentY = doc.lastAutoTable.finalY + 7;
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
+        doc.setFontSize(10);
         doc.setTextColor(...verdeBarinas);
         doc.text("II. DATOS DEL PREDIO E IDENTIFICACIÓN TERRITORIAL", 12, currentY);
         doc.line(12, currentY + 2, 204, currentY + 2);
@@ -112,21 +118,23 @@ export const useReportes = (prediosOriginales = []) => {
         autoTable(doc, {
             startY: currentY + 4,
             body: datosPredio,
-            theme: "plain",
-            styles: { fontSize: 9, cellPadding: 2.5, font: "helvetica" },
+            theme: "grid",
+            styles: { fontSize: 8.5, cellPadding: 2.5, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: {
-                0: { fontStyle: "bold", width: 35, textColor: grisOscuro },
+                0: { fontStyle: "bold", width: 35, textColor: grisOscuro, fillColor: [250, 250, 250] },
                 1: { width: 65 },
-                2: { fontStyle: "bold", width: 32, textColor: grisOscuro },
+                2: { fontStyle: "bold", width: 32, textColor: grisOscuro, fillColor: [250, 250, 250] },
                 3: { width: 60 }
             },
             margin: { left: 12, right: 12 }
         });
 
-        // III. Infraestructura
+        // III. Infraestructura (En celdas / grid)
         currentY = doc.lastAutoTable.finalY + 7;
+        if (currentY > 230) { doc.addPage(); currentY = 20; }
+
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
+        doc.setFontSize(10);
         doc.setTextColor(...verdeBarinas);
         doc.text("III. INFRAESTRUCTURA Y ESTRUCTURAS DISPONIBLES", 12, currentY);
         doc.line(12, currentY + 2, 204, currentY + 2);
@@ -143,61 +151,27 @@ export const useReportes = (prediosOriginales = []) => {
         autoTable(doc, {
             startY: currentY + 4,
             body: infreestructureData,
-            theme: "plain",
-            styles: { fontSize: 9, cellPadding: 2, font: "helvetica" },
-            willDrawCell: (data) => {
-                if (data.column.index % 2 === 0) {
-                    doc.setFillColor(...grisSuave);
-                    doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, "F");
-                }
-            },
+            theme: "grid",
+            styles: { fontSize: 8.5, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: {
-                0: { fontStyle: "bold", textColor: verdeBarinas, width: 38 },
+                0: { fontStyle: "bold", textColor: verdeBarinas, width: 38, fillColor: [250, 250, 250] },
                 1: { width: 26, halign: "center" },
-                2: { fontStyle: "bold", textColor: verdeBarinas, width: 38 },
+                2: { fontStyle: "bold", textColor: verdeBarinas, width: 38, fillColor: [250, 250, 250] },
                 3: { width: 26, halign: "center" },
-                4: { fontStyle: "bold", textColor: verdeBarinas, width: 38 },
+                4: { fontStyle: "bold", textColor: verdeBarinas, width: 38, fillColor: [250, 250, 250] },
                 5: { width: 26, halign: "center" }
             },
             margin: { left: 12, right: 12 }
         });
 
-        // IV. Régimen de Producción
+        // IV. Servicios Básicos (En celdas / grid)
         currentY = doc.lastAutoTable.finalY + 7;
+        if (currentY > 235) { doc.addPage(); currentY = 20; }
+
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
+        doc.setFontSize(10);
         doc.setTextColor(...verdeBarinas);
-        doc.text("IV. RÉGIMEN SOCIO-PRODUCTIVO Y CONTROLES", 12, currentY);
-        doc.line(12, currentY + 2, 204, currentY + 2);
-
-        const prod = predio.produccion || {};
-        const datosProduccion = [
-            ["Tipo de Explotación Económica principal:", prod.tipo_explotacion || "N/A"],
-            ["Cuenta con Registro Sanitario Vigente:", prod.registro_sanitario ? "SÍ (Verificado)" : "NO"],
-            ["Mantiene Registro de Control Productivo:", prod.registro_productivo ? "SÍ (Verificado)" : "NO"],
-            ["Mantiene Registro de Control Reproductivo:", prod.registro_reproductivo ? "SÍ (Verificado)" : "NO"],
-            ["Mantiene Registro Financiero / Contable:", prod.registro_financiero ? "SÍ (Verificado)" : "NO"]
-        ];
-
-        autoTable(doc, {
-            startY: currentY + 4,
-            body: datosProduccion,
-            theme: "striped",
-            headStyles: { fillColor: verdeBarinas },
-            styles: { fontSize: 9, cellPadding: 2.5, font: "helvetica" },
-            columnStyles: {
-                0: { fontStyle: "bold", width: 130, textColor: grisOscuro },
-                1: { halign: "center", fontStyle: "bold", textColor: verdeBarinas, width: 62 }
-            },
-            margin: { left: 12, right: 12 }
-        });
-
-        // V. Servicios Básicos
-        currentY = doc.lastAutoTable.finalY + 7;
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(...verdeBarinas);
-        doc.text("V. SERVICIOS BÁSICOS INSTALADOS EN EL PREDIO", 12, currentY);
+        doc.text("IV. SERVICIOS BÁSICOS INSTALADOS EN EL PREDIO", 12, currentY);
         doc.line(12, currentY + 2, 204, currentY + 2);
 
         const serviciosFinales = predio.servicios_lectura || [];
@@ -213,18 +187,12 @@ export const useReportes = (prediosOriginales = []) => {
 
         autoTable(doc, {
             startY: currentY + 4,
-            body: [[listaServiciosText]],
-            theme: "plain",
-            styles: {
-                fontSize: 9,
-                cellPadding: 4,
-                font: "helvetica",
-                fontStyle: serviciosFinales.length > 0 ? "normal" : "italic",
-                textColor: serviciosFinales.length > 0 ? [20, 20, 20] : [110, 110, 110]
-            },
-            willDrawCell: (data) => {
-                doc.setFillColor(...grisSuave);
-                doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, "F");
+            body: [["Servicios Disponibles:", listaServiciosText]],
+            theme: "grid",
+            styles: { fontSize: 8.5, cellPadding: 3, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: {
+                0: { fontStyle: "bold", textColor: verdeBarinas, width: 42, fillColor: [250, 250, 250] },
+                1: { fontStyle: serviciosFinales.length > 0 ? "normal" : "italic", textColor: serviciosFinales.length > 0 ? [20, 20, 20] : [110, 110, 110], width: 150 }
             },
             margin: { left: 12, right: 12 }
         });

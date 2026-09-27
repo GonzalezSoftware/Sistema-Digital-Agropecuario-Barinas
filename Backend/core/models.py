@@ -97,10 +97,8 @@ class PredioServicio(models.Model):
         unique_together = ('predio', 'servicio')
 
 class LicenciaHierro(models.Model):
-
-    predio = models.ForeignKey('Predio', on_delete=models.CASCADE) # o como se llame tu modelo Predio
+    predio = models.ForeignKey('Predio', on_delete=models.CASCADE)
     fecha_emision = models.DateField()
-    fecha_vencimiento = models.DateField()
     observaciones = models.TextField(blank=True, null=True)
     certificado_pdf = models.FileField(upload_to='certificados/', blank=True, null=True)
     activa = models.BooleanField(default=True, help_text="Indica si la licencia está vigente y aprobada")

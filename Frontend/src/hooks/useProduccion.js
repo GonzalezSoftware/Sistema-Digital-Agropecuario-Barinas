@@ -301,93 +301,165 @@ export function useDashboardProduccion() {
         ? listaPredios.filter(p => p.municipio?.toLowerCase() === municipioEmpleado.toLowerCase())
         : listaPredios;
 
-    // 3. CÁLCULO DE ESTADÍSTICAS
+    // 3. CÁLCULO DE ESTADÍSTICAS GLOBAL Y LOCAL (CON ENFOQUE PRODUCTIVO CORREGIDO)
     useEffect(() => {
-        if (!usuario) return;
+        if (!usuario || listaPredios.length === 0) return;
 
         setCargando(true);
 
+        let totalHectareas = 0;
+        let prediosCaracterizados = 0;
+        let sumBovinos = 0, sumBubalinos = 0, sumEquinos = 0, sumOvinos = 0, sumPorcinos = 0, sumCaprinos = 0, sumAvicola = 0;
+
+        let destinosVegetalesMap = {};
+        let maquinariaRuedasMap = {};
+        let capacidadesPecuariasMap = { Leche: 0, Carne: 0, Cria: 0, Engorde: 0, Reproduccion: 0 };
+
+        const prediosAProcesar = usuario.esEmpleado ? listaPrediosBase : listaPredios;
+
+        prediosAProcesar.forEach(p => {
+            const supPredio = parseFloat(p.superficie || 0);
+            totalHectareas += supPredio;
+            if (p.caracterizacion_completada) prediosCaracterizados++;
+
+            // Destino de Producción Vegetal
+            const rubros = p.rubros_vegetales || p.produccion?.rubros_vegetales || [];
+            if (Array.isArray(rubros)) {
+                rubros.forEach(r => {
+                    const dest = r.destino || "Comercialización";
+                    destinosVegetalesMap[dest] = (destinosVegetalesMap[dest] || 0) + (parseFloat(r.hectareas) || supPredio || 1);
+                });
+            }
+
+            // Maquinaria de Ruedas (Gráfico de Barras Nº 4)
+            const maqData = p.maquinaria || {};
+            const ruedas = maqData.maquinaria_ruedas || {};
+            Object.entries(ruedas).forEach(([key, val]) => {
+                const num = Number(val) || 0;
+                if (num > 0) {
+                    const labelClean = key.replace(/_/g, ' ').toUpperCase();
+                    maquinariaRuedasMap[labelClean] = (maquinariaRuedasMap[labelClean] || 0) + num;
+                }
+            });
+
+            // Capacidades Pecuarias (Gráfico de Telaraña / Radar - CORREGIDO)
+            const animalData = p.existencia_animal || {};
+            ['capacidadBovina', 'capacidadBubalina', 'capacidadOvina', 'capacidadPorcina', 'capacidadCaprino'].forEach(capKey => {
+                const cap = animalData[capKey] || {};
+                
+                // Leche diaria
+                capacidadesPecuariasMap.Leche += Number(cap.leche_diaria || cap.leche || 0);
+                
+                // Carne anual
+                const pesoCarne = Number(cap.carne_anual || cap.carne || 0);
+                capacidadesPecuariasMap.Carne += isNaN(pesoCarne) ? 0 : pesoCarne;
+                
+                // Cría: Cantidad de partos anuales
+                capacidadesPecuariasMap.Cria += Number(cap.partos_anuales || cap.partos || 0);
+                
+                // Engorde: Capacidad de engorde
+                capacidadesPecuariasMap.Engorde += Number(cap.engorde || cap.capacidad_engorde || 0);
+                
+                // Reproducción: Cantidad de reproductores / reproductoras
+                capacidadesPecuariasMap.Reproduccion += Number(cap.reproduccion || cap.reproductores || cap.reproductoras || 0);
+            });
+
+            // Conteo de Existencia Animal General
+            const sumarJson = (obj) => {
+                if (!obj || typeof obj !== 'object') return 0;
+                return Object.values(obj).reduce((acc, val) => acc + (isNaN(Number(val)) ? 0 : Number(val)), 0);
+            };
+
+            sumBovinos += sumarJson(animalData.bovinos);
+            sumBubalinos += sumarJson(animalData.bubalinos);
+            sumEquinos += sumarJson(animalData.equinos);
+            sumOvinos += sumarJson(animalData.ovinos);
+            sumPorcinos += sumarJson(animalData.porcinos);
+            sumCaprinos += sumarJson(animalData.caprinos);
+            sumAvicola += sumarJson(animalData.avicola);
+        });
+
+        const datosDestinoVegetal = Object.keys(destinosVegetalesMap).length > 0 
+            ? Object.entries(destinosVegetalesMap).map(([name, value], idx) => ({
+                name, value, color: ['#136442', '#28a745', '#8bc34a', '#558b2f'][idx % 4]
+              }))
+            : [{ name: "Superficie Productiva", value: totalHectareas > 0 ? totalHectareas : 1, color: "#136442" }];
+
+        const datosMaquinaria = Object.keys(maquinariaRuedasMap).length > 0
+            ? Object.entries(maquinariaRuedasMap).map(([name, cantidad]) => ({ name, cantidad }))
+            : [{ name: "Sin Maquinaria", cantidad: 0 }];
+
+        const datosCapacidadesRadar = [
+            { subject: 'Leche (L/día)', A: capacidadesPecuariasMap.Leche, fullMark: Math.max(100, capacidadesPecuariasMap.Leche) },
+            { subject: 'Carne (Kg/año)', A: capacidadesPecuariasMap.Carne, fullMark: Math.max(100, capacidadesPecuariasMap.Carne) },
+            { subject: 'Cría (Partos/año)', A: capacidadesPecuariasMap.Cria, fullMark: Math.max(100, capacidadesPecuariasMap.Cria) },
+            { subject: 'Engorde', A: capacidadesPecuariasMap.Engorde, fullMark: Math.max(100, capacidadesPecuariasMap.Engorde) },
+            { subject: 'Reproducción', A: capacidadesPecuariasMap.Reproduccion, fullMark: Math.max(100, capacidadesPecuariasMap.Reproduccion) },
+        ];
+
+        const totalSemovientesCalculado = sumBovinos + sumBubalinos + sumEquinos + sumOvinos + sumPorcinos + sumCaprinos + sumAvicola;
+        const produccionGeneralCalculada = [
+            { name: "Bovinos", cantidad: sumBovinos },
+            { name: "Bubalinos", cantidad: sumBubalinos },
+            { name: "Porcinos", cantidad: sumPorcinos },
+            { name: "Equinos", cantidad: sumEquinos },
+            { name: "Avícola", cantidad: sumAvicola },
+            { name: "Ovinos/Caprinos", cantidad: sumOvinos + sumCaprinos }
+        ].filter(item => item.cantidad > 0);
+
         if (!usuario.esEmpleado) {
-            // PETICIÓN GLOBAL PARA ADMINISTRADOR
             axios.get("http://127.0.0.1:8000/api/dashboard-produccion/")
                 .then(res => {
-                    setStatsProduccion(res.data);
+                    const backendData = res.data || {};
+                    setStatsProduccion({
+                        ...backendData,
+                        cards: {
+                            predios_caracterizados: backendData.cards?.predios_caracterizados ?? prediosCaracterizados,
+                            total_semovientes: backendData.cards?.total_semovientes ?? totalSemovientesCalculado,
+                            total_hectareas: backendData.cards?.total_hectareas ?? totalHectareas,
+                        },
+                        graficos: {
+                            ...(backendData.graficos || {}),
+                            produccion_general: backendData.graficos?.produccion_general || produccionGeneralCalculada,
+                            destino_produccion_vegetal: backendData.graficos?.destino_produccion_vegetal || datosDestinoVegetal,
+                            digitalizacion_radar: datosCapacidadesRadar,
+                            tipo_explotacion: datosMaquinaria
+                        }
+                    });
                     setCargando(false);
                 })
                 .catch(err => {
-                    console.error("Error cargando el dashboard global:", err);
+                    console.error("Error cargando dashboard global, usando cálculo local:", err);
+                    setStatsProduccion({
+                        cards: { predios_caracterizados: prediosCaracterizados, total_semovientes: totalSemovientesCalculado, total_hectareas: totalHectareas },
+                        graficos: {
+                            produccion_general: produccionGeneralCalculada,
+                            destino_produccion_vegetal: datosDestinoVegetal,
+                            digitalizacion_radar: datosCapacidadesRadar,
+                            tipo_explotacion: datosMaquinaria
+                        }
+                    });
                     setCargando(false);
                 });
         } else {
-            // CÁLCULO LOCAL DETALLADO PARA EMPLEADO USANDO LOS MODELOS DE DJANGO
-            if (listaPredios.length >= 0) {
-                let totalHectareas = 0;
-                let prediosCaracterizados = 0;
-
-                let sumBovinos = 0;
-                let sumBubalinos = 0;
-                let sumEquinos = 0;
-                let sumOvinos = 0;
-                let sumPorcinos = 0;
-                let sumCaprinos = 0;
-                let sumAvicola = 0;
-
-                listaPrediosBase.forEach(p => {
-                    totalHectareas += parseFloat(p.superficie || 0);
-                    if (p.caracterizacion_completada) prediosCaracterizados++;
-
-                    const animalData = p.existencia_animal || {};
-
-                    const sumarJson = (obj) => {
-                        if (!obj || typeof obj !== 'object') return 0;
-                        return Object.values(obj).reduce((acc, val) => {
-                            const num = Number(val);
-                            return acc + (isNaN(num) ? 0 : num);
-                        }, 0);
-                    };
-
-                    sumBovinos += sumarJson(animalData.bovinos);
-                    sumBubalinos += sumarJson(animalData.bubalinos);
-                    sumEquinos += sumarJson(animalData.equinos);
-                    sumOvinos += sumarJson(animalData.ovinos);
-                    sumPorcinos += sumarJson(animalData.porcinos);
-                    sumCaprinos += sumarJson(animalData.caprinos);
-                    sumAvicola += sumarJson(animalData.avicola);
-                });
-
-                const totalSemovientesCalculado = sumBovinos + sumBubalinos + sumEquinos + sumOvinos + sumPorcinos + sumCaprinos + sumAvicola;
-
-                setStatsProduccion({
-                    cards: {
-                        predios_caracterizados: prediosCaracterizados,
-                        total_semovientes: totalSemovientesCalculado,
-                        total_hectareas: totalHectareas,
-                    },
-                    graficos: {
-                        produccion_general: [
-                            { name: "Bovinos", cantidad: sumBovinos },
-                            { name: "Bubalinos", cantidad: sumBubalinos },
-                            { name: "Porcinos", cantidad: sumPorcinos },
-                            { name: "Equinos", cantidad: sumEquinos },
-                            { name: "Avícola", cantidad: sumAvicola },
-                            { name: "Ovinos/Caprinos", cantidad: sumOvinos + sumCaprinos }
-                        ].filter(item => item.cantidad > 0),
-                        actividad_reciente: [
-                            { name: "Superficie Productiva", value: totalHectareas > 0 ? totalHectareas : 1, color: "#136442" }
-                        ]
-                    }
-                });
-                setCargando(false);
-            }
+            setStatsProduccion({
+                cards: { predios_caracterizados: prediosCaracterizados, total_semovientes: totalSemovientesCalculado, total_hectareas: totalHectareas },
+                graficos: {
+                    produccion_general: produccionGeneralCalculada,
+                    destino_produccion_vegetal: datosDestinoVegetal,
+                    digitalizacion_radar: datosCapacidadesRadar,
+                    tipo_explotacion: datosMaquinaria
+                }
+            });
+            setCargando(false);
         }
     }, [usuario, listaPredios, municipioEmpleado]);
 
-    // --- NUEVAS FUNCIONES DE CONTROL PARA EL FORMULARIO Y MODALES ---
+    // --- FUNCIONES DE CONTROL ---
 
     const seleccionarPredioParaCaracterizar = (predio) => {
         setPredioActivo(predio);
         setMostrarModal(true);
-        // Resetear o precargar estados si ya tuviese caracterización previa
         if (predio?.licencia_hierro) {
             setLicenciaHierro({
                 poseeLicencia: true,
@@ -452,8 +524,6 @@ export function useDashboardProduccion() {
             return nuevosRubros;
         });
     };
-
-    // -------------------------------------------------------------
 
     const cerrarSesion = () => {
         sessionStorage.removeItem("usuario_produccion");
@@ -529,7 +599,6 @@ export function useDashboardProduccion() {
         busquedaCedula, setBusquedaCedula, busqueda, setBusqueda, prediosFiltrados,
         filtrarPredios, licenciaHierro, setLicenciaHierro, subCaracterizacion, setSubCaracterizacion,
         rubrosVegetales, setRubrosVegetales, inventarioInicial, setInventarioInicial,
-        // Funciones auxiliares agregadas:
         seleccionarPredioParaCaracterizar,
         manejarCambioInventario,
         manejarCheckboxEspecie,

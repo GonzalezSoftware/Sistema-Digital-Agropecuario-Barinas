@@ -29,6 +29,7 @@ export const AdminSidebar = ({
     // Estado para controlar si el menú desplegable de Producción está abierto o cerrado
     const [produccionAbierto, setProduccionAbierto] = useState(
         vistaActiva === "produccion_dashboard" ||
+        vistaActiva === "guias_movilizacion"||
         vistaActiva === "produccion_reportes"
     );
 
@@ -273,6 +274,22 @@ export const AdminSidebar = ({
                                 <span>Dashboard Producción</span>
                             </div>
 
+                                                        <div
+                                onClick={() => setVistaActiva("guia_movilizacion")}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: "10px",
+                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                    backgroundColor: vistaActiva === "guia_movilizacion" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "guia_movilizacion" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "guia_movilizacion" ? 600 : 400,
+                                    fontSize: "13px",
+                                    transition: "background 0.2s"
+                                }}
+                            >
+                                <ClipboardDocumentListIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                <span>Guias de Movilización</span>
+                            </div>
+
                             <div
                                 onClick={() => setVistaActiva("produccion_reportes")}
                                 style={{
@@ -370,9 +387,9 @@ export const AdminSidebar = ({
                                 style={{
                                     display: "flex", alignItems: "center", gap: "10px",
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "credenciales" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "credenciales" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "credenciales" ? 600 : 400,
+                                    backgroundColor: vistaActiva === "noticias" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "noticias" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "noticias" ? 600 : 400,
                                     fontSize: "13px",
                                     transition: "background 0.2s"
                                 }}

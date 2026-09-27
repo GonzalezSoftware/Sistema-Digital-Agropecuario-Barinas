@@ -13,10 +13,7 @@ export default function SeccionReportes({ listaPredios }) {
     });
 
     const generarPDFPredio = (predio) => {
-        if (!predio || !predio.caracterizacion_completada) {
-            alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
-            return;
-        }
+        if (!predio) return;
 
         const doc = new jsPDF({
             orientation: "portrait",
@@ -85,14 +82,14 @@ export default function SeccionReportes({ listaPredios }) {
         autoTable(doc, {
             startY: currentY + 4,
             body: datosProductor,
-            theme: "plain",
-            styles: { fontSize: 8, cellPadding: 2, font: "helvetica" },
+            theme: "grid",
+            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: {
-                0: { fontStyle: "bold", textColor: grisOscuro, width: 32 },
+                0: { fontStyle: "bold", textColor: grisOscuro, width: 32, fillColor: [250, 250, 250] },
                 1: { width: 45 },
-                2: { fontStyle: "bold", textColor: grisOscuro, width: 25 },
+                2: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
                 3: { width: 35 },
-                4: { fontStyle: "bold", textColor: grisOscuro, width: 22 },
+                4: { fontStyle: "bold", textColor: grisOscuro, width: 22, fillColor: [250, 250, 250] },
                 5: { width: 33 }
             },
             margin: { left: 12, right: 12 }
@@ -119,14 +116,14 @@ export default function SeccionReportes({ listaPredios }) {
         autoTable(doc, {
             startY: currentY + 4,
             body: datosUbicacion,
-            theme: "plain",
-            styles: { fontSize: 8, cellPadding: 2, font: "helvetica" },
+            theme: "grid",
+            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: {
-                0: { fontStyle: "bold", textColor: grisOscuro, width: 25 },
+                0: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
                 1: { width: 43 },
-                2: { fontStyle: "bold", textColor: grisOscuro, width: 25 },
+                2: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
                 3: { width: 43 },
-                4: { fontStyle: "bold", textColor: grisOscuro, width: 25 },
+                4: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
                 5: { width: 31 }
             },
             margin: { left: 12, right: 12 }
@@ -158,9 +155,9 @@ export default function SeccionReportes({ listaPredios }) {
             startY: currentY + 4,
             head: [["Rubro", "Superficie (Ha)", "Estado", "Producción Estimada"]],
             body: bodyRubros,
-            theme: "striped",
-            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
-            styles: { fontSize: 8, cellPadding: 2, font: "helvetica" },
+            theme: "grid",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
+            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: { 0: { width: 65 }, 1: { width: 45 }, 2: { width: 45 }, 3: { width: 37 } },
             margin: { left: 12, right: 12 }
         });
@@ -184,7 +181,6 @@ export default function SeccionReportes({ listaPredios }) {
             Object.entries(existenciaAnimal).forEach(([especie, detalleEspecie]) => {
                 if (!detalleEspecie || typeof detalleEspecie !== "object" || Object.keys(detalleEspecie).length === 0) return;
                 
-                // Fila de cabecera de especie dentro de la tabla o separador
                 bodySemovientes.push([{ content: `ESPECIE: ${especie.replace(/_/g, " ").toUpperCase()}`, colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
 
                 Object.entries(detalleEspecie).forEach(([subKey, subValue]) => {
@@ -206,8 +202,8 @@ export default function SeccionReportes({ listaPredios }) {
             head: [["Categoría / Subtipo", "Cantidad / Unidades"]],
             body: bodySemovientes,
             theme: "grid",
-            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
-            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica" },
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
+            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: { 0: { width: 140 }, 1: { width: 52 } },
             margin: { left: 12, right: 12 }
         });
@@ -252,8 +248,8 @@ export default function SeccionReportes({ listaPredios }) {
             head: [["Elemento / Equipo", "Cantidad"]],
             body: bodyMaquinaria,
             theme: "grid",
-            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold" },
-            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica" },
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
+            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: { 0: { width: 140 }, 1: { width: 52 } },
             margin: { left: 12, right: 12 }
         });
@@ -310,7 +306,7 @@ export default function SeccionReportes({ listaPredios }) {
                             <th style={{ fontSize: "14px", padding: "12px" }}>Nombre del Predio</th>
                             <th style={{ fontSize: "14px", padding: "12px" }}>Productor</th>
                             <th style={{ fontSize: "14px", padding: "12px" }}>Municipio</th>
-                            <th style={{ fontSize: "14px", padding: "12px" }}>Superficie</th>
+                            <th style={{ fontSize: "14px", padding: "12px" }}>Caracterización</th>
                             <th style={{ fontSize: "14px", padding: "12px" }}>Acciones</th>
                         </tr>
                     </thead>
@@ -328,11 +324,23 @@ export default function SeccionReportes({ listaPredios }) {
                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
                                     <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
-                                    <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
+                                    <td style={{ fontSize: "13px", padding: "12px" }}>
+                                        <span style={{
+                                            padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "600",
+                                            backgroundColor: p.caracterizacion_completada ? "#dcfce7" : "#fee2e2",
+                                            color: p.caracterizacion_completada ? "#166534" : "#991b1b"
+                                        }}>
+                                            {p.caracterizacion_completada ? "Caracterizado" : "No Caracterizado"}
+                                        </span>
+                                    </td>
                                     <td style={{ fontSize: "13px", padding: "12px" }}>
                                         <button
                                             onClick={() => generarPDFPredio(p)}
-                                            style={{ backgroundColor: "#f0fdf4", color: "#136442", border: "1px solid #136442", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}
+                                            style={{
+                                                backgroundColor: "#f0fdf4", color: "#136442",
+                                                border: "1px solid #136442", padding: "6px 12px",
+                                                borderRadius: "6px", cursor: "pointer", fontSize: "12px"
+                                            }}
                                         >
                                             Generar Ficha PDF
                                         </button>
