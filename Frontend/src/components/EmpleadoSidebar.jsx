@@ -10,7 +10,9 @@ import {
     DocumentTextIcon, 
     ArrowPathIcon, 
     DocumentChartBarIcon,
-    TagIcon // 🔹 1. Icono añadido para la Licencia de Hierro
+    TagIcon,
+    ClockIcon,      // 🔹 Icono para Historial
+    MapPinIcon      // 🔹 Icono para Georreferenciación
 } from "@heroicons/react/24/outline";
 
 export const EmpleadoSidebar = ({
@@ -156,6 +158,18 @@ export const EmpleadoSidebar = ({
                                 <ClipboardDocumentListIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Registro</span>
                             </div>
+                            <div onClick={() => setVistaActiva("predios_historial")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "predios_historial" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_historial" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
+                                <ClockIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                <span>Historial</span>
+                            </div>
+                            <div onClick={() => setVistaActiva("predios_georreferenciacion")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "predios_georreferenciacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_georreferenciacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
+                                <MapPinIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                <span>Georreferenciación</span>
+                            </div>
+                            <div onClick={() => setVistaActiva("predios_reportes")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "predios_reportes" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_reportes" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
+                                <DocumentChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                <span>Reportes</span>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -195,7 +209,6 @@ export const EmpleadoSidebar = ({
                                 <DocumentTextIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Caracterización</span>
                             </div>
-                            {/* 🔹 Opción Integrada de Licencia de Hierro */}
                             <div onClick={() => setVistaActiva("produccion_hierro")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_hierro" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_hierro" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
                                 <TagIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Licencia de Hierro</span>
