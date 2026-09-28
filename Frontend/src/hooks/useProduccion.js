@@ -298,16 +298,16 @@ export function useDashboardProduccion() {
     const municipioEmpleado = usuario?.esEmpleado ? (usuario?.municipio || usuario?.municipio_asignado) : null;
 
     const listaPrediosBase = municipioEmpleado
-        ? listaPredios.filter(p => p.municipio?.toLowerCase() === municipioEmpleado.toLowerCase())
+        ? listaPredios.filter(p => (p.municipio || "").trim().toLowerCase() === municipioEmpleado.trim().toLowerCase())
         : listaPredios;
 
-    // 3. CÁLCULO DE ESTADÍSTICAS GLOBAL Y LOCAL (CON ENFOQUE PRODUCTIVO CORREGIDO)
+    // 3. CÁLCULO DE ESTADÍSTICAS GLOBAL Y LOCAL (CORREGIDO)
     useEffect(() => {
-        if (!usuario || listaPredios.length === 0) return;
+        if (!usuario || !Array.isArray(listaPredios) || listaPredios.length === 0) return;
 
         setCargando(true);
 
-        let totalHectareas = 0;
+        let totalHectareas = 0; 
         let prediosCaracterizados = 0;
         let sumBovinos = 0, sumBubalinos = 0, sumEquinos = 0, sumOvinos = 0, sumPorcinos = 0, sumCaprinos = 0, sumAvicola = 0;
 
@@ -318,20 +318,20 @@ export function useDashboardProduccion() {
         const prediosAProcesar = usuario.esEmpleado ? listaPrediosBase : listaPredios;
 
         prediosAProcesar.forEach(p => {
-            const supPredio = parseFloat(p.superficie || 0);
-            totalHectareas += supPredio;
             if (p.caracterizacion_completada) prediosCaracterizados++;
 
-            // Destino de Producción Vegetal
             const rubros = p.rubros_vegetales || p.produccion?.rubros_vegetales || [];
-            if (Array.isArray(rubros)) {
+            if (Array.isArray(rubros) && rubros.length > 0) {
                 rubros.forEach(r => {
+                    const hectareasRubro = parseFloat(r.hectareas || 0);
+                    totalHectareas += isNaN(hectareasRubro) ? 0 : hectareasRubro;
+
                     const dest = r.destino || "Comercialización";
-                    destinosVegetalesMap[dest] = (destinosVegetalesMap[dest] || 0) + (parseFloat(r.hectareas) || supPredio || 1);
+                    destinosVegetalesMap[dest] = (destinosVegetalesMap[dest] || 0) + (hectareasRubro || 1);
                 });
             }
 
-            // Maquinaria de Ruedas (Gráfico de Barras Nº 4)
+            // Maquinaria de Ruedas
             const maqData = p.maquinaria || {};
             const ruedas = maqData.maquinaria_ruedas || {};
             Object.entries(ruedas).forEach(([key, val]) => {
@@ -342,25 +342,20 @@ export function useDashboardProduccion() {
                 }
             });
 
-            // Capacidades Pecuarias (Gráfico de Telaraña / Radar - CORREGIDO)
+            // Capacidades Pecuarias
             const animalData = p.existencia_animal || {};
             ['capacidadBovina', 'capacidadBubalina', 'capacidadOvina', 'capacidadPorcina', 'capacidadCaprino'].forEach(capKey => {
                 const cap = animalData[capKey] || {};
                 
-                // Leche diaria
                 capacidadesPecuariasMap.Leche += Number(cap.leche_diaria || cap.leche || 0);
                 
-                // Carne anual
                 const pesoCarne = Number(cap.carne_anual || cap.carne || 0);
                 capacidadesPecuariasMap.Carne += isNaN(pesoCarne) ? 0 : pesoCarne;
                 
-                // Cría: Cantidad de partos anuales
                 capacidadesPecuariasMap.Cria += Number(cap.partos_anuales || cap.partos || 0);
                 
-                // Engorde: Capacidad de engorde
                 capacidadesPecuariasMap.Engorde += Number(cap.engorde || cap.capacidad_engorde || 0);
                 
-                // Reproducción: Cantidad de reproductores / reproductoras
                 capacidadesPecuariasMap.Reproduccion += Number(cap.reproduccion || cap.reproductores || cap.reproductoras || 0);
             });
 
@@ -383,7 +378,7 @@ export function useDashboardProduccion() {
             ? Object.entries(destinosVegetalesMap).map(([name, value], idx) => ({
                 name, value, color: ['#136442', '#28a745', '#8bc34a', '#558b2f'][idx % 4]
               }))
-            : [{ name: "Superficie Productiva", value: totalHectareas > 0 ? totalHectareas : 1, color: "#136442" }];
+            : [{ name: "Sin Rubros Registrados", value: 1, color: "#136442" }];
 
         const datosMaquinaria = Object.keys(maquinariaRuedasMap).length > 0
             ? Object.entries(maquinariaRuedasMap).map(([name, cantidad]) => ({ name, cantidad }))
@@ -453,10 +448,9 @@ export function useDashboardProduccion() {
             });
             setCargando(false);
         }
-    }, [usuario, listaPredios, municipioEmpleado]);
+    }, [usuario?.esEmpleado, usuario?.municipio, listaPredios]);
 
     // --- FUNCIONES DE CONTROL ---
-
     const seleccionarPredioParaCaracterizar = (predio) => {
         setPredioActivo(predio);
         setMostrarModal(true);

@@ -10,7 +10,7 @@ import { useDashboardProduccion } from "../../hooks/useProduccion";
 // Components
 import AdminProduccionDashboard from "../../components/AdminProduccionDashboard";
 import AdminProduccionSeleccionarPredio from "../../components/SeleccionPredio";
-import FormHierro from "../../components/FormHierro"; // 🔹 Componente de Licencia de Hierro
+import FormHierro from "../../components/FormHierro"; // 
 import FormCaracterizacion from "../../components/FormCaracterizacion";
 import SeccionReportes from "../../components/SeccionReportes";
 import { EmpleadoHeader } from '../../components/EmpleadoHeader';
