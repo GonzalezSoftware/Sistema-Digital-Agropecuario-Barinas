@@ -6,6 +6,7 @@ import NoticiasRegistrar from "./NoticiasRegistrar"; // <--- Importación actual
 import NoticiasEditarEliminar from "./NoticiasEditarEliminar";
 import gobierno from "../assets/gobierno.jpg";
 import escudo from "../assets/logo2.jpg";
+import Swal from "sweetalert2";
 
 export default function NoticiasDashboard() {
     const [vistaActiva, setVistaActiva] = useState("registrar");

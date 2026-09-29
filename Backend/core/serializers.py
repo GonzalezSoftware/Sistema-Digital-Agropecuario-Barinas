@@ -133,12 +133,6 @@ class PredioSerializer(serializers.ModelSerializer):
     # ── AQUÍ ESTÁ LA SOLUCIÓN: MÉTODO UPDATE ──
     def update(self, instance, validated_data):
 
-        if instance.caracterizacion_completada:
-
-          raise serializers.ValidationError(
-            "Este predio ya fue caracterizado."
-        )
-
         # ─────────────────────────────
         # EXTRAER DATOS ANIDADOS
         # ─────────────────────────────

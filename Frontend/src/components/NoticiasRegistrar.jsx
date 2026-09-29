@@ -9,7 +9,7 @@ export default function NoticiasRegistrar() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!titulo.trim() || !descripcion.trim()) {
             setMensaje({ texto: "Por favor, completa el título y la descripción.", tipo: "error" });
             return;
@@ -56,12 +56,7 @@ export default function NoticiasRegistrar() {
 
     return (
         <div style={{ background: "#ffffff", padding: "32px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
-            <h3 style={{ color: "#136442", marginTop: 0, fontSize: "18px", fontWeight: "600", marginBottom: "8px" }}>
-                Registrar Nueva Noticia
-            </h3>
-            <p style={{ color: "#475569", fontSize: "14px", marginBottom: "24px" }}>
-                Completa los campos a continuación para publicar un comunicado oficial en el sistema.
-            </p>
+
 
             {mensaje.texto && (
                 <div style={{
@@ -128,22 +123,44 @@ export default function NoticiasRegistrar() {
                     <label style={{ fontSize: "14px", fontWeight: "600", color: "#334155" }}>
                         Imagen Ilustrativa
                     </label>
+
+                    {/* Input de archivo oculto para que funcione lógicamente */}
                     <input
                         id="input-imagen"
                         type="file"
                         accept="image/*"
                         onChange={(e) => setImagen(e.target.files[0])}
-                        style={{
-                            padding: "10px",
-                            borderRadius: "8px",
-                            border: "1px dashed #cbd5e1",
-                            fontSize: "14px",
-                            backgroundColor: "#f8fafc",
-                            cursor: "pointer"
-                        }}
+                        style={{ display: "none" }}
                     />
+
+                    {/* Label que actúa como botón estilizado idéntico al que pediste */}
+                    <label
+                        htmlFor="input-imagen"
+                        style={{
+                            backgroundColor: "#f0fdf4",
+                            color: "#136442",
+                            border: "1px solid #136442",
+                            padding: "8px 14px",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontSize: "13px",
+                            fontWeight: "500",
+                            fontFamily: "Poppins, sans-serif",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "6px",
+                            width: "fit-content",
+                            textAlign: "center",
+                            transition: "background-color 0.2s"
+                        }}
+                    >
+                         Seleccionar Imagen
+                    </label>
+
+                    {/* Opcional: Para que el usuario sepa si ya seleccionó un archivo */}
                     <span style={{ fontSize: "12px", color: "#64748b" }}>
-                        Formatos aceptados: JPG, PNG, WEBP.
+                        {imagen ? `Archivo seleccionado: ${imagen.name}` : "Formatos aceptados: JPG, PNG, WEBP."}
                     </span>
                 </div>
 
@@ -157,7 +174,7 @@ export default function NoticiasRegistrar() {
                         padding: "14px",
                         borderRadius: "8px",
                         border: "none",
-                        fontSize: "15px",
+                        fontSize: "14px",
                         fontWeight: "600",
                         cursor: cargando ? "not-allowed" : "pointer",
                         opacity: cargando ? 0.7 : 1,
