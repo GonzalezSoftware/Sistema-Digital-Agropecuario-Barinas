@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { TrashIcon, PencilSquareIcon, XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
+import Swal from "sweetalert2";
 
 export default function NoticiasEditarEliminar() {
     const [noticias, setNoticias] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
-    
+
     // Estado para la noticia que se está editando actualmente
     const [noticiaEditando, setNoticiaEditando] = useState(null);
     const [nuevoTitulo, setNuevoTitulo] = useState("");
@@ -34,9 +35,21 @@ export default function NoticiasEditarEliminar() {
         obtenerNoticias();
     }, []);
 
-    // Función para eliminar noticia
+    // Función para eliminar noticia con SweetAlert2
     const eliminarNoticia = async (id) => {
-        if (!window.confirm("¿Estás seguro de que deseas eliminar esta noticia?")) return;
+        const result = await Swal.fire({
+            title: "¿Estás seguro?",
+            text: "¿Estás seguro de que deseas eliminar esta noticia?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#136442", // Color verde institucional de tu app
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar"
+        });
+
+        // Si el usuario hace clic en cancelar, detenemos la ejecución
+        if (!result.isConfirmed) return;
 
         try {
             const respuesta = await fetch(`http://localhost:8000/api/noticias/${id}/`, {
@@ -45,13 +58,31 @@ export default function NoticiasEditarEliminar() {
 
             if (respuesta.ok) {
                 setNoticias(noticias.filter((n) => n.id !== id));
-                setMensaje({ texto: "Noticia eliminada correctamente.", tipo: "exito" });
+
+                // Opcional: También puedes mostrar una alerta de éxito con SweetAlert
+                Swal.fire({
+                    icon: "success",
+                    title: "¡Eliminado!",
+                    text: "Noticia eliminada correctamente.",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             } else {
-                setMensaje({ texto: "No se pudo eliminar la noticia.", tipo: "error" });
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "No se pudo eliminar la noticia.",
+                    confirmButtonColor: "#136442"
+                });
             }
         } catch (error) {
             console.error("Error de red:", error);
-            setMensaje({ texto: "Error de conexión al eliminar.", tipo: "error" });
+            Swal.fire({
+                icon: "error",
+                title: "Error de conexión",
+                text: "No se pudo conectar con el servidor.",
+                confirmButtonColor: "#136442"
+            });
         }
     };
 
@@ -95,12 +126,6 @@ export default function NoticiasEditarEliminar() {
 
     return (
         <div style={{ background: "#ffffff", padding: "32px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
-            <h3 style={{ color: "#136442", marginTop: 0, fontSize: "18px", fontWeight: "600", marginBottom: "8px" }}>
-                Gestión de Artículos (Editar y Eliminar)
-            </h3>
-            <p style={{ color: "#475569", fontSize: "14px", marginBottom: "24px" }}>
-                Aquí puedes visualizar todas las noticias registradas en la base de datos, modificarlas o eliminarlas.
-            </p>
 
             {mensaje.texto && (
                 <div style={{
@@ -147,12 +172,36 @@ export default function NoticiasEditarEliminar() {
                                         rows={3}
                                         style={{ padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "14px", fontFamily: "inherit" }}
                                     />
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => setNuevaImagen(e.target.files[0])}
-                                        style={{ fontSize: "13px" }}
-                                    />
+                                    <div>
+                                        {/* Input de tipo file oculto */}
+                                        <input
+                                            id="input-nueva-imagen"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => setNuevaImagen(e.target.files[0])}
+                                            style={{ display: "none" }}
+                                        />
+
+                                        {/* Label estilizado exactamente igual al botón Ver Detalles */}
+                                        <label
+                                            htmlFor="input-nueva-imagen"
+                                            style={{
+                                                backgroundColor: "#f0fdf4",
+                                                color: "#136442",
+                                                border: "1px solid #136442",
+                                                padding: "6px 12px",
+                                                borderRadius: "6px",
+                                                cursor: "pointer",
+                                                fontSize: "12px",
+                                                fontWeight: "500",
+                                                fontFamily: "Poppins, sans-serif",
+                                                display: "inline-block",
+                                                textAlign: "center"
+                                            }}
+                                        >
+                                            {nuevaImagen ? nuevaImagen.name : "Seleccionar Imagen"}
+                                        </label>
+                                    </div>
                                     <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
                                         <button
                                             onClick={() => guardarEdicion(noticia.id)}

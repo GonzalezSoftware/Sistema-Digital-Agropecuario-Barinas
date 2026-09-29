@@ -33,7 +33,7 @@ export default function HistorialPredios({
                 marginBottom: "20px", flexWrap: "wrap", gap: "10px"
             }}>
                 <h2 style={{ color: "#136442", fontSize: "16px", fontWeight: "bold", margin: 0 }}>
-                    Historial de Predios Registrados
+                    Historial de Predios Registradoss
                 </h2>
 
                 <div style={{ position: "relative", width: "100%", maxWidth: "350px" }}>
@@ -93,7 +93,7 @@ export default function HistorialPredios({
                                                 cursor: "pointer",
                                                 fontSize: "12px",
                                                 fontWeight: "500",
-                                                fontFamily: "Poppins, sans-serif" 
+                                                fontFamily: "Poppins, sans-serif"
                                             }}
                                         >
                                             Ver Detalles
@@ -391,16 +391,16 @@ export default function HistorialPredios({
                             justifyContent: "flex-end", gap: "10px", borderTop: "1px solid #ddd",
                             position: "sticky", bottom: 0, zIndex: 10
                         }}>
-                            <button onClick={eliminarDefinitivoReal} disabled={cargandoAccion} style={{ ...estiloBoton, backgroundColor: "#ce3a3a" }}>
+                            <button type="button" onClick={eliminarDefinitivoReal} disabled={cargandoAccion} style={{ ...estiloBoton, backgroundColor: "#ce3a3a" }}>
                                 ELIMINAR
                             </button>
-                            <button onClick={() => editando ? guardarCambiosReal() : setEditando(true)} style={{ ...estiloBoton, backgroundColor: "#136442" }}>
+                            <button type="button" onClick={() => editando ? guardarCambiosReal() : setEditando(true)} style={{ ...estiloBoton, backgroundColor: "#136442" }}>
                                 {cargandoAccion ? "PROCESANDO..." : editando ? "CONFIRMAR CAMBIOS" : "EDITAR FICHA"}
                             </button>
-                            <button onClick={() => setEditando(false)} style={{ ...estiloBoton, backgroundColor: "#6b7280" }}>
+                            <button type="button" onClick={() => setEditando(false)} style={{ ...estiloBoton, backgroundColor: "#6b7280" }}>
                                 SOLO VISUALIZAR
                             </button>
-                            <button onClick={() => { setMostrarModal(false); setEditando(false); }} style={{ ...estiloBoton, backgroundColor: "#374151" }}>
+                            <button type="button" onClick={() => { setMostrarModal(false); setEditando(false); }} style={{ ...estiloBoton, backgroundColor: "#374151" }}>
                                 SALIR DE FICHA
                             </button>
                         </div>

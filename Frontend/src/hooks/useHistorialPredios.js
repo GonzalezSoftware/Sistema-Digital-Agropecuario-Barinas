@@ -62,35 +62,32 @@ export function useHistorialPredios(listaPredios = []) {
         if (!predioSeleccionado) return;
         setCargandoAccion(true);
         try {
-            const data = JSON.parse(JSON.stringify(predioSeleccionado));
-            const limpiar = (obj) => {
-                if (!obj || typeof obj !== 'object') return obj;
-                delete obj.id;
-                delete obj.fecha_registro;
-                return obj;
-            };
-
-            data.productor = limpiar(data.productor);
-            data.infraestructura = limpiar(data.infraestructura);
-            data.produccion = limpiar(data.produccion);
-
-            delete data.id_predio;
-            delete data.fecha_registro;
+            // Obtén el token de autenticación guardado en el navegador (ajusta la clave si usas otra)
+            const token = sessionStorage.getItem("token") || localStorage.getItem("token");
 
             const response = await fetch(`http://127.0.0.1:8000/api/predios/${predioSeleccionado.id_predio}/`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                headers: { 
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify(predioSeleccionado)
             });
 
             if (response.ok) {
-                Swal.fire('¡Actualización Exitosa!', 'El predio ha sido guardado.', 'success');
+                await Swal.fire('¡Actualización Exitosa!', 'El predio ha sido guardado.', 'success');
+                setEditando(false);
+                setMostrarModal(false);
+                window.location.reload(); 
             } else {
                 const resultado = await response.json();
-                Swal.fire('Error', JSON.stringify(resultado), 'error');
+                console.error("Error de validación en Django:", resultado);
+                // Esto te mostrará el error exacto que devuelve Django en una alerta
+                Swal.fire('Error de validación', JSON.stringify(resultado), 'error');
             }
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error de red:", error);
+            Swal.fire('Error', 'Ocurrió un error al conectar con el servidor.', 'error');
         } finally {
             setCargandoAccion(false);
         }
