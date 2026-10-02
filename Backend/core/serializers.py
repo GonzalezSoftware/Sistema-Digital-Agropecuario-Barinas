@@ -1,4 +1,13 @@
 from rest_framework import serializers
+from .models import BitacoraAuditoria
+
+class BitacoraAuditoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BitacoraAuditoria
+        fields = '__all__'
+
+
+
 from .models import (
     Predio,
     Infraestructura,

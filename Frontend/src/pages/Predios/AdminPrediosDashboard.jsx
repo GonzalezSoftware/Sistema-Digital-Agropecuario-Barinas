@@ -18,6 +18,7 @@ import { ReportesView } from '../../components/ReportesView';
 import { AdminCredencialesNoticias } from '../../components/AdminCredencialesNoticias';
 import AdminProduccionDashboard from '../../components/AdminProduccionDashboard';
 import SeccionReportes from "../../components/SeccionReportes";
+import AdminBitacora from '../../components/AdminBitacora';
 
 // Estilos UI
 import {
@@ -304,7 +305,9 @@ export default function AdminPrediosDashboard() {
                         <AdminProduccionDashboard productionState={productionState} />
                     ) : vistaActiva === "produccion_reportes" ? (
                         <SeccionReportes listaPredios={listaPredios} />
-                    ) : (
+                    ) : vistaActiva === "bitacora" ? (
+                        <AdminBitacora />) : (
+
                         <div>
                             <p>Selecciona una sección válida en el menú lateral.</p>
                         </div>
