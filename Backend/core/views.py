@@ -5,7 +5,7 @@ from django.db.models import Sum
 from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Predio, LicenciaHierro, Productor, Noticia
+from .models import Predio, LicenciaHierro, Productor, Noticia, BitacoraAuditoria
 from .serializers import PredioSerializer, LicenciaHierroSerializer
 from .models import Predio, RubroVegetal, ExistenciaAnimal, Maquinaria
 from rest_framework import status
@@ -13,6 +13,14 @@ from django.contrib.auth.hashers import make_password, check_password
 from .models import AdministradorSistema
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import viewsets
+from .models import BitacoraAuditoria
+from .serializers import BitacoraAuditoriaSerializer
+
+
+class BitacoraAuditoriaViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = BitacoraAuditoria.objects.all().order_by('-fecha_hora')
+    serializer_class = BitacoraAuditoriaSerializer
 
 
 @api_view(['GET'])
@@ -28,11 +36,11 @@ def buscar_productor(request, cedula):
         })
     except Productor.DoesNotExist:
         return Response({"existe": False}, status=404)
-    
+
+
 class PredioViewSet(viewsets.ModelViewSet):
     serializer_class = PredioSerializer
-    queryset = Predio.objects.all() 
-    serializer_class = PredioSerializer
+    queryset = Predio.objects.all()
 
     def get_queryset(self):
         queryset = Predio.objects.select_related(
@@ -43,15 +51,244 @@ class PredioViewSet(viewsets.ModelViewSet):
 
         cedula = self.request.query_params.get('cedula')
         if cedula:
-            queryset = queryset.filter(productor__cedula_rif=cedula.strip().upper())
+            queryset = queryset.filter(
+                productor__cedula_rif=cedula.strip().upper())
 
         return queryset
 
-class LicenciaHierroViewSet(viewsets.ModelViewSet):
+    def perform_create(self, serializer):
+        # Intentamos capturar el usuario o rol enviado desde el frontend; si no viene, asignamos un valor por defecto
+        usuario = self.request.data.get(
+            'usuario') or self.request.data.get('rol') or 'Empleado'
+        predio = serializer.save()
 
+        BitacoraAuditoria.objects.create(
+            usuario=usuario,
+            accion="CREAR",
+            modulo="Predios",
+            descripcion=f"Se registró el predio '{predio.nombre_predio}' (ID: {predio.pk}) ubicado en {predio.municipio}"
+        )
+
+    def perform_update(self, serializer):
+        predio_anterior = self.get_object()
+        cambios = []
+        
+        # 1. Obtenemos los datos enviados desde el frontend
+        datos_nuevos = self.request.data
+
+        # 2. Comparar campos generales y de ubicación/tenencia del predio
+        campos_predio = {
+            'nombre_predio': 'Nombre del Predio',
+            'municipio': 'Municipio',
+            'parroquia': 'Parroquia',
+            'comunidad': 'Comunidad / Sector',
+            'centro_poblado': 'Centro Poblado',
+            'coordenadas': 'Coordenadas',
+            'direccion': 'Dirección Exacta',
+            'superficie': 'Superficie (Ha)',
+            'tipo_propiedad': 'Tipo de Propiedad',
+            'tenencia': 'Tenencia de la Tierra',
+            'vialidad': 'Condición Vialidad'
+        }
+
+        for campo, etiqueta in campos_predio.items():
+            val_nuevo = datos_nuevos.get(campo)
+            if val_nuevo is not None:
+                val_ant = getattr(predio_anterior, campo, None)
+                if str(val_ant) != str(val_nuevo):
+                    cambios.append(f"{etiqueta}: '{val_ant}' ➔ '{val_nuevo}'")
+
+        # 3. Comparar datos del productor
+        productor_nuevo = datos_nuevos.get('productor', {})
+        if predio_anterior.productor:
+            prod_ant = predio_anterior.productor
+            campos_productor = {
+                'nombre': 'Productor (Nombre)',
+                'cedula_rif': 'Productor (Cédula / RIF)',
+                'telefono': 'Productor (Teléfono)',
+                'correo': 'Productor (Correo Electrónico)'
+            }
+            for campo, etiqueta in campos_productor.items():
+                val_nuevo = productor_nuevo.get(campo)
+                if val_nuevo is not None:
+                    val_ant = getattr(prod_ant, campo, None)
+                    if str(val_ant) != str(val_nuevo):
+                        cambios.append(f"{etiqueta}: '{val_ant}' ➔ '{val_nuevo}'")
+
+        # 4. Comparar infraestructura
+        infraestructura_nueva = datos_nuevos.get('infraestructura', {})
+        if hasattr(predio_anterior, 'infraestructura') and predio_anterior.infraestructura:
+            infra_ant = predio_anterior.infraestructura
+            for campo, val_nuevo in infraestructura_nueva.items():
+                if hasattr(infra_ant, campo):
+                    val_ant = getattr(infra_ant, campo)
+                    if val_ant is not None and val_nuevo is not None and str(val_ant) != str(val_nuevo):
+                        nombre_amigable = campo.replace('_', ' ').capitalize()
+                        cambios.append(f"Infraestructura ({nombre_amigable}): '{val_ant}' ➔ '{val_nuevo}'")
+
+        # 5. Comparar producción (Tipo de explotación y sistemas de registro)
+        produccion_nueva = datos_nuevos.get('produccion', {})
+        if hasattr(predio_anterior, 'produccion') and predio_anterior.produccion:
+            prod_ant = predio_anterior.produccion
+            campos_produccion = {
+                'tipo_explotacion': 'Tipo de Explotación',
+                'registro_sanitario': 'Registro Sanitario',
+                'registro_productivo': 'Registro Productivo',
+                'registro_reproductivo': 'Registro Reproductivo',
+                'registro_financiero': 'Registro Financiero'
+            }
+            for campo, etiqueta in campos_produccion.items():
+                val_nuevo = produccion_nueva.get(campo)
+                if val_nuevo is not None:
+                    val_ant = getattr(prod_ant, campo, None)
+                    if str(val_ant) != str(val_nuevo):
+                        cambios.append(f"{etiqueta}: '{val_ant}' ➔ '{val_nuevo}'")
+
+        # 5.1. Comparar existencia animal (NUEVO - Sin borrar nada previo)
+        existencia_nueva = datos_nuevos.get('existencia_animal', {})
+        if hasattr(predio_anterior, 'existencia_animal') and predio_anterior.existencia_animal and existencia_nueva:
+            exist_ant = predio_anterior.existencia_animal
+            for campo, val_nuevo in existencia_nueva.items():
+                if hasattr(exist_ant, campo):
+                    val_ant = getattr(exist_ant, campo)
+                    if val_ant is not None and val_nuevo is not None and str(val_ant) != str(val_nuevo):
+                        nombre_amigable = campo.replace('_', ' ').capitalize()
+                        cambios.append(f"Existencia Animal ({nombre_amigable}): '{val_ant}' ➔ '{val_nuevo}'")
+
+        # 5.2. Comparar maquinaria (NUEVO - Sin borrar nada previo)
+        maquinaria_nueva = datos_nuevos.get('maquinaria', {})
+        if hasattr(predio_anterior, 'maquinaria') and predio_anterior.maquinaria and maquinaria_nueva:
+            maq_ant = predio_anterior.maquinaria
+            for campo, val_nuevo in maquinaria_nueva.items():
+                if hasattr(maq_ant, campo):
+                    val_ant = getattr(maq_ant, campo)
+                    if val_ant is not None and val_nuevo is not None and str(val_ant) != str(val_nuevo):
+                        nombre_amigable = campo.replace('_', ' ').capitalize()
+                        cambios.append(f"Maquinaria ({nombre_amigable}): '{val_ant}' ➔ '{val_nuevo}'")
+
+        # 5.3. Comparar rubros vegetales (NUEVO - Sin borrar nada previo)
+        rubros_nuevos = datos_nuevos.get('rubros_vegetales')
+        if rubros_nuevos is not None:
+            # Si el frontend envía la lista de rubros, registramos que hubo actualización en esta sección
+            cambios.append("Rubros Vegetales actualizados")
+
+        # 6. Comparar servicios básicos (si vienen en la petición)
+        servicios_nuevos = datos_nuevos.get('servicios')
+        if servicios_nuevos is not None:
+            servicios_antiguos = [ps.servicio.nombre_servicio for ps in predio_anterior.predioservicio_set.all()]
+            if set(servicios_antiguos) != set(servicios_nuevos):
+                cambios.append(f"Servicios Básicos: '{', '.join(servicios_antiguos)}' ➔ '{', '.join(servicios_nuevos)}'")
+
+        # 7. Guardar cambios en la base de datos
+        predio = serializer.save()
+        
+        # 8. Definir módulo, acción y descripción personalizados
+        accion = "EDITAR"
+        modulo = "Predios"
+        
+        # Verificamos si los cambios involucran caracterización (rubros, animales, maquinaria)
+        es_caracterizacion = any("Rubros Vegetales" in c or "Existencia Animal" in c or "Maquinaria" in c for c in cambios)
+
+        if es_caracterizacion:
+            # Usamos "CREAR" (o la palabra que tu frontend pinte en verde, ej. "REGISTRAR" si ya lo ajustaste allá)
+            accion = "CREAR" 
+            modulo = "Producción"
+            descripcion = f"Se caracterizó el predio '{predio.nombre_predio}'"
+        else:
+            if cambios:
+                detalles_texto = "; ".join(cambios)
+                descripcion = f"Se editó el predio '{predio.nombre_predio}'. Modificaciones: {detalles_texto}"
+            else:
+                descripcion = f"Se actualizó la información general del predio '{predio.nombre_predio}'"
+
+        # 9. Registrar en la bitácora
+        usuario = datos_nuevos.get('usuario') or 'Empleado'
+
+        BitacoraAuditoria.objects.create(
+            usuario=usuario,
+            accion=accion,
+            modulo=modulo,
+            descripcion=descripcion
+        )
+    
+    def perform_destroy(self, instance):
+        nombre = instance.nombre_predio
+        municipio = instance.municipio
+        usuario = self.request.data.get('usuario', 'Administrador')
+
+        instance.delete()
+
+        BitacoraAuditoria.objects.create(
+            usuario=usuario,
+            accion="ELIMINAR",
+            modulo="Predios",
+            descripcion=f"Se eliminó el predio '{nombre}' del municipio {municipio}"
+        )
+
+class LicenciaHierroViewSet(viewsets.ModelViewSet):
     queryset = LicenciaHierro.objects.all()
     serializer_class = LicenciaHierroSerializer
 
+    def perform_create(self, serializer):
+        # Capturamos el nombre real del empleado enviado desde el frontend (ej. "Carlos Gómez" o "Empleado - Juan")
+        nombre_empleado = self.request.data.get('empleado') or self.request.data.get('usuario') or self.request.data.get('rol') or 'Empleado'
+        
+        # Guardamos la licencia
+        licencia = serializer.save()
+        
+        # Obtenemos el nombre y municipio del predio asociado de forma segura
+        predio = licencia.predio
+        nombre_predio = predio.nombre_predio if predio else "Desconocido"
+        nombre_municipio = predio.municipio if (predio and predio.municipio) else "Sin municipio"
+        
+        # Combinamos el empleado con su municipio para que quede registrado en la bitácora
+        usuario_con_municipio = f"{nombre_empleado} ({nombre_municipio})"
+
+        BitacoraAuditoria.objects.create(
+            usuario=usuario_con_municipio,
+            accion="CREAR",
+            modulo="Producción",
+            descripcion=f"Se creó y registró la licencia de hierro para el predio '{nombre_predio}' del municipio {nombre_municipio}"
+        ) 
+
+    def perform_update(self, serializer):
+        # Capturamos el empleado y el rol de manera segura
+        nombre_empleado = self.request.data.get('empleado') or self.request.data.get('usuario') or self.request.data.get('rol') or 'Empleado'
+        
+        # Corregido: Guardamos la licencia correctamente
+        licencia = serializer.save()
+        
+        # Obtenemos el predio desde la licencia
+        predio = licencia.predio
+        nombre_predio = predio.nombre_predio if predio else "Desconocido"
+        nombre_municipio = predio.municipio if (predio and predio.municipio) else "Sin municipio"
+        
+        usuario_con_municipio = f"{nombre_empleado} ({nombre_municipio})"
+
+        BitacoraAuditoria.objects.create(
+            usuario=usuario_con_municipio,
+            accion="ACTUALIZAR",
+            modulo="Producción",
+            descripcion=f"Se actualizó la licencia de hierro del predio '{nombre_predio}' del municipio {nombre_municipio}"
+        )
+
+    def perform_destroy(self, instance):
+        nombre_empleado = self.request.data.get('empleado') or self.request.data.get('usuario') or self.request.data.get('rol') or 'Administrador'
+        
+        predio = instance.predio
+        nombre_predio = predio.nombre_predio if predio else "Desconocido"
+        nombre_municipio = predio.municipio if (predio and predio.municipio) else "Sin municipio"
+        
+        usuario_con_municipio = f"{nombre_empleado} ({nombre_municipio})"
+
+        instance.delete()
+
+        BitacoraAuditoria.objects.create(
+            usuario=usuario_con_municipio,
+            accion="ELIMINAR",
+            modulo="Producción - Licencia de Hierro",
+            descripcion=f"Se eliminó la licencia de hierro del predio '{nombre_predio}' del municipio {nombre_municipio}"
+        )
 
 @api_view(['POST'])
 def enviar_codigo_whatsapp(request):
@@ -92,18 +329,19 @@ No comparta este código.
 
         "respuesta_whatsapp": response.json()
     })
-    
-    
+
+
 @api_view(['GET'])
 def dashboard_produccion_stats(request):
     # ── CARD 1: PREDIOS CARACTERIZADOS ─────────────────────────────────
-    predios_caracterizados = Predio.objects.filter(caracterizacion_completada=True).count()
+    predios_caracterizados = Predio.objects.filter(
+        caracterizacion_completada=True).count()
 
 # ── CARD 2: CANTIDAD DE SEMOVIENTES REGISTRADOS ─────────────────────
     import json
     total_semovientes = 0
     existencias = ExistenciaAnimal.objects.all()
-    
+
     for existencia in existencias:
         # Función para forzar la conversión segura a un diccionario nativo
         def obtener_diccionario(campo):
@@ -130,7 +368,7 @@ def dashboard_produccion_stats(request):
         for bloque in bloques_animales:
             if not bloque:
                 continue
-                
+
             # IMPRESIÓN DE DEPURACIÓN: Verás en la consola de tu terminal cómo está estructurado tu JSON real
             print("ESTRUCTURA REAL DEL JSONField:", bloque)
 
@@ -138,7 +376,7 @@ def dashboard_produccion_stats(request):
             if 'total' in bloque:
                 try:
                     total_semovientes += int(float(bloque['total']))
-                    continue # Salta a la siguiente especie
+                    continue  # Salta a la siguiente especie
                 except (ValueError, TypeError):
                     pass
 
@@ -152,14 +390,15 @@ def dashboard_produccion_stats(request):
                     # Si el valor se puede convertir a número entero, se añade al conteo
                     total_semovientes += int(float(valor))
                 except (ValueError, TypeError):
-                    pass # Si es un string o texto descriptivo, lo ignora de forma segura
-        
+                    pass  # Si es un string o texto descriptivo, lo ignora de forma segura
+
     # ── CARD 3: HECTÁREAS SEMBRADAS ────────────────────────────────────
-    resultado_hectareas = RubroVegetal.objects.aggregate(total_has=Sum('hectareas'))
+    resultado_hectareas = RubroVegetal.objects.aggregate(
+        total_has=Sum('hectareas'))
     total_hectareas = resultado_hectareas['total_has'] or 0
 
 # ── GRÁFICOS REALES BASADOS EN TUS MODELOS ──────────────────────────
-    
+
     # Auxiliar para deserializar JSON con seguridad
     def parse_json(campo):
         if isinstance(campo, str):
@@ -189,13 +428,16 @@ def dashboard_produccion_stats(request):
         return suma
 
     # Inicializadores para los conteos de cabezas y capacidades
-    sumas_especies = {"Bovino": 0, "Bubalino": 0, "Porcino": 0, "Caprino": 0, "Equino": 0, "Ovino": 0, "Avícola": 0}
-    sumas_capacidades = {"Bovinos": 0, "Bubalinos": 0, "Porcinos": 0, "Caprinos": 0, "Equinos": 0, "Ovinos": 0, "Avícola": 0}
+    sumas_especies = {"Bovino": 0, "Bubalino": 0, "Porcino": 0,
+                      "Caprino": 0, "Equino": 0, "Ovino": 0, "Avícola": 0}
+    sumas_capacidades = {"Bovinos": 0, "Bubalinos": 0, "Porcinos": 0,
+                         "Caprinos": 0, "Equinos": 0, "Ovinos": 0, "Avícola": 0}
 
     for ex in existencias:
         # 1. Conteo de cabezas reales por especie
         sumas_especies["Bovino"] += total_del_bloque(parse_json(ex.bovinos))
-        sumas_especies["Bubalino"] += total_del_bloque(parse_json(ex.bubalinos))
+        sumas_especies["Bubalino"] += total_del_bloque(
+            parse_json(ex.bubalinos))
         sumas_especies["Porcino"] += total_del_bloque(parse_json(ex.porcinos))
         sumas_especies["Caprino"] += total_del_bloque(parse_json(ex.caprinos))
         sumas_especies["Equino"] += total_del_bloque(parse_json(ex.equinos))
@@ -212,14 +454,21 @@ def dashboard_produccion_stats(request):
                 return 0
 
         # Verifica que los nombres de los atributos coincidan exactamente con tu modelo ExistenciaAnimal
-        sumas_capacidades["Bovinos"] += extraer_capacidad(getattr(ex, 'capacidadBovina', 0))
-        sumas_capacidades["Bubalinos"] += extraer_capacidad(getattr(ex, 'capacidadBubalina', 0))
-        sumas_capacidades["Porcinos"] += extraer_capacidad(getattr(ex, 'capacidadPorcina', 0))
-        sumas_capacidades["Caprinos"] += extraer_capacidad(getattr(ex, 'capacidadCaprino', 0))
-        sumas_capacidades["Equinos"] += extraer_capacidad(getattr(ex, 'capacidadEquina', 0))
-        sumas_capacidades["Ovinos"] += extraer_capacidad(getattr(ex, 'capacidadOvina', 0))
-        sumas_capacidades["Avícola"] += extraer_capacidad(getattr(ex, 'capacidadAvicola', 0))
-        
+        sumas_capacidades["Bovinos"] += extraer_capacidad(
+            getattr(ex, 'capacidadBovina', 0))
+        sumas_capacidades["Bubalinos"] += extraer_capacidad(
+            getattr(ex, 'capacidadBubalina', 0))
+        sumas_capacidades["Porcinos"] += extraer_capacidad(
+            getattr(ex, 'capacidadPorcina', 0))
+        sumas_capacidades["Caprinos"] += extraer_capacidad(
+            getattr(ex, 'capacidadCaprino', 0))
+        sumas_capacidades["Equinos"] += extraer_capacidad(
+            getattr(ex, 'capacidadEquina', 0))
+        sumas_capacidades["Ovinos"] += extraer_capacidad(
+            getattr(ex, 'capacidadOvina', 0))
+        sumas_capacidades["Avícola"] += extraer_capacidad(
+            getattr(ex, 'capacidadAvicola', 0))
+
     # ESTRUCTURA GRÁFICO 1: Cantidad por Especie (Barras)
     datos_produccion_general = [
         {"name": k, "cantidad": v} for k, v in sumas_especies.items()
@@ -234,17 +483,20 @@ def dashboard_produccion_stats(request):
         dest = getattr(r, 'destino', None) or getattr(r, 'rubro', 'Otros')
         destinos_dict[dest] = destinos_dict.get(dest, 0) + 1
 
-    colores_pie = ["#136442", "#4CAF50", "#82ca9d", "#FFBB28", "#FF8042", "#a4de6c"]
+    colores_pie = ["#136442", "#4CAF50",
+                   "#82ca9d", "#FFBB28", "#FF8042", "#a4de6c"]
     datos_actividad = [
-        {"name": str(k), "value": int(v), "color": colores_pie[i % len(colores_pie)]} 
+        {"name": str(k), "value": int(
+            v), "color": colores_pie[i % len(colores_pie)]}
         for i, (k, v) in enumerate(destinos_dict.items())
     ]
-    if not datos_actividad: # Fallback en caso de que esté completamente vacío
-        datos_actividad = [{"name": "Sin registros", "value": 0, "color": "#cccccc"}]
+    if not datos_actividad:  # Fallback en caso de que esté completamente vacío
+        datos_actividad = [
+            {"name": "Sin registros", "value": 0, "color": "#cccccc"}]
 
 # ── ESTRUCTURA GRÁFICO 3: Uso Tecnológico y Maquinaria (Radar) ──────────────────
     maquinarias_registro = Maquinaria.objects.all()
-    
+
     # Inicializamos los contadores de unidades físicas reales
     total_ruedas = 0
     total_implementos = 0
@@ -261,17 +513,21 @@ def dashboard_produccion_stats(request):
                 campo_json = json.loads(campo_json)
             except json.JSONDecodeError:
                 return 0
-        
+
         if not isinstance(campo_json, dict):
             return 0
 
         # Si el JSON tiene una estructura con una llave 'cantidad' o 'total', la usamos
         if 'cantidad' in campo_json:
-            try: return int(float(campo_json['cantidad']))
-            except (ValueError, TypeError): pass
+            try:
+                return int(float(campo_json['cantidad']))
+            except (ValueError, TypeError):
+                pass
         if 'total' in campo_json:
-            try: return int(float(campo_json['total']))
-            except (ValueError, TypeError): pass
+            try:
+                return int(float(campo_json['total']))
+            except (ValueError, TypeError):
+                pass
 
         # Si guarda elementos individuales como {'tractores': 2, 'cosechadoras': 1}
         suma = 0
@@ -332,7 +588,7 @@ def dashboard_produccion_stats(request):
     datos_estado = [
         {"especie": k, "cantidad": v} for k, v in sumas_capacidades.items()
     ]
-    
+
     return Response({
         "cards": {
             "predios_caracterizados": predios_caracterizados,
@@ -346,6 +602,7 @@ def dashboard_produccion_stats(request):
             "estado_sistema": datos_estado
         }
     })
+
 
 @api_view(['GET', 'POST'])
 def configurar_o_login_admin(request):
@@ -368,7 +625,7 @@ def configurar_o_login_admin(request):
             # ── REGISTRO ÚNICO (Primer administrador) ──
             if not usuario or not clave or not nombre:
                 return Response({"error": "Todos los campos son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # Guardamos la contraseña cifrada por seguridad
             nuevo_admin = AdministradorSistema.objects.create(
                 nombre=nombre,
@@ -404,7 +661,6 @@ def configurar_o_login_admin(request):
                 return Response({"error": "El usuario no existe."}, status=status.HTTP_404_NOT_FOUND)
 
 
-
 @api_view(['POST'])
 def guardar_credencial_municipio(request):
     municipio_id = request.data.get('municipio_id')
@@ -437,12 +693,16 @@ def guardar_credencial_municipio(request):
         "usuario": admin_mun.usuario
     }, status=status.HTTP_200_OK)
 
+
 @api_view(['GET'])
 def obtener_credenciales_municipios(request):
     # Retorna la lista de municipios que ya tienen credenciales configuradas
-    credenciales = AdministradorSistema.objects.filter(municipio__isnull=False).values('municipio', 'usuario')
-    data = {item['municipio']: {"creado": True, "usuario": item['usuario']} for item in credenciales}
+    credenciales = AdministradorSistema.objects.filter(
+        municipio__isnull=False).values('municipio', 'usuario')
+    data = {item['municipio']: {"creado": True, "usuario": item['usuario']}
+            for item in credenciales}
     return Response(data)
+
 
 @api_view(['POST'])
 def login_admin_api(request):
@@ -455,7 +715,7 @@ def login_admin_api(request):
 
     try:
         admin = AdministradorSistema.objects.get(usuario=usuario)
-        
+
         # 🚫 Solo bloqueamos si es el Administrador Maestro
         if admin.rol == "Administrador Maestro":
             return Response({"success": False, "message": "Este acceso no está disponible para el Administrador Maestro."}, status=status.HTTP_403_FORBIDDEN)
@@ -474,15 +734,17 @@ def login_admin_api(request):
             }, status=status.HTTP_200_OK)
         else:
             return Response({"success": False, "message": "Usuario o contraseña incorrectos."}, status=status.HTTP_400_BAD_REQUEST)
-            
+
     except AdministradorSistema.DoesNotExist:
         return Response({"success": False, "message": "Usuario o contraseña incorrectos."}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['GET', 'PUT'])
 def gestionar_credenciales_noticias(request):
     if request.method == 'GET':
         try:
-            admin_noticias = AdministradorSistema.objects.get(rol="Empleado de Noticias")
+            admin_noticias = AdministradorSistema.objects.get(
+                rol="Empleado de Noticias")
             return Response({
                 "usuario": admin_noticias.usuario,
                 "activo": True
@@ -528,7 +790,8 @@ def gestionar_noticias(request):
         if not titulo or not descripcion:
             return Response({"error": "El título y la descripción son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
 
-        noticia = Noticia.objects.create(titulo=titulo, descripcion=descripcion, imagen=imagen)
+        noticia = Noticia.objects.create(
+            titulo=titulo, descripcion=descripcion, imagen=imagen)
         return Response({"mensaje": "¡Noticia registrada con éxito!"}, status=status.HTTP_201_CREATED)
 
     elif request.method == 'GET':
@@ -553,6 +816,9 @@ def detalle_noticia(request, pk):
     except Noticia.DoesNotExist:
         return Response({"error": "Noticia no encontrada."}, status=status.HTTP_404_NOT_FOUND)
 
+    # Capturamos el usuario si viene en el request (o un valor por defecto)
+    usuario_actual = request.data.get('usuario', 'Administrador')
+
     if request.method == 'PUT':
         titulo = request.data.get('titulo', noticia.titulo)
         descripcion = request.data.get('descripcion', noticia.descripcion)
@@ -564,8 +830,26 @@ def detalle_noticia(request, pk):
             noticia.imagen = imagen
         noticia.save()
 
+        # ── REGISTRO EN BITÁCORA ──
+        BitacoraAuditoria.objects.create(
+            usuario=usuario_actual,
+            accion="EDITAR",
+            modulo="Noticias",
+            descripcion=f"Se actualizó la noticia: '{noticia.titulo}'"
+        )
+
         return Response({"mensaje": "¡Noticia actualizada con éxito!"}, status=status.HTTP_200_OK)
 
     elif request.method == 'DELETE':
+        titulo_noticia = noticia.titulo
         noticia.delete()
+
+        # ── REGISTRO EN BITÁCORA ──
+        BitacoraAuditoria.objects.create(
+            usuario=usuario_actual,
+            accion="ELIMINAR",
+            modulo="Noticias",
+            descripcion=f"Se eliminó la noticia: '{titulo_noticia}'"
+        )
+
         return Response({"mensaje": "¡Noticia eliminada con éxito!"}, status=status.HTTP_200_OK)
