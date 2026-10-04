@@ -12,6 +12,7 @@ export const AdminSidebar = ({
     vistaActiva,
     setVistaActiva,
     cerrarSesion,
+    badgeCount,
     PresentationChartBarIcon,
     KeyIcon,
     ClockIcon,
@@ -29,15 +30,17 @@ export const AdminSidebar = ({
     // Estado para controlar si el menú desplegable de Producción está abierto o cerrado
     const [produccionAbierto, setProduccionAbierto] = useState(
         vistaActiva === "produccion_dashboard" ||
-        vistaActiva === "guias_movilizacion"||
+        vistaActiva === "guias_movilizacion" ||
         vistaActiva === "produccion_reportes"
     );
 
     // Estado para controlar si el menú desplegable de Configuración está abierto o cerrado
     const [configuracionAbierto, setConfiguracionAbierto] = useState(
         vistaActiva === "configuracion" ||
-        vistaActiva === "credenciales"||
-        vistaActiva === "bitacora"
+        vistaActiva === "credenciales" ||
+        vistaActiva === "bitacora" ||
+        vistaActiva === "noticias" ||
+        vistaActiva === "notificaciones_noticias"
     );
 
     return (
@@ -274,7 +277,7 @@ export const AdminSidebar = ({
                                 <span>Dashboard Producción</span>
                             </div>
 
-                                                        <div
+                            <div
                                 onClick={() => setVistaActiva("guia_movilizacion")}
                                 style={{
                                     display: "flex", alignItems: "center", gap: "10px",
@@ -402,6 +405,50 @@ export const AdminSidebar = ({
                             >
                                 <NewspaperIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
                                 <span>Credenciales Noticias</span>
+                            </div>
+
+                            {/* NUEVA OPCIÓN: Notificaciones Noticias */}
+                            {/* NUEVA OPCIÓN: Notificaciones Noticias */}
+                            <div
+                                onClick={() => setVistaActiva("notificaciones_noticias")}
+                                style={{
+                                    display: "flex", alignItems: "center", justifyContent: "space-between", // Cambiado a space-between para alinear el badge a la derecha
+                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                    backgroundColor: vistaActiva === "notificaciones_noticias" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "notificaciones_noticias" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "notificaciones_noticias" ? 600 : 400,
+                                    fontSize: "13px",
+                                    transition: "background 0.2s",
+                                    position: "relative" // Necesario para posicionar elementos si se requiere
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (vistaActiva !== "notificaciones_noticias") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (vistaActiva !== "notificaciones_noticias") e.currentTarget.style.backgroundColor = "transparent";
+                                }}
+                            >
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                    <NewspaperIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                    <span>Notificaciones Noticias</span>
+                                </div>
+
+                                {/* Insignia roja del contador */}
+                                {badgeCount > 0 && (
+                                    <span style={{
+                                        backgroundColor: "#ef4444",
+                                        color: "#ffffff",
+                                        fontSize: "11px",
+                                        fontWeight: "700",
+                                        padding: "2px 6px",
+                                        borderRadius: "9999px",
+                                        minWidth: "20px",
+                                        textAlign: "center",
+                                        lineHeight: "1"
+                                    }}>
+                                        {badgeCount}
+                                    </span>
+                                )}
                             </div>
 
                             <div

@@ -19,6 +19,7 @@ import { AdminCredencialesNoticias } from '../../components/AdminCredencialesNot
 import AdminProduccionDashboard from '../../components/AdminProduccionDashboard';
 import SeccionReportes from "../../components/SeccionReportes";
 import AdminBitacora from '../../components/AdminBitacora';
+import AdminNotificacionesNoticias from '../../components/AdminNotificacionesNoticias';
 
 // Estilos UI
 import {
@@ -192,6 +193,27 @@ export default function AdminPrediosDashboard() {
         }
     }, [vistaActiva]);
 
+    // 1. Agrega este estado junto con tus otros estados en AdminPrediosDashboard:
+    const [contadorPendientes, setContadorPendientes] = useState(0);
+
+    // 2. Crea la función para consultar las pendientes a la API:
+    const obtenerContadorPendientes = async () => {
+        try {
+            const res = await fetch("http://localhost:8000/api/noticias/pendientes/");
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                setContadorPendientes(data.length);
+            }
+        } catch (err) {
+            console.error("Error al obtener el contador de pendientes:", err);
+        }
+    };
+
+    // 3. Ejecuta esta función cuando cargue el componente (dentro de un useEffect):
+    useEffect(() => {
+        obtenerContadorPendientes();
+    }, []);
+
     const cerrarSesion = () => {
         sessionStorage.removeItem("usuario_admin");
         navigate("/predios/admin-secreto");
@@ -215,6 +237,7 @@ export default function AdminPrediosDashboard() {
                     vistaActiva={vistaActiva}
                     setVistaActiva={setVistaActiva}
                     cerrarSesion={cerrarSesion}
+                    badgeCount={contadorPendientes}
                     predioSeleccionado={productionState.predioSeleccionado || predioSeleccionado} // <--- ¡Añadir esto!
                     PresentationChartBarIcon={PresentationChartBarIcon}
                     KeyIcon={KeyIcon}
@@ -270,6 +293,12 @@ export default function AdminPrediosDashboard() {
                             UserIcon={UserIcon}
                             LockClosedIcon={LockClosedIcon}
                         />
+                    ) : vistaActiva === "notificaciones_noticias" ? (
+
+                        <AdminNotificacionesNoticias
+                            onActualizarConteo={obtenerContadorPendientes} // <--- ¡Añade esta prop aquí!
+                        />
+
                     ) : vistaActiva === "historial" ? (
                         <HistorialPredios
                             tabActiva={vistaActiva}

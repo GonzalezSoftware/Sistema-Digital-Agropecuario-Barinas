@@ -5,7 +5,7 @@ from django.db.models import Sum
 from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Predio, LicenciaHierro, Productor, Noticia, BitacoraAuditoria
+from .models import Predio, LicenciaHierro, Productor, Noticia
 from .serializers import PredioSerializer, LicenciaHierroSerializer
 from .models import Predio, RubroVegetal, ExistenciaAnimal, Maquinaria
 from rest_framework import status
@@ -14,7 +14,7 @@ from .models import AdministradorSistema
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import viewsets
-from .models import BitacoraAuditoria
+from .models import Noticia, NoticiaPendiente, BitacoraAuditoria
 from .serializers import BitacoraAuditoriaSerializer
 
 
@@ -853,3 +853,83 @@ def detalle_noticia(request, pk):
         )
 
         return Response({"mensaje": "¡Noticia eliminada con éxito!"}, status=status.HTTP_200_OK)
+
+@api_view(['GET', 'POST'])
+def gestionar_noticias_pendientes(request):
+    if request.method == 'POST':
+        # El empleado envía la noticia para revisión
+        titulo = request.data.get('titulo')
+        descripcion = request.data.get('descripcion')
+        imagen = request.FILES.get('imagen')
+        empleado = request.data.get('usuario', 'Empleado')
+
+        if not titulo or not descripcion:
+            return Response({"error": "El título y la descripción son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+
+        NoticiaPendiente.objects.create(
+            titulo=titulo, descripcion=descripcion, imagen=imagen, empleado=empleado
+        )
+        return Response({"mensaje": "¡Noticia enviada al administrador para su revisión con éxito!"}, status=status.HTTP_201_CREATED)
+
+    elif request.method == 'GET':
+        # Listar todas las notificaciones pendientes para el admin
+        pendientes = NoticiaPendiente.objects.all().order_by('-fecha_solicitud')
+        data = [
+            {
+                "id": p.id,
+                "titulo": p.titulo,
+                "descripcion": p.descripcion,
+                "imagen": request.build_absolute_uri(p.imagen.url) if p.imagen else None,
+                "empleado": p.empleado,
+                "fecha": p.fecha_solicitud
+            }
+            for p in pendientes
+        ]
+        return Response(data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def resolver_noticia_pendiente(request, pk):
+    accion = request.data.get('accion') # "aprobar" o "rechazar"
+    usuario_admin = request.data.get('usuario', 'Administrador')
+
+    try:
+        pendiente = NoticiaPendiente.objects.get(pk=pk)
+    except NoticiaPendiente.DoesNotExist:
+        return Response({"error": "La notificación no fue encontrada."}, status=status.HTTP_404_NOT_FOUND)
+
+    if accion == 'aprobar':
+        # 1. Se crea formalmente en la tabla oficial de Noticias
+        Noticia.objects.create(
+            titulo=pendiente.titulo,
+            descripcion=pendiente.descripcion,
+            imagen=pendiente.imagen # Django maneja la transferencia del archivo
+        )
+
+        # 2. Registrar en bitácora
+        BitacoraAuditoria.objects.create(
+            usuario=usuario_admin,
+            accion="CREAR",
+            modulo="Noticias",
+            descripcion=f"Se aprobó y publicó la noticia propuesta: '{pendiente.titulo}'"
+        )
+
+        # 3. Eliminar de pendientes
+        pendiente.delete()
+        return Response({"mensaje": "¡Noticia aprobada y publicada oficialmente!"}, status=status.HTTP_200_OK)
+
+    elif accion == 'rechazar':
+        titulo_rechazado = pendiente.titulo
+        
+        # Registrar rechazo en bitácora opcionalmente
+        BitacoraAuditoria.objects.create(
+            usuario=usuario_admin,
+            accion="ELIMINAR",
+            modulo="Noticias",
+            descripcion=f"Se rechazó la propuesta de noticia: '{titulo_rechazado}'"
+        )
+
+        pendiente.delete()
+        return Response({"mensaje": "La noticia propuesta fue rechazada y descartada."}, status=status.HTTP_200_OK)
+
+    return Response({"error": "Acción no válida."}, status=status.HTTP_400_BAD_REQUEST)
