@@ -16,6 +16,10 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from .models import Noticia, NoticiaPendiente, BitacoraAuditoria
 from .serializers import BitacoraAuditoriaSerializer
+from django.core.mail import EmailMessage
+
+
+
 
 
 class BitacoraAuditoriaViewSet(viewsets.ReadOnlyModelViewSet):
@@ -122,9 +126,17 @@ class PredioViewSet(viewsets.ModelViewSet):
             for campo, val_nuevo in infraestructura_nueva.items():
                 if hasattr(infra_ant, campo):
                     val_ant = getattr(infra_ant, campo)
-                    if val_ant is not None and val_nuevo is not None and str(val_ant) != str(val_nuevo):
-                        nombre_amigable = campo.replace('_', ' ').capitalize()
-                        cambios.append(f"Infraestructura ({nombre_amigable}): '{val_ant}' ➔ '{val_nuevo}'")
+                    if str(val_ant) != str(val_nuevo):
+                        cambios.append(f"Infraestructura ({campo}): '{val_ant}' ➔ '{val_nuevo}'")
+
+        # Guardar en bitácora si hubo cambios
+        if cambios:
+            BitacoraAuditoria.objects.create(
+                usuario=self.request.data.get('usuario', 'Sistema'),
+                accion="ACTUALIZAR",
+                modulo="Predios",
+                descripcion=f"Se actualizó el predio '{predio_anterior.nombre_predio}'. Cambios: {', '.join(cambios)}"
+            )
 
         # 5. Comparar producción (Tipo de explotación y sistemas de registro)
         produccion_nueva = datos_nuevos.get('produccion', {})
@@ -933,3 +945,50 @@ def resolver_noticia_pendiente(request, pk):
         return Response({"mensaje": "La noticia propuesta fue rechazada y descartada."}, status=status.HTTP_200_OK)
 
     return Response({"error": "Acción no válida."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def enviar_correo_ficha_predio(request):
+    id_predio = request.data.get('id_predio')
+    correo_destino = request.data.get('correo')
+    pdf_file = request.FILES.get('pdf_file')  # Capturamos el archivo PDF enviado desde React
+
+    if not id_predio or not correo_destino:
+        return Response({"error": "Faltan datos requeridos (id_predio o correo)."}, status=400)
+
+    try:
+        predio = Predio.objects.select_related('productor').get(pk=id_predio)
+    except Predio.DoesNotExist:
+        return Response({"error": "Predio no encontrado."}, status=404)
+
+    productor = predio.productor
+    nombre_productor = productor.nombre if productor else "Productor"
+    
+    # Construcción del mensaje de correo
+    asunto = f"Ficha Técnica Integral - Predio: {predio.nombre_predio}"
+    cuerpo = (
+        f"Estimado/a {nombre_productor},\n\n"
+        f"Se ha completado exitosamente la caracterización / actualización productiva "
+        f"del predio '{predio.nombre_predio}' ubicado en el municipio {predio.municipio}.\n\n"
+        f"Adjunto a este correo encontrará su Ficha Técnica Integral en formato PDF con todos los detalles registrados.\n\n"
+        f"Atentamente,\n"
+        f"Ministerio del Poder Popular para la Agricultura Productiva y Tierras (MPPAPT)"
+    )
+
+    try:
+        email = EmailMessage(
+            subject=asunto,
+            body=cuerpo,
+            from_email=None,  # Utiliza el DEFAULT_FROM_EMAIL configurado en settings.py
+            to=[correo_destino]
+        )
+        
+        # Adjuntar el archivo PDF si fue recibido correctamente
+        if pdf_file:
+            email.attach(pdf_file.name, pdf_file.read(), 'application/pdf')
+
+        email.send(fail_silently=False)
+        return Response({"mensaje": "Correo enviado exitosamente al productor con el PDF adjunto."}, status=200)
+    except Exception as e:
+        # Corregido el formateo del string de error para que muestre la excepción real
+        return Response({"error": f"No se pudo enviar el correo: {str(e)}"}, status=500)

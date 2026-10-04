@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2'; // 🔹 Importamos SweetAlert2
-import { 
-    ChevronDownIcon, 
+import {
+    ChevronDownIcon,
     PresentationChartBarIcon as DefaultChartIcon,
     MapIcon,
     ClipboardDocumentListIcon,
     ChartBarIcon,
-    CircleStackIcon, 
-    CheckCircleIcon, 
-    DocumentTextIcon, 
-    ArrowPathIcon, 
+    CircleStackIcon,
+    CheckCircleIcon,
+    DocumentTextIcon,
+    ArrowPathIcon,
     DocumentChartBarIcon,
     TagIcon,
     ClockIcon,      // 🔹 Icono para Historial
@@ -31,6 +31,31 @@ export const EmpleadoSidebar = ({
     const [produccionAbierto, setProduccionAbierto] = useState(
         vistaActiva?.startsWith("produccion")
     );
+
+    // 🔹 Función para validar antes de entrar a Actualización Productiva
+    const manejarClickActualizacion = () => {
+        if (!predioActivo) {
+            Swal.fire({
+                icon: "warning",
+                title: "Predio no seleccionado",
+                text: "Debe seleccionar un predio previamente para realizar la actualización productiva.",
+                confirmButtonColor: "#136442"
+            });
+            return;
+        }
+
+        if (!predioActivo.caracterizacion_completada) {
+            Swal.fire({
+                icon: "warning",
+                title: "Predio sin caracterización",
+                text: `El predio "${predioActivo.nombre_predio}" aún no cuenta con una caracterización registrada. Debe caracterizarlo primero.`,
+                confirmButtonColor: "#136442"
+            });
+            return;
+        }
+
+        setVistaActiva("produccion_actualizacion");
+    };
 
     // 🔹 Función para validar antes de entrar a Caracterización
     const manejarClickCaracterizacion = () => {
@@ -55,6 +80,21 @@ export const EmpleadoSidebar = ({
         }
 
         setVistaActiva("produccion_caracterizacion");
+    };
+
+    // 🔹 Función para validar antes de entrar a Licencia de Hierro
+    const manejarClickHierro = () => {
+        if (!predioActivo) {
+            Swal.fire({
+                icon: "warning",
+                title: "Predio no seleccionado",
+                text: "Debe seleccionar un predio previamente para usar la opción de licencia de hierro.",
+                confirmButtonColor: "#136442"
+            });
+            return;
+        }
+
+        setVistaActiva("produccion_hierro");
     };
 
     return (
@@ -235,11 +275,13 @@ export const EmpleadoSidebar = ({
                                 <DocumentTextIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Caracterización</span>
                             </div>
-                            <div onClick={() => setVistaActiva("produccion_hierro")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_hierro" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_hierro" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
+                            {/* 🔹 Opción de Licencia de Hierro actualizada con la validación */}
+                            <div onClick={manejarClickHierro} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_hierro" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_hierro" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
                                 <TagIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Licencia de Hierro</span>
                             </div>
-                            <div onClick={() => setVistaActiva("produccion_actualizacion")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_actualizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_actualizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
+                            {/* 🔹 Opción de Actualización Productiva con la validación integrada */}
+                            <div onClick={manejarClickActualizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_actualizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_actualizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
                                 <ArrowPathIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Actualización Productiva</span>
                             </div>

@@ -141,3 +141,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# ── CONFIGURACIÓN DE CORREO PROPIO (SMTP) ──────────────────
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'                 # Cambia al servidor SMTP de tu proveedor (ej. smtp.office365.com para Outlook)
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'isaiasutriz13@gmail.com'  # Tu dirección de correo real
+EMAIL_HOST_PASSWORD = 'gsvp tbpz eohp ryrc'             # La clave de aplicación de tu correo (ver paso 2)
+DEFAULT_FROM_EMAIL = 'MPPAT Dirección Estadal <isaiasutriz13@gmail.com>'

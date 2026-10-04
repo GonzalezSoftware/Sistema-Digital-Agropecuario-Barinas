@@ -1,5 +1,5 @@
 // src/components/FormCaracterizacion.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import {
@@ -23,14 +23,249 @@ export default function FormCaracterizacion({
     setTabActiva,
     subCaracterizacion,
     setSubCaracterizacion,
+    modo = "caracterizacion", // Nuevo prop: "caracterizacion" o "actualizacion"
 }) {
 
     const [codigoGenerado, setCodigoGenerado] = useState("");
-    const [codigoIngresado, setCodigoIngresado] = useState("");
+    const [erroresFilas, setErroresFilas] = useState({});
+
+    // ── EFECTO PARA GESTIONAR DATOS SEGÚN EL MODO Y EL PREDIO ACTIVO ──────────────────
+    useEffect(() => {
+        if (predioActivo) {
+            if (modo === "actualizacion") {
+                // 1. Cargar datos existentes si es actualización
+                if (predioActivo.rubros_vegetales && Array.isArray(predioActivo.rubros_vegetales)) {
+                    setRubrosVegetales(predioActivo.rubros_vegetales);
+                } else {
+                    setRubrosVegetales([]);
+                }
+
+                setInventarioInicial((prev) => ({
+                    ...prev,
+                    especiesSeleccionadas: predioActivo.existencia_animal?.especiesSeleccionadas || [],
+                    ...(predioActivo.existencia_animal || {}),
+                    ...(predioActivo.maquinaria || {}),
+                }));
+            } else {
+                // 2. Limpiar / reiniciar estados si es caracterización nueva para evitar arrastrar datos
+                setRubrosVegetales([]);
+                setInventarioInicial((prev) => ({
+                    ...prev,
+                    especiesSeleccionadas: [],
+
+                    bovinos: {
+                        toro_reproductor: 0,
+                        toro_ceba: 0,
+                        vaca: 0,
+                        novilla: 0,
+                        novillo: 0,
+                        maute: 0,
+                        mauta: 0,
+                        becerra: 0,
+                        becerro: 0,
+                    },
+
+                    capacidadBovina: {
+                        leche_diaria: 0,
+                        carne_anual: 0,
+                        sistemas: [],
+                    },
+
+                    bubalinos: {
+                        butoro_reproductor: 0,
+                        butoro_ceba: 0,
+                        bufala: 0,
+                        buvilla: 0,
+                        buvillo: 0,
+                        bumauta: 0,
+                        bumaute: 0,
+                        bucerra: 0,
+                        bucerro: 0,
+                    },
+
+                    capacidadBubalina: {
+                        leche_diaria: 0,
+                        carne_anual: 0,
+                        partos_anuales: 0,
+                        reproductores: 0,
+                        sistemas: [],
+                    },
+
+                    equinos: {
+                        padrillo: 0,
+                        caballo_trabajo: 0,
+                        yegua: 0,
+                        potra: 0,
+                        potro: 0,
+                        potrilla: 0,
+                        potrillo: 0,
+                        burro: 0,
+                        burra: 0,
+                    },
+
+                    capacidadEquina: {
+                        sistemas: [],
+                        trabajo_agricola: 0,
+                        transporte: 0,
+                        reproduccion: 0,
+                        deporte: 0,
+                        exhibicion: 0,
+                        turismo: 0,
+                        carga: 0,
+                    },
+
+                    ovinos: {
+                        carnero: 0,
+                        oveja: 0,
+                        borrego: 0,
+                        borrega: 0,
+                        cordero: 0,
+                        cordera: 0,
+                    },
+
+                    capacidadOvina: {
+                        sistemas: [],
+                        carne_anual: 0,
+                        leche_diaria: 0,
+                        lana_anual: 0,
+                        cria: 0,
+                        reproduccion: 0,
+                        doble_proposito: 0,
+                        genetica: 0,
+                    },
+
+                    porcinos: {
+                        berraco: 0,
+                        cerda_gestante: 0,
+                        cerda_lactante: 0,
+                        lechon: 0,
+                        lechona: 0,
+                    },
+
+                    capacidadPorcina: {
+                        sistemas: [],
+                        cria: 0,
+                        engorde: 0,
+                        reproduccion: 0,
+                        ciclo_completo: 0,
+                        genetica: 0,
+                        carne_anual: 0,
+                    },
+
+                    caprinos: {
+                        cabrio: 0,
+                        cabra: 0,
+                        cabrillo: 0,
+                        cabrilla: 0,
+                        cabrito: 0,
+                        cabrita: 0,
+                    },
+
+                    capacidadCaprino: {
+                        sistemas: [],
+                        vientres: 0,
+                        engorde: 0,
+                        leche_diaria: 0,
+                        carne_anual: 0,
+                    },
+
+                    cunicola: {
+                        macho: 0,
+                        madre: 0,
+                        gazapo: 0,
+                    },
+
+                    capacidadCunicola: {
+                        sistemas: [],
+                        jaulas_madre: 0,
+                        reproductoras: 0,
+                        carne_anual: 0
+                    },
+
+                    avicola: {
+                        pollos_engorde: 0,
+                        gallinas_ponedoras: 0,
+                        gallinas_descarte: 0,
+                        codornices: 0,
+                        patos: 0,
+                        pavos: 0,
+                        avestruz: 0,
+                        guinea: 0,
+                        otros: 0,
+                    },
+
+                    capacidadAvicola: {
+                        sistemas: [],
+                        capacidad_alojamiento: 0,
+                        produccion_huevos: 0,
+                        capacidad_lote: 0,
+                    },
+
+                    apicola: {
+                        colmenas: 0,
+                    },
+
+                    capacidadApicola: {
+                        sistemas: [],
+                        colmenas_activas: 0,
+                        miel_anual: 0,
+                        nucleos_anuales: 0,
+                    },
+
+                    maquinariaSeleccionada: [],
+
+                    maquinaria_ruedas: {
+                        tractor: 0,
+                        rotocultor: 0,
+                        patrol: 0,
+                        lowboy: 0,
+                        payloader: 0,
+                        cosechadora: 0,
+                        desgranadora: 0,
+                        basuca: 0,
+                        remolque: 0,
+                    },
+
+                    implementos: {
+                        abonadora: 0,
+                        arados: 0,
+                        aspergadoras: 0,
+                        rastra_pesada: 0,
+                        cultivadora: 0,
+                        desmalezadora: 0,
+                        desterronadora: 0,
+                        encaladora: 0,
+                        niveladora: 0,
+                        cegadora: 0,
+                        sembradora: 0,
+                        subsolador: 0,
+                        surcadora: 0,
+                        trompo_fertilizador: 0,
+                    },
+
+                    riego: {
+                        electrobomba: 0,
+                        molino_viento: 0,
+                        motobomba: 0,
+                        motor_diesel: 0,
+                    },
+
+                    otros_equipos: {
+                        cargadora_madera: 0,
+                        descortezadora: 0,
+                        motosierra: 0,
+                        secadora_granos: 0,
+                        termonebulizadores: 0,
+                        trilladora: 0,
+                        acuicultura_aireacion: 0,
+                        alimentacion_mecanizada: 0,
+                    },
+                }));
+            }
+        }
+    }, [predioActivo, modo]);
+
     // ── COMPONENTE DE INPUT NUMÉRICO CON TIPOGRAFÍA HEREDADA ──────────────────
-
-// ── COMPONENTE DE INPUT NUMÉRICO CON TIPOGRAFÍA HEREDADA ──────────────────
-
     const NumericInputField = ({
         label,
         value,
@@ -38,11 +273,9 @@ export default function FormCaracterizacion({
         placeholder = "0",
         min = 0,
     }) => {
-        // Mantenemos un estado local para que el usuario pueda tipear con total fluidez (ej: "12", "150")
         const [textValue, setTextValue] = useState(value ?? "");
 
-        // Sincronizamos el estado local si el valor externo cambia por otro motivo
-        React.useEffect(() => {
+        useEffect(() => {
             setTextValue(value ?? "");
         }, [value]);
 
@@ -61,7 +294,7 @@ export default function FormCaracterizacion({
                     }}
                     onChange={(e) => {
                         const val = e.target.value;
-                        setTextValue(val); // Actualiza la vista de forma continua e inmediata
+                        setTextValue(val);
 
                         if (val === "") {
                             onChange("");
@@ -83,13 +316,15 @@ export default function FormCaracterizacion({
         );
     };
 
+
+
     // ── COMPONENTE DE CHECKBOX / SWITCH CON TIPOGRAFÍA HEREDADA ──────────────────
     const ModernCheckbox = ({ label, checked, onChange }) => {
         return (
             <div
                 onClick={() => onChange(!checked)}
                 style={{
-                    ...radioLabel, // <--- Usa la base original (tipografía, cursor, colores bases)
+                    ...radioLabel,
                     display: "flex",
                     alignItems: "center",
                     gap: "12px",
@@ -104,7 +339,6 @@ export default function FormCaracterizacion({
                     boxSizing: "border-box",
                 }}
             >
-                {/* Cuadro de verificación moderno */}
                 <div
                     style={{
                         width: "20px",
@@ -134,33 +368,16 @@ export default function FormCaracterizacion({
                         </svg>
                     )}
                 </div>
-                {/* El texto mantendrá la tipografía nativa de la app */}
                 <span>{label}</span>
             </div>
         );
     };
 
-    // Lista de rubros vegetales comunes ordenada alfabéticamente
     const LISTA_RUBROS_VEGETALES = [
-        "Caraota",
-        "Maíz Blanco",
-        "Maíz Amarillo",
-        "Arroz",
-        "Sorgo",
-        "Café",
-        "Cacao",
-        "Caña de Azúcar",
-        "Yuca",
-        "Plátano",
-        "Cambur",
-        "Auyama",
-        "Tomate",
-        "Cebolla",
-        "Pimentón",
-    ].sort((a, b) => a.localeCompare(b)); // Esto asegura el orden alfabético estricto
-
-    // Dentro de FormCaracterizacion, arriba:
-    const [erroresFilas, setErroresFilas] = useState({});
+        "Caraota", "Maíz Blanco", "Maíz Amarillo", "Arroz", "Sorgo",
+        "Café", "Cacao", "Caña de Azúcar", "Yuca", "Plátano",
+        "Cambur", "Auyama", "Tomate", "Cebolla", "Pimentón",
+    ].sort((a, b) => a.localeCompare(b));
 
     const agregarRubroVegetal = () => {
         setRubrosVegetales((prev) => [
@@ -183,26 +400,21 @@ export default function FormCaracterizacion({
     };
 
     const actualizarRubroVegetal = (index, campo, valor) => {
-        // Validación preventiva para que no permita escribir números negativos
         if (
             (campo === "hectareas" || campo === "produccion_estimada") &&
-            valor !== ""
+            valor !== "" && Number(valor) < 0
         ) {
-            if (Number(valor) < 0) {
-                return; // Bloquea el cambio inmediatamente si es negativo
-            }
+            return;
         }
 
-        // 1. Actualizamos el estado normal del rubro
         setRubrosVegetales((prev) => {
             const copia = [...prev];
-            copia[index][campo] = valor;
+            // CORRECCIÓN: Copiar el objeto de la fila para mantener la inmutabilidad
+            copia[index] = { ...copia[index], [campo]: valor };
             return copia;
         });
 
-        // 2. Validación en tiempo real del campo modificado
         let mensajeError = "";
-
         if (campo === "hectareas" || campo === "produccion_estimada") {
             if (valor === "") {
                 mensajeError = "Este campo es requerido";
@@ -221,13 +433,276 @@ export default function FormCaracterizacion({
             }
         }
 
-        // 3. Guardamos el error apuntando exactamente al índice y columna afectada
         setErroresFilas((prev) => ({
             ...prev,
             [`${index}-${campo}`]: mensajeError,
         }));
     };
 
+
+    // Función auxiliar recomendada para generar el documento en memoria
+    const generarObjetoPDF = (predio) => {
+        const doc = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "letter"
+        });
+
+        const verdeBarinas = [19, 100, 66];
+        const grisOscuro = [40, 40, 40];
+
+        // ────────────────────────────────────────────────────────
+        // CINTILLO INSTITUCIONAL (MEMBRETE)
+        // ────────────────────────────────────────────────────────
+        try {
+            doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
+            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+        } catch (error) {
+            console.warn("Logos institucionales omitidos.");
+        }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(100, 100, 100);
+        doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
+
+        const fechaEmision = predio.fecha_registro
+            ? new Date(predio.fecha_registro).toLocaleDateString()
+            : new Date().toLocaleDateString();
+        doc.text(`Fecha de Registro: ${fechaEmision}`, 204, 18, { align: "right" });
+
+        doc.setDrawColor(...verdeBarinas);
+        doc.setLineWidth(0.6);
+        doc.line(12, 25, 204, 25);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.setTextColor(...verdeBarinas);
+        doc.text(`FICHA TÉCNICA INTEGRAL: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`, 12, 33);
+
+        let currentY = 40;
+
+        // ────────────────────────────────────────────────────────
+        // I. DATOS DEL PRODUCTOR
+        // ────────────────────────────────────────────────────────
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("I. DATOS DEL PRODUCTOR", 12, currentY);
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const datosProductor = [
+            [
+                "NOMBRE COMPLETO:", predio.productor?.nombre || "N/A",
+                "CÉDULA / RIF:", predio.productor?.cedula_rif || "N/A",
+                "TELÉFONO:", predio.productor?.telefono || "N/A"
+            ]
+        ];
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            body: datosProductor,
+            theme: "grid",
+            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: {
+                0: { fontStyle: "bold", textColor: grisOscuro, width: 32, fillColor: [250, 250, 250] },
+                1: { width: 45 },
+                2: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
+                3: { width: 35 },
+                4: { fontStyle: "bold", textColor: grisOscuro, width: 22, fillColor: [250, 250, 250] },
+                5: { width: 33 }
+            },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // II. GEORREFERENCIACIÓN Y UBICACIÓN
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("II. GEORREFERENCIACIÓN Y UBICACIÓN", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const datosUbicacion = [
+            [
+                "MUNICIPIO:", predio.municipio || "N/A",
+                "PARROQUIA:", predio.parroquia || "N/A",
+                "COMUNIDAD:", predio.comunidad || "N/A"
+            ]
+        ];
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            body: datosUbicacion,
+            theme: "grid",
+            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: {
+                0: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
+                1: { width: 43 },
+                2: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
+                3: { width: 43 },
+                4: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
+                5: { width: 31 }
+            },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        if (currentY > 240) { doc.addPage(); currentY = 20; }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const rubros = predio.rubros_vegetales || [];
+        const bodyRubros = rubros.length > 0
+            ? rubros.map(r => [
+                r.rubro || "N/A",
+                r.hectareas ? `${r.hectareas} Ha` : "0 Ha",
+                r.estado || "N/A",
+                r.produccion_estimada ? `${r.produccion_estimada} Kg` : "0 Kg"
+            ])
+            : [["Sin rubros vegetales declarados.", "", "", ""]];
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Rubro", "Superficie (Ha)", "Estado", "Producción Estimada"]],
+            body: bodyRubros,
+            theme: "grid",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
+            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: { 0: { width: 65 }, 1: { width: 45 }, 2: { width: 45 }, 3: { width: 37 } },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // IV. INVENTARIO DE SEMOVIENTES / GANADERÍA
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        if (currentY > 230) { doc.addPage(); currentY = 20; }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("IV. INVENTARIO DE SEMOVIENTES / GANADERÍA", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const existenciaAnimal = predio.existencia_animal || {};
+        let bodySemovientes = [];
+
+        if (Object.keys(existenciaAnimal).length > 0) {
+            Object.entries(existenciaAnimal).forEach(([especie, detalleEspecie]) => {
+                if (!detalleEspecie || typeof detalleEspecie !== "object" || Object.keys(detalleEspecie).length === 0) return;
+
+                bodySemovientes.push([{ content: `ESPECIE: ${especie.replace(/_/g, " ").toUpperCase()}`, colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
+
+                Object.entries(detalleEspecie).forEach(([subKey, subValue]) => {
+                    if (subKey === "id") return;
+                    bodySemovientes.push([
+                        subKey.replace(/_/g, " ").toUpperCase(),
+                        subValue !== null && subValue !== undefined ? subValue : 0
+                    ]);
+                });
+            });
+        }
+
+        if (bodySemovientes.length === 0) {
+            bodySemovientes = [["Sin inventario animal registrado en este predio.", ""]];
+        }
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Categoría / Subtipo", "Cantidad / Unidades"]],
+            body: bodySemovientes,
+            theme: "grid",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
+            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: { 0: { width: 140 }, 1: { width: 52 } },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // V. MAQUINARIA, IMPLEMENTOS Y EQUIPOS
+        // ────────────────────────────────────────────────────────
+        currentY = doc.lastAutoTable.finalY + 6;
+        if (currentY > 230) { doc.addPage(); currentY = 20; }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("V. MAQUINARIA, IMPLEMENTOS Y EQUIPOS", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const maquinaria = predio.maquinaria || {};
+        let bodyMaquinaria = [];
+
+        if (Object.keys(maquinaria).length > 0) {
+            Object.entries(maquinaria).forEach(([tipoMaq, detalleMaq]) => {
+                if (!detalleMaq || typeof detalleMaq !== "object" || Object.keys(detalleMaq).length === 0) return;
+
+                bodyMaquinaria.push([{ content: `TIPO: ${tipoMaq.replace(/_/g, " ").toUpperCase()}`, colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
+
+                Object.entries(detalleMaq).forEach(([itemKey, itemVal]) => {
+                    if (itemKey === "id") return;
+                    bodyMaquinaria.push([
+                        itemKey.replace(/_/g, " ").toUpperCase(),
+                        itemVal !== null && itemVal !== undefined ? itemVal : 0
+                    ]);
+                });
+            });
+        }
+
+        if (bodyMaquinaria.length === 0) {
+            bodyMaquinaria = [["Sin maquinaria o equipos registrados.", ""]];
+        }
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Elemento / Equipo", "Cantidad"]],
+            body: bodyMaquinaria,
+            theme: "grid",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
+            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: { 0: { width: 140 }, 1: { width: 52 } },
+            margin: { left: 12, right: 12 }
+        });
+
+        // ────────────────────────────────────────────────────────
+        // PIE DE PÁGINA
+        // ────────────────────────────────────────────────────────
+        const totalPaginas = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPaginas; i++) {
+            doc.setPage(i);
+            doc.setFontSize(7);
+            doc.setTextColor(140, 140, 140);
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(0.3);
+            doc.line(12, 268, 204, 268);
+            doc.text("Ficha Técnica Integral de Caracterización — UTMPPAPT.", 12, 272);
+            doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
+        }
+
+        const fileSanitizado = `Ficha_Tecnica_Integral_${(predio.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`;
+        doc.save(fileSanitizado);
+
+        return doc;
+    };
+
+    // ── FUNCIÓN DE GUARDADO / ACTUALIZACIÓN ──────────────────
     const guardarInventario = async () => {
         if (!predioActivo?.id_predio) {
             Swal.fire({
@@ -235,73 +710,56 @@ export default function FormCaracterizacion({
                 title: "Predio no seleccionado",
                 text: "Debe seleccionar un predio",
                 confirmButtonColor: '#136442',
-                didOpen: () => {
-                    const popup = Swal.getPopup();
-                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                },
+                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
             });
             return;
         }
 
-        // ─────────────────────────────
-        // CONFIRMACIÓN
-        // ─────────────────────────────
+        let codigoServidor = "";
+
+        // Determinar el título dinámicamente según el modo (caracterización o actualización)
+        const esCaracterizacion = modo === "caracterizacion";
+        const tituloPregunta = esCaracterizacion ? "¿Guardar caracterización?" : "¿Guardar actualización productiva?";
+
+        // Confirmación inicial (aplica para ambos modos)
         const confirmacion = await Swal.fire({
-            title: "¿Guardar caracterización?",
+            title: tituloPregunta,
             text: "Se enviará un código de validación al productor.",
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Sí, continuar",
             cancelButtonText: "Cancelar",
             confirmButtonColor: "#136442",
-            didOpen: () => {
-                const popup = Swal.getPopup();
-                if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-            },
+            didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
         });
 
         if (!confirmacion.isConfirmed) return;
 
-        // ─────────────────────────────
-        // ENVIAR WHATSAPP (Django genera el código)
-        // ─────────────────────────────
-        let codigoServidor = "";
         try {
             const telefono = predioActivo?.productor?.telefono;
             const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo/", { telefono });
-
             codigoServidor = envio.data.codigo.toString();
             setCodigoGenerado(codigoServidor);
-            console.log("CÓDIGO RECIBIDO DEL SERVIDOR:", codigoServidor);
 
             await Swal.fire({
                 icon: "success",
                 title: "Código enviado",
                 text: "El código fue enviado al WhatsApp del productor",
                 confirmButtonColor: "#136442",
-                didOpen: () => {
-                    const popup = Swal.getPopup();
-                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                },
+                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
             });
         } catch (error) {
-            console.error("Error enviando WhatsApp:", error);
             Swal.fire({
                 icon: "error",
                 title: "Error de comunicación",
                 text: "No se pudo enviar el código de validación.",
                 confirmButtonColor: "#d32f2f",
-                didOpen: () => {
-                    const popup = Swal.getPopup();
-                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                },
+                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
             });
             return;
         }
 
-        // ─────────────────────────────
-        // PEDIR CÓDIGO
-        // ─────────────────────────────
+        // Ventana para ingresar el código recibido
         const { value: codigoUsuario } = await Swal.fire({
             title: "Validación del Productor",
             input: "text",
@@ -310,48 +768,26 @@ export default function FormCaracterizacion({
             confirmButtonText: "Validar",
             confirmButtonColor: "#136442",
             showCancelButton: true,
-            didOpen: () => {
-                const popup = Swal.getPopup();
-                if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-            },
+            didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
         });
 
-        if (!codigoUsuario) {
-            Swal.fire({
-                icon: "warning",
-                title: "Proceso cancelado",
-                confirmButtonColor: "#136442",
-                didOpen: () => {
-                    const popup = Swal.getPopup();
-                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                },
-            });
-            return;
-        }
+        if (!codigoUsuario) return;
 
-        // ─────────────────────────────
-        // VALIDAR CÓDIGO
-        // ─────────────────────────────
         if (codigoUsuario !== codigoServidor) {
             Swal.fire({
                 icon: "error",
                 title: "Código incorrecto",
                 text: "No se pudo validar al productor",
                 confirmButtonColor: "#d32f2f",
-                didOpen: () => {
-                    const popup = Swal.getPopup();
-                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                },
+                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
             });
             return;
         }
 
-        // ─────────────────────────────
-        // ANIMACIÓN DE CARGA (Evita el doble envío al procesar con Django)
-        // ─────────────────────────────
+        // Si el código es correcto, continúa con el proceso de guardado/actualización
         Swal.fire({
             title: 'Procesando...',
-            text: 'Guardando caracterización en el servidor, por favor espere.',
+            text: 'Guardando cambios en el servidor, por favor espere.',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
@@ -360,11 +796,7 @@ export default function FormCaracterizacion({
             }
         });
 
-        // ─────────────────────────────
-        // DATA PARA DJANGO
-        // ─────────────────────────────
         try {
-            // Lógica exacta de detección de usuario/empleado con su municipio
             let usuarioAccion = "Empleado";
             const adminDataStr = sessionStorage.getItem("usuario_admin");
 
@@ -382,9 +814,8 @@ export default function FormCaracterizacion({
             }
 
             const data = {
-                caracterizacion_completada: true,
+                ...(modo === "caracterizacion" ? { caracterizacion_completada: true } : {}),
                 usuario: usuarioAccion,
-
                 rubros_vegetales: rubrosVegetales,
                 existencia_animal: {
                     especiesSeleccionadas: inventarioInicial.especiesSeleccionadas,
@@ -416,47 +847,60 @@ export default function FormCaracterizacion({
                 },
             };
 
-            console.log("DATOS ENVIADOS:", data);
+            // 1. Guardar o actualizar la caracterización en el servidor
+            await axios.patch(`http://127.0.0.1:8000/api/predios/${predioActivo.id_predio}/`, data);
 
-            const response = await axios.patch(
-                `http://127.0.0.1:8000/api/predios/${predioActivo.id_predio}/`,
-                data,
-            );
+            // 2. Enviar la ficha técnica por correo electrónico al productor con el PDF adjunto
+            const correoProductor = predioActivo?.productor?.correo;
+            if (correoProductor) {
+                try {
+                    // Generamos el documento PDF en memoria
+                    const docPDF = generarObjetoPDF(predioActivo);
+                    const pdfBlob = docPDF.output("blob");
 
-            console.log(response.data);
+                    // Creamos un FormData para enviar el archivo binario al backend
+                    const formData = new FormData();
+                    formData.append("id_predio", predioActivo.id_predio);
+                    formData.append("correo", correoProductor);
+                    formData.append(
+                        "pdf_file",
+                        pdfBlob,
+                        `Ficha_Tecnica_Integral_${(predioActivo.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`
+                    );
 
-            // ─────────────────────────────
-            // ÉXITO Y ACTUALIZACIÓN DE PÁGINA
-            // ─────────────────────────────
+                    await axios.post("http://127.0.0.1:8000/api/enviar-correo-ficha/", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data"
+                        }
+                    });
+                } catch (emailError) {
+                    console.warn("El predio se guardó correctamente, pero hubo un inconveniente al enviar el correo con el PDF:", emailError);
+                }
+            }
+
             Swal.fire({
                 icon: "success",
-                title: "Caracterización guardada",
-                text: "La información fue validada por el productor",
+                title: modo === "caracterizacion" ? "Caracterización guardada" : "Actualización guardada",
+                text: modo === "caracterizacion"
+                    ? "La información fue validada por el productor y se ha enviado la ficha a su correo."
+                    : "Los datos productivos se actualizaron correctamente.",
                 confirmButtonColor: "#136442",
                 confirmButtonText: "Aceptar",
-                didOpen: () => {
-                    const popup = Swal.getPopup();
-                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                },
+                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.reload(); // Recarga la página inmediatamente
+                    window.location.reload();
                 }
             });
 
         } catch (error) {
-            console.error("ERROR:", error.response?.data || error.message);
-
             Swal.fire({
                 icon: "error",
                 title: "Error al guardar",
-                text: "Ocurrió un problema en el servidor al procesar el inventario.",
+                text: "Ocurrió un problema en el servidor al procesar la información.",
                 confirmButtonColor: "#d32f2f",
                 confirmButtonText: "Entendido",
-                didOpen: () => {
-                    const popup = Swal.getPopup();
-                    if (popup) popup.style.setProperty("font-family", "'Poppins', sans-serif", "important");
-                },
+                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
             });
         }
     };

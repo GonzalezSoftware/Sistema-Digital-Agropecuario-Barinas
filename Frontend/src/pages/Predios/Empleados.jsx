@@ -13,7 +13,7 @@ import { useHistorialPredios } from "../../hooks/useHistorialPredios";
 // Components
 import AdminProduccionDashboard from "../../components/AdminProduccionDashboard";
 import AdminProduccionSeleccionarPredio from "../../components/SeleccionPredio";
-import FormHierro from "../../components/FormHierro"; 
+import FormHierro from "../../components/FormHierro";
 import FormCaracterizacion from "../../components/FormCaracterizacion";
 import SeccionReportes from "../../components/SeccionReportes";
 import { EmpleadoHeader } from '../../components/EmpleadoHeader';
@@ -92,6 +92,20 @@ export default function EmpleadoDashboard() {
                     icon: "warning",
                     title: "Acción restringida",
                     text: "Este predio ya posee una caracterización completada.",
+                    confirmButtonColor: "#136442"
+                });
+                setVistaActiva("produccion_seleccionar_predio");
+            }
+        }
+    }, [vistaActiva, predioActivo]);
+
+    useEffect(() => {
+        if (vistaActiva === "produccion_actualizacion" && predioActivo) {
+            if (!predioActivo.caracterizacion_completada) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Acción restringida",
+                    text: "Este predio no posee una caracterización completada. No se puede actualizar.",
                     confirmButtonColor: "#136442"
                 });
                 setVistaActiva("produccion_seleccionar_predio");
@@ -392,6 +406,7 @@ export default function EmpleadoDashboard() {
                     ) : vistaActiva === "produccion_caracterizacion" ? (
                         <div>
                             <FormCaracterizacion
+                                modo="caracterizacion" // 🔹 Activa el flujo completo con validación WhatsApp
                                 predioActivo={predioActivo}
                                 rubrosVegetales={rubrosVegetales}
                                 setRubrosVegetales={setRubrosVegetales}
@@ -427,7 +442,17 @@ export default function EmpleadoDashboard() {
                         </div>
                     ) : vistaActiva === "produccion_actualizacion" ? (
                         <div>
-                            <h3>Actualización Productiva - Municipio {municipioEmpleado}</h3>
+                            <FormCaracterizacion
+                                modo="actualizacion" // 🔹 Activa la precarga de datos y el guardado directo sin WhatsApp
+                                predioActivo={predioActivo}
+                                rubrosVegetales={rubrosVegetales}
+                                setRubrosVegetales={setRubrosVegetales}
+                                inventarioInicial={inventarioInicial}
+                                setInventarioInicial={setInventarioInicial}
+                                setTabActiva={setTabActiva}
+                                subCaracterizacion={subCaracterizacion}
+                                setSubCaracterizacion={setSubCaracterizacion}
+                            />
                         </div>
                     ) : vistaActiva === "produccion_reportes" ? (
                         <div>
