@@ -1,5 +1,15 @@
 from django.db import models
 
+class BitacoraAuditoria(models.Model):
+    usuario = models.CharField(max_length=100, blank=True, null=True)
+    accion = models.CharField(max_length=50)  # Ej: CREAR, EDITAR, ELIMINAR
+    modulo = models.CharField(max_length=50)  # Ej: Predios
+    descripcion = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.fecha} - {self.usuario}: {self.accion} en {self.modulo}"
+
 # ─────────────────────────────
 # PRODUCTOR
 # ─────────────────────────────
@@ -223,3 +233,24 @@ class Noticia(models.Model):
 
     def __str__(self):
         return self.titulo
+
+class NoticiaPendiente(models.Model):
+    titulo = models.CharField(max_length=255)
+    descripcion = models.TextField()
+    imagen = models.ImageField(upload_to='noticias_pendientes/', blank=True, null=True)
+    empleado = models.CharField(max_length=150, default="Empleado")
+    fecha_solicitud = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Pendiente: {self.titulo}"
+
+class BitacoraAuditoria(models.Model):
+    usuario = models.CharField(max_length=150) # Nombre o rol del municipio/usuario
+    accion = models.CharField(max_length=50)   # CREAR, EDITAR, ELIMINAR
+    modulo = models.CharField(max_length=100)  # Predio, Noticia, etc.
+    descripcion = models.TextField()           # Detalle de lo que ocurrió
+    fecha_hora = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'bitacora_auditoria'
+        ordering = ['-fecha_hora']

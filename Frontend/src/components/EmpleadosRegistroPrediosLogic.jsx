@@ -252,6 +252,7 @@ export function useEmpleadosRegistroPrediosLogic({ formData, setFormData, setErr
             const sistemasReg = Array.isArray(formData.sistemas_registro) ? formData.sistemas_registro : [];
 
             const payload = {
+                usuario: municipioEmpleado ? `Empleado (${municipioEmpleado})` : "Empleado (Barinas)",
                 productor: {
                     cedula_rif: cedulaCompleta,
                     nombre: formData.productor_nombre?.trim(),

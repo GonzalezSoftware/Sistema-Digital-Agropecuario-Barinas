@@ -62,31 +62,49 @@ export function useHistorialPredios(listaPredios = []) {
         if (!predioSeleccionado) return;
         setCargandoAccion(true);
         try {
-            // Obtén el token de autenticación guardado en el navegador (ajusta la clave si usas otra)
             const token = sessionStorage.getItem("token") || localStorage.getItem("token");
+
+            let usuarioAccion = "Empleado";
+            const adminDataStr = sessionStorage.getItem("usuario_admin");
+
+            if (adminDataStr) {
+                try {
+                    const adminData = JSON.parse(adminDataStr);
+                    const nombreAdmin = adminData.nombre || adminData.username || adminData.usuario || "Administrador";
+                    usuarioAccion = `Administrador (${nombreAdmin})`;
+                } catch (e) {
+                    usuarioAccion = "Administrador";
+                }
+            } else {
+                // Si es un empleado, intentamos obtener su municipio actual o sesión
+                const empleadoMunicipio = sessionStorage.getItem("municipio_empleado") || window.municipioActualParaBitacora || "Barinas";
+                usuarioAccion = `Empleado (${empleadoMunicipio})`;
+            }
+
+            const datosAEnviar = {
+                ...predioSeleccionado,
+                usuario: usuarioAccion // <--- Enviará "Empleado (Barinas)" o el municipio correspondiente
+            };
 
             const response = await fetch(`http://127.0.0.1:8000/api/predios/${predioSeleccionado.id_predio}/`, {
                 method: 'PATCH',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
                 },
-                body: JSON.stringify(predioSeleccionado)
+                body: JSON.stringify(datosAEnviar)
             });
 
             if (response.ok) {
                 await Swal.fire('¡Actualización Exitosa!', 'El predio ha sido guardado.', 'success');
                 setEditando(false);
                 setMostrarModal(false);
-                window.location.reload(); 
+                window.location.reload();
             } else {
                 const resultado = await response.json();
-                console.error("Error de validación en Django:", resultado);
-                // Esto te mostrará el error exacto que devuelve Django en una alerta
                 Swal.fire('Error de validación', JSON.stringify(resultado), 'error');
             }
         } catch (error) {
-            console.error("Error de red:", error);
             Swal.fire('Error', 'Ocurrió un error al conectar con el servidor.', 'error');
         } finally {
             setCargandoAccion(false);

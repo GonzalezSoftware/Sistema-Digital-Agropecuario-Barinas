@@ -78,6 +78,13 @@ export default function EmpleadoDashboard() {
         guardarLicencia,
     } = useDashboardProduccion();
 
+    // ── AQUÍ PUEDES COLOCARLO ──
+    useEffect(() => {
+        if (municipioEmpleado) {
+            sessionStorage.setItem("municipio_empleado", municipioEmpleado);
+        }
+    }, [municipioEmpleado]);
+
     useEffect(() => {
         if (vistaActiva === "produccion_caracterizacion" && predioActivo) {
             if (predioActivo.caracterizacion_completada) {

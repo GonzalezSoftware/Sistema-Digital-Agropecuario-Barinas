@@ -364,8 +364,26 @@ export default function FormCaracterizacion({
         // DATA PARA DJANGO
         // ─────────────────────────────
         try {
+            // Lógica exacta de detección de usuario/empleado con su municipio
+            let usuarioAccion = "Empleado";
+            const adminDataStr = sessionStorage.getItem("usuario_admin");
+
+            if (adminDataStr) {
+                try {
+                    const adminData = JSON.parse(adminDataStr);
+                    const nombreAdmin = adminData.nombre || adminData.username || adminData.usuario || "Administrador";
+                    usuarioAccion = `Administrador (${nombreAdmin})`;
+                } catch (e) {
+                    usuarioAccion = "Administrador";
+                }
+            } else {
+                const empleadoMunicipio = sessionStorage.getItem("municipio_empleado") || window.municipioActualParaBitacora || "Barinas";
+                usuarioAccion = `Empleado (${empleadoMunicipio})`;
+            }
+
             const data = {
                 caracterizacion_completada: true,
+                usuario: usuarioAccion,
 
                 rubros_vegetales: rubrosVegetales,
                 existencia_animal: {
