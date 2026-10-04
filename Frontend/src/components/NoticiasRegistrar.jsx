@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Swal from "sweetalert2"; // <--- 1. Importar SweetAlert2
 
 export default function NoticiasRegistrar() {
     const [titulo, setTitulo] = useState("");
@@ -15,10 +16,19 @@ export default function NoticiasRegistrar() {
             return;
         }
 
+        // 2. Mostrar alerta de carga con SweetAlert2
+        Swal.fire({
+            title: "Enviando noticia...",
+            text: "Por favor, espera un momento.",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         setCargando(true);
         setMensaje({ texto: "", tipo: "" });
 
-        // FormData es obligatorio para enviar archivos e imágenes hacia Django
         const formData = new FormData();
         formData.append("titulo", titulo);
         formData.append("descripcion", descripcion);
@@ -27,27 +37,48 @@ export default function NoticiasRegistrar() {
         }
 
         try {
-            // URL de tu API en Django (ajusta el puerto si es necesario, ej: 8000)
-            const respuesta = await fetch("http://localhost:8000/api/noticias/", {
+            const respuesta = await fetch("http://localhost:8000/api/noticias/pendientes/", {
                 method: "POST",
                 body: formData,
-                // Nota: No incluyas 'Content-Type': 'multipart/form-data' manualmente en los headers,
-                // el navegador lo calcula y añade el boundary por sí solo al usar FormData.
             });
 
             const resultado = await respuesta.json();
 
             if (respuesta.ok) {
-                setMensaje({ texto: "¡Noticia registrada y publicada con éxito en la base de datos!", tipo: "exito" });
+                // 3. Mostrar alerta de éxito y recargar al terminar
+                Swal.fire({
+                    icon: "success",
+                    title: "¡Éxito!",
+                    text: "¡Noticia enviada al administrador para revisión!",
+                    timer: 2500,
+                    showConfirmButton: false
+                }).then(() => {
+                    // 🔄 Recarga la página automáticamente después de la alerta
+                    window.location.reload();
+                });
+
+                setMensaje({ texto: "¡Noticia enviada al administrador para revisión!", tipo: "exito" });
                 setTitulo("");
                 setDescripcion("");
                 setImagen(null);
-                document.getElementById("input-imagen").value = "";
+                const inputImg = document.getElementById("input-imagen");
+                if (inputImg) inputImg.value = "";
             } else {
+                // Mostrar alerta de error del servidor
+                Swal.fire({
+                    icon: "error",
+                    title: "Atención",
+                    text: resultado.error || "Hubo un error al registrar la noticia."
+                });
                 setMensaje({ texto: resultado.error || "Hubo un error al registrar la noticia.", tipo: "error" });
             }
         } catch (error) {
             console.error("Error de red:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Error de conexión",
+                text: "Error de conexión con el servidor de Django."
+            });
             setMensaje({ texto: "Error de conexión con el servidor de Django.", tipo: "error" });
         } finally {
             setCargando(false);
@@ -56,8 +87,7 @@ export default function NoticiasRegistrar() {
 
     return (
         <div style={{ background: "#ffffff", padding: "32px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
-
-
+            
             {mensaje.texto && (
                 <div style={{
                     padding: "12px 16px",
@@ -124,7 +154,6 @@ export default function NoticiasRegistrar() {
                         Imagen Ilustrativa
                     </label>
 
-                    {/* Input de archivo oculto para que funcione lógicamente */}
                     <input
                         id="input-imagen"
                         type="file"
@@ -133,7 +162,6 @@ export default function NoticiasRegistrar() {
                         style={{ display: "none" }}
                     />
 
-                    {/* Label que actúa como botón estilizado idéntico al que pediste */}
                     <label
                         htmlFor="input-imagen"
                         style={{
@@ -155,10 +183,9 @@ export default function NoticiasRegistrar() {
                             transition: "background-color 0.2s"
                         }}
                     >
-                         Seleccionar Imagen
+                        Seleccionar Imagen
                     </label>
 
-                    {/* Opcional: Para que el usuario sepa si ya seleccionó un archivo */}
                     <span style={{ fontSize: "12px", color: "#64748b" }}>
                         {imagen ? `Archivo seleccionado: ${imagen.name}` : "Formatos aceptados: JPG, PNG, WEBP."}
                     </span>

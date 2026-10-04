@@ -234,6 +234,16 @@ class Noticia(models.Model):
     def __str__(self):
         return self.titulo
 
+class NoticiaPendiente(models.Model):
+    titulo = models.CharField(max_length=255)
+    descripcion = models.TextField()
+    imagen = models.ImageField(upload_to='noticias_pendientes/', blank=True, null=True)
+    empleado = models.CharField(max_length=150, default="Empleado")
+    fecha_solicitud = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Pendiente: {self.titulo}"
+
 class BitacoraAuditoria(models.Model):
     usuario = models.CharField(max_length=150) # Nombre o rol del municipio/usuario
     accion = models.CharField(max_length=50)   # CREAR, EDITAR, ELIMINAR

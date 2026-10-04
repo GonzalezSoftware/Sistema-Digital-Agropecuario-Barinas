@@ -2,11 +2,10 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-# Asegúrate de incluir 'BitacoraAuditoriaViewSet' en esta importación:
 from .views import (
     PredioViewSet, 
     LicenciaHierroViewSet, 
-    BitacoraAuditoriaViewSet,  # <--- 1. Importa tu viewset de bitácora aquí
+    BitacoraAuditoriaViewSet, 
     enviar_codigo_whatsapp, 
     buscar_productor, 
     dashboard_produccion_stats, 
@@ -16,13 +15,15 @@ from .views import (
     login_admin_api, 
     gestionar_credenciales_noticias, 
     gestionar_noticias, 
-    detalle_noticia
+    detalle_noticia,
+    gestionar_noticias_pendientes,      # <--- 1. Importa esta vista pendiente
+    resolver_noticia_pendiente         # <--- 2. Importa esta vista para resolver la propuesta
 )
 
 router = DefaultRouter()
 router.register(r'predios', PredioViewSet)
 router.register(r'licencias-hierro', LicenciaHierroViewSet)
-router.register(r'bitacora', BitacoraAuditoriaViewSet) # <--- 2. Registra la ruta de la bitácora aquí
+router.register(r'bitacora', BitacoraAuditoriaViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -36,6 +37,10 @@ urlpatterns = [
     path('credenciales-noticias/', gestionar_credenciales_noticias, name='gestionar_credenciales_noticias'),
     path('noticias/', gestionar_noticias, name='gestionar_noticias'),
     path('noticias/<int:pk>/', detalle_noticia, name='detalle_noticia'),
+    
+    # ── Rutas para las noticias pendientes de aprobación ──
+    path('noticias/pendientes/', gestionar_noticias_pendientes, name='gestionar_noticias_pendientes'),
+    path('noticias/pendientes/<int:pk>/resolver/', resolver_noticia_pendiente, name='resolver_noticia_pendiente'),
 ]
 
 # Servir archivos subidos por el usuario en desarrollo local
