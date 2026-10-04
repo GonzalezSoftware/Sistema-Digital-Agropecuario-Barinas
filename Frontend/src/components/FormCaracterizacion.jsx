@@ -28,6 +28,9 @@ export default function FormCaracterizacion({
     const [codigoGenerado, setCodigoGenerado] = useState("");
     const [codigoIngresado, setCodigoIngresado] = useState("");
     // ── COMPONENTE DE INPUT NUMÉRICO CON TIPOGRAFÍA HEREDADA ──────────────────
+
+// ── COMPONENTE DE INPUT NUMÉRICO CON TIPOGRAFÍA HEREDADA ──────────────────
+
     const NumericInputField = ({
         label,
         value,
@@ -35,6 +38,14 @@ export default function FormCaracterizacion({
         placeholder = "0",
         min = 0,
     }) => {
+        // Mantenemos un estado local para que el usuario pueda tipear con total fluidez (ej: "12", "150")
+        const [textValue, setTextValue] = useState(value ?? "");
+
+        // Sincronizamos el estado local si el valor externo cambia por otro motivo
+        React.useEffect(() => {
+            setTextValue(value ?? "");
+        }, [value]);
+
         return (
             <div style={{ marginBottom: "15px" }}>
                 {label && <label style={labelStyle}>{label}</label>}
@@ -42,22 +53,28 @@ export default function FormCaracterizacion({
                     type="number"
                     min={min}
                     placeholder={placeholder}
-                    value={value ?? ""}
+                    value={textValue}
                     onKeyDown={(e) => {
                         if (e.key === "-" || e.key === "e" || e.key === "+") {
                             e.preventDefault();
                         }
                     }}
                     onChange={(e) => {
-                        const valorIngresado = parseInt(e.target.value, 10);
-                        const valorLimpio =
-                            isNaN(valorIngresado) || valorIngresado < min
-                                ? min
-                                : valorIngresado;
-                        onChange(valorLimpio);
+                        const val = e.target.value;
+                        setTextValue(val); // Actualiza la vista de forma continua e inmediata
+
+                        if (val === "") {
+                            onChange("");
+                            return;
+                        }
+
+                        const valorIngresado = Number(val);
+                        if (!isNaN(valorIngresado)) {
+                            onChange(valorIngresado);
+                        }
                     }}
                     style={{
-                        ...inputStyle, // <--- Hereda el estilo exacto de tus otros inputs
+                        ...inputStyle,
                         width: "100%",
                         boxSizing: "border-box",
                     }}
