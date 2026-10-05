@@ -322,51 +322,6 @@ export default function PrediosProduccionInformacion({
               );
             })}
           </div>
-
-          {/* Tarjetas de contacto (3 columnas con el mismo diseño estético) */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
-            {[
-              { Icon: IconPhone || FallbackIcon, label: "Teléfono", value: "(0273) 300-0000", href: "tel:+582733000000", isLink: true },
-              { Icon: IconMail || FallbackIcon, label: "Correo electrónico", value: "agrosistema@barinas.gob.ve", href: "mailto:agrosistema@barinas.gob.ve", isLink: true },
-              { Icon: IconClock || FallbackIcon, label: "Horario de atención", value: "Lunes a Viernes · 8:00am – 4:00pm", isLink: false },
-            ].map((item) => {
-              const ItemIcon = item.Icon;
-              return (
-                <div key={item.label} className="contact-card" style={{
-                  background: "#ffffff",
-                  borderRadius: "16px",
-                  padding: "28px 24px",
-                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.04)",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: "12px",
-                  border: "1px solid #eef0ee",
-                }}>
-                  <div style={{
-                    width: "48px", height: "48px", borderRadius: "12px",
-                    background: "#e8f5e9", display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "#136442"
-                  }}>
-                    <ItemIcon />
-                  </div>
-                  <p style={{ fontSize: "10px", color: "#888", margin: 0, textTransform: "uppercase", letterSpacing: "1.5px", fontWeight: 700 }}>
-                    {item.label}
-                  </p>
-                  {item.isLink ? (
-                    <a href={item.href} style={{ color: "#1b4332", textDecoration: "none", fontSize: "14px", fontWeight: 600, lineHeight: 1.5 }}>
-                      {item.value}
-                    </a>
-                  ) : (
-                    <span style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, lineHeight: 1.5 }}>
-                      {item.value}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
         </div>
       </div>
     </>

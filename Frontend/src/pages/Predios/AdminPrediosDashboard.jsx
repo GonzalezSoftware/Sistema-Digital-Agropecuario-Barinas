@@ -20,6 +20,8 @@ import AdminProduccionDashboard from '../../components/AdminProduccionDashboard'
 import SeccionReportes from "../../components/SeccionReportes";
 import AdminBitacora from '../../components/AdminBitacora';
 import AdminNotificacionesNoticias from '../../components/AdminNotificacionesNoticias';
+import AdminConfiguracionContraseña from "../../components/AdminConfiguracionContraseña";
+import AdminContacto from '../../components/AdminContacto'; // <--- Importarlo arriba
 
 // Estilos UI
 import {
@@ -334,6 +336,16 @@ export default function AdminPrediosDashboard() {
                         <AdminProduccionDashboard productionState={productionState} />
                     ) : vistaActiva === "produccion_reportes" ? (
                         <SeccionReportes listaPredios={listaPredios} />
+                    ) :  vistaActiva === "configuracion" ? (
+
+                        <AdminConfiguracionContraseña />
+                        
+                    ) : 
+                    
+                    vistaActiva === "contacto" ? (
+
+                        <AdminContacto />
+                        
                     ) : vistaActiva === "bitacora" ? (
                         <AdminBitacora />) : (
 

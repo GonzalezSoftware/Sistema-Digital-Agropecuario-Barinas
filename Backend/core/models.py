@@ -254,3 +254,13 @@ class BitacoraAuditoria(models.Model):
     class Meta:
         db_table = 'bitacora_auditoria'
         ordering = ['-fecha_hora']
+
+class ConfiguracionContacto(models.Model):
+    correo = models.EmailField(default="agrosistema@barinas.gob.ve")
+    telefono = models.CharField(max_length=50, default="(0273) 300-0000")
+    
+    class Meta:
+        db_table = 'configuracion_contacto'
+
+    def __str__(self):
+        return f"Contacto: {self.correo} | {self.telefono}"

@@ -18,7 +18,10 @@ from .views import (
     detalle_noticia,
     gestionar_noticias_pendientes,      # <--- 1. Importa esta vista pendiente
     resolver_noticia_pendiente,         # <--- 2. Importa esta vista para resolver la propuesta
-    enviar_correo_ficha_predio
+    enviar_correo_ficha_predio,
+    cambiar_password_admin,
+    gestionar_contacto
+
 )
 
 router = DefaultRouter()
@@ -39,6 +42,8 @@ urlpatterns = [
     path('noticias/', gestionar_noticias, name='gestionar_noticias'),
     path('noticias/<int:pk>/', detalle_noticia, name='detalle_noticia'),
     path('enviar-correo-ficha/', enviar_correo_ficha_predio, name='enviar_correo_ficha'),
+    path('admin/cambiar-password/', cambiar_password_admin, name='cambiar_password_admin'), # <--- Aquí
+    path('contacto-info/', gestionar_contacto, name='gestionar_contacto'),
     
     # ── Rutas para las noticias pendientes de aprobación ──
     path('noticias/pendientes/', gestionar_noticias_pendientes, name='gestionar_noticias_pendientes'),

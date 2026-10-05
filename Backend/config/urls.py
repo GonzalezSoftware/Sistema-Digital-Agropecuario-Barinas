@@ -5,9 +5,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('core.urls')), # O la ruta donde tengas enlazadas tus APIs de core
+    path('api/', include('core.urls')), 
 ]
 
-# Esto permite que Django exponga las URLs de las imágenes subidas
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
