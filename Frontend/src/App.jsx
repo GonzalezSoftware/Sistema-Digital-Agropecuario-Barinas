@@ -3,7 +3,6 @@ import HomePage from "./pages/HomePage"
 import Productores from "./pages/Productores/Productores" 
 import PrediosPage from "./pages/Predios/PrediosProduccion"
 import ProduccionPage from "./pages/Produccion/ProduccionPage"
-import EstadisticaPage from "./pages/Estadistica/EstadisticaPage"
 import LoginPrediosPage from "./pages/Predios/PrediosProduccionLogin";
 import Dashboard from "./pages/Predios/Dashboard";
 import LoginProduccionPage from "./pages/Produccion/LoginProduccionPage"
@@ -23,7 +22,6 @@ function App() {
         <Route path="/productores" element={<Productores />} />
         <Route path="/predios" element={<PrediosPage />} />
         <Route path="/produccion" element={<ProduccionPage />} />
-        <Route path="/estadística-portalinfo" element={<EstadisticaPage />} />
         <Route path="/predios/login" element={<LoginPrediosPage />} />
         <Route path="/predios/Dashboard" element={<Dashboard />} />
         <Route path="/produccion/login" element={<LoginProduccionPage />} />

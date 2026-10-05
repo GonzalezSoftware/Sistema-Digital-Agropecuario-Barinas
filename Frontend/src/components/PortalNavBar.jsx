@@ -5,7 +5,6 @@ import escudo from "../assets/logo2.jpg";
 const NAV_ITEMS = [
   { label: "Productores", href: "/productores" },
   { label: "Predios y Producción", href: "/predios", isRoute: true },
-  { label: "Estadísticas Generales", href: "/estadística-portalinfo", isRoute: true },
   { label: "Contactos", href: "#contactos" },
 ];
 

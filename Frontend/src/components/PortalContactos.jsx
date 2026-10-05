@@ -1,6 +1,30 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 export default function PortalContactos() {
+  const [contacto, setContacto] = useState({
+    correo: "",
+    telefono: ""
+  });
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/contacto-info/")
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setContacto({
+            correo: data.correo || "agrosistema@barinas.gob.ve",
+            telefono: data.telefono || "(0273) 300-0000"
+          });
+        }
+        setCargando(false);
+      })
+      .catch(err => {
+        console.error("Error al obtener datos de contacto públicos:", err);
+        setCargando(false);
+      });
+  }, []);
+
   return (
     <div id="contactos" style={{
       background: "#f5f7f5", padding: "64px 80px",
@@ -44,11 +68,21 @@ export default function PortalContactos() {
             <p style={{ fontSize: "12px", color: "#999", margin: 0, textTransform: "uppercase", letterSpacing: "1px" }}>
               Correo electrónico
             </p>
-            <a href="mailto:agrosistema@barinas.gob.ve" style={{
-              color: "#1b4332", textDecoration: "none", fontSize: "14px", fontWeight: 600,
-            }}>
-              agrosistema@barinas.gob.ve
-            </a>
+            {cargando ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 0" }}>
+                <div style={{
+                  width: "16px", height: "16px", border: "2px solid #e2e8f0", borderTop: "2px solid #589e38",
+                  borderRadius: "50%", animation: "spin 0.8s linear infinite"
+                }} />
+                <span style={{ fontSize: "13px", color: "#94a3b8" }}>Cargando...</span>
+              </div>
+            ) : (
+              <a href={`mailto:${contacto.correo}`} style={{
+                color: "#1b4332", textDecoration: "none", fontSize: "14px", fontWeight: 600,
+              }}>
+                {contacto.correo}
+              </a>
+            )}
           </div>
 
           {/* Teléfono */}
@@ -68,11 +102,21 @@ export default function PortalContactos() {
             <p style={{ fontSize: "12px", color: "#999", margin: 0, textTransform: "uppercase", letterSpacing: "1px" }}>
               Teléfono
             </p>
-            <a href="tel:+582733000000" style={{
-              color: "#1b4332", textDecoration: "none", fontSize: "14px", fontWeight: 600,
-            }}>
-              (0273) 300-0000
-            </a>
+            {cargando ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "4px 0" }}>
+                <div style={{
+                  width: "16px", height: "16px", border: "2px solid #e2e8f0", borderTop: "2px solid #589e38",
+                  borderRadius: "50%", animation: "spin 0.8s linear infinite"
+                }} />
+                <span style={{ fontSize: "13px", color: "#94a3b8" }}>Cargando...</span>
+              </div>
+            ) : (
+              <a href={`tel:${contacto.telefono}`} style={{
+                color: "#1b4332", textDecoration: "none", fontSize: "14px", fontWeight: 600,
+              }}>
+                {contacto.telefono}
+              </a>
+            )}
           </div>
 
           {/* Ubicación */}
@@ -100,6 +144,14 @@ export default function PortalContactos() {
 
         </div>
       </div>
+
+      {/* Animación del spinner */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

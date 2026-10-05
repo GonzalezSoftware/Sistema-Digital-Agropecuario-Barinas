@@ -5,7 +5,14 @@ import PortalInformativo from "../components/PortalInformativo";
 import PortalSolucionesIntegrales from "../components/PortalSolucionesIntegrales";
 import PortalSobreNosotros from "../components/PortalSobreNosotros";
 import PortalContactos from "../components/PortalContactos";
-import PortalFooter from "../components/PortalFooter";
+import Footer from "../components/Footer";
+import escudo from "../assets/logo2.jpg";
+import logo from "../assets/gobierno.jpg";
+
+import {
+  NAV_ITEMS,
+} from "../components/ui/PrediosProduccionUI";
+
 
 export default function HomePage() {
   return (
@@ -16,7 +23,7 @@ export default function HomePage() {
       <PortalSolucionesIntegrales />
       <PortalSobreNosotros />
       <PortalContactos />
-      <PortalFooter />
+      <Footer logo={logo} escudo={escudo} NAV_ITEMS={NAV_ITEMS} />
     </div>
   );
 }

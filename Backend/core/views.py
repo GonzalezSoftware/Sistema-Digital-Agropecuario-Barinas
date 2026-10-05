@@ -17,9 +17,7 @@ from rest_framework import viewsets
 from .models import Noticia, NoticiaPendiente, BitacoraAuditoria
 from .serializers import BitacoraAuditoriaSerializer
 from django.core.mail import EmailMessage
-
-
-
+from .models import ConfiguracionContacto
 
 
 class BitacoraAuditoriaViewSet(viewsets.ReadOnlyModelViewSet):
@@ -70,7 +68,7 @@ class PredioViewSet(viewsets.ModelViewSet):
             usuario=usuario,
             accion="CREAR",
             modulo="Predios",
-            descripcion=f"Se registró el predio '{predio.nombre_predio}' (ID: {predio.pk}) ubicado en {predio.municipio}"
+            descripcion=f"Se registró el predio '{predio.nombre_predio}', ubicado en {predio.municipio}"
         )
 
     def perform_update(self, serializer):
@@ -129,15 +127,6 @@ class PredioViewSet(viewsets.ModelViewSet):
                     if str(val_ant) != str(val_nuevo):
                         cambios.append(f"Infraestructura ({campo}): '{val_ant}' ➔ '{val_nuevo}'")
 
-        # Guardar en bitácora si hubo cambios
-        if cambios:
-            BitacoraAuditoria.objects.create(
-                usuario=self.request.data.get('usuario', 'Sistema'),
-                accion="ACTUALIZAR",
-                modulo="Predios",
-                descripcion=f"Se actualizó el predio '{predio_anterior.nombre_predio}'. Cambios: {', '.join(cambios)}"
-            )
-
         # 5. Comparar producción (Tipo de explotación y sistemas de registro)
         produccion_nueva = datos_nuevos.get('produccion', {})
         if hasattr(predio_anterior, 'produccion') and predio_anterior.produccion:
@@ -156,7 +145,7 @@ class PredioViewSet(viewsets.ModelViewSet):
                     if str(val_ant) != str(val_nuevo):
                         cambios.append(f"{etiqueta}: '{val_ant}' ➔ '{val_nuevo}'")
 
-        # 5.1. Comparar existencia animal (NUEVO - Sin borrar nada previo)
+        # 5.1. Comparar existencia animal
         existencia_nueva = datos_nuevos.get('existencia_animal', {})
         if hasattr(predio_anterior, 'existencia_animal') and predio_anterior.existencia_animal and existencia_nueva:
             exist_ant = predio_anterior.existencia_animal
@@ -167,7 +156,7 @@ class PredioViewSet(viewsets.ModelViewSet):
                         nombre_amigable = campo.replace('_', ' ').capitalize()
                         cambios.append(f"Existencia Animal ({nombre_amigable}): '{val_ant}' ➔ '{val_nuevo}'")
 
-        # 5.2. Comparar maquinaria (NUEVO - Sin borrar nada previo)
+        # 5.2. Comparar maquinaria
         maquinaria_nueva = datos_nuevos.get('maquinaria', {})
         if hasattr(predio_anterior, 'maquinaria') and predio_anterior.maquinaria and maquinaria_nueva:
             maq_ant = predio_anterior.maquinaria
@@ -178,13 +167,14 @@ class PredioViewSet(viewsets.ModelViewSet):
                         nombre_amigable = campo.replace('_', ' ').capitalize()
                         cambios.append(f"Maquinaria ({nombre_amigable}): '{val_ant}' ➔ '{val_nuevo}'")
 
-        # 5.3. Comparar rubros vegetales (NUEVO - Sin borrar nada previo)
+        # 5.3. Comparar rubros vegetales
         rubros_nuevos = datos_nuevos.get('rubros_vegetales')
         if rubros_nuevos is not None:
-            # Si el frontend envía la lista de rubros, registramos que hubo actualización en esta sección
-            cambios.append("Rubros Vegetales actualizados")
+            rubros_antiguos = list(predio_anterior.rubros_vegetales.values_list('id', flat=True))
+            if set(map(str, rubros_antiguos)) != set(map(str, rubros_nuevos)):
+                cambios.append("Rubros Vegetales actualizados")
 
-        # 6. Comparar servicios básicos (si vienen en la petición)
+        # 6. Comparar servicios básicos
         servicios_nuevos = datos_nuevos.get('servicios')
         if servicios_nuevos is not None:
             servicios_antiguos = [ps.servicio.nombre_servicio for ps in predio_anterior.predioservicio_set.all()]
@@ -198,11 +188,10 @@ class PredioViewSet(viewsets.ModelViewSet):
         accion = "EDITAR"
         modulo = "Predios"
         
-        # Verificamos si los cambios involucran caracterización (rubros, animales, maquinaria)
+        # Verificamos estrictamente si hubo cambios reales de caracterización
         es_caracterizacion = any("Rubros Vegetales" in c or "Existencia Animal" in c or "Maquinaria" in c for c in cambios)
 
         if es_caracterizacion:
-            # Usamos "CREAR" (o la palabra que tu frontend pinte en verde, ej. "REGISTRAR" si ya lo ajustaste allá)
             accion = "CREAR" 
             modulo = "Producción"
             descripcion = f"Se caracterizó el predio '{predio.nombre_predio}'"
@@ -213,7 +202,7 @@ class PredioViewSet(viewsets.ModelViewSet):
             else:
                 descripcion = f"Se actualizó la información general del predio '{predio.nombre_predio}'"
 
-        # 9. Registrar en la bitácora
+        # 9. ÚNICO REGISTRO EN LA BITÁCORA (Evita duplicados)
         usuario = datos_nuevos.get('usuario') or 'Empleado'
 
         BitacoraAuditoria.objects.create(
@@ -222,7 +211,7 @@ class PredioViewSet(viewsets.ModelViewSet):
             modulo=modulo,
             descripcion=descripcion
         )
-    
+
     def perform_destroy(self, instance):
         nombre = instance.nombre_predio
         municipio = instance.municipio
@@ -674,6 +663,32 @@ def configurar_o_login_admin(request):
 
 
 @api_view(['POST'])
+def cambiar_password_admin(request):
+    data = request.data
+    usuario = data.get('usuario') # O puedes identificarlo por ID o sesión actual
+    clave_actual = data.get('clave_actual')
+    nueva_clave = data.get('nueva_clave')
+
+    if not usuario or not clave_actual or not nueva_clave:
+        return Response({"error": "Todos los campos son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        admin = AdministradorSistema.objects.get(usuario=usuario)
+        
+        # Verificar si la contraseña actual coincide
+        if not check_password(clave_actual, admin.clave):
+            return Response({"error": "La contraseña actual es incorrecta."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Actualizar con la nueva clave encriptada
+        admin.clave = make_password(nueva_clave)
+        admin.save()
+
+        return Response({"mensaje": "Contraseña actualizada con éxito."}, status=status.HTTP_200_OK)
+
+    except AdministradorSistema.DoesNotExist:
+        return Response({"error": "Administrador no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
 def guardar_credencial_municipio(request):
     municipio_id = request.data.get('municipio_id')
     nombre_mun = request.data.get('nombre_municipio')
@@ -992,3 +1007,21 @@ def enviar_correo_ficha_predio(request):
     except Exception as e:
         # Corregido el formateo del string de error para que muestre la excepción real
         return Response({"error": f"No se pudo enviar el correo: {str(e)}"}, status=500)
+
+
+@api_view(['GET', 'PUT'])
+def gestionar_contacto(request):
+    # Obtenemos o creamos el registro único de contacto
+    contacto, created = ConfiguracionContacto.objects.get_or_create(id=1)
+
+    if request.method == 'GET':
+        return Response({
+            "correo": contacto.correo,
+            "telefono": contacto.telefono
+        })
+
+    elif request.method == 'PUT':
+        contacto.correo = request.data.get('correo', contacto.correo)
+        contacto.telefono = request.data.get('telefono', contacto.telefono)
+        contacto.save()
+        return Response({"mensaje": "Información de contacto actualizada exitosamente."})

@@ -5,7 +5,7 @@ import DocumentChartBarIcon from "@heroicons/react/24/solid/DocumentChartBarIcon
 import Cog6ToothIcon from "@heroicons/react/24/solid/Cog6ToothIcon";
 import ClipboardDocumentListIcon from "@heroicons/react/24/solid/ClipboardDocumentListIcon";
 import NewspaperIcon from "@heroicons/react/24/solid/NewspaperIcon";
-import ArrowPathIcon from "@heroicons/react/24/solid/ArrowPathIcon";
+import EnvelopeIcon from "@heroicons/react/24/solid/EnvelopeIcon"; // Icono para Contacto
 
 export const AdminSidebar = ({
     adminData,
@@ -34,13 +34,14 @@ export const AdminSidebar = ({
         vistaActiva === "produccion_reportes"
     );
 
-    // Estado para controlar si el menú desplegable de Configuración está abierto o cerrado
+    // Estado para controlar si el menú desplegable de Configuración está abierto o cerrado (incluye "contacto")
     const [configuracionAbierto, setConfiguracionAbierto] = useState(
         vistaActiva === "configuracion" ||
         vistaActiva === "credenciales" ||
         vistaActiva === "bitacora" ||
         vistaActiva === "noticias" ||
-        vistaActiva === "notificaciones_noticias"
+        vistaActiva === "notificaciones_noticias" ||
+        vistaActiva === "contacto"
     );
 
     return (
@@ -366,7 +367,7 @@ export const AdminSidebar = ({
                                 }}
                             >
                                 <Cog6ToothIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
-                                <span>Ajustes Generales</span>
+                                <span>Credenciales Admin</span>
                             </div>
 
                             <div
@@ -407,19 +408,18 @@ export const AdminSidebar = ({
                                 <span>Credenciales Noticias</span>
                             </div>
 
-                            {/* NUEVA OPCIÓN: Notificaciones Noticias */}
-                            {/* NUEVA OPCIÓN: Notificaciones Noticias */}
+                            {/* Notificaciones Noticias */}
                             <div
                                 onClick={() => setVistaActiva("notificaciones_noticias")}
                                 style={{
-                                    display: "flex", alignItems: "center", justifyContent: "space-between", // Cambiado a space-between para alinear el badge a la derecha
+                                    display: "flex", alignItems: "center", justifyContent: "space-between",
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "notificaciones_noticias" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "notificaciones_noticias" ? "#ffffff" : "#86efac",
                                     fontWeight: vistaActiva === "notificaciones_noticias" ? 600 : 400,
                                     fontSize: "13px",
                                     transition: "background 0.2s",
-                                    position: "relative" // Necesario para posicionar elementos si se requiere
+                                    position: "relative"
                                 }}
                                 onMouseEnter={(e) => {
                                     if (vistaActiva !== "notificaciones_noticias") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
@@ -433,7 +433,6 @@ export const AdminSidebar = ({
                                     <span>Notificaciones Noticias</span>
                                 </div>
 
-                                {/* Insignia roja del contador */}
                                 {badgeCount > 0 && (
                                     <span style={{
                                         backgroundColor: "#ef4444",
@@ -465,6 +464,29 @@ export const AdminSidebar = ({
                             >
                                 <ClipboardDocumentListIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Bitácora de Cambios</span>
+                            </div>
+
+                            {/* NUEVA OPCIÓN: Contacto */}
+                            <div
+                                onClick={() => setVistaActiva("contacto")}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: "10px",
+                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                    backgroundColor: vistaActiva === "contacto" ? "rgba(255,255,255,0.15)" : "transparent",
+                                    color: vistaActiva === "contacto" ? "#ffffff" : "#86efac",
+                                    fontWeight: vistaActiva === "contacto" ? 600 : 400,
+                                    fontSize: "13px",
+                                    transition: "background 0.2s"
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (vistaActiva !== "contacto") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (vistaActiva !== "contacto") e.currentTarget.style.backgroundColor = "transparent";
+                                }}
+                            >
+                                <EnvelopeIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                <span>Contacto</span>
                             </div>
 
                         </div>

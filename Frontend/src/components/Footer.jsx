@@ -1,6 +1,30 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
+  const [contacto, setContacto] = useState({
+    correo: "",
+    telefono: ""
+  });
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/contacto-info/")
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setContacto({
+            correo: data.correo || "agrosistema@barinas.gob.ve",
+            telefono: data.telefono || "(0273) 300-0000"
+          });
+        }
+        setCargando(false);
+      })
+      .catch(err => {
+        console.error("Error al obtener datos de contacto en el footer:", err);
+        setCargando(false);
+      });
+  }, []);
+
   return (
     <footer style={{ background: "#fff", color: "#555", fontFamily: "'Poppins', sans-serif", borderTop: "1px solid #e8e8e8" }}>
 
@@ -108,21 +132,49 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
             Contacto
           </h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            
+            {/* Correo */}
             <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#589e38" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: "2px", minWidth: "16px" }}>
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                 <polyline points="22,6 12,13 2,6" />
               </svg>
-              <a href="mailto:agrosistema@barinas.gob.ve" style={{ color: "#777", fontSize: "13px", textDecoration: "none" }}>
-                agrosistema@barinas.gob.ve
-              </a>
+              {cargando ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <div style={{
+                    width: "14px", height: "14px", border: "2px solid #e2e8f0", borderTop: "2px solid #589e38",
+                    borderRadius: "50%", animation: "spin 0.8s linear infinite"
+                  }} />
+                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>Cargando...</span>
+                </div>
+              ) : (
+                <a href={`mailto:${contacto.correo}`} style={{ color: "#777", fontSize: "13px", textDecoration: "none" }}>
+                  {contacto.correo}
+                </a>
+              )}
             </div>
+
+            {/* Teléfono */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#589e38" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ minWidth: "16px" }}>
                 <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .9h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
               </svg>
-              <span style={{ color: "#777", fontSize: "13px" }}>(0273) 300-0000</span>
+              {cargando ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <div style={{
+                    width: "14px", height: "14px", border: "2px solid #e2e8f0", borderTop: "2px solid #589e38",
+                    borderRadius: "50%", animation: "spin 0.8s linear infinite"
+                  }} />
+                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>Cargando...</span>
+                </div>
+              ) : (
+                <a href={`tel:${contacto.telefono}`} style={{ color: "#777", fontSize: "13px", textDecoration: "none" }}>
+                  {contacto.telefono}
+                </a>
+              )}
             </div>
+
+            {/* Ubicación */}
             <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#589e38" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: "2px", minWidth: "16px" }}>
                 <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
@@ -130,6 +182,7 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
               </svg>
               <span style={{ color: "#777", fontSize: "13px" }}>Barinas, Estado Barinas, Venezuela</span>
             </div>
+
           </div>
         </div>
 
@@ -148,6 +201,13 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
         </span>
       </div>
 
+      {/* Animación del spinner */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </footer>
   );
 }
