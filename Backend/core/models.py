@@ -37,6 +37,9 @@ class Predio(models.Model):
     centro_poblado = models.CharField(max_length=150, null=True, blank=True) # <-- NUEVO
     direccion = models.TextField(null=True, blank=True) # <-- NUEVO
 
+    estado = models.CharField(max_length=50, default='activo')
+    inhabilitado = models.BooleanField(default=False)
+
     superficie = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     coordenadas = models.CharField(max_length=100, null=True, blank=True, help_text="Latitud, Longitud")
 
