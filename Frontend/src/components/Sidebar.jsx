@@ -313,6 +313,29 @@ export const AdminSidebar = ({
                     )}
                 </div>
 
+                {/* OPCIÓN INDEPENDIENTE FUERA DE TODO: Reportes Generales */}
+                <div
+                    onClick={() => setVistaActiva("reportes_generales")}
+                    style={{
+                        display: "flex", alignItems: "center", gap: "12px",
+                        padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
+                        transition: "all 0.25s ease",
+                        backgroundColor: vistaActiva === "reportes_generales" ? "rgba(255,255,255,0.15)" : "transparent",
+                        color: vistaActiva === "reportes_generales" ? "#ffffff" : "#86efac",
+                        fontWeight: vistaActiva === "reportes_generales" ? 600 : 500,
+                        fontSize: "14px"
+                    }}
+                    onMouseEnter={(e) => {
+                        if (vistaActiva !== "reportes_generales") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                    }}
+                    onMouseLeave={(e) => {
+                        if (vistaActiva !== "reportes_generales") e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                >
+                    <DocumentChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
+                    <span>Reportes Generales</span>
+                </div>
+
                 {/* MENÚ PRINCIPAL: Configuración */}
                 <div>
                     <div
@@ -466,7 +489,7 @@ export const AdminSidebar = ({
                                 <span>Bitácora de Cambios</span>
                             </div>
 
-                            {/* NUEVA OPCIÓN: Contacto */}
+                            {/* Contacto */}
                             <div
                                 onClick={() => setVistaActiva("contacto")}
                                 style={{

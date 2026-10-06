@@ -129,7 +129,9 @@ export const EmpleadoSidebar = ({
                         <img
                             src={
                                 empleadoData?.foto ||
-                                `https://ui-avatars.com/api/?name=${empleadoData?.nombre || empleadoData?.usuario || "Empleado"}&background=0f4d34&color=ffffff&bold=true`
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                    empleadoData?.nombre ? empleadoData.nombre.replace("Admin", "Empleado") : empleadoData?.usuario || "Empleado"
+                                )}&background=0f4d34&color=ffffff&bold=true`
                             }
                             alt="Profile"
                             style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -145,7 +147,7 @@ export const EmpleadoSidebar = ({
                             overflow: "hidden",
                             textOverflow: "ellipsis"
                         }}>
-                            {empleadoData?.nombre || empleadoData?.usuario || "Empleado"}
+                            {empleadoData?.nombre ? empleadoData.nombre.replace("Admin", "Empleado") : empleadoData?.usuario || "Empleado"}
                         </span>
 
                         <span style={{

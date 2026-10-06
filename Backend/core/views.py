@@ -632,7 +632,7 @@ def configurar_o_login_admin(request):
                 nombre=nombre,
                 usuario=usuario,
                 clave=make_password(clave),
-                rol="Administrador Maestro"
+                rol="Administrador General"
             )
             return Response({
                 "mensaje": "Administrador registrado con éxito",
@@ -708,7 +708,7 @@ def guardar_credencial_municipio(request):
     admin_mun, creado = AdministradorSistema.objects.update_or_create(
         municipio=municipio_id,
         defaults={
-            'nombre': f"Admin {nombre_mun}",
+            'nombre': f"Empleado {nombre_mun}",
             'usuario': usuario,
             'clave': clave_encriptada,
             'rol': f"Municipio {nombre_mun}"

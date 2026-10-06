@@ -22,6 +22,7 @@ import AdminBitacora from '../../components/AdminBitacora';
 import AdminNotificacionesNoticias from '../../components/AdminNotificacionesNoticias';
 import AdminConfiguracionContraseña from "../../components/AdminConfiguracionContraseña";
 import AdminContacto from '../../components/AdminContacto'; // <--- Importarlo arriba
+import { AdminReportesGenerales } from '../../components/AdminReportesGenerales';
 
 // Estilos UI
 import {
@@ -324,6 +325,7 @@ export default function AdminPrediosDashboard() {
                             eliminarDefinitivoReal={eliminarDefinitivoReal}
                             InputField={InputField}
                             errors={{}}
+                            esAdmin={true} // <--- ¡Añade esto solo en el Admin!
                         />
                     ) : vistaActiva === "georreferenciacion" ? (
                         <VistaMapaPredios
@@ -336,23 +338,27 @@ export default function AdminPrediosDashboard() {
                         <AdminProduccionDashboard productionState={productionState} />
                     ) : vistaActiva === "produccion_reportes" ? (
                         <SeccionReportes listaPredios={listaPredios} />
-                    ) :  vistaActiva === "configuracion" ? (
+                    ) : vistaActiva === "configuracion" ? (
 
                         <AdminConfiguracionContraseña />
-                        
-                    ) : 
-                    
-                    vistaActiva === "contacto" ? (
 
-                        <AdminContacto />
-                        
-                    ) : vistaActiva === "bitacora" ? (
-                        <AdminBitacora />) : (
+                    ) :
 
-                        <div>
-                            <p>Selecciona una sección válida en el menú lateral.</p>
-                        </div>
-                    )}
+                        vistaActiva === "contacto" ? (
+
+                            <AdminContacto />
+
+                        ) : vistaActiva === "reportes_generales" ? (
+
+                            <AdminReportesGenerales />
+
+                        ) : vistaActiva === "bitacora" ? (
+                            <AdminBitacora />) : (
+
+                            <div>
+                                <p>Selecciona una sección válida en el menú lateral.</p>
+                            </div>
+                        )}
                 </main>
             </div>
         </div>

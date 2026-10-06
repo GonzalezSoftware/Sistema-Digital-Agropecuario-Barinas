@@ -78,6 +78,64 @@ export default function EmpleadoDashboard() {
         guardarLicencia,
     } = useDashboardProduccion();
 
+    const cambiarDueñoPredio = async (predioSeleccionado) => {
+        try {
+            console.log("Enviando petición para el predio ID:", predioSeleccionado.id_predio);
+
+            // 1. Mostramos la alerta de carga (Swal.showLoading)
+            Swal.fire({
+                title: "Procesando...",
+                text: "Actualizando el estado del predio, por favor espere.",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const response = await fetch(`/api/predios/${predioSeleccionado.id_predio}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Si usas token, desbanca la línea de abajo y pon tu token:
+                    // 'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                },
+                body: JSON.stringify({
+                    estado: 'inactivo',
+                    inhabilitado: true
+                })
+            });
+
+            console.log("Código de respuesta del servidor:", response.status);
+
+            if (!response.ok) {
+                const errorTexto = await response.text();
+                console.error("Detalle del error del servidor:", errorTexto);
+                throw new Error("No se pudo procesar la solicitud (Error " + response.status + ")");
+            }
+
+            // 2. Mostramos el mensaje de éxito (esto reemplazará automáticamente al de carga)
+            await Swal.fire({
+                title: "¡Predio Inhabilitado!",
+                text: "El predio ha sido marcado como inactivo correctamente.",
+                icon: "success",
+                confirmButtonColor: "#136442"
+            });
+
+            // Recargamos la página para que se refleje el cambio de inmediato
+            window.location.reload();
+
+        } catch (error) {
+            console.error("Error en cambio de dueño:", error);
+            Swal.fire({
+                title: "Error",
+                text: error.message || "No se pudo completar la acción.",
+                icon: "error",
+                confirmButtonColor: "#b91c1c"
+            });
+        }
+    };
+
     // ── AQUÍ PUEDES COLOCARLO ──
     useEffect(() => {
         if (municipioEmpleado) {
@@ -197,7 +255,7 @@ export default function EmpleadoDashboard() {
         actualizarInfraestructura,
         actualizarProduccion,
         guardarCambiosReal,
-        eliminarDefinitivoReal
+        eliminarDefinitivoReal,
     } = useHistorialPredios(prediosMunicipio);
 
     // Gráficos del municipio
@@ -306,8 +364,10 @@ export default function EmpleadoDashboard() {
                             actualizarProduccion={actualizarProduccion}
                             guardarCambiosReal={guardarCambiosReal}
                             eliminarDefinitivoReal={eliminarDefinitivoReal}
+                            cambiarDueñoPredio={cambiarDueñoPredio} // <--- ¡Agrega esta línea aquí!
                             InputField={InputField}
                             errors={errors}
+                            esAdmin={false}
                         />
                     ) : vistaActiva === "predios_georreferenciacion" ? (
                         <div style={{ maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
