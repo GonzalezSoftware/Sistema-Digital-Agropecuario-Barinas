@@ -1,57 +1,88 @@
+// src/components/FormHierro.jsx
 import React, { useState, useEffect } from "react";
-import { FormSection, btnPrincipal, grid3, labelStyle, inputStyle } from "../pages/Produccion/DashboardProduccion";
 
-// Componente ModernSelectField estilizado
-const ModernSelectField = ({ label, value, onChange, error, children }) => {
-    return (
-        <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
-            <label style={labelStyle}>{label}</label>
-            <select
-                value={value}
-                onChange={onChange}
-                style={{
-                    ...inputStyle,
-                    border: error ? "1px solid #ef4444" : "1px solid #cbd5e1",
-                    appearance: "none",
-                    WebkitAppearance: "none",
-                    MozAppearance: "none",
-                    backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right 12px center",
-                    backgroundSize: "16px",
-                    paddingRight: "40px",
-                    cursor: "pointer",
-                    backgroundColor: "#fff",
-                    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-                }}
-                onFocus={(e) => {
-                    if (!error) e.target.style.borderColor = "#136442";
-                }}
-                onBlur={(e) => {
-                    if (!error) e.target.style.borderColor = "#cbd5e1";
-                }}
-            >
-                {children}
-            </select>
-        </div>
-    );
+// ── CONSTANTES Y ESTILOS INTEGRADOS ──────────────────────────
+const inputStyle = {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
+    fontSize: "14px",
+    outline: "none",
+    backgroundColor: "#f8fafc",
 };
+
+const labelStyle = {
+    display: "block",
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#475569",
+    marginBottom: "8px",
+};
+
+const grid3 = {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "20px",
+};
+
+const btnPrincipal = {
+    background: "#136442",
+    color: "#fff",
+    border: "none",
+    padding: "16px 40px",
+    borderRadius: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
+    boxShadow: "0 4px 14px rgba(19, 100, 66, 0.3)",
+};
+
+// ── COMPONENTE INTEGRADO ────────────────────────────────────
+export const FormSection = ({ title, children }) => (
+    <div
+        style={{
+            background: "#fff",
+            padding: "28px",
+            borderRadius: "20px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            marginBottom: "24px",
+            border: "1px solid #e2e8f0",
+        }}
+    >
+        <h3
+            style={{
+                fontSize: "13px",
+                color: "#136442",
+                marginBottom: "25px",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+            }}
+        >
+            {title}
+        </h3>
+        {children}
+    </div>
+);
+
+export const InputField = ({ label, ...props }) => (
+    <div style={{ marginBottom: "15px" }}>
+        <label style={labelStyle}>{label}</label>
+        <input {...props} style={inputStyle} />
+    </div>
+);
 
 export default function FormHierro({
     predioActivo,
     licenciaHierro,
     setLicenciaHierro,
     guardarLicencia,
-    FormSection,
-    InputField,
 }) {
     const [errores, setErrores] = useState({});
     const hoy = new Date().toISOString().split("T")[0];
 
-    // 💡 EFECTO CLAVE: Sincroniza la licencia existente del predio al seleccionarlo o cargar la página
     useEffect(() => {
         if (predioActivo) {
-            // Buscamos si el predio activo ya trae una licencia registrada desde el backend
             const licenciaBackend = predioActivo.productor?.licencias?.[0] || predioActivo.licencias?.[0];
 
             if (licenciaBackend) {
@@ -61,12 +92,10 @@ export default function FormHierro({
                     observaciones: licenciaBackend.observaciones || "",
                     activa: licenciaBackend.activa,
                     certificado: null,
-                    // 🔍 AQUÍ ESTABA EL ERROR: Django envía 'certificado_pdf', no 'certificado_url'
                     certificadoUrl: licenciaBackend.certificado_pdf || licenciaBackend.certificado_url || licenciaBackend.url || licenciaBackend.archivo || "",
-                    registrada: true   // 🔒 ESTO BLOQUEA EL FORMULARIO EN MODO DE SOLO LECTURA
+                    registrada: true
                 });
             } else {
-                // Si no tiene licencia previa en backend, iniciamos limpio
                 setLicenciaHierro(prev => ({
                     ...prev,
                     poseeLicencia: prev.poseeLicencia ?? false,
@@ -77,7 +106,6 @@ export default function FormHierro({
         }
     }, [predioActivo]);
 
-    // Determina si ya fue registrada previamente
     const yaRegistrada = licenciaHierro.registrada || false;
 
     useEffect(() => {
@@ -90,11 +118,8 @@ export default function FormHierro({
         let mensajeError = "";
         if (licenciaHierro.poseeLicencia) {
             if (campo === "fechaEmision") {
-                if (!valor) {
-                    mensajeError = "La fecha de emisión es obligatoria.";
-                } else if (valor > hoy) {
-                    mensajeError = "La fecha de emisión no puede ser futura.";
-                }
+                if (!valor) mensajeError = "La fecha de emisión es obligatoria.";
+                else if (valor > hoy) mensajeError = "La fecha de emisión no puede ser futura.";
             }
         }
         setErrores((prev) => ({ ...prev, [campo]: mensajeError }));
@@ -105,19 +130,10 @@ export default function FormHierro({
 
         if (licenciaHierro.poseeLicencia) {
             const valor = licenciaHierro["fechaEmision"] || "";
-            let tieneErrores = false;
-            let nuevosErrores = {};
-
             if (!valor) {
-                nuevosErrores["fechaEmision"] = "La fecha de emisión es obligatoria.";
-                tieneErrores = true;
-            }
-
-            if (tieneErrores) {
-                setErrores(nuevosErrores);
+                setErrores({ fechaEmision: "La fecha de emisión es obligatoria." });
                 return;
             }
-
             estadoActiva = true;
         }
 
@@ -125,7 +141,7 @@ export default function FormHierro({
             const licenciaActualizada = {
                 ...prev,
                 activa: estadoActiva,
-                registrada: true // Bloquea el formulario en adelante
+                registrada: true
             };
 
             setTimeout(() => {

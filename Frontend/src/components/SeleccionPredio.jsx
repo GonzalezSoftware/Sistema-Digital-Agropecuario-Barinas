@@ -247,7 +247,7 @@ export default function AdminProduccionSeleccionarPredio({
                             {/* I. DATOS DEL PRODUCTOR */}
                             <div style={estiloContenedorSeccion}>
                                 <div style={estiloTituloSeccion}>I. DATOS DEL PRODUCTOR</div>
-                                <div style={estiloGridTresColumnas}>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr) repeat(2, 1fr)", gap: "15px" }}>
                                     <div>
                                         <small style={estiloLabel}>NOMBRE COMPLETO</small>
                                         <p style={estiloP}>{predioSeleccionado.productor?.nombre || "N/A"}</p>
@@ -259,6 +259,10 @@ export default function AdminProduccionSeleccionarPredio({
                                     <div>
                                         <small style={estiloLabel}>TELÉFONO</small>
                                         <p style={estiloP}>{predioSeleccionado.productor?.telefono || "N/A"}</p>
+                                    </div>
+                                    <div>
+                                        <small style={estiloLabel}>CORREO ELECTRÓNICO</small>
+                                        <p style={estiloP}>{predioSeleccionado.productor?.correo || "N/A"}</p>
                                     </div>
                                 </div>
                             </div>

@@ -2,17 +2,114 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
-import {
-    FormSection,
-    btnPrincipal,
-    gridCheck,
-    radioLabel,
-    grid3,
-    InputField,
-    labelStyle,
-    inputStyle,
-    SelectField,
-} from "../pages/Produccion/DashboardProduccion";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+// ── CONSTANTES Y ESTILOS INTEGRADOS ──────────────────────────
+const inputStyle = {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "10px",
+    border: "1px solid #e2e8f0",
+    fontSize: "14px",
+    outline: "none",
+    backgroundColor: "#f8fafc",
+};
+
+const labelStyle = {
+    display: "block",
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#475569",
+    marginBottom: "8px",
+};
+
+const grid3 = {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "20px",
+};
+
+const gridCheck = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+    gap: "15px",
+};
+
+const radioLabel = {
+    fontSize: "13px",
+    color: "#334155",
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    cursor: "pointer",
+    padding: "10px",
+    background: "#f1f5f9",
+    borderRadius: "8px",
+};
+
+const btnPrincipal = {
+    background: "#136442",
+    color: "#fff",
+    border: "none",
+    padding: "16px 40px",
+    borderRadius: "12px",
+    fontWeight: "700",
+    cursor: "pointer",
+    boxShadow: "0 4px 14px rgba(19, 100, 66, 0.3)",
+};
+
+// ── COMPONENTES INTEGRADOS ──────────────────────────────────
+export const FormSection = ({ title, children }) => (
+    <div
+        style={{
+            background: "#fff",
+            padding: "28px",
+            borderRadius: "20px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            marginBottom: "24px",
+            border: "1px solid #e2e8f0",
+        }}
+    >
+        <h3
+            style={{
+                fontSize: "13px",
+                color: "#136442",
+                marginBottom: "25px",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+            }}
+        >
+            {title}
+        </h3>
+        {children}
+    </div>
+);
+
+export const InputField = ({ label, ...props }) => (
+    <div style={{ marginBottom: "15px" }}>
+        <label style={labelStyle}>{label}</label>
+        <input {...props} style={inputStyle} />
+    </div>
+);
+
+export const SelectField = ({ label, options, error, ...props }) => (
+    <div style={{ marginBottom: "15px" }}>
+        <label style={labelStyle}>{label}</label>
+        <select
+            {...props}
+            style={{
+                ...inputStyle,
+                border: error ? "1.5px solid #ef4444" : "1px solid #e2e8f0"
+            }}
+        >
+            <option value="">Seleccione una opción...</option>
+            {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        </select>
+        {error && <p style={{ color: "#ef4444", fontSize: "11px", marginTop: "5px", fontWeight: "600" }}>{error}</p>}
+    </div>
+);
 
 export default function FormCaracterizacion({
     predioActivo,
@@ -23,7 +120,7 @@ export default function FormCaracterizacion({
     setTabActiva,
     subCaracterizacion,
     setSubCaracterizacion,
-    modo = "caracterizacion", // Nuevo prop: "caracterizacion" o "actualizacion"
+    modo = "caracterizacion",
 }) {
 
     const [codigoGenerado, setCodigoGenerado] = useState("");
@@ -33,7 +130,6 @@ export default function FormCaracterizacion({
     useEffect(() => {
         if (predioActivo) {
             if (modo === "actualizacion") {
-                // 1. Cargar datos existentes si es actualización
                 if (predioActivo.rubros_vegetales && Array.isArray(predioActivo.rubros_vegetales)) {
                     setRubrosVegetales(predioActivo.rubros_vegetales);
                 } else {
@@ -47,331 +143,80 @@ export default function FormCaracterizacion({
                     ...(predioActivo.maquinaria || {}),
                 }));
             } else {
-                // 2. Limpiar / reiniciar estados si es caracterización nueva para evitar arrastrar datos
                 setRubrosVegetales([]);
                 setInventarioInicial((prev) => ({
                     ...prev,
                     especiesSeleccionadas: [],
-
-                    bovinos: {
-                        toro_reproductor: 0,
-                        toro_ceba: 0,
-                        vaca: 0,
-                        novilla: 0,
-                        novillo: 0,
-                        maute: 0,
-                        mauta: 0,
-                        becerra: 0,
-                        becerro: 0,
-                    },
-
-                    capacidadBovina: {
-                        leche_diaria: 0,
-                        carne_anual: 0,
-                        sistemas: [],
-                    },
-
-                    bubalinos: {
-                        butoro_reproductor: 0,
-                        butoro_ceba: 0,
-                        bufala: 0,
-                        buvilla: 0,
-                        buvillo: 0,
-                        bumauta: 0,
-                        bumaute: 0,
-                        bucerra: 0,
-                        bucerro: 0,
-                    },
-
-                    capacidadBubalina: {
-                        leche_diaria: 0,
-                        carne_anual: 0,
-                        partos_anuales: 0,
-                        reproductores: 0,
-                        sistemas: [],
-                    },
-
-                    equinos: {
-                        padrillo: 0,
-                        caballo_trabajo: 0,
-                        yegua: 0,
-                        potra: 0,
-                        potro: 0,
-                        potrilla: 0,
-                        potrillo: 0,
-                        burro: 0,
-                        burra: 0,
-                    },
-
-                    capacidadEquina: {
-                        sistemas: [],
-                        trabajo_agricola: 0,
-                        transporte: 0,
-                        reproduccion: 0,
-                        deporte: 0,
-                        exhibicion: 0,
-                        turismo: 0,
-                        carga: 0,
-                    },
-
-                    ovinos: {
-                        carnero: 0,
-                        oveja: 0,
-                        borrego: 0,
-                        borrega: 0,
-                        cordero: 0,
-                        cordera: 0,
-                    },
-
-                    capacidadOvina: {
-                        sistemas: [],
-                        carne_anual: 0,
-                        leche_diaria: 0,
-                        lana_anual: 0,
-                        cria: 0,
-                        reproduccion: 0,
-                        doble_proposito: 0,
-                        genetica: 0,
-                    },
-
-                    porcinos: {
-                        berraco: 0,
-                        cerda_gestante: 0,
-                        cerda_lactante: 0,
-                        lechon: 0,
-                        lechona: 0,
-                    },
-
-                    capacidadPorcina: {
-                        sistemas: [],
-                        cria: 0,
-                        engorde: 0,
-                        reproduccion: 0,
-                        ciclo_completo: 0,
-                        genetica: 0,
-                        carne_anual: 0,
-                    },
-
-                    caprinos: {
-                        cabrio: 0,
-                        cabra: 0,
-                        cabrillo: 0,
-                        cabrilla: 0,
-                        cabrito: 0,
-                        cabrita: 0,
-                    },
-
-                    capacidadCaprino: {
-                        sistemas: [],
-                        vientres: 0,
-                        engorde: 0,
-                        leche_diaria: 0,
-                        carne_anual: 0,
-                    },
-
-                    cunicola: {
-                        macho: 0,
-                        madre: 0,
-                        gazapo: 0,
-                    },
-
-                    capacidadCunicola: {
-                        sistemas: [],
-                        jaulas_madre: 0,
-                        reproductoras: 0,
-                        carne_anual: 0
-                    },
-
-                    avicola: {
-                        pollos_engorde: 0,
-                        gallinas_ponedoras: 0,
-                        gallinas_descarte: 0,
-                        codornices: 0,
-                        patos: 0,
-                        pavos: 0,
-                        avestruz: 0,
-                        guinea: 0,
-                        otros: 0,
-                    },
-
-                    capacidadAvicola: {
-                        sistemas: [],
-                        capacidad_alojamiento: 0,
-                        produccion_huevos: 0,
-                        capacidad_lote: 0,
-                    },
-
-                    apicola: {
-                        colmenas: 0,
-                    },
-
-                    capacidadApicola: {
-                        sistemas: [],
-                        colmenas_activas: 0,
-                        miel_anual: 0,
-                        nucleos_anuales: 0,
-                    },
-
+                    bovinos: { toro_reproductor: 0, toro_ceba: 0, vaca: 0, novilla: 0, novillo: 0, maute: 0, mauta: 0, becerra: 0, becerro: 0 },
+                    capacidadBovina: { leche_diaria: 0, carne_anual: 0, sistemas: [] },
+                    bubalinos: { butoro_reproductor: 0, butoro_ceba: 0, bufala: 0, buvilla: 0, buvillo: 0, bumauta: 0, bumaute: 0, bucerra: 0, bucerro: 0 },
+                    capacidadBubalina: { leche_diaria: 0, carne_anual: 0, partos_anuales: 0, reproductores: 0, sistemas: [] },
+                    equinos: { padrillo: 0, caballo_trabajo: 0, yegua: 0, potra: 0, potro: 0, potrilla: 0, potrillo: 0, burro: 0, burra: 0 },
+                    capacidadEquina: { sistemas: [], trabajo_agricola: 0, transporte: 0, reproduccion: 0, deporte: 0, exhibicion: 0, turismo: 0, carga: 0 },
+                    ovinos: { carnero: 0, oveja: 0, borrego: 0, borrega: 0, cordero: 0, cordera: 0 },
+                    capacidadOvina: { sistemas: [], carne_anual: 0, leche_diaria: 0, lana_anual: 0, cria: 0, reproduccion: 0, doble_proposito: 0, genetica: 0 },
+                    porcinos: { berraco: 0, cerda_gestante: 0, cerda_lactante: 0, lechon: 0, lechona: 0 },
+                    capacidadPorcina: { sistemas: [], cria: 0, engorde: 0, reproduccion: 0, ciclo_completo: 0, genetica: 0, carne_anual: 0 },
+                    caprinos: { cabrio: 0, cabra: 0, cabrillo: 0, cabrilla: 0, cabrito: 0, cabrita: 0 },
+                    capacidadCaprino: { sistemas: [], vientres: 0, engorde: 0, leche_diaria: 0, carne_anual: 0 },
+                    cunicola: { macho: 0, madre: 0, gazapo: 0 },
+                    capacidadCunicola: { sistemas: [], jaulas_madre: 0, reproductoras: 0, carne_anual: 0 },
+                    avicola: { pollos_engorde: 0, gallinas_ponedoras: 0, gallinas_descarte: 0, codornices: 0, patos: 0, pavos: 0, avestruz: 0, guinea: 0, otros: 0 },
+                    capacidadAvicola: { sistemas: [], capacidad_alojamiento: 0, produccion_huevos: 0, capacidad_lote: 0 },
+                    apicola: { colmenas: 0 },
+                    capacidadApicola: { sistemas: [], colmenas_activas: 0, miel_anual: 0, nucleos_anuales: 0 },
                     maquinariaSeleccionada: [],
-
-                    maquinaria_ruedas: {
-                        tractor: 0,
-                        rotocultor: 0,
-                        patrol: 0,
-                        lowboy: 0,
-                        payloader: 0,
-                        cosechadora: 0,
-                        desgranadora: 0,
-                        basuca: 0,
-                        remolque: 0,
-                    },
-
-                    implementos: {
-                        abonadora: 0,
-                        arados: 0,
-                        aspergadoras: 0,
-                        rastra_pesada: 0,
-                        cultivadora: 0,
-                        desmalezadora: 0,
-                        desterronadora: 0,
-                        encaladora: 0,
-                        niveladora: 0,
-                        cegadora: 0,
-                        sembradora: 0,
-                        subsolador: 0,
-                        surcadora: 0,
-                        trompo_fertilizador: 0,
-                    },
-
-                    riego: {
-                        electrobomba: 0,
-                        molino_viento: 0,
-                        motobomba: 0,
-                        motor_diesel: 0,
-                    },
-
-                    otros_equipos: {
-                        cargadora_madera: 0,
-                        descortezadora: 0,
-                        motosierra: 0,
-                        secadora_granos: 0,
-                        termonebulizadores: 0,
-                        trilladora: 0,
-                        acuicultura_aireacion: 0,
-                        alimentacion_mecanizada: 0,
-                    },
+                    maquinaria_ruedas: { tractor: 0, rotocultor: 0, patrol: 0, lowboy: 0, payloader: 0, cosechadora: 0, desgranadora: 0, basuca: 0, remolque: 0 },
+                    implementos: { abonadora: 0, arados: 0, aspergadoras: 0, rastra_pesada: 0, cultivadora: 0, desmalezadora: 0, desterronadora: 0, encaladora: 0, niveladora: 0, cegadora: 0, sembradora: 0, subsolador: 0, surcadora: 0, trompo_fertilizador: 0 },
+                    riego: { electrobomba: 0, molino_viento: 0, motobomba: 0, motor_diesel: 0 },
+                    otros_equipos: { cargadora_madera: 0, descortezadora: 0, motosierra: 0, secadora_granos: 0, termonebulizadores: 0, trilladora: 0, acuicultura_aireacion: 0, alimentacion_mecanizada: 0 },
                 }));
             }
         }
     }, [predioActivo, modo]);
 
-    // ── COMPONENTE DE INPUT NUMÉRICO CON TIPOGRAFÍA HEREDADA ──────────────────
-    const NumericInputField = ({
-        label,
-        value,
-        onChange,
-        placeholder = "0",
-        min = 0,
-    }) => {
-        const [textValue, setTextValue] = useState(value ?? "");
-
-        useEffect(() => {
-            setTextValue(value ?? "");
-        }, [value]);
-
-        return (
-            <div style={{ marginBottom: "15px" }}>
-                {label && <label style={labelStyle}>{label}</label>}
-                <input
-                    type="number"
-                    min={min}
-                    placeholder={placeholder}
-                    value={textValue}
-                    onKeyDown={(e) => {
-                        if (e.key === "-" || e.key === "e" || e.key === "+") {
-                            e.preventDefault();
-                        }
-                    }}
-                    onChange={(e) => {
-                        const val = e.target.value;
-                        setTextValue(val);
-
-                        if (val === "") {
-                            onChange("");
-                            return;
-                        }
-
-                        const valorIngresado = Number(val);
-                        if (!isNaN(valorIngresado)) {
-                            onChange(valorIngresado);
-                        }
-                    }}
-                    style={{
-                        ...inputStyle,
-                        width: "100%",
-                        boxSizing: "border-box",
-                    }}
-                />
-            </div>
-        );
-    };
-
-
-
-    // ── COMPONENTE DE CHECKBOX / SWITCH CON TIPOGRAFÍA HEREDADA ──────────────────
-    const ModernCheckbox = ({ label, checked, onChange }) => {
-        return (
+    const ModernCheckbox = ({ label, checked, onChange }) => (
+        <div
+            onClick={() => onChange(!checked)}
+            style={{
+                ...radioLabel,
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "12px 16px",
+                border: checked ? "2px solid #136442" : "1px solid #cbd5e1",
+                backgroundColor: checked ? "#f0fdf4" : "#fff",
+                borderRadius: "10px",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                userSelect: "none",
+                width: "100%",
+                boxSizing: "border-box",
+            }}
+        >
             <div
-                onClick={() => onChange(!checked)}
                 style={{
-                    ...radioLabel,
+                    width: "20px",
+                    height: "20px",
+                    borderRadius: "6px",
+                    border: checked ? "none" : "2px solid #cbd5e1",
+                    backgroundColor: checked ? "#136442" : "transparent",
                     display: "flex",
                     alignItems: "center",
-                    gap: "12px",
-                    padding: "12px 16px",
-                    border: checked ? "2px solid #136442" : "1px solid #cbd5e1",
-                    backgroundColor: checked ? "#f0fdf4" : "#fff",
-                    borderRadius: "10px",
-                    cursor: "pointer",
+                    justifyContent: "center",
                     transition: "all 0.2s ease",
-                    userSelect: "none",
-                    width: "100%",
-                    boxSizing: "border-box",
+                    flexShrink: 0,
                 }}
             >
-                <div
-                    style={{
-                        width: "20px",
-                        height: "20px",
-                        borderRadius: "6px",
-                        border: checked ? "none" : "2px solid #cbd5e1",
-                        backgroundColor: checked ? "#136442" : "transparent",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        transition: "all 0.2s ease",
-                        flexShrink: 0,
-                    }}
-                >
-                    {checked && (
-                        <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#fff"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                    )}
-                </div>
-                <span>{label}</span>
+                {checked && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                )}
             </div>
-        );
-    };
+            <span>{label}</span>
+        </div>
+    );
 
     const LISTA_RUBROS_VEGETALES = [
         "Caraota", "Maíz Blanco", "Maíz Amarillo", "Arroz", "Sorgo",
@@ -382,16 +227,7 @@ export default function FormCaracterizacion({
     const agregarRubroVegetal = () => {
         setRubrosVegetales((prev) => [
             ...prev,
-            {
-                rubro: "",
-                hectares: "",
-                estado: "",
-                riego: "",
-                ciclo_productivo: "",
-                tipo_produccion: "",
-                produccion_estimada: "",
-                destino: "",
-            },
+            { rubro: "", hectareas: "", estado: "", riego: "", ciclo_productivo: "", tipo_produccion: "", produccion_estimada: "", destino: "" },
         ]);
     };
 
@@ -400,60 +236,33 @@ export default function FormCaracterizacion({
     };
 
     const actualizarRubroVegetal = (index, campo, valor) => {
-        if (
-            (campo === "hectareas" || campo === "produccion_estimada") &&
-            valor !== "" && Number(valor) < 0
-        ) {
-            return;
-        }
+        if ((campo === "hectareas" || campo === "produccion_estimada") && valor !== "" && Number(valor) < 0) return;
 
         setRubrosVegetales((prev) => {
             const copia = [...prev];
-            // CORRECCIÓN: Copiar el objeto de la fila para mantener la inmutabilidad
             copia[index] = { ...copia[index], [campo]: valor };
             return copia;
         });
 
         let mensajeError = "";
         if (campo === "hectareas" || campo === "produccion_estimada") {
-            if (valor === "") {
-                mensajeError = "Este campo es requerido";
-            } else if (isNaN(valor) || Number(valor) <= 0) {
-                mensajeError = "Debe ser un número mayor a 0";
-            } else if (Number(valor) > 10000) {
-                mensajeError = "Cantidad exagerada. Verifique.";
-            }
+            if (valor === "") mensajeError = "Este campo es requerido";
+            else if (isNaN(valor) || Number(valor) <= 0) mensajeError = "Debe ser un número mayor a 0";
+            else if (Number(valor) > 1000000) mensajeError = "Cantidad exagerada. Verifique.";
         }
-
         if (campo === "rubro") {
-            if (valor.trim() === "") {
-                mensajeError = "Seleccione un rubro";
-            } else if (/[0-9]/.test(valor)) {
-                mensajeError = "El rubro no puede contener números";
-            }
+            if (valor.trim() === "") mensajeError = "Seleccione un rubro";
+            else if (/[0-9]/.test(valor)) mensajeError = "El rubro no puede contener números";
         }
 
-        setErroresFilas((prev) => ({
-            ...prev,
-            [`${index}-${campo}`]: mensajeError,
-        }));
+        setErroresFilas((prev) => ({ ...prev, [`${index}-${campo}`]: mensajeError }));
     };
 
-
-    // Función auxiliar recomendada para generar el documento en memoria
     const generarObjetoPDF = (predio) => {
-        const doc = new jsPDF({
-            orientation: "portrait",
-            unit: "mm",
-            format: "letter"
-        });
-
+        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
         const verdeBarinas = [19, 100, 66];
         const grisOscuro = [40, 40, 40];
 
-        // ────────────────────────────────────────────────────────
-        // CINTILLO INSTITUCIONAL (MEMBRETE)
-        // ────────────────────────────────────────────────────────
         try {
             doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
             doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
@@ -465,15 +274,12 @@ export default function FormCaracterizacion({
         doc.setFontSize(7.5);
         doc.setTextColor(...verdeBarinas);
         doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
-
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
         doc.setTextColor(100, 100, 100);
         doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
 
-        const fechaEmision = predio.fecha_registro
-            ? new Date(predio.fecha_registro).toLocaleDateString()
-            : new Date().toLocaleDateString();
+        const fechaEmision = predio.fecha_registro ? new Date(predio.fecha_registro).toLocaleDateString() : new Date().toLocaleDateString();
         doc.text(`Fecha de Registro: ${fechaEmision}`, 204, 18, { align: "right" });
 
         doc.setDrawColor(...verdeBarinas);
@@ -487,9 +293,6 @@ export default function FormCaracterizacion({
 
         let currentY = 40;
 
-        // ────────────────────────────────────────────────────────
-        // I. DATOS DEL PRODUCTOR
-        // ────────────────────────────────────────────────────────
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9.5);
         doc.setTextColor(...verdeBarinas);
@@ -498,17 +301,9 @@ export default function FormCaracterizacion({
         doc.setLineWidth(0.3);
         doc.line(12, currentY + 2, 204, currentY + 2);
 
-        const datosProductor = [
-            [
-                "NOMBRE COMPLETO:", predio.productor?.nombre || "N/A",
-                "CÉDULA / RIF:", predio.productor?.cedula_rif || "N/A",
-                "TELÉFONO:", predio.productor?.telefono || "N/A"
-            ]
-        ];
-
         autoTable(doc, {
             startY: currentY + 4,
-            body: datosProductor,
+            body: [["NOMBRE COMPLETO:", predio.productor?.nombre || "N/A", "CÉDULA / RIF:", predio.productor?.cedula_rif || "N/A", "TELÉFONO:", predio.productor?.telefono || "N/A"]],
             theme: "grid",
             styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: {
@@ -522,278 +317,77 @@ export default function FormCaracterizacion({
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // II. GEORREFERENCIACIÓN Y UBICACIÓN
-        // ────────────────────────────────────────────────────────
-        currentY = doc.lastAutoTable.finalY + 6;
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(9.5);
-        doc.setTextColor(...verdeBarinas);
-        doc.text("II. GEORREFERENCIACIÓN Y UBICACIÓN", 12, currentY);
-        doc.line(12, currentY + 2, 204, currentY + 2);
-
-        const datosUbicacion = [
-            [
-                "MUNICIPIO:", predio.municipio || "N/A",
-                "PARROQUIA:", predio.parroquia || "N/A",
-                "COMUNIDAD:", predio.comunidad || "N/A"
-            ]
-        ];
-
-        autoTable(doc, {
-            startY: currentY + 4,
-            body: datosUbicacion,
-            theme: "grid",
-            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
-            columnStyles: {
-                0: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
-                1: { width: 43 },
-                2: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
-                3: { width: 43 },
-                4: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
-                5: { width: 31 }
-            },
-            margin: { left: 12, right: 12 }
-        });
-
-        // ────────────────────────────────────────────────────────
-        // III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)
-        // ────────────────────────────────────────────────────────
-        currentY = doc.lastAutoTable.finalY + 6;
-        if (currentY > 240) { doc.addPage(); currentY = 20; }
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(9.5);
-        doc.setTextColor(...verdeBarinas);
-        doc.text("III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)", 12, currentY);
-        doc.line(12, currentY + 2, 204, currentY + 2);
-
-        const rubros = predio.rubros_vegetales || [];
-        const bodyRubros = rubros.length > 0
-            ? rubros.map(r => [
-                r.rubro || "N/A",
-                r.hectareas ? `${r.hectareas} Ha` : "0 Ha",
-                r.estado || "N/A",
-                r.produccion_estimada ? `${r.produccion_estimada} Kg` : "0 Kg"
-            ])
-            : [["Sin rubros vegetales declarados.", "", "", ""]];
-
-        autoTable(doc, {
-            startY: currentY + 4,
-            head: [["Rubro", "Superficie (Ha)", "Estado", "Producción Estimada"]],
-            body: bodyRubros,
-            theme: "grid",
-            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
-            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
-            columnStyles: { 0: { width: 65 }, 1: { width: 45 }, 2: { width: 45 }, 3: { width: 37 } },
-            margin: { left: 12, right: 12 }
-        });
-
-        // ────────────────────────────────────────────────────────
-        // IV. INVENTARIO DE SEMOVIENTES / GANADERÍA
-        // ────────────────────────────────────────────────────────
-        currentY = doc.lastAutoTable.finalY + 6;
-        if (currentY > 230) { doc.addPage(); currentY = 20; }
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(9.5);
-        doc.setTextColor(...verdeBarinas);
-        doc.text("IV. INVENTARIO DE SEMOVIENTES / GANADERÍA", 12, currentY);
-        doc.line(12, currentY + 2, 204, currentY + 2);
-
-        const existenciaAnimal = predio.existencia_animal || {};
-        let bodySemovientes = [];
-
-        if (Object.keys(existenciaAnimal).length > 0) {
-            Object.entries(existenciaAnimal).forEach(([especie, detalleEspecie]) => {
-                if (!detalleEspecie || typeof detalleEspecie !== "object" || Object.keys(detalleEspecie).length === 0) return;
-
-                bodySemovientes.push([{ content: `ESPECIE: ${especie.replace(/_/g, " ").toUpperCase()}`, colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
-
-                Object.entries(detalleEspecie).forEach(([subKey, subValue]) => {
-                    if (subKey === "id") return;
-                    bodySemovientes.push([
-                        subKey.replace(/_/g, " ").toUpperCase(),
-                        subValue !== null && subValue !== undefined ? subValue : 0
-                    ]);
-                });
-            });
-        }
-
-        if (bodySemovientes.length === 0) {
-            bodySemovientes = [["Sin inventario animal registrado en este predio.", ""]];
-        }
-
-        autoTable(doc, {
-            startY: currentY + 4,
-            head: [["Categoría / Subtipo", "Cantidad / Unidades"]],
-            body: bodySemovientes,
-            theme: "grid",
-            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
-            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
-            columnStyles: { 0: { width: 140 }, 1: { width: 52 } },
-            margin: { left: 12, right: 12 }
-        });
-
-        // ────────────────────────────────────────────────────────
-        // V. MAQUINARIA, IMPLEMENTOS Y EQUIPOS
-        // ────────────────────────────────────────────────────────
-        currentY = doc.lastAutoTable.finalY + 6;
-        if (currentY > 230) { doc.addPage(); currentY = 20; }
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(9.5);
-        doc.setTextColor(...verdeBarinas);
-        doc.text("V. MAQUINARIA, IMPLEMENTOS Y EQUIPOS", 12, currentY);
-        doc.line(12, currentY + 2, 204, currentY + 2);
-
-        const maquinaria = predio.maquinaria || {};
-        let bodyMaquinaria = [];
-
-        if (Object.keys(maquinaria).length > 0) {
-            Object.entries(maquinaria).forEach(([tipoMaq, detalleMaq]) => {
-                if (!detalleMaq || typeof detalleMaq !== "object" || Object.keys(detalleMaq).length === 0) return;
-
-                bodyMaquinaria.push([{ content: `TIPO: ${tipoMaq.replace(/_/g, " ").toUpperCase()}`, colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
-
-                Object.entries(detalleMaq).forEach(([itemKey, itemVal]) => {
-                    if (itemKey === "id") return;
-                    bodyMaquinaria.push([
-                        itemKey.replace(/_/g, " ").toUpperCase(),
-                        itemVal !== null && itemVal !== undefined ? itemVal : 0
-                    ]);
-                });
-            });
-        }
-
-        if (bodyMaquinaria.length === 0) {
-            bodyMaquinaria = [["Sin maquinaria o equipos registrados.", ""]];
-        }
-
-        autoTable(doc, {
-            startY: currentY + 4,
-            head: [["Elemento / Equipo", "Cantidad"]],
-            body: bodyMaquinaria,
-            theme: "grid",
-            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
-            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
-            columnStyles: { 0: { width: 140 }, 1: { width: 52 } },
-            margin: { left: 12, right: 12 }
-        });
-
-        // ────────────────────────────────────────────────────────
-        // PIE DE PÁGINA
-        // ────────────────────────────────────────────────────────
-        const totalPaginas = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPaginas; i++) {
-            doc.setPage(i);
-            doc.setFontSize(7);
-            doc.setTextColor(140, 140, 140);
-            doc.setDrawColor(220, 220, 220);
-            doc.setLineWidth(0.3);
-            doc.line(12, 268, 204, 268);
-            doc.text("Ficha Técnica Integral de Caracterización — UTMPPAPT.", 12, 272);
-            doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
-        }
-
         const fileSanitizado = `Ficha_Tecnica_Integral_${(predio.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`;
         doc.save(fileSanitizado);
-
         return doc;
     };
 
-    // ── FUNCIÓN DE GUARDADO / ACTUALIZACIÓN ──────────────────
     const guardarInventario = async () => {
         if (!predioActivo?.id_predio) {
-            Swal.fire({
-                icon: "warning",
-                title: "Predio no seleccionado",
-                text: "Debe seleccionar un predio",
-                confirmButtonColor: '#136442',
-                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
-            });
+            Swal.fire({ icon: "warning", title: "Predio no seleccionado", text: "Debe seleccionar un predio", confirmButtonColor: '#136442' });
+            return;
+        }
+
+        const correoProductor = predioActivo?.productor?.correo;
+        if (!correoProductor) {
+            Swal.fire({ icon: "warning", title: "Correo no disponible", text: "El productor seleccionado no tiene un correo electrónico registrado.", confirmButtonColor: '#136442' });
             return;
         }
 
         let codigoServidor = "";
-
-        // Determinar el título dinámicamente según el modo (caracterización o actualización)
         const esCaracterizacion = modo === "caracterizacion";
         const tituloPregunta = esCaracterizacion ? "¿Guardar caracterización?" : "¿Guardar actualización productiva?";
 
-        // Confirmación inicial (aplica para ambos modos)
         const confirmacion = await Swal.fire({
             title: tituloPregunta,
-            text: "Se enviará un código de validación al productor.",
+            text: `Se enviará un código de validación al correo del productor (${correoProductor}).`,
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Sí, continuar",
             cancelButtonText: "Cancelar",
             confirmButtonColor: "#136442",
-            didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
         });
 
         if (!confirmacion.isConfirmed) return;
 
         try {
-            const telefono = predioActivo?.productor?.telefono;
-            const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo/", { telefono });
+            const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo-correo/", { correo: correoProductor });
             codigoServidor = envio.data.codigo.toString();
             setCodigoGenerado(codigoServidor);
 
             await Swal.fire({
                 icon: "success",
                 title: "Código enviado",
-                text: "El código fue enviado al WhatsApp del productor",
+                text: `El código de verificación fue enviado al correo: ${correoProductor}`,
                 confirmButtonColor: "#136442",
-                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
             });
         } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Error de comunicación",
-                text: "No se pudo enviar el código de validación.",
-                confirmButtonColor: "#d32f2f",
-                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
-            });
+            Swal.fire({ icon: "error", title: "Error de envío", text: "No se pudo enviar el código de validación al correo.", confirmButtonColor: "#d32f2f" });
             return;
         }
 
-        // Ventana para ingresar el código recibido
         const { value: codigoUsuario } = await Swal.fire({
             title: "Validación del Productor",
             input: "text",
-            inputLabel: "Ingrese el código enviado al WhatsApp del productor",
+            inputLabel: "Ingrese el código enviado al correo del productor",
             inputPlaceholder: "Ingrese el código",
             confirmButtonText: "Validar",
             confirmButtonColor: "#136442",
             showCancelButton: true,
-            didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
         });
 
         if (!codigoUsuario) return;
 
         if (codigoUsuario !== codigoServidor) {
-            Swal.fire({
-                icon: "error",
-                title: "Código incorrecto",
-                text: "No se pudo validar al productor",
-                confirmButtonColor: "#d32f2f",
-                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
-            });
+            Swal.fire({ icon: "error", title: "Código incorrecto", text: "El código ingresado no coincide.", confirmButtonColor: "#d32f2f" });
             return;
         }
 
-        // Si el código es correcto, continúa con el proceso de guardado/actualización
         Swal.fire({
             title: 'Procesando...',
-            text: 'Guardando cambios en el servidor, por favor espere.',
+            text: 'Guardando cambios y enviando ficha técnica al correo, por favor espere.',
             allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-                const popup = Swal.getPopup();
-                if (popup) popup.style.setProperty('font-family', "'Poppins', sans-serif", 'important');
-            }
+            didOpen: () => Swal.showLoading()
         });
 
         try {
@@ -803,14 +397,10 @@ export default function FormCaracterizacion({
             if (adminDataStr) {
                 try {
                     const adminData = JSON.parse(adminDataStr);
-                    const nombreAdmin = adminData.nombre || adminData.username || adminData.usuario || "Administrador";
-                    usuarioAccion = `Administrador (${nombreAdmin})`;
+                    usuarioAccion = `Administrador (${adminData.nombre || adminData.username || "Administrador"})`;
                 } catch (e) {
                     usuarioAccion = "Administrador";
                 }
-            } else {
-                const empleadoMunicipio = sessionStorage.getItem("municipio_empleado") || window.municipioActualParaBitacora || "Barinas";
-                usuarioAccion = `Empleado (${empleadoMunicipio})`;
             }
 
             const data = {
@@ -847,61 +437,36 @@ export default function FormCaracterizacion({
                 },
             };
 
-            // 1. Guardar o actualizar la caracterización en el servidor
             await axios.patch(`http://127.0.0.1:8000/api/predios/${predioActivo.id_predio}/`, data);
 
-            // 2. Enviar la ficha técnica por correo electrónico al productor con el PDF adjunto
-            const correoProductor = predioActivo?.productor?.correo;
-            if (correoProductor) {
-                try {
-                    // Generamos el documento PDF en memoria
-                    const docPDF = generarObjetoPDF(predioActivo);
-                    const pdfBlob = docPDF.output("blob");
+            const predioActualizadoParaPDF = {
+                ...predioActivo,
+                rubros_vegetales: rubrosVegetales,
+                existencia_animal: data.existencia_animal,
+                maquinaria: data.maquinaria
+            };
 
-                    // Creamos un FormData para enviar el archivo binario al backend
-                    const formData = new FormData();
-                    formData.append("id_predio", predioActivo.id_predio);
-                    formData.append("correo", correoProductor);
-                    formData.append(
-                        "pdf_file",
-                        pdfBlob,
-                        `Ficha_Tecnica_Integral_${(predioActivo.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`
-                    );
+            const docPDF = generarObjetoPDF(predioActualizadoParaPDF);
+            const pdfBlob = docPDF.output("blob");
 
-                    await axios.post("http://127.0.0.1:8000/api/enviar-correo-ficha/", formData, {
-                        headers: {
-                            "Content-Type": "multipart/form-data"
-                        }
-                    });
-                } catch (emailError) {
-                    console.warn("El predio se guardó correctamente, pero hubo un inconveniente al enviar el correo con el PDF:", emailError);
-                }
-            }
+            const formData = new FormData();
+            formData.append("id_predio", predioActivo.id_predio);
+            formData.append("correo", correoProductor);
+            formData.append("pdf_file", pdfBlob, `Ficha_Tecnica_Integral_${(predioActivo.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`);
+
+            await axios.post("http://127.0.0.1:8000/api/enviar-correo-ficha/", formData);
 
             Swal.fire({
                 icon: "success",
                 title: modo === "caracterizacion" ? "Caracterización guardada" : "Actualización guardada",
-                text: modo === "caracterizacion"
-                    ? "La información fue validada por el productor y se ha enviado la ficha a su correo."
-                    : "Los datos productivos se actualizaron correctamente.",
+                text: "La información fue validada y se ha enviado la ficha técnica en PDF al correo del productor.",
                 confirmButtonColor: "#136442",
-                confirmButtonText: "Aceptar",
-                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
             }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.reload();
-                }
+                if (result.isConfirmed) window.location.reload();
             });
 
         } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Error al guardar",
-                text: "Ocurrió un problema en el servidor al procesar la información.",
-                confirmButtonColor: "#d32f2f",
-                confirmButtonText: "Entendido",
-                didOpen: (popup) => popup?.style.setProperty("font-family", "'Poppins', sans-serif", "important"),
-            });
+            Swal.fire({ icon: "error", title: "Error al procesar", text: "Ocurrió un problema en el servidor.", confirmButtonColor: "#d32f2f" });
         }
     };
 
@@ -991,16 +556,30 @@ export default function FormCaracterizacion({
                             <FormSection title="Bovinos">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.bovinos).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.bovinos[item]}
-                                            onChange={(nuevoValor) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.bovinos[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                // Bloquea el signo menos (-), la letra e, el signo más (+) y el punto decimal (.)
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+
+                                                // Establece el límite máximo de caracteres (ej. máximo 6 dígitos, ej. 999,999)
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     bovinos: {
                                                         ...prev.bovinos,
-                                                        [item]: nuevoValor,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -1017,7 +596,7 @@ export default function FormCaracterizacion({
                                 >
                                     Total Bovinos:{" "}
                                     {Object.values(inventarioInicial.bovinos).reduce(
-                                        (a, b) => a + b,
+                                        (a, b) => (Number(a) || 0) + (Number(b) || 0),
                                         0,
                                     )}
                                 </p>
@@ -1087,15 +666,26 @@ export default function FormCaracterizacion({
                                             inventarioInicial.capacidadBovina.sistemas.includes(
                                                 "Doble propósito",
                                             )) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Producción de leche diaria (L)"
-                                                    value={inventarioInicial.capacidadBovina.leche_diaria}
-                                                    onChange={(nuevoValor) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadBovina.leche_diaria ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadBovina: {
                                                                 ...prev.capacidadBovina,
-                                                                leche_diaria: nuevoValor,
+                                                                leche_diaria: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1109,15 +699,26 @@ export default function FormCaracterizacion({
                                             inventarioInicial.capacidadBovina.sistemas.includes(
                                                 "Doble propósito",
                                             )) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Producción carne anual (Kg)"
-                                                    value={inventarioInicial.capacidadBovina.carne_anual}
-                                                    onChange={(nuevoValor) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadBovina.carne_anual ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadBovina: {
                                                                 ...prev.capacidadBovina,
-                                                                carne_anual: nuevoValor,
+                                                                carne_anual: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1128,15 +729,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadBovina.sistemas.includes(
                                             "Cría",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Cantidad de partos anuales"
-                                                    value={inventarioInicial.capacidadBovina.partos_anuales} // Asegúrate de tener esta clave en tu estado inicial
-                                                    onChange={(nuevoValor) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadBovina.partos_anuales ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadBovina: {
                                                                 ...prev.capacidadBovina,
-                                                                partos_anuales: nuevoValor,
+                                                                partos_anuales: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1147,15 +759,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadBovina.sistemas.includes(
                                             "Genética",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Cantidad de reproductores"
-                                                    value={inventarioInicial.capacidadBovina.reproductores} // Asegúrate de tener esta clave en tu estado inicial
-                                                    onChange={(nuevoValor) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadBovina.reproductores ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadBovina: {
                                                                 ...prev.capacidadBovina,
-                                                                reproductores: nuevoValor,
+                                                                reproductores: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1171,16 +794,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Bubalinos">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.bubalinos).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.bubalinos[item]}
-                                            onChange={(nuevoValor) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.bubalinos[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     bubalinos: {
                                                         ...prev.bubalinos,
-                                                        [item]: nuevoValor,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -1197,7 +831,7 @@ export default function FormCaracterizacion({
                                 >
                                     Total Bubalinos:{" "}
                                     {Object.values(inventarioInicial.bubalinos).reduce(
-                                        (a, b) => a + b,
+                                        (a, b) => (Number(a) || 0) + (Number(b) || 0),
                                         0,
                                     )}
                                 </p>
@@ -1266,15 +900,26 @@ export default function FormCaracterizacion({
                                             inventarioInicial.capacidadBubalina.sistemas.includes(
                                                 "Doble propósito",
                                             )) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Producción de leche diaria (L)"
-                                                    value={inventarioInicial.capacidadBubalina.leche_diaria}
-                                                    onChange={(nuevoValor) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadBubalina.leche_diaria ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadBubalina: {
                                                                 ...prev.capacidadBubalina,
-                                                                leche_diaria: nuevoValor,
+                                                                leche_diaria: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1288,15 +933,26 @@ export default function FormCaracterizacion({
                                             inventarioInicial.capacidadBubalina.sistemas.includes(
                                                 "Doble propósito",
                                             )) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Producción carne anual (Kg)"
-                                                    value={inventarioInicial.capacidadBubalina.carne_anual}
-                                                    onChange={(nuevoValor) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadBubalina.carne_anual ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadBubalina: {
                                                                 ...prev.capacidadBubalina,
-                                                                carne_anual: nuevoValor,
+                                                                carne_anual: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1307,17 +963,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadBubalina.sistemas.includes(
                                             "Cría",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Cantidad de partos anuales"
-                                                    value={
-                                                        inventarioInicial.capacidadBubalina.partos_anuales
-                                                    }
-                                                    onChange={(nuevoValor) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadBubalina.partos_anuales ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadBubalina: {
                                                                 ...prev.capacidadBubalina,
-                                                                partos_anuales: nuevoValor,
+                                                                partos_anuales: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1328,17 +993,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadBubalina.sistemas.includes(
                                             "Genética",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Cantidad de reproductores"
-                                                    value={
-                                                        inventarioInicial.capacidadBubalina.reproductores
-                                                    }
-                                                    onChange={(nuevoValor) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadBubalina.reproductores ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadBubalina: {
                                                                 ...prev.capacidadBubalina,
-                                                                reproductores: nuevoValor,
+                                                                reproductores: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1354,16 +1028,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Equinos">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.equinos).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.equinos[item]}
-                                            onChange={(valorLimpio) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.equinos[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     equinos: {
                                                         ...prev.equinos,
-                                                        [item]: valorLimpio,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -1380,7 +1065,7 @@ export default function FormCaracterizacion({
                                 >
                                     Total Equinos:{" "}
                                     {Object.values(inventarioInicial.equinos).reduce(
-                                        (a, b) => a + b,
+                                        (a, b) => (Number(a) || 0) + (Number(b) || 0),
                                         0,
                                     )}
                                 </p>
@@ -1419,12 +1104,11 @@ export default function FormCaracterizacion({
                                                 checked={inventarioInicial.capacidadEquina.sistemas.includes(
                                                     item.nombre,
                                                 )}
-                                                onChange={(nuevoChecked) => {
+                                                onChange={() => {
                                                     setInventarioInicial((prev) => {
-                                                        const nuevosSistemas = !nuevoChecked
-                                                            ? prev.capacidadEquina.sistemas.filter(
-                                                                (s) => s !== item.nombre,
-                                                            )
+                                                        const existe = prev.capacidadEquina.sistemas.includes(item.nombre);
+                                                        const nuevosSistemas = existe
+                                                            ? prev.capacidadEquina.sistemas.filter((s) => s !== item.nombre)
                                                             : [...prev.capacidadEquina.sistemas, item.nombre];
 
                                                         return {
@@ -1432,8 +1116,8 @@ export default function FormCaracterizacion({
                                                             capacidadEquina: {
                                                                 ...prev.capacidadEquina,
                                                                 sistemas: nuevosSistemas,
-                                                                // Si pasa a falso (se desmarca), resetea automáticamente su cantidad a 0
-                                                                ...(!nuevoChecked ? { [item.llave]: 0 } : {}),
+                                                                // Si se desmarca, resetea automáticamente su cantidad a "" o 0
+                                                                ...(existe ? { [item.llave]: "" } : {}),
                                                             },
                                                         };
                                                     });
@@ -1484,20 +1168,30 @@ export default function FormCaracterizacion({
                                             },
                                         ].map(
                                             ({ sistema, llave, label }) =>
-                                                // Solo renderiza el input numérico si el sistema está seleccionado
                                                 inventarioInicial.capacidadEquina.sistemas.includes(
                                                     sistema,
                                                 ) && (
-                                                    <NumericInputField
+                                                    <InputField
                                                         key={llave}
                                                         label={label}
-                                                        value={inventarioInicial.capacidadEquina[llave]}
-                                                        onChange={(valorLimpio) => {
+                                                        type="number"
+                                                        min="0"
+                                                        value={inventarioInicial.capacidadEquina[llave] ?? ""}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            const LIMITE_DIGITOS = 6;
+                                                            if (val.length > LIMITE_DIGITOS) return;
+
                                                             setInventarioInicial((prev) => ({
                                                                 ...prev,
                                                                 capacidadEquina: {
                                                                     ...prev.capacidadEquina,
-                                                                    [llave]: valorLimpio,
+                                                                    [llave]: val === "" ? "" : Number(val),
                                                                 },
                                                             }));
                                                         }}
@@ -1514,16 +1208,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Ovinos">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.ovinos).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.ovinos[item]}
-                                            onChange={(valorLimpio) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.ovinos[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     ovinos: {
                                                         ...prev.ovinos,
-                                                        [item]: valorLimpio,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -1540,7 +1245,7 @@ export default function FormCaracterizacion({
                                 >
                                     Total Ovinos:{" "}
                                     {Object.values(inventarioInicial.ovinos).reduce(
-                                        (a, b) => a + b,
+                                        (a, b) => (Number(a) || 0) + (Number(b) || 0),
                                         0,
                                     )}
                                 </p>
@@ -1579,12 +1284,11 @@ export default function FormCaracterizacion({
                                                 checked={inventarioInicial.capacidadOvina.sistemas.includes(
                                                     item.nombre,
                                                 )}
-                                                onChange={(nuevoChecked) => {
+                                                onChange={() => {
                                                     setInventarioInicial((prev) => {
-                                                        const nuevosSistemas = !nuevoChecked
-                                                            ? prev.capacidadOvina.sistemas.filter(
-                                                                (s) => s !== item.nombre,
-                                                            )
+                                                        const existe = prev.capacidadOvina.sistemas.includes(item.nombre);
+                                                        const nuevosSistemas = existe
+                                                            ? prev.capacidadOvina.sistemas.filter((s) => s !== item.nombre)
                                                             : [...prev.capacidadOvina.sistemas, item.nombre];
 
                                                         return {
@@ -1592,8 +1296,8 @@ export default function FormCaracterizacion({
                                                             capacidadOvina: {
                                                                 ...prev.capacidadOvina,
                                                                 sistemas: nuevosSistemas,
-                                                                // Limpia el valor numérico a 0 de forma reactiva al desmarcar la opción
-                                                                ...(!nuevoChecked ? { [item.llave]: 0 } : {}),
+                                                                // Si se desmarca, resetea automáticamente su valor a ""
+                                                                ...(existe ? { [item.llave]: "" } : {}),
                                                             },
                                                         };
                                                     });
@@ -1610,15 +1314,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Carne",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Producción carne anual (Kg)"
-                                                    value={inventarioInicial.capacidadOvina.carne_anual}
-                                                    onChange={(valorLimpio) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadOvina.carne_anual ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadOvina: {
                                                                 ...prev.capacidadOvina,
-                                                                carne_anual: valorLimpio,
+                                                                carne_anual: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1629,15 +1344,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Leche",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Producción leche diaria (L)"
-                                                    value={inventarioInicial.capacidadOvina.leche_diaria}
-                                                    onChange={(valorLimpio) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadOvina.leche_diaria ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadOvina: {
                                                                 ...prev.capacidadOvina,
-                                                                leche_diaria: valorLimpio,
+                                                                leche_diaria: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1648,15 +1374,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Lana",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Producción lana anual (Kg)"
-                                                    value={inventarioInicial.capacidadOvina.lana_anual}
-                                                    onChange={(valorLimpio) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadOvina.lana_anual ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadOvina: {
                                                                 ...prev.capacidadOvina,
-                                                                lana_anual: valorLimpio,
+                                                                lana_anual: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1667,15 +1404,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Cría",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Animales destinados a cría"
-                                                    value={inventarioInicial.capacidadOvina.cria}
-                                                    onChange={(valorLimpio) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadOvina.cria ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadOvina: {
                                                                 ...prev.capacidadOvina,
-                                                                cria: valorLimpio,
+                                                                cria: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1686,15 +1434,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Reproducción",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Reproductores activos"
-                                                    value={inventarioInicial.capacidadOvina.reproduccion}
-                                                    onChange={(valorLimpio) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadOvina.reproduccion ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadOvina: {
                                                                 ...prev.capacidadOvina,
-                                                                reproduccion: valorLimpio,
+                                                                reproduccion: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1705,15 +1464,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Doble propósito",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Animales doble propósito"
-                                                    value={inventarioInicial.capacidadOvina.doble_proposito}
-                                                    onChange={(valorLimpio) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadOvina.doble_proposito ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadOvina: {
                                                                 ...prev.capacidadOvina,
-                                                                doble_proposito: valorLimpio,
+                                                                doble_proposito: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1724,15 +1494,26 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Genética",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Animales de genética"
-                                                    value={inventarioInicial.capacidadOvina.genetica}
-                                                    onChange={(valorLimpio) => {
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadOvina.genetica ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadOvina: {
                                                                 ...prev.capacidadOvina,
-                                                                genetica: valorLimpio,
+                                                                genetica: val === "" ? "" : Number(val),
                                                             },
                                                         }));
                                                     }}
@@ -1748,16 +1529,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Porcinos">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.porcinos).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.porcinos[item]}
-                                            onChange={(val) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.porcinos[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     porcinos: {
                                                         ...prev.porcinos,
-                                                        [item]: val,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -1774,7 +1566,7 @@ export default function FormCaracterizacion({
                                 >
                                     Total Porcinos:{" "}
                                     {Object.values(inventarioInicial.porcinos).reduce(
-                                        (a, b) => a + b,
+                                        (a, b) => (Number(a) || 0) + (Number(b) || 0),
                                         0,
                                     )}
                                 </p>
@@ -1833,15 +1625,26 @@ export default function FormCaracterizacion({
                                     <div style={grid3}>
                                         {/* CRÍA */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Cría") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Cantidad destinada a cría"
-                                                value={inventarioInicial.capacidadPorcina.cria}
-                                                onChange={(val) => {
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadPorcina.cria ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadPorcina: {
                                                             ...prev.capacidadPorcina,
-                                                            cria: val,
+                                                            cria: val === "" ? "" : Number(val),
                                                         },
                                                     }));
                                                 }}
@@ -1850,15 +1653,26 @@ export default function FormCaracterizacion({
 
                                         {/* ENGORDE */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Engorde") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Capacidad de engorde"
-                                                value={inventarioInicial.capacidadPorcina.engorde}
-                                                onChange={(val) => {
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadPorcina.engorde ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadPorcina: {
                                                             ...prev.capacidadPorcina,
-                                                            engorde: val,
+                                                            engorde: val === "" ? "" : Number(val),
                                                         },
                                                     }));
                                                 }}
@@ -1867,15 +1681,26 @@ export default function FormCaracterizacion({
 
                                         {/* REPRODUCCIÓN */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Reproducción") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Reproductores activos"
-                                                value={inventarioInicial.capacidadPorcina.reproduccion}
-                                                onChange={(val) => {
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadPorcina.reproduccion ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadPorcina: {
                                                             ...prev.capacidadPorcina,
-                                                            reproduccion: val,
+                                                            reproduccion: val === "" ? "" : Number(val),
                                                         },
                                                     }));
                                                 }}
@@ -1884,15 +1709,26 @@ export default function FormCaracterizacion({
 
                                         {/* CICLO COMPLETO */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Ciclo completo") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Capacidad ciclo completo"
-                                                value={inventarioInicial.capacidadPorcina.ciclo_completo}
-                                                onChange={(val) => {
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadPorcina.ciclo_completo ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadPorcina: {
                                                             ...prev.capacidadPorcina,
-                                                            ciclo_completo: val,
+                                                            ciclo_completo: val === "" ? "" : Number(val),
                                                         },
                                                     }));
                                                 }}
@@ -1901,15 +1737,26 @@ export default function FormCaracterizacion({
 
                                         {/* GENÉTICA */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Genética") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Animales de genética"
-                                                value={inventarioInicial.capacidadPorcina.genetica}
-                                                onChange={(val) => {
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadPorcina.genetica ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadPorcina: {
                                                             ...prev.capacidadPorcina,
-                                                            genetica: val,
+                                                            genetica: val === "" ? "" : Number(val),
                                                         },
                                                     }));
                                                 }}
@@ -1918,15 +1765,26 @@ export default function FormCaracterizacion({
 
                                         {/* PRODUCCIÓN CARNE */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Producción de carne") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Producción carne anual (Kg)"
-                                                value={inventarioInicial.capacidadPorcina.carne_anual}
-                                                onChange={(val) => {
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadPorcina.carne_anual ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadPorcina: {
                                                             ...prev.capacidadPorcina,
-                                                            carne_anual: val,
+                                                            carne_anual: val === "" ? "" : Number(val),
                                                         },
                                                     }));
                                                 }}
@@ -1942,16 +1800,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Caprinos">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.caprinos).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.caprinos[item]}
-                                            onChange={(val) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.caprinos[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     caprinos: {
                                                         ...prev.caprinos,
-                                                        [item]: val,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -1968,7 +1837,7 @@ export default function FormCaracterizacion({
                                 >
                                     Total Caprinos:{" "}
                                     {Object.values(inventarioInicial.caprinos).reduce(
-                                        (a, b) => a + b,
+                                        (a, b) => (Number(a) || 0) + (Number(b) || 0),
                                         0,
                                     )}
                                 </p>
@@ -2033,78 +1902,119 @@ export default function FormCaracterizacion({
                                         {inventarioInicial.capacidadCaprino.sistemas.includes(
                                             "Cría y Recría",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Vientres en producción"
-                                                    value={
-                                                        inventarioInicial.capacidadCaprino.vientres || ""
-                                                    }
-                                                    onChange={(val) =>
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadCaprino.vientres ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadCaprino: {
                                                                 ...prev.capacidadCaprino,
-                                                                vientres: val,
+                                                                vientres: val === "" ? "" : Number(val),
                                                             },
-                                                        }))
-                                                    }
+                                                        }));
+                                                    }}
                                                 />
                                             )}
+
                                         {inventarioInicial.capacidadCaprino.sistemas.includes(
                                             "Engorde",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Capacidad de engorde (Cabezas)"
-                                                    value={inventarioInicial.capacidadCaprino.engorde || ""}
-                                                    onChange={(val) =>
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadCaprino.engorde ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadCaprino: {
                                                                 ...prev.capacidadCaprino,
-                                                                engorde: val,
+                                                                engorde: val === "" ? "" : Number(val),
                                                             },
-                                                        }))
-                                                    }
+                                                        }));
+                                                    }}
                                                 />
                                             )}
+
                                         {inventarioInicial.capacidadCaprino.sistemas.includes(
                                             "Producción de Leche",
                                         ) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Producción diaria promedio (Lts)"
-                                                    value={
-                                                        inventarioInicial.capacidadCaprino.leche_diaria || ""
-                                                    }
-                                                    onChange={(val) =>
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadCaprino.leche_diaria ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadCaprino: {
                                                                 ...prev.capacidadCaprino,
-                                                                leche_diaria: val,
+                                                                leche_diaria: val === "" ? "" : Number(val),
                                                             },
-                                                        }))
-                                                    }
+                                                        }));
+                                                    }}
                                                 />
                                             )}
+
                                         {(inventarioInicial.capacidadCaprino.sistemas.includes(
                                             "Producción de Carne",
                                         ) ||
                                             inventarioInicial.capacidadCaprino.sistemas.includes(
                                                 "Doble Propósito",
                                             )) && (
-                                                <NumericInputField
+                                                <InputField
                                                     label="Producción carne estimado anual (Kg)"
-                                                    value={
-                                                        inventarioInicial.capacidadCaprino.carne_anual || ""
-                                                    }
-                                                    onChange={(val) =>
+                                                    type="number"
+                                                    min="0"
+                                                    value={inventarioInicial.capacidadCaprino.carne_anual ?? ""}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                            e.preventDefault();
+                                                        }
+                                                    }}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const LIMITE_DIGITOS = 6;
+                                                        if (val.length > LIMITE_DIGITOS) return;
+
                                                         setInventarioInicial((prev) => ({
                                                             ...prev,
                                                             capacidadCaprino: {
                                                                 ...prev.capacidadCaprino,
-                                                                carne_anual: val,
+                                                                carne_anual: val === "" ? "" : Number(val),
                                                             },
-                                                        }))
-                                                    }
+                                                        }));
+                                                    }}
                                                 />
                                             )}
                                     </div>
@@ -2117,16 +2027,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Cunícola">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.cunicola).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.cunicola[item]}
-                                            onChange={(val) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.cunicola[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     cunicola: {
                                                         ...prev.cunicola,
-                                                        [item]: val,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -2143,8 +2064,8 @@ export default function FormCaracterizacion({
                                 >
                                     Total Cunícola:{" "}
                                     {Object.values(inventarioInicial.cunicola).reduce(
-                                        (a, b) => a + b,
-                                        0
+                                        (a, b) => (Number(a) || 0) + (Number(b) || 0),
+                                        0,
                                     )}
                                 </p>
                             </FormSection>
@@ -2197,49 +2118,82 @@ export default function FormCaracterizacion({
                                 {/* CAMPOS DINÁMICOS */}
                                 <div style={{ marginTop: "25px" }}>
                                     <div style={grid3}>
-                                        <NumericInputField
+                                        <InputField
                                             label="Número total de jaulas madre"
-                                            value={inventarioInicial.capacidadCunicola.jaulas_madre}
-                                            onChange={(val) =>
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.capacidadCunicola.jaulas_madre ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     capacidadCunicola: {
                                                         ...prev.capacidadCunicola,
-                                                        jaulas_madre: val,
+                                                        jaulas_madre: val === "" ? "" : Number(val),
                                                     },
-                                                }))
-                                            }
+                                                }));
+                                            }}
                                         />
 
                                         {inventarioInicial.capacidadCunicola.sistemas.includes("Producción de Carne") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Canales / Carne estimada anual (Kg)"
-                                                value={inventarioInicial.capacidadCunicola.carne_anual}
-                                                onChange={(val) =>
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadCunicola.carne_anual ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadCunicola: {
                                                             ...prev.capacidadCunicola,
-                                                            carne_anual: val,
+                                                            carne_anual: val === "" ? "" : Number(val),
                                                         },
-                                                    }))
-                                                }
+                                                    }));
+                                                }}
                                             />
                                         )}
 
                                         {inventarioInicial.capacidadCunicola.sistemas.includes("Pie de Cría (Genética)") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Conejas reproductoras activas"
-                                                value={inventarioInicial.capacidadCunicola.reproductoras}
-                                                onChange={(val) =>
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadCunicola.reproductoras ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadCunicola: {
                                                             ...prev.capacidadCunicola,
-                                                            reproductoras: val,
+                                                            reproductoras: val === "" ? "" : Number(val),
                                                         },
-                                                    }))
-                                                }
+                                                    }));
+                                                }}
                                             />
                                         )}
                                     </div>
@@ -2252,16 +2206,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Avícola">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.avicola).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.avicola[item]}
-                                            onChange={(val) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.avicola[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     avicola: {
                                                         ...prev.avicola,
-                                                        [item]: val,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -2278,8 +2243,8 @@ export default function FormCaracterizacion({
                                 >
                                     Total Avícola:{" "}
                                     {Object.values(inventarioInicial.avicola).reduce(
-                                        (a, b) => a + b,
-                                        0
+                                        (a, b) => (Number(a) || 0) + (Number(b) || 0),
+                                        0,
                                     )}
                                 </p>
                             </FormSection>
@@ -2337,48 +2302,81 @@ export default function FormCaracterizacion({
                                             "Producción de Huevo (Postura)"
                                         ) && (
                                                 <>
-                                                    <NumericInputField
+                                                    <InputField
                                                         label="Capacidad de alojamiento (Avícola)"
-                                                        value={inventarioInicial.capacidadAvicola.capacidad_alojamiento}
-                                                        onChange={(val) =>
+                                                        type="number"
+                                                        min="0"
+                                                        value={inventarioInicial.capacidadAvicola.capacidad_alojamiento ?? ""}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            const LIMITE_DIGITOS = 6;
+                                                            if (val.length > LIMITE_DIGITOS) return;
+
                                                             setInventarioInicial((prev) => ({
                                                                 ...prev,
                                                                 capacidadAvicola: {
                                                                     ...prev.capacidadAvicola,
-                                                                    capacidad_alojamiento: val,
+                                                                    capacidad_alojamiento: val === "" ? "" : Number(val),
                                                                 },
-                                                            }))
-                                                        }
+                                                            }));
+                                                        }}
                                                     />
-                                                    <NumericInputField
+                                                    <InputField
                                                         label="Producción diaria (Cartones/Huevos)"
-                                                        value={inventarioInicial.capacidadAvicola.produccion_huevos}
-                                                        onChange={(val) =>
+                                                        type="number"
+                                                        min="0"
+                                                        value={inventarioInicial.capacidadAvicola.produccion_huevos ?? ""}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            const LIMITE_DIGITOS = 6;
+                                                            if (val.length > LIMITE_DIGITOS) return;
+
                                                             setInventarioInicial((prev) => ({
                                                                 ...prev,
                                                                 capacidadAvicola: {
                                                                     ...prev.capacidadAvicola,
-                                                                    produccion_huevos: val,
+                                                                    produccion_huevos: val === "" ? "" : Number(val),
                                                                 },
-                                                            }))
-                                                        }
+                                                            }));
+                                                        }}
                                                     />
                                                 </>
                                             )}
 
                                         {inventarioInicial.capacidadAvicola.sistemas.includes("Pollo de Engorde") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Capacidad por ciclo / lote"
-                                                value={inventarioInicial.capacidadAvicola.capacidad_lote}
-                                                onChange={(val) =>
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadAvicola.capacidad_lote ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadAvicola: {
                                                             ...prev.capacidadAvicola,
-                                                            capacidad_lote: val,
+                                                            capacidad_lote: val === "" ? "" : Number(val),
                                                         },
-                                                    }))
-                                                }
+                                                    }));
+                                                }}
                                             />
                                         )}
                                     </div>
@@ -2391,16 +2389,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Apícola">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.apicola).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.apicola[item]}
-                                            onChange={(val) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.apicola[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     apicola: {
                                                         ...prev.apicola,
-                                                        [item]: val,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -2417,8 +2426,8 @@ export default function FormCaracterizacion({
                                 >
                                     Total Colmenas:{" "}
                                     {Object.values(inventarioInicial.apicola).reduce(
-                                        (a, b) => a + b,
-                                        0
+                                        (a, b) => (Number(a) || 0) + (Number(b) || 0),
+                                        0,
                                     )}
                                 </p>
                             </FormSection>
@@ -2471,49 +2480,82 @@ export default function FormCaracterizacion({
                                 {/* CAMPOS DINÁMICOS */}
                                 <div style={{ marginTop: "25px" }}>
                                     <div style={grid3}>
-                                        <NumericInputField
+                                        <InputField
                                             label="Número de colmenas activas"
-                                            value={inventarioInicial.capacidadApicola.colmenas_activas}
-                                            onChange={(val) =>
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.capacidadApicola.colmenas_activas ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     capacidadApicola: {
                                                         ...prev.capacidadApicola,
-                                                        colmenas_activas: val,
+                                                        colmenas_activas: val === "" ? "" : Number(val),
                                                     },
-                                                }))
-                                            }
+                                                }));
+                                            }}
                                         />
 
                                         {inventarioInicial.capacidadApicola.sistemas.includes("Producción de Miel") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Producción estimada anual (Kg/Litros)"
-                                                value={inventarioInicial.capacidadApicola.miel_anual}
-                                                onChange={(val) =>
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadApicola.miel_anual ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadApicola: {
                                                             ...prev.capacidadApicola,
-                                                            miel_anual: val,
+                                                            miel_anual: val === "" ? "" : Number(val),
                                                         },
-                                                    }))
-                                                }
+                                                    }));
+                                                }}
                                             />
                                         )}
 
                                         {inventarioInicial.capacidadApicola.sistemas.includes("Crianza de Reinas y Núcleos") && (
-                                            <NumericInputField
+                                            <InputField
                                                 label="Núcleos producidos por año"
-                                                value={inventarioInicial.capacidadApicola.nucleos_anuales}
-                                                onChange={(val) =>
+                                                type="number"
+                                                min="0"
+                                                value={inventarioInicial.capacidadApicola.nucleos_anuales ?? ""}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                        e.preventDefault();
+                                                    }
+                                                }}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    const LIMITE_DIGITOS = 6;
+                                                    if (val.length > LIMITE_DIGITOS) return;
+
                                                     setInventarioInicial((prev) => ({
                                                         ...prev,
                                                         capacidadApicola: {
                                                             ...prev.capacidadApicola,
-                                                            nucleos_anuales: val,
+                                                            nucleos_anuales: val === "" ? "" : Number(val),
                                                         },
-                                                    }))
-                                                }
+                                                    }));
+                                                }}
                                             />
                                         )}
                                     </div>
@@ -2898,16 +2940,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Maquinaria Agrícola de Ruedas">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.maquinaria_ruedas).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.maquinaria_ruedas[item]}
-                                            onChange={(val) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.maquinaria_ruedas[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     maquinaria_ruedas: {
                                                         ...prev.maquinaria_ruedas,
-                                                        [item]: val,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -2922,16 +2975,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Implementos Agrícolas">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.implementos).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.implementos[item]}
-                                            onChange={(val) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.implementos[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     implementos: {
                                                         ...prev.implementos,
-                                                        [item]: val,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -2946,16 +3010,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Equipos de Riego">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.riego).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.riego[item]}
-                                            onChange={(val) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.riego[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     riego: {
                                                         ...prev.riego,
-                                                        [item]: val,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}
@@ -2970,16 +3045,27 @@ export default function FormCaracterizacion({
                             <FormSection title="Otros Equipos">
                                 <div style={grid3}>
                                     {Object.keys(inventarioInicial.otros_equipos).map((item) => (
-                                        <NumericInputField
+                                        <InputField
                                             key={item}
                                             label={item.replaceAll("_", " ").toUpperCase()}
-                                            value={inventarioInicial.otros_equipos[item]}
-                                            onChange={(val) => {
+                                            type="number"
+                                            min="0"
+                                            value={inventarioInicial.otros_equipos[item] ?? ""}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
+                                                    e.preventDefault();
+                                                }
+                                            }}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const LIMITE_DIGITOS = 6;
+                                                if (val.length > LIMITE_DIGITOS) return;
+
                                                 setInventarioInicial((prev) => ({
                                                     ...prev,
                                                     otros_equipos: {
                                                         ...prev.otros_equipos,
-                                                        [item]: val,
+                                                        [item]: val === "" ? "" : Number(val),
                                                     },
                                                 }));
                                             }}

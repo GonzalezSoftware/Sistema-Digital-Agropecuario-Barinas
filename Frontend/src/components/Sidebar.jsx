@@ -278,21 +278,6 @@ export const AdminSidebar = ({
                                 <span>Dashboard Producción</span>
                             </div>
 
-                            <div
-                                onClick={() => setVistaActiva("guia_movilizacion")}
-                                style={{
-                                    display: "flex", alignItems: "center", gap: "10px",
-                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                                    backgroundColor: vistaActiva === "guia_movilizacion" ? "rgba(255,255,255,0.15)" : "transparent",
-                                    color: vistaActiva === "guia_movilizacion" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "guia_movilizacion" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
-                                }}
-                            >
-                                <ClipboardDocumentListIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
-                                <span>Guias de Movilización</span>
-                            </div>
 
                             <div
                                 onClick={() => setVistaActiva("produccion_reportes")}

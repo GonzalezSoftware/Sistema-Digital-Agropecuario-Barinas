@@ -292,45 +292,44 @@ class LicenciaHierroViewSet(viewsets.ModelViewSet):
         )
 
 @api_view(['POST'])
-def enviar_codigo_whatsapp(request):
+def enviar_codigo_correo(request):
+    correo_destino = request.data.get("correo")
 
-    telefono = request.data.get("telefono")
+    if not correo_destino:
+        return Response({"error": "El correo de destino es obligatorio."}, status=400)
 
+    # Generar código aleatorio de 6 dígitos
     codigo = str(random.randint(100000, 999999))
 
-    mensaje = f"""
+    asunto = "Código de validación - MPPAT"
+    cuerpo = (
+        f"Estimado productor,\n\n"
+        f"Su código de confirmación para el registro/actualización en el sistema es:\n\n"
+        f"[{codigo}]\n\n"
+        f"Por favor, ingrese este código en la pantalla del sistema para validar la operación.\n"
+        f"No comparta este código con nadie.\n\n"
+        f"Atentamente,\n"
+        f"Ministerio del Poder Popular para la Agricultura Productiva y Tierras (MPPAPT)"
+    )
 
-Código de validación MPPAT
-
-Su código de confirmación es:
-
-{codigo}
-
-No comparta este código.
-"""
-
-    url = "https://api.ultramsg.com/instance178120/messages/chat"
-
-    payload = {
-
-        "token": "wukizlc37nijuqyj",
-
-        "to": telefono,
-
-        "body": mensaje
-    }
-
-    response = requests.post(url, data=payload)
-
-    return Response({
-
-        "success": True,
-
-        "codigo": codigo,
-
-        "respuesta_whatsapp": response.json()
-    })
-
+    try:
+        email = EmailMessage(
+            subject=asunto,
+            body=cuerpo,
+            from_email=None,  # Utiliza el DEFAULT_FROM_EMAIL configurado en settings.py
+            to=[correo_destino]
+        )
+        email.send(fail_silently=False)
+        
+        return Response({
+            "success": True,
+            "codigo": codigo,
+            "mensaje": "Código enviado exitosamente al correo."
+        }, status=200)
+    except Exception as e:
+        return Response({"error": f"No se pudo enviar el correo de verificación: {str(e)}"}, status=500)
+    
+    
 
 @api_view(['GET'])
 def dashboard_produccion_stats(request):
