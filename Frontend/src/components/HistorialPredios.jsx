@@ -1,6 +1,28 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 
+// 1. El componente Spinner corporativo
+export const Spinner = ({ color = "#136442" }) => {
+    const spinnerRef = (el) => {
+        if (el) {
+            el.animate(
+                [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+                { duration: 1000, iterations: Infinity }
+            );
+        }
+    };
+
+    return (
+        <svg
+            ref={spinnerRef}
+            width="30" height="30" viewBox="0 0 24 24" fill="none"
+            stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+        >
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+    );
+};
+
 export default function HistorialPredios({
     tabActiva,
     busqueda,
@@ -24,7 +46,8 @@ export default function HistorialPredios({
     cambiarDueñoPredio,
     InputField,
     errors,
-    esAdmin
+    esAdmin,
+    cargando // <--- 2. Asegúrate de recibir esta prop aquí
 }) {
     // ── ESTADO DE PAGINACIÓN ──
     const [paginaActual, setPaginaActual] = useState(1);
@@ -36,12 +59,31 @@ export default function HistorialPredios({
 
     if (tabActiva !== "historial") return null;
 
+    // 3. ── VALIDACIÓN DE CARGA (Aquí es donde se pinta el Spinner al entrar o refrescar) ──
+    if (cargando) {
+        return (
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "60px",
+                gap: "12px",
+                color: "#136442",
+                fontSize: "13px",
+                fontWeight: "500"
+            }}>
+                <Spinner color="#136442" />
+                <span>Cargando historial de predios...</span>
+            </div>
+        );
+    }
+    
     const indiceUltimoElemento = paginaActual * elementosPorPagina;
     const indicePrimerElemento = indiceUltimoElemento - elementosPorPagina;
     const prediosPaginados = prediosFiltrados.slice(indicePrimerElemento, indiceUltimoElemento);
     const totalPaginas = Math.ceil(prediosFiltrados.length / elementosPorPagina);
 
-    // Verificamos si el predio seleccionado está inhabilitado (por cambio de dueño)
     const estaInhabilitado = predioSeleccionado?.estado === 'inactivo' || predioSeleccionado?.inhabilitado === true;
 
     return (
@@ -506,8 +548,29 @@ export default function HistorialPredios({
 
                             {/* Botón de Editar / Guardar Cambios (bloqueado si está inhabilitado) */}
                             {!estaInhabilitado && (
-                                <button type="button" onClick={() => editando ? guardarCambiosReal() : setEditando(true)} style={{ ...estiloBoton, backgroundColor: "#136442" }}>
-                                    {cargandoAccion ? "PROCESANDO..." : editando ? "CONFIRMAR CAMBIOS" : "EDITAR FICHA"}
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        if (editando) {
+                                            // 1. Mostramos la animación de carga antes de ejecutar guardarCambiosReal
+                                            Swal.fire({
+                                                title: "Procesando...",
+                                                text: "Por favor, espere un momento.",
+                                                allowOutsideClick: false,
+                                                allowEscapeKey: false,
+                                                didOpen: () => {
+                                                    Swal.showLoading();
+                                                }
+                                            });
+                                            guardarCambiosReal();
+                                        } else {
+                                            setEditando(true);
+                                        }
+                                    }} 
+                                    disabled={cargandoAccion} 
+                                    style={{ ...estiloBoton, backgroundColor: "#136442" }}
+                                >
+                                    {editando ? "CONFIRMAR CAMBIOS" : "EDITAR FICHA"}
                                 </button>
                             )}
 

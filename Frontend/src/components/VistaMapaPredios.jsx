@@ -1,7 +1,50 @@
 import React from "react";
 import MapaBarinas from "../components/MapaBarinas";
 
-export default function VistaMapaPredios({ listaPredios, municipios }) {
+// 1. El componente Spinner corporativo integrado
+export const Spinner = ({ color = "#136442" }) => {
+    const spinnerRef = (el) => {
+        if (el) {
+            el.animate(
+                [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+                { duration: 1000, iterations: Infinity }
+            );
+        }
+    };
+
+    return (
+        <svg
+            ref={spinnerRef}
+            width="30" height="30" viewBox="0 0 24 24" fill="none"
+            stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+        >
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+    );
+};
+
+export default function VistaMapaPredios({ listaPredios, municipios, cargando }) {
+    
+    // 2. Validación de carga idéntica a las demás vistas
+    if (cargando) {
+        return (
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "80px",
+                gap: "12px",
+                color: "#136442",
+                fontSize: "13px",
+                fontWeight: "500"
+            }}>
+                <Spinner color="#136442" />
+                <span>Cargando mapa y distribución de predios...</span>
+            </div>
+        );
+    }
+
     return (
         <div style={{ maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
@@ -20,84 +63,6 @@ export default function VistaMapaPredios({ listaPredios, municipios }) {
                         <MapaBarinas predios={listaPredios} />
                     </div>
                 </div>
-
-                {/* SECCIÓN INFERIOR: RESUMEN POR MUNICIPIO EN CUADRÍCULA */}
-                <div style={{
-                    width: "100%",
-                    backgroundColor: "#fff",
-                    padding: "25px",
-                    borderRadius: "12px",
-                    boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
-                    border: "1px solid #eee"
-                }}>
-                    <h4 style={{
-                        color: "#136442",
-                        marginBottom: "20px",
-                        fontWeight: "700",
-                        borderBottom: "2px solid #ccc",
-                        paddingBottom: "10px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        fontSize: "14px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px"
-                    }}>
-                        Distribución por Municipios
-                    </h4>
-
-                    {/* Grid organizado para los contadores */}
-                    <div style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                        gap: "15px"
-                    }}>
-                        {municipios.map(muni => {
-                            const total = listaPredios.filter(p => p.municipio === muni).length;
-                            const tieneRegistros = total > 0;
-
-                            return (
-                                <div key={muni} style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    padding: "15px 10px",
-                                    borderRadius: "8px",
-                                    border: `1px solid ${tieneRegistros ? "#bbf7d0" : "#e5e7eb"}`,
-                                    backgroundColor: tieneRegistros ? "#f0fdf4" : "#f9fafb",
-                                    boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
-                                    transition: "all 0.2s ease",
-                                    cursor: "default"
-                                }}>
-                                    {/* Nombre del Municipio */}
-                                    <span style={{
-                                        fontSize: "10px",
-                                        fontWeight: "bold",
-                                        color: tieneRegistros ? "#136442" : "#6b7280",
-                                        marginBottom: "6px",
-                                        textAlign: "center",
-                                        textTransform: "uppercase",
-                                        letterSpacing: "0.5px"
-                                    }}>
-                                        {muni}
-                                    </span>
-
-                                    {/* Contador Numérico */}
-                                    <span style={{
-                                        fontSize: "20px",
-                                        fontWeight: "bold",
-                                        color: tieneRegistros ? "#136442" : "#1f2937",
-                                        lineHeight: "1"
-                                    }}>
-                                        {total}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
             </div>
         </div>
     );

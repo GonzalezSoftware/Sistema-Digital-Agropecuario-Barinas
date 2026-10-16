@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 export default function AdminProduccionSeleccionarPredio({
     busquedaCedula,
@@ -14,6 +14,19 @@ export default function AdminProduccionSeleccionarPredio({
     InputField,
     Spinner
 }) {
+    // ── ESTADO DE PAGINACIÓN ──
+    const [paginaActual, setPaginaActual] = useState(1);
+    const elementosPorPagina = 10;
+
+    useEffect(() => {
+        setPaginaActual(1);
+    }, [busquedaCedula]);
+
+    const indiceUltimoElemento = paginaActual * elementosPorPagina;
+    const indicePrimerElemento = indiceUltimoElemento - elementosPorPagina;
+    const prediosPaginados = filtrarPredios.slice(indicePrimerElemento, indiceUltimoElemento);
+    const totalPaginas = Math.ceil(filtrarPredios.length / elementosPorPagina);
+
     // Estilos internos reutilizados para el modal
     const estiloContenedorSeccion = {
         background: "#f9fafb",
@@ -98,10 +111,10 @@ export default function AdminProduccionSeleccionarPredio({
                             Buscando información...
                         </p>
                     </div>
-                ) : filtrarPredios.length === 0 ? (
+                ) : prediosPaginados.length === 0 ? (
                     <p style={{ color: "#64748b", textAlign: "center", padding: "20px 0" }}>No se encontraron predios</p>
                 ) : (
-                    filtrarPredios.map((p) => (
+                    prediosPaginados.map((p) => (
                         <div
                             key={p.id_predio}
                             style={{
@@ -175,6 +188,52 @@ export default function AdminProduccionSeleccionarPredio({
                             </div>
                         </div>
                     ))
+                )}
+
+                {/* ── CONTROLES DE PAGINACIÓN ── */}
+                {!cargando && totalPaginas > 1 && (
+                    <div style={{
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #eee", flexWrap: "wrap", gap: "10px"
+                    }}>
+                        <span style={{ fontSize: "13px", color: "#666" }}>
+                            Mostrando del <strong>{indicePrimerElemento + 1}</strong> al <strong>{Math.min(indiceUltimoElemento, filtrarPredios.length)}</strong> de <strong>{filtrarPredios.length}</strong> predios
+                        </span>
+
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                            <button
+                                onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
+                                disabled={paginaActual === 1}
+                                style={{
+                                    padding: "6px 12px", borderRadius: "6px", border: "1px solid #ccc",
+                                    backgroundColor: paginaActual === 1 ? "#f5f5f5" : "#fff",
+                                    color: paginaActual === 1 ? "#aaa" : "#136442",
+                                    cursor: paginaActual === 1 ? "not-allowed" : "pointer",
+                                    fontWeight: "bold", fontSize: "12px"
+                                }}
+                            >
+                                Anterior
+                            </button>
+
+                            <span style={{ fontSize: "13px", padding: "0 8px", fontWeight: "bold", color: "#333" }}>
+                                Página {paginaActual} de {totalPaginas}
+                            </span>
+
+                            <button
+                                onClick={() => setPaginaActual(prev => Math.min(prev + 1, totalPaginas))}
+                                disabled={paginaActual === totalPaginas}
+                                style={{
+                                    padding: "6px 12px", borderRadius: "6px", border: "1px solid #ccc",
+                                    backgroundColor: paginaActual === totalPaginas ? "#f5f5f5" : "#fff",
+                                    color: paginaActual === totalPaginas ? "#aaa" : "#136442",
+                                    cursor: paginaActual === totalPaginas ? "not-allowed" : "pointer",
+                                    fontWeight: "bold", fontSize: "12px"
+                                }}
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
                 )}
             </div>
 

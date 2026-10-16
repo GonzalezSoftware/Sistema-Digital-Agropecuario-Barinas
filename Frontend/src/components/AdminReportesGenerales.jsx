@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { DocumentChartBarIcon, ArrowDownTrayIcon, MapIcon, ChartPieIcon } from "@heroicons/react/24/solid";
+import Swal from 'sweetalert2';
+import { ChartPieIcon, MapIcon, ArrowDownTrayIcon } from "@heroicons/react/24/solid";
+import { generarPDFReporteGeneralPredios } from './ReportesGeneralesListaPredios';
+import { generarPDFReporteTotalesPredios } from './ReportesGeneralesTotalesPredios';
 
-// Lista de los 12 municipios del Estado Barinas
 const MUNICIPIOS_BARINAS = [
     "Alberto Arvelo Torrealba",
     "Andrés Eloy Blanco",
@@ -17,38 +19,46 @@ const MUNICIPIOS_BARINAS = [
     "Sosa"
 ];
 
-export const AdminReportesGenerales = () => {
-    // Estados independientes para cada tipo de reporte
+export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     const [municipioPredios, setMunicipioPredios] = useState("");
+    const [municipioTotales, setMunicipioTotales] = useState("");
     const [municipioProduccion, setMunicipioProduccion] = useState("");
 
     const handleExportarPredios = (e) => {
         e.preventDefault();
-        if (!municipioPredios) {
-            alert("Por favor seleccione un municipio para el reporte de predios.");
-            return;
-        }
-        // Simulación de exportación (Front-end)
-        alert(`Exportando reporte general de predios para el municipio: ${municipioPredios}... (Próximamente conexión backend)`);
+        generarPDFReporteGeneralPredios(municipioPredios, listaPredios);
+    };
+
+    const handleExportarTotales = (e) => {
+        e.preventDefault();
+        generarPDFReporteTotalesPredios(municipioTotales, listaPredios);
     };
 
     const handleExportarProduccion = (e) => {
         e.preventDefault();
         if (!municipioProduccion) {
-            alert("Por favor seleccione un municipio para el reporte de producción.");
+            Swal.fire({
+                title: 'Selección requerida',
+                text: 'Por favor seleccione un municipio para el reporte de producción.',
+                icon: 'warning',
+                confirmButtonColor: '#136442'
+            });
             return;
         }
-        // Simulación de exportación (Front-end)
-        alert(`Exportando reporte general de producción para el municipio: ${municipioProduccion}... (Próximamente conexión backend)`);
+
+        Swal.fire({
+            title: 'En desarrollo',
+            text: `Exportando reporte general de producción para el municipio: ${municipioProduccion}...`,
+            icon: 'info',
+            confirmButtonColor: '#136442'
+        });
     };
 
     return (
         <div style={{ display: "flex", flexDirection: "column", gap: "24px", width: "100%" }}>
-
-            {/* Contenedor de las dos opciones de reportes (Lado a lado con grid flexible) */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: "24px" }}>
                 
-                {/* 1. Reporte General de Predios */}
+                {/* 1. Lista General de Predios del Municipio (Catastro Detallado) */}
                 <div style={{
                     backgroundColor: "#ffffff",
                     border: "1px solid #e2e8f0",
@@ -63,11 +73,11 @@ export const AdminReportesGenerales = () => {
                         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                             <MapIcon style={{ width: "22px", height: "22px", color: "#136442" }} />
                             <h4 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#1e293b" }}>
-                                1. Reporte General de Predios
+                                1. Lista General de Predios del Municipio
                             </h4>
                         </div>
                         <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px", lineHeight: "1.5" }}>
-                            Exporta el catastro y la información detallada de todos los predios registrados  por el municipio seleccionado.
+                            Exporta el catastro oficial y el detalle de todos los predios registrados del municipio seleccionado en un formato PDF formal.
                         </p>
 
                         <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "24px" }}>
@@ -88,7 +98,7 @@ export const AdminReportesGenerales = () => {
                                     cursor: "pointer"
                                 }}
                             >
-                                <option value="">Seleccione un municipio </option>
+                                <option value="">Seleccione un municipio...</option>
                                 {MUNICIPIOS_BARINAS.map((mun, index) => (
                                     <option key={index} value={mun}>{mun}</option>
                                 ))}
@@ -121,7 +131,7 @@ export const AdminReportesGenerales = () => {
                     </button>
                 </div>
 
-                {/* 2. Reporte General de Producción */}
+                {/* 2. Reporte General de Totales y Estadísticas del Dashboard */}
                 <div style={{
                     backgroundColor: "#ffffff",
                     border: "1px solid #e2e8f0",
@@ -136,11 +146,11 @@ export const AdminReportesGenerales = () => {
                         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                             <ChartPieIcon style={{ width: "22px", height: "22px", color: "#136442" }} />
                             <h4 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#1e293b" }}>
-                                2. Reporte General de Producción
+                                2. Reporte de Totales y Estadísticas
                             </h4>
                         </div>
                         <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px", lineHeight: "1.5" }}>
-                            Exporta el resumen de producción agrícola y pecuaria consolidada correspondiente al municipio seleccionado.
+                            Exporta el resumen consolidado de predios censados, superficie total, distribución por parroquias y estatus legal de la tierra.
                         </p>
 
                         <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "24px" }}>
@@ -148,8 +158,8 @@ export const AdminReportesGenerales = () => {
                                 Seleccione el Municipio:
                             </label>
                             <select
-                                value={municipioProduccion}
-                                onChange={(e) => setMunicipioProduccion(e.target.value)}
+                                value={municipioTotales}
+                                onChange={(e) => setMunicipioTotales(e.target.value)}
                                 style={{
                                     padding: "12px",
                                     borderRadius: "10px",
@@ -161,7 +171,7 @@ export const AdminReportesGenerales = () => {
                                     cursor: "pointer"
                                 }}
                             >
-                                <option value="">Seleccione un municipio </option>
+                                <option value="">Seleccione un municipio...</option>
                                 {MUNICIPIOS_BARINAS.map((mun, index) => (
                                     <option key={index} value={mun}>{mun}</option>
                                 ))}
@@ -170,7 +180,7 @@ export const AdminReportesGenerales = () => {
                     </div>
 
                     <button
-                        onClick={handleExportarProduccion}
+                        onClick={handleExportarTotales}
                         style={{
                             display: "flex",
                             alignItems: "center",
@@ -190,7 +200,7 @@ export const AdminReportesGenerales = () => {
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#136442"}
                     >
                         <ArrowDownTrayIcon style={{ width: "18px", height: "18px" }} />
-                        <span>Exportar Producción</span>
+                        <span>Exportar Totales</span>
                     </button>
                 </div>
 

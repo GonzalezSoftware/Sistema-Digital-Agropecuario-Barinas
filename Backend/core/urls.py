@@ -46,7 +46,9 @@ urlpatterns = [
     path('admin/cambiar-password/', cambiar_password_admin, name='cambiar_password_admin'),
     path('contacto-info/', gestionar_contacto, name='gestionar_contacto'),
     path('noticias/pendientes/', gestionar_noticias_pendientes, name='gestionar_noticias_pendientes'),
-    path('noticias/pendientes/<int:pk>/resolver/', resolver_noticia_pendiente, name='resolver_noticia_pendiente'),
+    path('enviar-codigo-correo/', enviar_codigo_correo, name='enviar_codigo_correo'),
+    path('noticias/pendientes/<int:pk>/resolver/', resolver_noticia_pendiente, 
+    name='resolver_noticia_pendiente'),
 ]
 
 # Servir archivos subidos por el usuario en desarrollo local

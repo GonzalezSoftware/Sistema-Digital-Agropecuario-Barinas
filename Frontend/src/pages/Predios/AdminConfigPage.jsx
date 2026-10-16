@@ -2,13 +2,14 @@ import logo from "../../assets/gobierno.jpg";
 import escudo from "../../assets/logo2.jpg";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect } from "react";
+import Swal from 'sweetalert2';
 
 export default function AdminConfigPage() {
   const navigate = useNavigate();
-  
+
   // 1. Iniciamos en null para evitar que pinte "Configurar" y luego cambie a "Iniciar Sesión"
-  const [adminRegistrado, setAdminRegistrado] = React.useState(null); 
-  
+  const [adminRegistrado, setAdminRegistrado] = React.useState(null);
+
   const [nombre, setNombre] = React.useState("");
   const [usuario, setUsuario] = React.useState("");
   const [clave, setClave] = React.useState("");
@@ -41,6 +42,27 @@ export default function AdminConfigPage() {
 
     setCargando(true);
 
+    Swal.fire({
+      title: "Procesando...",
+      text: !adminRegistrado ? "Registrando administrador..." : "Verificando credenciales...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // 1. Mostramos el SweetAlert de carga antes de la petición
+    Swal.fire({
+      title: "Procesando...",
+      text: !adminRegistrado ? "Registrando administrador..." : "Verificando credenciales...",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const response = await fetch("http://localhost:8000/api/admin-config/", {
         method: "POST",
@@ -60,23 +82,39 @@ export default function AdminConfigPage() {
         throw new Error(data.error || "Ocurrió un error en el servidor.");
       }
 
-      if (!adminRegistrado) {
-        setExito("¡Administrador registrado en la Base de Datos con éxito! Redirigiendo...");
-      } else {
-        setExito("¡Inicio de sesión exitoso! Redirigiendo...");
-      }
-
       // Guardamos la sesión del administrador
       sessionStorage.setItem("usuario_admin", JSON.stringify(data.usuario));
-      
-      // REDIRIGIDO AL NUEVO PANEL DE ADMINISTRADOR ESPECIALIZADO
-      setTimeout(() => {
-        navigate("/admin/dashboard");
-      }, 1200);
+
+      // 2. Definimos el mensaje de éxito correspondiente
+      const mensajeExito = !adminRegistrado 
+        ? "¡Administrador registrado en la Base de Datos con éxito! Redirigiendo..." 
+        : "¡Inicio de sesión exitoso! Redirigiendo...";
+
+      // 3. Mostramos la alerta de éxito (esta reemplazará automáticamente a la de carga)
+      await Swal.fire({
+        icon: "success",
+        title: "¡Éxito!",
+        text: mensajeExito,
+        confirmButtonColor: "#136442",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false
+      });
+
+      // Redirección al panel
+      navigate("/admin/dashboard");
 
     } catch (err) {
-      setError(err.message);
       setCargando(false);
+      setError(err.message);
+
+      // Si ocurre un error, mostramos la alerta roja
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err.message,
+        confirmButtonColor: "#b91c1c"
+      });
     }
   };
 
@@ -112,7 +150,7 @@ export default function AdminConfigPage() {
             100% { opacity: 0.7; }
           }
         `}</style>
-        
+
         {/* Contenido centrado con zIndex superior para que esté por encima de la imagen */}
         <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
           <div style={{
@@ -221,7 +259,7 @@ export default function AdminConfigPage() {
               <span style={{ color: "#86efac" }}>Administrador General</span>
             </h1>
             <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "14px", lineHeight: 1.8, margin: 0, maxWidth: "380px" }}>
-              {!adminRegistrado 
+              {!adminRegistrado
                 ? "Establece las credenciales maestras que se guardarán de forma segura en tu base de datos relacional."
                 : "Área exclusiva para el administrador autorizado por el MPPAT en el estado Barinas. Ingresa tus credenciales institucionales para acceder al sistema."}
             </p>
@@ -316,7 +354,7 @@ export default function AdminConfigPage() {
               {/* Contraseña */}
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
-                  Contraseña 
+                  Contraseña
                 </label>
                 <div style={{ position: "relative" }}>
                   <input
@@ -367,15 +405,19 @@ export default function AdminConfigPage() {
               )}
 
               {/* Botón */}
-              <button type="submit" className="btn-login" disabled={cargando}
+              <button
+                type="submit"
+                className="btn-login"
+                disabled={cargando}
                 style={{
                   width: "100%", padding: "12px",
                   background: "#136442", color: "#fff", border: "none",
                   borderRadius: "10px", fontSize: "14px", fontWeight: 600,
                   fontFamily: "'Poppins', sans-serif", cursor: "pointer",
                   transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                }}>
-                {cargando ? "Procesando..." : (!adminRegistrado ? "Registrar en Base de Datos" : "Aceptar")}
+                }}
+              >
+                {!adminRegistrado ? "Registrar en Base de Datos" : "Aceptar"}
               </button>
             </form>
 

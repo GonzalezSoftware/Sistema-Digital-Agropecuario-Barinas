@@ -344,31 +344,39 @@ export default function EmpleadoDashboard() {
                             />
                         </div>
                     ) : vistaActiva === "predios_historial" ? (
-                        <HistorialPredios
-                            tabActiva="historial"
-                            busqueda={busquedaHistorial}
-                            setBusqueda={setBusquedaHistorial}
-                            prediosFiltrados={prediosFiltrados}
-                            manejarVerDetalles={manejarVerDetalles}
-                            mostrarModal={mostrarModalHistorial}
-                            predioSeleccionado={predioSeleccionadoHistorial}
-                            setMostrarModal={setMostrarModalHistorial}
-                            editando={editandoHistorial}
-                            setEditando={setEditandoHistorial}
-                            cargandoAccion={cargandoAccionHistorial}
-                            estiloInput={estiloInput}
-                            estiloBoton={estiloBoton}
-                            actualizarProductor={actualizarProductor}
-                            actualizarPredio={actualizarPredio}
-                            actualizarInfraestructura={actualizarInfraestructura}
-                            actualizarProduccion={actualizarProduccion}
-                            guardarCambiosReal={guardarCambiosReal}
-                            eliminarDefinitivoReal={eliminarDefinitivoReal}
-                            cambiarDueñoPredio={cambiarDueñoPredio} // <--- ¡Agrega esta línea aquí!
-                            InputField={InputField}
-                            errors={errors}
-                            esAdmin={false}
-                        />
+                        <div style={{ maxWidth: "1100px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
+                            {cargandoDashboard ? (
+                                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
+                                    <Spinner />
+                                </div>
+                            ) : (
+                                <HistorialPredios
+                                    tabActiva="historial"
+                                    busqueda={busquedaHistorial}
+                                    setBusqueda={setBusquedaHistorial}
+                                    prediosFiltrados={prediosFiltrados}
+                                    manejarVerDetalles={manejarVerDetalles}
+                                    mostrarModal={mostrarModalHistorial}
+                                    predioSeleccionado={predioSeleccionadoHistorial}
+                                    setMostrarModal={setMostrarModalHistorial}
+                                    editando={editandoHistorial}
+                                    setEditando={setEditandoHistorial}
+                                    cargandoAccion={cargandoAccionHistorial}
+                                    estiloInput={estiloInput}
+                                    estiloBoton={estiloBoton}
+                                    actualizarProductor={actualizarProductor}
+                                    actualizarPredio={actualizarPredio}
+                                    actualizarInfraestructura={actualizarInfraestructura}
+                                    actualizarProduccion={actualizarProduccion}
+                                    guardarCambiosReal={guardarCambiosReal}
+                                    eliminarDefinitivoReal={eliminarDefinitivoReal}
+                                    cambiarDueñoPredio={cambiarDueñoPredio}
+                                    InputField={InputField}
+                                    errors={errors}
+                                    esAdmin={false}
+                                />
+                            )}
+                        </div>
                     ) : vistaActiva === "predios_georreferenciacion" ? (
                         <div style={{ maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
                             {cargandoDashboard ? (
@@ -515,8 +523,21 @@ export default function EmpleadoDashboard() {
                             />
                         </div>
                     ) : vistaActiva === "produccion_reportes" ? (
-                        <div>
-                            <SeccionReportes listaPredios={listaPredios} />
+                        <div style={{ maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
+                            {cargandoDashboard ? (
+                                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
+                                    <Spinner />
+                                </div>
+                            ) : (
+                                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                                    <div style={{
+                                        backgroundColor: "#fff", padding: "20px", borderRadius: "12px",
+                                        boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
+                                    }}>
+                                        <SeccionReportes listaPredios={listaPredios} cargando={cargandoDashboard} />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div>
