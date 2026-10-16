@@ -45,7 +45,7 @@ export const useReportes = (prediosOriginales = []) => {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7.5);
         doc.setTextColor(...verdeBarinas);
-        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
+        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRA", 204, 10, { align: "right" });
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
@@ -110,7 +110,7 @@ export const useReportes = (prediosOriginales = []) => {
         const datosPredio = [
             ["Municipio:", predio.municipio || "N/A", "Parroquia:", predio.parroquia || "N/A"],
             ["Comunidad / Sector:", predio.comunidad || "N/A", "Centro Poblado:", predio.centro_poblado || "N/A"],
-            ["Superficie Total (Ha):", predio.superficie ? `${predio.superficie} Ha` : "0.00 Ha", "Coordenadas UTM:", predio.coordenadas || "N/A"],
+            ["Superficie Total (Ha):", predio.superficie ? `${predio.superficie} Ha` : "0.00 Ha", "Coordenadas (Latitud/Longitud)", predio.coordenadas || "N/A"],
             ["Tipo de Propiedad:", predio.tipo_propiedad || "N/A", "Tenencia de Tierra:", predio.tenencia || "N/A"],
             ["Vialidad Interna:", predio.vialidad || "N/A", "Dirección Detallada:", predio.direccion || "N/A"]
         ];

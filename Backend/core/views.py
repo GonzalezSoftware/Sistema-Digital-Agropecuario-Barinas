@@ -302,23 +302,151 @@ def enviar_codigo_correo(request):
     codigo = str(random.randint(100000, 999999))
 
     asunto = "Código de validación - MPPAT"
-    cuerpo = (
+    
+    # Cuerpo alternativo en texto plano por si el cliente de correo no soporta HTML
+    cuerpo_texto = (
         f"Estimado productor,\n\n"
-        f"Su código de confirmación para el registro/actualización en el sistema es:\n\n"
-        f"[{codigo}]\n\n"
+        f"Su código de confirmación para el registro/actualización en el sistema es: {codigo}\n\n"
         f"Por favor, ingrese este código en la pantalla del sistema para validar la operación.\n"
         f"No comparta este código con nadie.\n\n"
         f"Atentamente,\n"
-        f"Ministerio del Poder Popular para la Agricultura Productiva y Tierras (MPPAPT)"
+        f"Ministerio del Poder Popular para la Agricultura Productiva y Tierras (MPPAT)"
     )
+
+    # Cuerpo formateado en HTML con diseño corporativo
+    cuerpo_html = f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {{
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                background-color: #f4f6f8;
+                margin: 0;
+                padding: 0;
+                -webkit-font-smoothing: antialiased;
+            }}
+            .email-wrapper {{
+                max-width: 600px;
+                margin: 30px auto;
+                background-color: #ffffff;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                border: 1px solid #e2e8f0;
+            }}
+            .email-header {{
+                background-color: #136442;
+                padding: 24px;
+                text-align: center;
+                color: #ffffff;
+            }}
+            .email-header h2 {{
+                margin: 0;
+                font-size: 18px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+            }}
+            .email-header p {{
+                margin: 5px 0 0;
+                font-size: 12px;
+                color: #a7f3d0;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }}
+            .email-body {{
+                padding: 32px 24px;
+                color: #334155;
+            }}
+            .email-body p {{
+                margin: 0 0 16px;
+                font-size: 15px;
+                line-height: 1.6;
+            }}
+            .code-container {{
+                text-align: center;
+                margin: 30px 0;
+            }}
+            .code-box {{
+                display: inline-block;
+                background-color: #f0fdf4;
+                border: 2px dashed #136442;
+                color: #136442;
+                font-size: 32px;
+                font-weight: 800;
+                letter-spacing: 6px;
+                padding: 14px 28px;
+                border-radius: 10px;
+            }}
+            .alert-text {{
+                font-size: 13px;
+                color: #64748b;
+                background-color: #f8fafc;
+                padding: 12px 16px;
+                border-radius: 8px;
+                border-left: 4px solid #136442;
+                margin-top: 20px;
+            }}
+            .email-footer {{
+                background-color: #f8fafc;
+                padding: 20px 24px;
+                text-align: center;
+                font-size: 12px;
+                color: #94a3b8;
+                border-top: 1px solid #e2e8f0;
+            }}
+            .email-footer strong {{
+                color: #136442;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="email-wrapper">
+            <!-- Encabezado Institucional -->
+            <div class="email-header">
+                <h3>MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRA </h3>
+                <p>(MPPAT)</p>
+            </div>
+            
+            <!-- Contenido Principal -->
+            <div class="email-body">
+                <p>Estimado/a productor/a,</p>
+                <p>Hemos recibido una solicitud para validar su registro o actualización dentro del sistema agropecuario. Utilice el siguiente código de confirmación:</p>
+                
+                <!-- Caja del Código -->
+                <div class="code-container">
+                    <div class="code-box">{codigo}</div>
+                </div>
+                
+                <p>Por favor, ingrese este código numérico en la pantalla del sistema para completar la operación de forma exitosa.</p>
+                
+                <div class="alert-text">
+                    <strong>Aviso de seguridad:</strong> No comparta este código con ninguna persona. Nuestro equipo nunca se lo solicitará por fuera del sistema.
+                </div>
+            </div>
+            
+            <!-- Pie de página -->
+            <div class="email-footer">
+                <p>Atentamente,<br><strong>Sistema Digital Agropecuario - Estado Barinas</strong></p>
+                <p style="margin-top: 10px; font-size: 11px;">Este es un mensaje automático, por favor no responda a este correo.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
 
     try:
         email = EmailMessage(
             subject=asunto,
-            body=cuerpo,
-            from_email=None,  # Utiliza el DEFAULT_FROM_EMAIL configurado en settings.py
+            body=cuerpo_texto,  # Texto plano alternativo
+            from_email=None,
             to=[correo_destino]
         )
+        # Añadir la versión HTML al correo
+        email.content_subtype = "html"
+        email.body = cuerpo_html
+        
         email.send(fail_silently=False)
         
         return Response({
@@ -328,7 +456,6 @@ def enviar_codigo_correo(request):
         }, status=200)
     except Exception as e:
         return Response({"error": f"No se pudo enviar el correo de verificación: {str(e)}"}, status=500)
-    
     
 
 @api_view(['GET'])

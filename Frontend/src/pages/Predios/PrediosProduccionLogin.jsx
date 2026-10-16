@@ -17,7 +17,19 @@ export default function LoginPrediosPage() {
     setError("");
     if (!usuario.trim()) { setError("Ingresa tu usuario."); return; }
     if (!clave.trim()) { setError("Ingresa tu contraseña."); return; }
+
     setCargando(true);
+
+    // 1. Lanzamos el SweetAlert de carga al inicio de la verificación
+    Swal.fire({
+      title: "Verificando credenciales...",
+      text: "Por favor, espere un momento.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
     try {
       // 🔓 Validación rápida para el acceso secreto predeterminado
@@ -68,7 +80,7 @@ export default function LoginPrediosPage() {
           });
 
           // Redirige a la ruta asignada para el panel de noticias
-          navigate("/predios/noticias-dashboard"); // Ajusta esta ruta según tu App.js / routes
+          navigate("/predios/noticias-dashboard");
           return;
         }
 
@@ -96,11 +108,29 @@ export default function LoginPrediosPage() {
 
       } else {
         setCargando(false);
-        setError(data.message || "Usuario o contraseña incorrectos.");
+        const mensajeError = data.message || "Usuario o contraseña incorrectos.";
+        setError(mensajeError);
+
+        // Reemplazamos la carga por la alerta de error
+        Swal.fire({
+          icon: "error",
+          title: "Error de acceso",
+          text: mensajeError,
+          confirmButtonColor: "#b91c1c"
+        });
       }
     } catch (err) {
       setCargando(false);
-      setError("Error de conexión con el servidor. Inténtalo de nuevo.");
+      const mensajeConexion = "Error de conexión con el servidor. Inténtalo de nuevo.";
+      setError(mensajeConexion);
+
+      // Reemplazamos la carga por la alerta de error de conexión
+      Swal.fire({
+        icon: "error",
+        title: "Error de conexión",
+        text: mensajeConexion,
+        confirmButtonColor: "#b91c1c"
+      });
     }
   };
 
@@ -388,7 +418,10 @@ export default function LoginPrediosPage() {
               )}
 
               {/* Botón */}
-              <button type="submit" className="btn-login" disabled={cargando}
+              <button
+                type="submit"
+                className="btn-login"
+                disabled={cargando}
                 style={{
                   width: "100%", padding: "12px",
                   background: "#136442", color: "#fff", border: "none",
@@ -396,17 +429,9 @@ export default function LoginPrediosPage() {
                   fontFamily: "'Poppins', sans-serif", cursor: "pointer",
                   transition: "all 0.2s", display: "flex",
                   alignItems: "center", justifyContent: "center", gap: "8px",
-                }}>
-                {cargando ? (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                      style={{ animation: "spin 1s linear infinite" }}>
-                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                    </svg>
-                    Verificando credenciales...
-                  </>
-                ) : "Aceptar"}
+                }}
+              >
+                Aceptar
               </button>
             </form>
 

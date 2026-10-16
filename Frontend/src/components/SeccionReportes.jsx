@@ -1,9 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export default function SeccionReportes({ listaPredios }) {
+// 1. Componente Spinner corporativo integrado
+export const Spinner = ({ color = "#136442" }) => {
+    const spinnerRef = (el) => {
+        if (el) {
+            el.animate(
+                [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+                { duration: 1000, iterations: Infinity }
+            );
+        }
+    };
+
+    return (
+        <svg
+            ref={spinnerRef}
+            width="30" height="30" viewBox="0 0 24 24" fill="none"
+            stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+        >
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+        </svg>
+    );
+};
+
+export default function SeccionReportes({ listaPredios = [], cargando }) {
     const [busqueda, setBusqueda] = useState("");
+
+    // ── ESTADO DE PAGINACIÓN ──
+    const [paginaActual, setPaginaActual] = useState(1);
+    const elementosPorPagina = 10;
+
+    useEffect(() => {
+        setPaginaActual(1);
+    }, [busqueda]);
+
+    // 2. Validación de carga idéntica a las demás vistas
+    if (cargando) {
+        return (
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "80px",
+                gap: "12px",
+                color: "#136442",
+                fontSize: "13px",
+                fontWeight: "500"
+            }}>
+                <Spinner color="#136442" />
+                <span>Cargando reportes...</span>
+            </div>
+        );
+    }
 
     const prediosFiltrados = listaPredios.filter((p) => {
         const term = busqueda.toLowerCase();
@@ -11,6 +61,11 @@ export default function SeccionReportes({ listaPredios }) {
         const nombreProductor = p.productor?.nombre?.toLowerCase() || "";
         return nombrePredio.includes(term) || nombreProductor.includes(term);
     });
+
+    const indiceUltimoElemento = paginaActual * elementosPorPagina;
+    const indicePrimerElemento = indiceUltimoElemento - elementosPorPagina;
+    const prediosPaginados = prediosFiltrados.slice(indicePrimerElemento, indiceUltimoElemento);
+    const totalPaginas = Math.ceil(prediosFiltrados.length / elementosPorPagina);
 
     const generarPDFPredio = (predio) => {
         if (!predio) return;
@@ -24,9 +79,6 @@ export default function SeccionReportes({ listaPredios }) {
         const verdeBarinas = [19, 100, 66];
         const grisOscuro = [40, 40, 40];
 
-        // ────────────────────────────────────────────────────────
-        // CINTILLO INSTITUCIONAL (MEMBRETE)
-        // ────────────────────────────────────────────────────────
         try {
             doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
             doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
@@ -60,9 +112,6 @@ export default function SeccionReportes({ listaPredios }) {
 
         let currentY = 40;
 
-        // ────────────────────────────────────────────────────────
-        // I. DATOS DEL PRODUCTOR
-        // ────────────────────────────────────────────────────────
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9.5);
         doc.setTextColor(...verdeBarinas);
@@ -95,9 +144,6 @@ export default function SeccionReportes({ listaPredios }) {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // II. GEORREFERENCIACIÓN Y UBICACIÓN
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9.5);
@@ -129,9 +175,6 @@ export default function SeccionReportes({ listaPredios }) {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         if (currentY > 240) { doc.addPage(); currentY = 20; }
 
@@ -162,9 +205,6 @@ export default function SeccionReportes({ listaPredios }) {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // IV. INVENTARIO DE SEMOVIENTES / GANADERÍA
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         if (currentY > 230) { doc.addPage(); currentY = 20; }
 
@@ -208,9 +248,6 @@ export default function SeccionReportes({ listaPredios }) {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // V. MAQUINARIA, IMPLEMENTOS Y EQUIPOS
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         if (currentY > 230) { doc.addPage(); currentY = 20; }
 
@@ -254,11 +291,8 @@ export default function SeccionReportes({ listaPredios }) {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // PIE DE PÁGINA
-        // ────────────────────────────────────────────────────────
-        const totalPaginas = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPaginas; i++) {
+        const totalPaginasPDF = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPaginasPDF; i++) {
             doc.setPage(i);
             doc.setFontSize(7);
             doc.setTextColor(140, 140, 140);
@@ -266,7 +300,7 @@ export default function SeccionReportes({ listaPredios }) {
             doc.setLineWidth(0.3);
             doc.line(12, 268, 204, 268);
             doc.text("Ficha Técnica Integral de Caracterización — UTMPPAPT.", 12, 272);
-            doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
+            doc.text(`Página ${i} de ${totalPaginasPDF}`, 204, 272, { align: "right" });
         }
 
         const fileSanitizado = `Ficha_Tecnica_Integral_${(predio.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`;
@@ -311,47 +345,97 @@ export default function SeccionReportes({ listaPredios }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {prediosFiltrados.length > 0 ? (
-                            prediosFiltrados.map((p, index) => (
-                                <tr
-                                    key={p.id_predio || index}
-                                    style={{
-                                        borderBottom: "1px solid #f0f0f0",
-                                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
-                                    }}
-                                >
-                                    <td style={{ fontSize: "13px", padding: "12px" }}>{index + 1}</td>
-                                    <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
-                                    <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
-                                    <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
-                                    <td style={{ fontSize: "13px", padding: "12px" }}>
-                                        <span style={{
-                                            padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "600",
-                                            backgroundColor: p.caracterizacion_completada ? "#dcfce7" : "#fee2e2",
-                                            color: p.caracterizacion_completada ? "#166534" : "#991b1b"
-                                        }}>
-                                            {p.caracterizacion_completada ? "Caracterizado" : "No Caracterizado"}
-                                        </span>
-                                    </td>
-                                    <td style={{ fontSize: "13px", padding: "12px" }}>
-                                        <button
-                                            onClick={() => generarPDFPredio(p)}
-                                            style={{
-                                                backgroundColor: "#f0fdf4", color: "#136442",
-                                                border: "1px solid #136442", padding: "6px 12px",
-                                                borderRadius: "6px", cursor: "pointer", fontSize: "12px"
-                                            }}
-                                        >
-                                            Generar Ficha PDF
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
+                        {prediosPaginados.length > 0 ? (
+                            prediosPaginados.map((p, index) => {
+                                const numeroFila = indicePrimerElemento + index + 1;
+
+                                return (
+                                    <tr
+                                        key={p.id_predio || index}
+                                        style={{
+                                            borderBottom: "1px solid #f0f0f0",
+                                            backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9fafb"
+                                        }}
+                                    >
+                                        <td style={{ fontSize: "13px", padding: "12px" }}>{numeroFila}</td>
+                                        <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
+                                        <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
+                                        <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
+                                        <td style={{ fontSize: "13px", padding: "12px" }}>
+                                            <span style={{
+                                                padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "600",
+                                                backgroundColor: p.caracterizacion_completada ? "#dcfce7" : "#fee2e2",
+                                                color: p.caracterizacion_completada ? "#166534" : "#991b1b"
+                                            }}>
+                                                {p.caracterizacion_completada ? "Caracterizado" : "No Caracterizado"}
+                                            </span>
+                                        </td>
+                                        <td style={{ fontSize: "13px", padding: "12px" }}>
+                                            <button
+                                                onClick={() => generarPDFPredio(p)}
+                                                style={{
+                                                    backgroundColor: "#f0fdf4", color: "#136442",
+                                                    border: "1px solid #136442", padding: "6px 12px",
+                                                    borderRadius: "6px", cursor: "pointer", fontSize: "12px"
+                                                }}
+                                            >
+                                                Generar Ficha PDF
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         ) : (
                             <tr><td colSpan="6" style={{ textAlign: "center", padding: "40px", color: "#999" }}>No se encontraron registros.</td></tr>
                         )}
                     </tbody>
                 </table>
+
+                {/* ── CONTROLES DE PAGINACIÓN ── */}
+                {totalPaginas > 1 && (
+                    <div style={{
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #eee", flexWrap: "wrap", gap: "10px"
+                    }}>
+                        <span style={{ fontSize: "13px", color: "#666" }}>
+                            Mostrando del <strong>{indicePrimerElemento + 1}</strong> al <strong>{Math.min(indiceUltimoElemento, prediosFiltrados.length)}</strong> de <strong>{prediosFiltrados.length}</strong> predios
+                        </span>
+
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                            <button
+                                onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
+                                disabled={paginaActual === 1}
+                                style={{
+                                    padding: "6px 12px", borderRadius: "6px", border: "1px solid #ccc",
+                                    backgroundColor: paginaActual === 1 ? "#f5f5f5" : "#fff",
+                                    color: paginaActual === 1 ? "#aaa" : "#136442",
+                                    cursor: paginaActual === 1 ? "not-allowed" : "pointer",
+                                    fontWeight: "bold", fontSize: "12px"
+                                }}
+                            >
+                                Anterior
+                            </button>
+
+                            <span style={{ fontSize: "13px", padding: "0 8px", fontWeight: "bold", color: "#333" }}>
+                                Página {paginaActual} de {totalPaginas}
+                            </span>
+
+                            <button
+                                onClick={() => setPaginaActual(prev => Math.min(prev + 1, totalPaginas))}
+                                disabled={paginaActual === totalPaginas}
+                                style={{
+                                    padding: "6px 12px", borderRadius: "6px", border: "1px solid #ccc",
+                                    backgroundColor: paginaActual === totalPaginas ? "#f5f5f5" : "#fff",
+                                    color: paginaActual === totalPaginas ? "#aaa" : "#136442",
+                                    cursor: paginaActual === totalPaginas ? "not-allowed" : "pointer",
+                                    fontWeight: "bold", fontSize: "12px"
+                                }}
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

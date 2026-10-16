@@ -2,7 +2,7 @@ import React from "react";
 import {
     ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     Legend, PieChart, Pie, Cell,
-    RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar // 🔹 Importados para el gráfico de telaraña
+    RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from "recharts";
 
 export default function AdminProduccionDashboard({ productionState, cargando: cargandoProp, statsProduccion: statsProp }) {
@@ -10,7 +10,27 @@ export default function AdminProduccionDashboard({ productionState, cargando: ca
     const cargando = cargandoProp ?? productionState?.cargando;
     const statsProduccion = statsProp ?? productionState?.statsProduccion;
 
-    const Spinner = () => <div style={{ color: "#136442", fontWeight: "600" }}>Cargando...</div>;
+    // Componente Spinner corporativo animado
+    const Spinner = ({ color = "#136442" }) => {
+        const spinnerRef = (el) => {
+            if (el) {
+                el.animate(
+                    [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+                    { duration: 1000, iterations: Infinity }
+                );
+            }
+        };
+
+        return (
+            <svg
+                ref={spinnerRef}
+                width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+            >
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+        );
+    };
 
     return (
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
@@ -24,11 +44,13 @@ export default function AdminProduccionDashboard({ productionState, cargando: ca
             {/* ── GRILLA DE GRÁFICOS ── */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px" }}>
 
-                {/* 1. Gráfico Existente: Cantidad por Especie */}
+                {/* 1. Gráfico 1: Cantidad por Especie */}
                 <div style={chartCard}>
                     <h3 style={chartTitle}>Cantidad por Especie</h3>
                     <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
-                        {!statsProduccion?.graficos?.produccion_general ? (
+                        {cargando ? (
+                            <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
+                        ) : !statsProduccion?.graficos?.produccion_general ? (
                             <div style={chartPlaceholder}>No hay datos para mostrar</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
@@ -44,11 +66,13 @@ export default function AdminProduccionDashboard({ productionState, cargando: ca
                     </div>
                 </div>
 
-                {/* 2. Gráfico Corregido: Destino de Producción Vegetal (Arreglado el error de superficie) */}
+                {/* 2. Gráfico 2: Destino de Producción Vegetal */}
                 <div style={chartCard}>
                     <h3 style={chartTitle}>Destino de Producción Vegetal</h3>
                     <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
-                        {!statsProduccion?.graficos?.destino_produccion_vegetal ? (
+                        {cargando ? (
+                            <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
+                        ) : !statsProduccion?.graficos?.destino_produccion_vegetal ? (
                             <div style={chartPlaceholder}>Sin datos de destino vegetal</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
@@ -73,11 +97,13 @@ export default function AdminProduccionDashboard({ productionState, cargando: ca
                     </div>
                 </div>
 
-                {/* 3. Gráfico de Telaraña (Radar): Capacidades Productivas Pecuarias */}
+                {/* 3. Gráfico 3: Capacidades Productivas Pecuarias (Radar) */}
                 <div style={chartCard}>
                     <h3 style={chartTitle}>Capacidades Productivas Pecuarias (Global)</h3>
                     <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
-                        {!statsProduccion?.graficos?.digitalizacion_radar ? (
+                        {cargando ? (
+                            <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
+                        ) : !statsProduccion?.graficos?.digitalizacion_radar ? (
                             <div style={chartPlaceholder}>Sin datos de capacidades</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
@@ -93,11 +119,13 @@ export default function AdminProduccionDashboard({ productionState, cargando: ca
                     </div>
                 </div>
 
-                {/* 4. Gráfico Adicional: Maquinaria y Equipos de Ruedas */}
+                {/* 4. Gráfico 4: Parque de Maquinaria */}
                 <div style={chartCard}>
                     <h3 style={chartTitle}>Parque de Maquinaria y Vehículos Agrícolas</h3>
                     <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
-                        {!statsProduccion?.graficos?.tipo_explotacion ? (
+                        {cargando ? (
+                            <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
+                        ) : !statsProduccion?.graficos?.tipo_explotacion ? (
                             <div style={chartPlaceholder}>Sin datos de maquinaria</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">

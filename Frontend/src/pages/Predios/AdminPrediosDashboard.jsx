@@ -326,18 +326,20 @@ export default function AdminPrediosDashboard() {
                             InputField={InputField}
                             errors={{}}
                             esAdmin={true} // <--- ¡Añade esto solo en el Admin!
+                            cargando={cargando}
                         />
                     ) : vistaActiva === "georreferenciacion" ? (
                         <VistaMapaPredios
                             listaPredios={listaPredios}
                             municipios={MUNICIPIOS}
+                            cargando={cargando}
                         />
                     ) : vistaActiva === "reportes" ? (
-                        <ReportesView predios={listaPredios} />
+                        <ReportesView predios={listaPredios} cargando={cargando} />
                     ) : vistaActiva === "produccion_dashboard" ? (
                         <AdminProduccionDashboard productionState={productionState} />
                     ) : vistaActiva === "produccion_reportes" ? (
-                        <SeccionReportes listaPredios={listaPredios} />
+                        <SeccionReportes listaPredios={listaPredios}cargando={cargando} />
                     ) : vistaActiva === "configuracion" ? (
 
                         <AdminConfiguracionContraseña />
@@ -350,7 +352,7 @@ export default function AdminPrediosDashboard() {
 
                         ) : vistaActiva === "reportes_generales" ? (
 
-                            <AdminReportesGenerales />
+                            <AdminReportesGenerales listaPredios={listaPredios} />
 
                         ) : vistaActiva === "bitacora" ? (
                             <AdminBitacora />) : (
