@@ -80,18 +80,21 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # settings.py
 import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'defaultdb', # Nombre por defecto en Aiven
-        'USER': 'avnadmin',
-        'PASSWORD': 'AVNS_1yO1jYTBGZrUAA-gm1W', 
-        'HOST': 'db-agro-barinas-gonzalezsoftware2025-8ffc.k.aivencloud.com',
-        'PORT': '27046',
-        'OPTIONS': {
-            'ssl': {
-                'ca': os.path.join(BASE_DIR, 'ca.pem'), 
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.environ.get("DB_NAME", "defaultdb"),
+        "USER": os.environ.get("DB_USER", "avnadmin"),
+        "PASSWORD": os.environ["DB_PASSWORD"],
+        "HOST": os.environ["DB_HOST"],
+        "PORT": os.environ.get("DB_PORT", "27046"),
+        "OPTIONS": {
+            "ssl": {
+                "ca": str(BASE_DIR / "ca.pem"),
             },
         },
     }
