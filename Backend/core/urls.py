@@ -16,13 +16,14 @@ from .views import (
     gestionar_credenciales_noticias, 
     gestionar_noticias, 
     detalle_noticia,
-    gestionar_noticias_pendientes,     
+    gestionar_noticias_pendientes,    
     resolver_noticia_pendiente,  
     enviar_codigo_correo, 
     enviar_correo_ficha_predio,
     cambiar_password_admin,
-    gestionar_contacto
-
+    gestionar_contacto,
+    solicitar_reinicio_sistema,
+    ejecutar_reinicio_sistema
 )
 
 router = DefaultRouter()
@@ -41,14 +42,14 @@ urlpatterns = [
     path('credenciales-noticias/', gestionar_credenciales_noticias, name='gestionar_credenciales_noticias'),
     path('noticias/', gestionar_noticias, name='gestionar_noticias'),
     path('noticias/<int:pk>/', detalle_noticia, name='detalle_noticia'),
-    path('enviar-codigo-correo/', enviar_codigo_correo, name='enviar_codigo_correo'), # <--- Coincide con el frontend
+    path('enviar-codigo-correo/', enviar_codigo_correo, name='enviar_codigo_correo'),
     path('enviar-correo-ficha/', enviar_correo_ficha_predio, name='enviar_correo_ficha'),
     path('admin/cambiar-password/', cambiar_password_admin, name='cambiar_password_admin'),
     path('contacto-info/', gestionar_contacto, name='gestionar_contacto'),
     path('noticias/pendientes/', gestionar_noticias_pendientes, name='gestionar_noticias_pendientes'),
-    path('enviar-codigo-correo/', enviar_codigo_correo, name='enviar_codigo_correo'),
-    path('noticias/pendientes/<int:pk>/resolver/', resolver_noticia_pendiente, 
-    name='resolver_noticia_pendiente'),
+    path('noticias/pendientes/<int:pk>/resolver/', resolver_noticia_pendiente, name='resolver_noticia_pendiente'), 
+    path('reiniciar/solicitar/', solicitar_reinicio_sistema, name='solicitar_reinicio_sistema'),
+    path('reiniciar/ejecutar/', ejecutar_reinicio_sistema, name='ejecutar_reinicio_sistema'),
 ]
 
 # Servir archivos subidos por el usuario en desarrollo local

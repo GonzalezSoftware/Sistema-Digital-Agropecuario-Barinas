@@ -22,6 +22,15 @@ export default function AdminProduccionSeleccionarPredio({
         setPaginaActual(1);
     }, [busquedaCedula]);
 
+    // Función auxiliar para formatear ortográficamente el texto del municipio en la vista
+    const formatearMunicipio = (texto) => {
+        if (!texto) return "N/A";
+        return texto
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/(^\w{1})|(\s+\w{1})/g, (letra) => letra.toUpperCase());
+    };
+
     const indiceUltimoElemento = paginaActual * elementosPorPagina;
     const indicePrimerElemento = indiceUltimoElemento - elementosPorPagina;
     const prediosPaginados = filtrarPredios.slice(indicePrimerElemento, indiceUltimoElemento);
@@ -330,7 +339,8 @@ export default function AdminProduccionSeleccionarPredio({
                             <div style={estiloContenedorSeccion}>
                                 <div style={estiloTituloSeccion}>II. GEORREFERENCIACIÓN Y UBICACIÓN</div>
                                 <div style={estiloGridTresColumnas}>
-                                    <div><small style={estiloLabel}>MUNICIPIO</small><p style={estiloP}>{predioSeleccionado.municipio || "N/A"}</p></div>
+                                    {/* Municipio formateado correctamente */}
+                                    <div><small style={estiloLabel}>MUNICIPIO</small><p style={estiloP}>{formatearMunicipio(predioSeleccionado.municipio)}</p></div>
                                     <div><small style={estiloLabel}>PARROQUIA</small><p style={estiloP}>{predioSeleccionado.parroquia || "N/A"}</p></div>
                                     <div><small style={estiloLabel}>COMUNIDAD</small><p style={estiloP}>{predioSeleccionado.comunidad || "N/A"}</p></div>
                                 </div>

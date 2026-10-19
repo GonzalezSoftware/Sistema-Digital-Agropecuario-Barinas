@@ -128,14 +128,15 @@ export default function Productores() {
         validarCampoProductor(valorNumerico);
     };
 
-    const exportarFichaConValidacion = async () => {
-        const telefonoProductor = resultado?.productor?.telefono || resultado?.telefono;
+const exportarFichaConValidacion = async () => {
+        // Obtenemos el correo del productor (del objeto resultado o de su relación)
+        const correoProductor = resultado?.productor?.correo || resultado?.correo;
 
-        if (!resultado || !telefonoProductor) {
+        if (!resultado || !correoProductor) {
             Swal.fire({
                 icon: "warning",
-                title: "Datos incompletos",
-                text: "El productor no posee un número de teléfono registrado en el sistema para realizar la validación.",
+                title: "Correo no registrado",
+                text: "El productor no posee un correo electrónico registrado en el sistema para realizar la validación.",
                 confirmButtonColor: '#136442',
             });
             return;
@@ -143,7 +144,7 @@ export default function Productores() {
 
         const confirmacion = await Swal.fire({
             title: "¿Exportar ficha técnica?",
-            text: `Se enviará un código de validación al WhatsApp registrado del productor`,
+            text: `Se enviará un código de validación al correo electrónico registrado del productor (${correoProductor})`,
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "Sí, enviar código",
@@ -155,20 +156,21 @@ export default function Productores() {
 
         let codigoServidor = "";
         try {
-            const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo/", { telefono: telefonoProductor });
+            // Llamada a la API de envío de correo que ya tienes configurada en el backend
+            const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo-correo/", { correo: correoProductor });
             codigoServidor = envio.data.codigo.toString();
 
             await Swal.fire({
                 icon: "success",
                 title: "Código enviado",
-                text: "El código de seguridad fue enviado al WhatsApp del productor",
+                text: `El código de seguridad fue enviado exitosamente al correo: ${correoProductor}`,
                 confirmButtonColor: "#136442",
             });
         } catch (error) {
             Swal.fire({
                 icon: "error",
                 title: "Error de comunicación",
-                text: "No se pudo despachar el código de validación.",
+                text: "No se pudo despachar el código de verificación por correo.",
                 confirmButtonColor: "#d32f2f",
             });
             return;
@@ -177,7 +179,7 @@ export default function Productores() {
         const { value: codigoUsuario } = await Swal.fire({
             title: "Validación de Seguridad",
             input: "text",
-            inputLabel: "Ingrese el código recibido por el productor",
+            inputLabel: "Ingrese el código recibido en el correo del productor",
             inputPlaceholder: "Código de verificación",
             confirmButtonText: "Verificar y Descargar",
             confirmButtonColor: "#136442",
@@ -263,12 +265,12 @@ export default function Productores() {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7.5);
         doc.setTextColor(...verdeBarinas);
-        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
+        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRAS", 204, 10, { align: "right" });
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
         doc.setTextColor(100, 100, 100);
-        doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
+        doc.text("MPPAT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
 
         const fechaEmision = predio.fecha_registro
             ? new Date(predio.fecha_registro).toLocaleDateString()
@@ -281,8 +283,19 @@ export default function Productores() {
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
+
+        // 1. Imprimir la etiqueta en color verde
         doc.setTextColor(...verdeBarinas);
-        doc.text(`FICHA TÉCNICA INTEGRAL: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`, 12, 33);
+        const tituloVerde = "FICHA TÉCNICA INTEGRAL: ";
+        doc.text(tituloVerde, 12, 33);
+
+        // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
+        const anchoTituloVerde = doc.getTextWidth(tituloVerde);
+
+        // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
+        doc.setTextColor(0, 0, 0); 
+        const nombreNegro = (predio.nombre_predio || "SIN NOMBRE").toUpperCase();
+        doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
 
         let currentY = 40;
 

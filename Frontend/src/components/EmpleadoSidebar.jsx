@@ -157,7 +157,9 @@ export const EmpleadoSidebar = ({
                             overflow: "hidden",
                             textOverflow: "ellipsis"
                         }}>
-                            {empleadoData?.municipio ? `Municipio ${empleadoData.municipio}` : "Municipio Asignado"}
+                            {empleadoData?.municipio 
+                                ? `Municipio ${empleadoData.municipio.replace(/_/g, " ").toLowerCase().replace(/(^\w{1})|(\s+\w{1})/g, letra => letra.toUpperCase())}` 
+                                : "Municipio Asignado"}
                         </span>
                     </div>
                 </div>

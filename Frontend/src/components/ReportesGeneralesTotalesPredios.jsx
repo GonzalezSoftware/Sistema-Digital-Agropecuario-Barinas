@@ -65,12 +65,12 @@ export const generarPDFReporteTotalesPredios = (municipioSeleccionado, listaPred
     doc.setFont("helvetica", "bold");
     doc.setFontSize(7.5);
     doc.setTextColor(...verdeBarinas);
-    doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
+    doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRAS", 204, 10, { align: "right" });
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7);
     doc.setTextColor(100, 100, 100);
-    doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
+    doc.text("MPPAT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
 
     const fechaEmision = new Date().toLocaleDateString();
     doc.text(`Fecha de Emisión: ${fechaEmision}`, 204, 18, { align: "right" });
@@ -79,11 +79,25 @@ export const generarPDFReporteTotalesPredios = (municipioSeleccionado, listaPred
     doc.setLineWidth(0.6);
     doc.line(12, 25, 204, 25);
 
-    // Título central
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(...verdeBarinas);
-    doc.text(`REPORTE DE TOTALES Y ESTADÍSTICAS: ${municipioSeleccionado.toUpperCase()}`, 12, 34);
+
+
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+
+        // 1. Imprimir la etiqueta en color verde
+        doc.setTextColor(...verdeBarinas);
+        const tituloVerde = "REPORTE DE TOTALES Y ESTADÍSTICAS: ";
+        doc.text(tituloVerde, 12, 33);
+
+        // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
+        const anchoTituloVerde = doc.getTextWidth(tituloVerde);
+
+        // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
+        doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
+        const nombreNegro = (municipioSeleccionado || "SIN NOMBRE").toUpperCase();
+        doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
+
 
     let currentY = 42;
 

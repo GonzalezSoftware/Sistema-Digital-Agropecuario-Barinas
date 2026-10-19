@@ -47,7 +47,7 @@ export default function HistorialPredios({
     InputField,
     errors,
     esAdmin,
-    cargando // <--- 2. Asegúrate de recibir esta prop aquí
+    cargando
 }) {
     // ── ESTADO DE PAGINACIÓN ──
     const [paginaActual, setPaginaActual] = useState(1);
@@ -59,7 +59,16 @@ export default function HistorialPredios({
 
     if (tabActiva !== "historial") return null;
 
-    // 3. ── VALIDACIÓN DE CARGA (Aquí es donde se pinta el Spinner al entrar o refrescar) ──
+    // Función auxiliar para formatear ortográficamente el texto del municipio en la vista
+    const formatearMunicipio = (texto) => {
+        if (!texto) return "N/A";
+        return texto
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/(^\w{1})|(\s+\w{1})/g, (letra) => letra.toUpperCase());
+    };
+
+    // 3. ── VALIDACIÓN DE CARGA ──
     if (cargando) {
         return (
             <div style={{
@@ -149,7 +158,8 @@ export default function HistorialPredios({
                                             {p.nombre_predio} {inhabilitadoFila && <span style={{ textDecoration: 'none', color: '#dc2626', fontSize: '10px', fontWeight: 'bold', marginLeft: '6px', background: '#fee2e2', padding: '2px 6px', borderRadius: '4px' }}>INHABILITADO (CAMBIO DE DUEÑO)</span>}
                                         </td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
-                                        <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
+                                        {/* Municipio formateado correctamente con mayúscula inicial */}
+                                        <td style={{ fontSize: "13px", padding: "12px" }}>{formatearMunicipio(p.municipio)}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
                                         <td style={{ fontSize: "13px", padding: "12px", textDecoration: "none" }}>
                                             <button
@@ -311,7 +321,8 @@ export default function HistorialPredios({
                                 <div style={{ gridColumn: "span 3", borderBottom: "2px solid #136442", paddingBottom: "5px" }}>
                                     <strong style={{ color: "#136442", fontSize: "14px" }}>II. GEORREFERENCIACIÓN Y UBICACIÓN</strong>
                                 </div>
-                                <div><InputField label="Municipio" value={predioSeleccionado.municipio || "N/A"} disabled={true} /></div>
+                                {/* Municipio formateado en la ficha técnica modal */}
+                                <div><InputField label="Municipio" value={formatearMunicipio(predioSeleccionado.municipio)} disabled={true} /></div>
                                 <div><InputField label="Parroquia" value={predioSeleccionado.parroquia || "N/A"} disabled={true} /></div>
                                 <div><InputField label="Comunidad / Sector" value={predioSeleccionado.comunidad || "N/A"} disabled={true} /></div>
                                 <div style={{ gridColumn: "span 2" }}><InputField label="Coordenadas" value={predioSeleccionado.coordenadas || "Sin coordenadas"} disabled={true} /></div>
@@ -512,7 +523,6 @@ export default function HistorialPredios({
                             justifyContent: "flex-end", gap: "10px", borderTop: "1px solid #ddd",
                             position: "sticky", bottom: 0, zIndex: 10
                         }}>
-                            {/* Botón de Cambio de Dueño con SweetAlert2 (solo visible para empleados si el predio sigue activo) */}
                             {!esAdmin && !estaInhabilitado && (
                                 <button
                                     type="button"
@@ -539,20 +549,17 @@ export default function HistorialPredios({
                                 </button>
                             )}
 
-                            {/* Botón de Eliminar exclusivo de Admin (si aplica) */}
                             {esAdmin && (
                                 <button type="button" onClick={eliminarDefinitivoReal} disabled={cargandoAccion} style={{ ...estiloBoton, backgroundColor: "#ce3a3a" }}>
                                     ELIMINAR
                                 </button>
                             )}
 
-                            {/* Botón de Editar / Guardar Cambios (bloqueado si está inhabilitado) */}
                             {!estaInhabilitado && (
                                 <button 
                                     type="button" 
                                     onClick={() => {
                                         if (editando) {
-                                            // 1. Mostramos la animación de carga antes de ejecutar guardarCambiosReal
                                             Swal.fire({
                                                 title: "Procesando...",
                                                 text: "Por favor, espere un momento.",
@@ -574,7 +581,6 @@ export default function HistorialPredios({
                                 </button>
                             )}
 
-                            {/* Botón Salir */}
                             <button type="button" onClick={() => { setMostrarModal(false); setEditando(false); }} style={{ ...estiloBoton, backgroundColor: "#374151" }}>
                                 SALIR DE FICHA
                             </button>

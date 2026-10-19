@@ -35,6 +35,15 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
         setPaginaActual(1);
     }, [busqueda]);
 
+    // Función auxiliar para formatear ortográficamente el texto del municipio en la vista
+    const formatearMunicipio = (texto) => {
+        if (!texto) return "N/A";
+        return texto
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/(^\w{1})|(\s+\w{1})/g, (letra) => letra.toUpperCase());
+    };
+
     // 2. Validación de carga idéntica a las demás vistas
     if (cargando) {
         return (
@@ -89,12 +98,12 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7.5);
         doc.setTextColor(...verdeBarinas);
-        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
+        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRAS", 204, 10, { align: "right" });
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
         doc.setTextColor(100, 100, 100);
-        doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
+        doc.text("MPPAT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
 
         const fechaEmision = predio.fecha_registro
             ? new Date(predio.fecha_registro).toLocaleDateString()
@@ -107,8 +116,19 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
+
+        // 1. Imprimir la etiqueta en color verde
         doc.setTextColor(...verdeBarinas);
-        doc.text(`FICHA TÉCNICA INTEGRAL: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`, 12, 33);
+        const tituloVerde = "FICHA TÉCNICA INTEGRAL: ";
+        doc.text(tituloVerde, 12, 33);
+
+        // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
+        const anchoTituloVerde = doc.getTextWidth(tituloVerde);
+
+        // 3. Imprimir el nombre del predio en color negro
+        doc.setTextColor(0, 0, 0);
+        const nombreNegro = (predio.nombre_predio || "SIN NOMBRE").toUpperCase();
+        doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
 
         let currentY = 40;
 
@@ -153,7 +173,7 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
 
         const datosUbicacion = [
             [
-                "MUNICIPIO:", predio.municipio || "N/A",
+                "MUNICIPIO:", formatearMunicipio(predio.municipio),
                 "PARROQUIA:", predio.parroquia || "N/A",
                 "COMUNIDAD:", predio.comunidad || "N/A"
             ]
@@ -360,7 +380,8 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{numeroFila}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
-                                        <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
+                                        {/* Municipio formateado correctamente en la tabla de reportes */}
+                                        <td style={{ fontSize: "13px", padding: "12px" }}>{formatearMunicipio(p.municipio)}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>
                                             <span style={{
                                                 padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "600",

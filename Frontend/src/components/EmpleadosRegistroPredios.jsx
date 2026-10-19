@@ -1,3 +1,4 @@
+// src/components/EmpleadosRegistroPredios.jsx
 import React from "react";
 import {
     grid3,
@@ -38,6 +39,18 @@ export default function EmpleadosRegistroPredios({
         municipioEmpleado,
         prefijoCedula
     });
+
+    // Función para abrir Google Maps con las coordenadas actuales
+    const abrirGoogleMaps = () => {
+        const coordenadas = formData.coordenadas ? formData.coordenadas.trim() : "";
+        if (coordenadas) {
+            // Abre Google Maps buscando directamente las coordenadas escritas
+            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coordenadas)}`, "_blank");
+        } else {
+            // Si está vacío, abre Google Maps de manera genérica
+            window.open("https://www.google.com/maps", "_blank");
+        }
+    };
 
     return (
         <div style={{ maxWidth: "950px", margin: "0 auto" }}>
@@ -138,7 +151,12 @@ export default function EmpleadosRegistroPredios({
                     <InputField
                         label="Municipio"
                         name="municipio"
-                        value={municipioEmpleado || formData.municipio || ""}
+                        value={
+                            (municipioEmpleado || formData.municipio || "")
+                                .replace(/_/g, " ") // Reemplaza los guiones bajos por espacios
+                                .toLowerCase()
+                                .replace(/(^\w{1})|(\s+\w{1})/g, letra => letra.toUpperCase()) // Convierte la primera letra en mayúscula
+                        }
                         disabled={true}
                     />
 
@@ -165,14 +183,67 @@ export default function EmpleadosRegistroPredios({
                         onChange={manejarCambio}
                         error={errors.centro_poblado}
                     />
-                    <InputField
-                        label="Coordenadas (Latitud, Longitud)"
-                        name="coordenadas"
-                        value={formData.coordenadas || ""}
-                        placeholder="Ej: 8.097364, -69.312631"
-                        onChange={manejarCambio}
-                        error={errors.coordenadas}
-                    />
+
+                    {/* Celda de Coordenadas con el botón Maps justo al lado */}
+                    <div>
+                        <label style={{ ...labelStyle, whiteSpace: "nowrap" }}>
+                            Coordenadas (Latitud, Longitud)
+                        </label>
+                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                            <input
+                                type="text"
+                                name="coordenadas"
+                                value={formData.coordenadas || ""}
+                                placeholder="Ej: 8.097364, -69.312631"
+                                onChange={manejarCambio}
+                                style={{
+                                    flex: 1,
+                                    padding: "12px",
+                                    borderRadius: "10px",
+                                    border: errors.coordenadas ? "1.5px solid #ef4444" : "1px solid #e2e8f0",
+                                    fontSize: "14px",
+                                    outline: "none",
+                                    backgroundColor: "#f8fafc",
+                                    boxSizing: "border-box"
+                                }}
+                            />
+                            <button
+                                type="button"
+                                onClick={abrirGoogleMaps}
+                                title="Abrir ubicación en Google Maps"
+                                style={{
+                                    backgroundColor: "#136442",
+                                    color: "#ffffff",
+                                    border: "none",
+                                    borderRadius: "10px",
+                                    height: "44px",
+                                    padding: "0 14px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: "4px",
+                                    cursor: "pointer",
+                                    fontWeight: "600",
+                                    fontSize: "13px",
+                                    flexShrink: 0,
+                                    transition: "background 0.2s"
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#0f4d34"}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#136442"}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>Maps</span>
+                            </button>
+                        </div>
+                        {errors.coordenadas && (
+                            <p style={{ color: "#ef4444", fontSize: "11px", marginTop: "5px", fontWeight: "600" }}>
+                                {errors.coordenadas}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </FormSection>
 

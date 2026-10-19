@@ -1,19 +1,32 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 
-export function useHistorialPredios(listaPredios = []) {
+export function useHistorialPredios(listaPredios = [], municipioEmpleado = "") {
     const [busqueda, setBusqueda] = useState("");
     const [predioSeleccionado, setPredioSeleccionado] = useState(null);
     const [mostrarModal, setMostrarModal] = useState(false);
     const [editando, setEditando] = useState(false);
     const [cargandoAccion, setCargandoAccion] = useState(false);
 
-    // 1. Filtrar la lista en tiempo real
+    // Función auxiliar para normalizar textos y comparar sin errores por mayúsculas o espacios
+    const normalizarTexto = (texto) => (texto || "").replace(/_/g, " ").trim().toLowerCase();
+
+    // 1. Filtrar la lista en tiempo real por Municipio y Término de búsqueda
     const prediosFiltrados = listaPredios.filter((p) => {
+        const municipioFiltroNormalizado = normalizarTexto(municipioEmpleado);
+        const municipioPredioNormalizado = normalizarTexto(p.municipio);
+
+        // Si hay un municipio de empleado definido, filtramos estrictamente por él
+        const coincideMunicipio = municipioFiltroNormalizado 
+            ? municipioPredioNormalizado === municipioFiltroNormalizado 
+            : true;
+
         const term = busqueda.toLowerCase();
         const nombrePredio = p.nombre_predio?.toLowerCase() || "";
         const nombreProductor = p.productor?.nombre?.toLowerCase() || "";
-        return nombrePredio.includes(term) || nombreProductor.includes(term);
+        const coincideBusqueda = nombrePredio.includes(term) || nombreProductor.includes(term);
+
+        return coincideMunicipio && coincideBusqueda;
     });
 
     // 2. Abrir el detalle del predio
@@ -76,14 +89,13 @@ export function useHistorialPredios(listaPredios = []) {
                     usuarioAccion = "Administrador";
                 }
             } else {
-                // Si es un empleado, intentamos obtener su municipio actual o sesión
-                const empleadoMunicipio = sessionStorage.getItem("municipio_empleado") || window.municipioActualParaBitacora || "Barinas";
+                const empleadoMunicipio = sessionStorage.getItem("municipio_empleado") || window.municipioActualParaBitacora || municipioEmpleado || "Barinas";
                 usuarioAccion = `Empleado (${empleadoMunicipio})`;
             }
 
             const datosAEnviar = {
                 ...predioSeleccionado,
-                usuario: usuarioAccion // <--- Enviará "Empleado (Barinas)" o el municipio correspondiente
+                usuario: usuarioAccion
             };
 
             const response = await fetch(`http://127.0.0.1:8000/api/predios/${predioSeleccionado.id_predio}/`, {

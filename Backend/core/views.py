@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Predio, LicenciaHierro, Productor, Noticia
 from .serializers import PredioSerializer, LicenciaHierroSerializer
-from .models import Predio, RubroVegetal, ExistenciaAnimal, Maquinaria
+from .models import Predio, RubroVegetal, ExistenciaAnimal, Maquinaria, Infraestructura, Produccion, PredioServicio, Servicio
 from rest_framework import status
 from django.contrib.auth.hashers import make_password, check_password
 from .models import AdministradorSistema
@@ -18,6 +18,231 @@ from .models import Noticia, NoticiaPendiente, BitacoraAuditoria
 from .serializers import BitacoraAuditoriaSerializer
 from django.core.mail import EmailMessage
 from .models import ConfiguracionContacto
+from django.core.cache import cache
+
+
+
+@api_view(['POST'])
+def solicitar_reinicio_sistema(request):
+    usuario = request.data.get('usuario')
+    clave = request.data.get('clave')
+    
+    if not usuario or not clave:
+        return Response({"error": "Usuario y contraseña requeridos."}, status=400)
+        
+    try:
+        admin = AdministradorSistema.objects.get(usuario=usuario)
+        if not check_password(clave, admin.clave):
+            return Response({"error": "Contraseña de administrador incorrecta."}, status=400)
+    except AdministradorSistema.DoesNotExist:
+        return Response({"error": "Administrador no encontrado."}, status=404)
+        
+    # Generar código de 6 dígitos
+    codigo = str(random.randint(100000, 999999))
+    contacto = ConfiguracionContacto.objects.first()
+    correo_destino = contacto.correo if contacto else "agrosistema@barinas.gob.ve"
+    
+    asunto = "Código de validación - MPPAT (Reinicio de Sistema)"
+    
+    # Cuerpo alternativo en texto plano
+    cuerpo_texto = (
+        f"Estimado administrador,\n\n"
+        f"Se ha solicitado el reinicio de la base de datos del sistema. Su código de confirmación es: {codigo}\n\n"
+        f"Por favor, ingrese este código en la pantalla del sistema para validar la operación.\n"
+        f"No comparta este código con nadie.\n\n"
+        f"Atentamente,\n"
+        f"Ministerio del Poder Popular para la Agricultura Productiva y Tierras (MPPAT)"
+    )
+
+    # Cuerpo formateado en HTML con la misma plantilla institucional
+    cuerpo_html = f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {{
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                background-color: #f4f6f8;
+                margin: 0;
+                padding: 0;
+                -webkit-font-smoothing: antialiased;
+            }}
+            .email-wrapper {{
+                max-width: 600px;
+                margin: 30px auto;
+                background-color: #ffffff;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+                border: 1px solid #e2e8f0;
+            }}
+            .email-header {{
+                background-color: #136442;
+                padding: 24px;
+                text-align: center;
+                color: #ffffff;
+            }}
+            .email-header h3 {{
+                margin: 0;
+                font-size: 18px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+            }}
+            .email-header p {{
+                margin: 5px 0 0;
+                font-size: 12px;
+                color: #a7f3d0;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }}
+            .email-body {{
+                padding: 32px 24px;
+                color: #334155;
+            }}
+            .email-body p {{
+                margin: 0 0 16px;
+                font-size: 15px;
+                line-height: 1.6;
+            }}
+            .code-container {{
+                text-align: center;
+                margin: 30px 0;
+            }}
+            .code-box {{
+                display: inline-block;
+                background-color: #f0fdf4;
+                border: 2px dashed #136442;
+                color: #136442;
+                font-size: 32px;
+                font-weight: 800;
+                letter-spacing: 6px;
+                padding: 14px 28px;
+                border-radius: 10px;
+            }}
+            .alert-text {{
+                font-size: 13px;
+                color: #64748b;
+                background-color: #f8fafc;
+                padding: 12px 16px;
+                border-radius: 8px;
+                border-left: 4px solid #136442;
+                margin-top: 20px;
+            }}
+            .email-footer {{
+                background-color: #f8fafc;
+                padding: 20px 24px;
+                text-align: center;
+                font-size: 12px;
+                color: #94a3b8;
+                border-top: 1px solid #e2e8f0;
+            }}
+            .email-footer strong {{
+                color: #136442;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="email-wrapper">
+            <!-- Encabezado Institucional -->
+            <div class="email-header">
+                <h3>MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRA</h3>
+                <p>(MPPAT)</p>
+            </div>
+            
+            <!-- Contenido Principal -->
+            <div class="email-body">
+                <p>Estimado/a administrador/a,</p>
+                <p>Hemos recibido una solicitud crítica para reiniciar la base de datos del sistema. Utilice el siguiente código de confirmación:</p>
+                
+                <!-- Caja del Código -->
+                <div class="code-container">
+                    <div class="code-box">{codigo}</div>
+                </div>
+                
+                <p>Por favor, ingrese este código numérico en la pantalla del sistema para completar el procedimiento.</p>
+                
+                <div class="alert-text">
+                    <strong>Aviso de seguridad:</strong> Esta acción borrará permanentemente todos los registros operacionales. No comparta este código con ninguna persona.
+                </div>
+            </div>
+            
+            <!-- Pie de página -->
+            <div class="email-footer">
+                <p>Atentamente,<br><strong>Sistema Digital Agropecuario - Estado Barinas</strong></p>
+                <p style="margin-top: 10px; font-size: 11px;">Este es un mensaje automático, por favor no responda a este correo.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    try:
+        email = EmailMessage(
+            subject=asunto,
+            body=cuerpo_texto,
+            from_email=None,
+            to=[correo_destino]
+        )
+        email.content_subtype = "html"
+        email.body = cuerpo_html
+        
+        email.send(fail_silently=False)
+    except Exception as e:
+        return Response({"error": f"No se pudo enviar el correo de verificación: {str(e)}"}, status=500)
+        
+    # Guardar en caché por 5 minutos
+    cache.set(f"reset_code_{usuario}", codigo, timeout=300)
+    
+    return Response({
+        "success": True, 
+        "mensaje": f"Código enviado al correo {correo_destino}"
+    }, status=200)
+
+@api_view(['POST'])
+def ejecutar_reinicio_sistema(request):
+    usuario = request.data.get('usuario')
+    codigo = request.data.get('codigo')
+    
+    if not usuario or not codigo:
+        return Response({"error": "Usuario y código de verificación requeridos."}, status=400)
+        
+    codigo_guardado = cache.get(f"reset_code_{usuario}")
+    
+    if not codigo_guardado or str(codigo_guardado) != str(codigo):
+        return Response({"error": "Código de verificación incorrecto o expirado."}, status=400)
+        
+    try:
+        # Vaciar tablas operacionales de la base de datos
+        Predio.objects.all().delete()
+        Productor.objects.all().delete()
+        Noticia.objects.all().delete()
+        NoticiaPendiente.objects.all().delete()
+        BitacoraAuditoria.objects.all().delete()
+        LicenciaHierro.objects.all().delete()
+        RubroVegetal.objects.all().delete()
+        ExistenciaAnimal.objects.all().delete()
+        Maquinaria.objects.all().delete()
+        Infraestructura.objects.all().delete()
+        Produccion.objects.all().delete()
+        PredioServicio.objects.all().delete()
+        Servicio.objects.all().delete()
+        
+        # Limpiar caché del código usado
+        cache.delete(f"reset_code_{usuario}")
+        
+        # Registrar acción final de auditoría
+        BitacoraAuditoria.objects.create(
+            usuario=usuario,
+            accion="ELIMINAR",
+            modulo="Sistema",
+            descripcion="Se reinició el sistema y se vació la base de datos por completo."
+        )
+        
+        return Response({"success": True, "mensaje": "Sistema reiniciado exitosamente. Base de datos en blanco."}, status=200)
+    except Exception as e:
+        return Response({"error": f"Error al reiniciar el sistema: {str(e)}"}, status=500)
+
 
 
 class BitacoraAuditoriaViewSet(viewsets.ReadOnlyModelViewSet):
@@ -34,10 +259,12 @@ def buscar_productor(request, cedula):
             "existe": True,
             "nombre": productor.nombre,
             "telefono": productor.telefono,
-            "cedula_rif": productor.cedula_rif  # <-- agregado
+            "correo": productor.correo,        # <-- Asegúrate de incluir esta línea
+            "cedula_rif": productor.cedula_rif
         })
     except Productor.DoesNotExist:
         return Response({"existe": False}, status=404)
+    
 
 
 class PredioViewSet(viewsets.ModelViewSet):
@@ -64,11 +291,14 @@ class PredioViewSet(viewsets.ModelViewSet):
             'usuario') or self.request.data.get('rol') or 'Empleado'
         predio = serializer.save()
 
+        # Formateamos el municipio solo para la descripción (ej: "alberto_arvelo" -> "Alberto Arvelo")
+        municipio_formateado = (predio.municipio or "").replace("_", " ").title()
+
         BitacoraAuditoria.objects.create(
             usuario=usuario,
             accion="CREAR",
             modulo="Predios",
-            descripcion=f"Se registró el predio '{predio.nombre_predio}', ubicado en {predio.municipio}"
+            descripcion=f"Se registró el predio '{predio.nombre_predio}', ubicado en {municipio_formateado}"
         )
 
     def perform_update(self, serializer):
@@ -240,9 +470,12 @@ class LicenciaHierroViewSet(viewsets.ModelViewSet):
         # Obtenemos el nombre y municipio del predio asociado de forma segura
         predio = licencia.predio
         nombre_predio = predio.nombre_predio if predio else "Desconocido"
-        nombre_municipio = predio.municipio if (predio and predio.municipio) else "Sin municipio"
+        municipio_raw = predio.municipio if (predio and predio.municipio) else "Sin municipio"
         
-        # Combinamos el empleado con su municipio para que quede registrado en la bitácora
+        # Formateamos el municipio solo para visualización en la bitácora
+        nombre_municipio = municipio_raw.replace("_", " ").title() if municipio_raw != "Sin municipio" else "Sin municipio"
+        
+        # Combinamos el empleado con su municipio formateado para que quede registrado en la bitácora
         usuario_con_municipio = f"{nombre_empleado} ({nombre_municipio})"
 
         BitacoraAuditoria.objects.create(
@@ -256,13 +489,16 @@ class LicenciaHierroViewSet(viewsets.ModelViewSet):
         # Capturamos el empleado y el rol de manera segura
         nombre_empleado = self.request.data.get('empleado') or self.request.data.get('usuario') or self.request.data.get('rol') or 'Empleado'
         
-        # Corregido: Guardamos la licencia correctamente
+        # Guardamos la licencia correctamente
         licencia = serializer.save()
         
         # Obtenemos el predio desde la licencia
         predio = licencia.predio
         nombre_predio = predio.nombre_predio if predio else "Desconocido"
-        nombre_municipio = predio.municipio if (predio and predio.municipio) else "Sin municipio"
+        municipio_raw = predio.municipio if (predio and predio.municipio) else "Sin municipio"
+        
+        # Formateamos el municipio solo para visualización en la bitácora
+        nombre_municipio = municipio_raw.replace("_", " ").title() if municipio_raw != "Sin municipio" else "Sin municipio"
         
         usuario_con_municipio = f"{nombre_empleado} ({nombre_municipio})"
 
@@ -288,7 +524,7 @@ class LicenciaHierroViewSet(viewsets.ModelViewSet):
             usuario=usuario_con_municipio,
             accion="ELIMINAR",
             modulo="Producción - Licencia de Hierro",
-            descripcion=f"Se eliminó la licencia de hierro del predio '{nombre_predio}' del municipio {nombre_municipio}"
+            descripcion=f"Se eliminó la licencia de hierro del predio '{nombre_predio}'"
         )
 
 @api_view(['POST'])

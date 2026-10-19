@@ -269,12 +269,21 @@ const generarPDFPredioBlob = (predio) => {
     doc.setLineWidth(0.6);
     doc.line(12, 25, 204, 25);
 
-    // Título central
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(...verdeBarinas);
-    const tituloFicha = `FICHA TÉCNICA: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`;
-    doc.text(tituloFicha, 12, 34);
+doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+
+        // 1. Imprimir la etiqueta en color verde
+        doc.setTextColor(...verdeBarinas);
+        const tituloVerde = "FICHA TÉCNICA INTEGRAL: ";
+        doc.text(tituloVerde, 12, 33);
+
+        // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
+        const anchoTituloVerde = doc.getTextWidth(tituloVerde);
+
+        // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
+        doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
+        const nombreNegro = (predio.nombre_predio || "SIN NOMBRE").toUpperCase();
+        doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
 
     let currentY = 42;
 

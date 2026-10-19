@@ -5,6 +5,15 @@ import autoTable from 'jspdf-autotable';
 export const useReportes = (prediosOriginales = []) => {
     const [busqueda, setBusqueda] = useState("");
 
+    // Función auxiliar para formatear ortográficamente el texto del municipio en el reporte PDF
+    const formatearMunicipio = (texto) => {
+        if (!texto) return "N/A";
+        return texto
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/(^\w{1})|(\s+\w{1})/g, (letra) => letra.toUpperCase());
+    };
+
     // Filtrar predios basados en el nombre del predio o del productor
     const prediosFiltrados = useMemo(() => {
         if (!busqueda.trim()) return prediosOriginales;
@@ -50,7 +59,7 @@ export const useReportes = (prediosOriginales = []) => {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
         doc.setTextColor(100, 100, 100);
-        doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
+        doc.text("MPPAT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
 
         const fechaEmision = predio.fecha_registro
             ? new Date(predio.fecha_registro).toLocaleDateString()
@@ -61,12 +70,21 @@ export const useReportes = (prediosOriginales = []) => {
         doc.setLineWidth(0.6);
         doc.line(12, 25, 204, 25);
 
-        // Título central
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(13);
+        doc.setFontSize(12);
+
+        // 1. Imprimir la etiqueta en color verde
         doc.setTextColor(...verdeBarinas);
-        const tituloFicha = `FICHA TÉCNICA: ${(predio.nombre_predio || "SIN NOMBRE").toUpperCase()}`;
-        doc.text(tituloFicha, 12, 34);
+        const tituloVerde = "FICHA TÉCNICA INTEGRAL: ";
+        doc.text(tituloVerde, 12, 33);
+
+        // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
+        const anchoTituloVerde = doc.getTextWidth(tituloVerde);
+
+        // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
+        doc.setTextColor(0, 0, 0);
+        const nombreNegro = (predio.nombre_predio || "SIN NOMBRE").toUpperCase();
+        doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
 
         let currentY = 42;
 
@@ -99,7 +117,7 @@ export const useReportes = (prediosOriginales = []) => {
             margin: { left: 12, right: 12 }
         });
 
-        // II. Datos del predio (En celdas / grid)
+        // II. Datos del predio (En celdas / grid) con Municipio formateado
         currentY = doc.lastAutoTable.finalY + 7;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(10);
@@ -108,7 +126,7 @@ export const useReportes = (prediosOriginales = []) => {
         doc.line(12, currentY + 2, 204, currentY + 2);
 
         const datosPredio = [
-            ["Municipio:", predio.municipio || "N/A", "Parroquia:", predio.parroquia || "N/A"],
+            ["Municipio:", formatearMunicipio(predio.municipio), "Parroquia:", predio.parroquia || "N/A"],
             ["Comunidad / Sector:", predio.comunidad || "N/A", "Centro Poblado:", predio.centro_poblado || "N/A"],
             ["Superficie Total (Ha):", predio.superficie ? `${predio.superficie} Ha` : "0.00 Ha", "Coordenadas (Latitud/Longitud)", predio.coordenadas || "N/A"],
             ["Tipo de Propiedad:", predio.tipo_propiedad || "N/A", "Tenencia de Tierra:", predio.tenencia || "N/A"],

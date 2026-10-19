@@ -5,7 +5,10 @@ import DocumentChartBarIcon from "@heroicons/react/24/solid/DocumentChartBarIcon
 import Cog6ToothIcon from "@heroicons/react/24/solid/Cog6ToothIcon";
 import ClipboardDocumentListIcon from "@heroicons/react/24/solid/ClipboardDocumentListIcon";
 import NewspaperIcon from "@heroicons/react/24/solid/NewspaperIcon";
-import EnvelopeIcon from "@heroicons/react/24/solid/EnvelopeIcon"; // Icono para Contacto
+import EnvelopeIcon from "@heroicons/react/24/solid/EnvelopeIcon";
+import TrashIcon from "@heroicons/react/24/solid/TrashIcon"; // Icono de advertencia/reinicio
+import Swal from 'sweetalert2';
+import axios from 'axios';
 
 export const AdminSidebar = ({
     adminData,
@@ -18,7 +21,6 @@ export const AdminSidebar = ({
     ClockIcon,
     PowerIcon,
 }) => {
-    // Estado para controlar si el menú desplegable de Predios está abierto o cerrado
     const [prediosAbierto, setPrediosAbierto] = useState(
         vistaActiva === "inicio" ||
         vistaActiva === "historial" ||
@@ -27,22 +29,106 @@ export const AdminSidebar = ({
         vistaActiva === "predios"
     );
 
-    // Estado para controlar si el menú desplegable de Producción está abierto o cerrado
     const [produccionAbierto, setProduccionAbierto] = useState(
         vistaActiva === "produccion_dashboard" ||
         vistaActiva === "guias_movilizacion" ||
         vistaActiva === "produccion_reportes"
     );
 
-    // Estado para controlar si el menú desplegable de Configuración está abierto o cerrado (incluye "contacto")
+    // Incluimos "reiniciar_sistema" dentro de las rutas activas de configuración
     const [configuracionAbierto, setConfiguracionAbierto] = useState(
         vistaActiva === "configuracion" ||
         vistaActiva === "credenciales" ||
         vistaActiva === "bitacora" ||
         vistaActiva === "noticias" ||
         vistaActiva === "notificaciones_noticias" ||
-        vistaActiva === "contacto"
+        vistaActiva === "contacto" ||
+        vistaActiva === "reiniciar_sistema"
     );
+
+    // ── FUNCIÓN PARA REINICIAR EL SISTEMA ──
+    const handleReiniciarSistema = async () => {
+        const usernameAdmin = adminData?.usuario || "admin";
+
+        // Paso 1: Pedir contraseña del administrador
+        const { value: password } = await Swal.fire({
+            title: '⚠️ Advertencia Crítica',
+            text: 'Esta acción borrará TODOS los datos del sistema (predios, productores, bitácora, etc.). Ingrese su contraseña de administrador para continuar:',
+            input: 'password',
+            inputPlaceholder: 'Contraseña de administrador',
+            inputAttributes: { autocapitalize: 'off', autocorrect: 'off' },
+            showCancelButton: true,
+            confirmButtonText: 'Continuar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b'
+        });
+
+        if (!password) return;
+
+        Swal.fire({
+            title: 'Verificando credenciales...',
+            text: 'Por favor espere mientras enviamos el código de verificación al correo.',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        try {
+            // Paso 2: Solicitar envío de código al correo mediante la API
+            await axios.post("http://127.0.0.1:8000/api/reiniciar/solicitar/", {
+                usuario: usernameAdmin,
+                clave: password
+            });
+
+            Swal.close();
+
+            // Paso 3: Pedir código de verificación de 6 dígitos
+            const { value: codigoVerificacion } = await Swal.fire({
+                title: 'Código de Verificación Enviado',
+                text: `Se ha enviado un código de confirmación al correo institucional. Ingréselo a continuación:`,
+                input: 'text',
+                inputPlaceholder: 'Ej: 123456',
+                showCancelButton: true,
+                confirmButtonText: 'Verificar y Reiniciar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b'
+            });
+
+            if (!codigoVerificacion) return;
+
+            Swal.fire({
+                title: 'Reiniciando Sistema...',
+                text: 'Vaciando la base de datos, por favor no cierre esta ventana.',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            // Paso 4: Ejecutar el reinicio definitivo de la base de datos
+            await axios.post("http://127.0.0.1:8000/api/reiniciar/ejecutar/", {
+                usuario: usernameAdmin,
+                codigo: codigoVerificacion
+            });
+
+            await Swal.fire({
+                icon: 'success',
+                title: '¡Sistema Reiniciado!',
+                text: 'La base de datos se ha vaciado correctamente. El sistema se cerrará por seguridad.',
+                confirmButtonColor: '#136442'
+            });
+
+            cerrarSesion();
+
+        } catch (error) {
+            const mensajeError = error.response?.data?.error || "Ocurrió un error al procesar la solicitud.";
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de Validación',
+                text: mensajeError,
+                confirmButtonColor: '#dc2626'
+            });
+        }
+    };
 
     return (
         <aside style={{
@@ -58,7 +144,7 @@ export const AdminSidebar = ({
             boxSizing: "border-box",
             overflow: "hidden"
         }}>
-            {/* Encabezado: Info del Usuario (Fijo arriba) */}
+            {/* Encabezado: Info del Usuario */}
             <div style={{
                 display: "flex",
                 alignItems: "center",
@@ -103,7 +189,6 @@ export const AdminSidebar = ({
                 </div>
             </div>
 
-
             {/* Navegación de Opciones */}
             <div style={{
                 display: "flex",
@@ -126,8 +211,6 @@ export const AdminSidebar = ({
                             fontWeight: 500,
                             fontSize: "14px"
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                     >
                         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                             {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />}
@@ -143,7 +226,6 @@ export const AdminSidebar = ({
                         }} />
                     </div>
 
-                    {/* Submenú desplegable de Predios */}
                     {prediosAbierto && (
                         <div style={{
                             display: "flex",
@@ -161,12 +243,9 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "inicio" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "inicio" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "inicio" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
+                                    fontSize: "13px"
                                 }}
                             >
-                                {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
                                 <span>Dashboard</span>
                             </div>
 
@@ -177,12 +256,9 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "historial" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "historial" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "historial" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
+                                    fontSize: "13px"
                                 }}
                             >
-                                {ClockIcon && <ClockIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
                                 <span>Historial</span>
                             </div>
 
@@ -193,12 +269,9 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "georreferenciacion" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "georreferenciacion" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "georreferenciacion" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
+                                    fontSize: "13px"
                                 }}
                             >
-                                <MapPinIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Georreferenciación</span>
                             </div>
 
@@ -209,12 +282,9 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "reportes" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "reportes" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "reportes" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
+                                    fontSize: "13px"
                                 }}
                             >
-                                <DocumentChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Reportes</span>
                             </div>
                         </div>
@@ -228,14 +298,10 @@ export const AdminSidebar = ({
                         style={{
                             display: "flex", alignItems: "center", justifyContent: "space-between",
                             padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
-                            transition: "all 0.25s ease",
                             backgroundColor: "transparent",
                             color: "#86efac",
-                            fontWeight: 500,
                             fontSize: "14px"
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                     >
                         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                             <DocumentChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
@@ -251,7 +317,6 @@ export const AdminSidebar = ({
                         }} />
                     </div>
 
-                    {/* Submenú desplegable de Producción */}
                     {produccionAbierto && (
                         <div style={{
                             display: "flex",
@@ -269,15 +334,11 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "produccion_dashboard" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "produccion_dashboard" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "produccion_dashboard" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
+                                    fontSize: "13px"
                                 }}
                             >
-                                {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
                                 <span>Dashboard Producción</span>
                             </div>
-
 
                             <div
                                 onClick={() => setVistaActiva("produccion_reportes")}
@@ -286,56 +347,41 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "produccion_reportes" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "produccion_reportes" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "produccion_reportes" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
+                                    fontSize: "13px"
                                 }}
                             >
-                                <DocumentChartBarIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Reportes</span>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* OPCIÓN INDEPENDIENTE FUERA DE TODO: Reportes Generales */}
+                {/* OPCIÓN INDEPENDIENTE: Reportes Generales */}
                 <div
                     onClick={() => setVistaActiva("reportes_generales")}
                     style={{
                         display: "flex", alignItems: "center", gap: "12px",
                         padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
-                        transition: "all 0.25s ease",
                         backgroundColor: vistaActiva === "reportes_generales" ? "rgba(255,255,255,0.15)" : "transparent",
                         color: vistaActiva === "reportes_generales" ? "#ffffff" : "#86efac",
-                        fontWeight: vistaActiva === "reportes_generales" ? 600 : 500,
                         fontSize: "14px"
-                    }}
-                    onMouseEnter={(e) => {
-                        if (vistaActiva !== "reportes_generales") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                    }}
-                    onMouseLeave={(e) => {
-                        if (vistaActiva !== "reportes_generales") e.currentTarget.style.backgroundColor = "transparent";
                     }}
                 >
                     <DocumentChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
                     <span>Reportes Generales</span>
                 </div>
 
-                {/* MENÚ PRINCIPAL: Configuración */}
+                {/* MENÚ PRINCIPAL: Configuración (Incluye Reiniciar Sistema) */}
                 <div>
                     <div
                         onClick={() => setConfiguracionAbierto(!configuracionAbierto)}
                         style={{
                             display: "flex", alignItems: "center", justifyContent: "space-between",
                             padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
-                            transition: "all 0.25s ease",
                             backgroundColor: "transparent",
                             color: "#86efac",
-                            fontWeight: 500,
                             fontSize: "14px"
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                     >
                         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                             <Cog6ToothIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
@@ -351,7 +397,6 @@ export const AdminSidebar = ({
                         }} />
                     </div>
 
-                    {/* Submenú desplegable de Configuración */}
                     {configuracionAbierto && (
                         <div style={{
                             display: "flex",
@@ -369,9 +414,7 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "configuracion" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "configuracion" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "configuracion" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
+                                    fontSize: "13px"
                                 }}
                             >
                                 <Cog6ToothIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
@@ -385,9 +428,7 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "credenciales" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "credenciales" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "credenciales" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
+                                    fontSize: "13px"
                                 }}
                             >
                                 {KeyIcon && <KeyIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
@@ -401,22 +442,13 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "noticias" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "noticias" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "noticias" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (vistaActiva !== "noticias") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (vistaActiva !== "noticias") e.currentTarget.style.backgroundColor = "transparent";
+                                    fontSize: "13px"
                                 }}
                             >
                                 <NewspaperIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
                                 <span>Credenciales Noticias</span>
                             </div>
 
-                            {/* Notificaciones Noticias */}
                             <div
                                 onClick={() => setVistaActiva("notificaciones_noticias")}
                                 style={{
@@ -424,16 +456,7 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "notificaciones_noticias" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "notificaciones_noticias" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "notificaciones_noticias" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s",
-                                    position: "relative"
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (vistaActiva !== "notificaciones_noticias") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (vistaActiva !== "notificaciones_noticias") e.currentTarget.style.backgroundColor = "transparent";
+                                    fontSize: "13px"
                                 }}
                             >
                                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -450,8 +473,7 @@ export const AdminSidebar = ({
                                         padding: "2px 6px",
                                         borderRadius: "9999px",
                                         minWidth: "20px",
-                                        textAlign: "center",
-                                        lineHeight: "1"
+                                        textAlign: "center"
                                     }}>
                                         {badgeCount}
                                     </span>
@@ -465,16 +487,13 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "bitacora" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "bitacora" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "bitacora" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
+                                    fontSize: "13px"
                                 }}
                             >
                                 <ClipboardDocumentListIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Bitácora de Cambios</span>
                             </div>
 
-                            {/* Contacto */}
                             <div
                                 onClick={() => setVistaActiva("contacto")}
                                 style={{
@@ -482,21 +501,31 @@ export const AdminSidebar = ({
                                     padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                                     backgroundColor: vistaActiva === "contacto" ? "rgba(255,255,255,0.15)" : "transparent",
                                     color: vistaActiva === "contacto" ? "#ffffff" : "#86efac",
-                                    fontWeight: vistaActiva === "contacto" ? 600 : 400,
-                                    fontSize: "13px",
-                                    transition: "background 0.2s"
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (vistaActiva !== "contacto") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (vistaActiva !== "contacto") e.currentTarget.style.backgroundColor = "transparent";
+                                    fontSize: "13px"
                                 }}
                             >
                                 <EnvelopeIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Contacto</span>
                             </div>
 
+                            {/* OPCIÓN: REINICIAR SISTEMA DENTRO DE CONFIGURACIÓN */}
+                            <div
+                                onClick={handleReiniciarSistema}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: "10px",
+                                    padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                    backgroundColor: "rgba(239, 68, 68, 0.15)",
+                                    color: "#fca5a5",
+                                    fontWeight: 600,
+                                    fontSize: "13px",
+                                    transition: "background 0.2s"
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.25)"}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.15)"}
+                            >
+                                <TrashIcon style={{ width: "21px", height: "21px", color: "#fca5a5" }} />
+                                <span>Reiniciar Sistema</span>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -509,8 +538,7 @@ export const AdminSidebar = ({
                     display: "flex", alignItems: "center", gap: "12px",
                     padding: "12px 14px", borderRadius: "10px", cursor: "pointer",
                     color: "#fca5a5", fontSize: "14px", fontWeight: 600,
-                    marginTop: "16px", flexShrink: 0,
-                    transition: "background 0.2s"
+                    marginTop: "16px", flexShrink: 0
                 }}
             >
                 {PowerIcon && <PowerIcon style={{ width: "20px", height: "20px", color: "#fca5a5" }} />}

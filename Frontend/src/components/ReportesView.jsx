@@ -39,6 +39,15 @@ export const ReportesView = ({ predios = [], cargando }) => {
         setPaginaActual(1);
     }, [busqueda]);
 
+    // Función auxiliar para formatear ortográficamente el texto del municipio en la vista
+    const formatearMunicipio = (texto) => {
+        if (!texto) return "N/A";
+        return texto
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/(^\w{1})|(\s+\w{1})/g, (letra) => letra.toUpperCase());
+    };
+
     // 2. Validación de carga idéntica a las demás vistas
     if (cargando) {
         return (
@@ -123,7 +132,8 @@ export const ReportesView = ({ predios = [], cargando }) => {
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{numeroFila}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
-                                        <td style={{ fontSize: "13px", padding: "12px" }}>{p.municipio}</td>
+                                        {/* Municipio formateado correctamente en la tabla */}
+                                        <td style={{ fontSize: "13px", padding: "12px" }}>{formatearMunicipio(p.municipio)}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>
                                             <button
