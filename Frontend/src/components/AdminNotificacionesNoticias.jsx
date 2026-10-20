@@ -3,9 +3,9 @@ import { Spinner } from "./ui/AdminUI";
 import CheckCircleIcon from "@heroicons/react/24/solid/CheckCircleIcon";
 import XCircleIcon from "@heroicons/react/24/solid/XCircleIcon";
 import DocumentTextIcon from "@heroicons/react/24/solid/DocumentTextIcon";
-import Swal from "sweetalert2"; // <--- 1. Importar SweetAlert2
+import Swal from "sweetalert2";
 
-export default function NotificacionesNoticias({ onActualizarConteo }) { // <--- 1. Recibe la prop aquí
+export default function NotificacionesNoticias({ onActualizarConteo }) {
     const [pendientes, setPendientes] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
@@ -48,7 +48,6 @@ export default function NotificacionesNoticias({ onActualizarConteo }) { // <---
             const data = await res.json();
             
             if (res.ok) {
-                // 👇 Actualizamos el contador antes de mostrar la alerta final si es necesario
                 if (onActualizarConteo) {
                     onActualizarConteo();
                 }
@@ -60,7 +59,6 @@ export default function NotificacionesNoticias({ onActualizarConteo }) { // <---
                     timer: 2000,
                     showConfirmButton: false
                 }).then(() => {
-                    // 🔄 Recarga la página automáticamente después de que se oculte el SweetAlert
                     window.location.reload();
                 });
 
@@ -117,11 +115,11 @@ export default function NotificacionesNoticias({ onActualizarConteo }) { // <---
                             padding: "16px", borderRadius: "8px", border: "1px solid #e2e8f0", backgroundColor: "#f8fafc"
                         }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                                <div>
-                                    <span style={{ fontSize: "11px", fontWeight: "600", color: "#136442", backgroundColor: "#dcfce7", padding: "2px 8px", borderRadius: "4px" }}>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                    <span style={{ fontSize: "11px", fontWeight: "600", color: "#136442", backgroundColor: "#dcfce7", padding: "2px 8px", borderRadius: "4px", width: "fit-content" }}>
                                         Enviado por: {item.empleado}
                                     </span>
-                                    <h4 style={{ fontSize: "16px", fontWeight: "700", color: "#0f172a", margin: "8px 0 4px 0" }}>
+                                    <h4 style={{ fontSize: "16px", fontWeight: "700", color: "#0f172a", margin: "4px 0 0 0" }}>
                                         {item.titulo}
                                     </h4>
                                 </div>
@@ -133,6 +131,13 @@ export default function NotificacionesNoticias({ onActualizarConteo }) { // <---
                             <p style={{ fontSize: "14px", color: "#475569", margin: 0, whiteSpace: "pre-wrap" }}>
                                 {item.descripcion}
                             </p>
+
+                            {/* Campo de Autor añadido */}
+                            <div>
+                                <span style={{ fontSize: "12px", color: "#136442", fontWeight: "600" }}>
+                                    Autor: {item.autor || "Redacción"}
+                                </span>
+                            </div>
 
                             {item.imagen && (
                                 <div>

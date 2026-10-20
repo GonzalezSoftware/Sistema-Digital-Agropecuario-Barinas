@@ -86,7 +86,7 @@ export default function PortalInformativo() {
                       cursor: "pointer"
                     }}
                   >
-                    {/* Contenedor de la Imagen: Se usa background oscuro para que si la imagen es vertical u horizontal, se vea completa */}
+                    {/* Contenedor de la Imagen */}
                     {item.imagen ? (
                       <div style={{ height: "190px", width: "100%", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                         <img 
@@ -102,19 +102,28 @@ export default function PortalInformativo() {
                     )}
 
                     {/* Contenido de la Tarjeta */}
-                    <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", flex: 1 }}>
-                      <span style={{ fontSize: "11px", color: "#589e38", fontWeight: "600", textTransform: "uppercase" }}>
-                        {new Date(item.fecha).toLocaleDateString()}
-                      </span>
-                      <h3 style={{ fontSize: "16px", color: "#1e293b", margin: 0, fontWeight: "600", lineHeight: "1.4" }}>
-                        {item.titulo}
-                      </h3>
-                      <p style={{ fontSize: "13px", color: "#64748b", margin: 0, lineHeight: "1.5", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                        {item.descripcion}
-                      </p>
-                      <span style={{ fontSize: "12px", color: "#2563eb", fontWeight: "600", marginTop: "8px" }}>
-                        Leer completo →
-                      </span>
+                    <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", flex: 1, justifyContent: "space-between" }}>
+                      <div>
+                        <span style={{ fontSize: "11px", color: "#589e38", fontWeight: "600", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
+                          {new Date(item.fecha).toLocaleDateString()}
+                        </span>
+                        <h3 style={{ fontSize: "16px", color: "#1e293b", margin: 0, fontWeight: "600", lineHeight: "1.4" }}>
+                          {item.titulo}
+                        </h3>
+                        <p style={{ fontSize: "13px", color: "#64748b", margin: "8px 0 0 0", lineHeight: "1.5", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                          {item.descripcion}
+                        </p>
+                      </div>
+
+                      {/* Autor y Leer completo al final de la tarjeta */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "12px" }}>
+                        <span style={{ fontSize: "12px", color: "#136442", fontWeight: "600" }}>
+                          Autor: {item.autor || "Redacción"}
+                        </span>
+                        <span style={{ fontSize: "12px", color: "#2563eb", fontWeight: "600" }}>
+                          Leer completo →
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -195,23 +204,30 @@ export default function PortalInformativo() {
 
               {/* Fecha y Título */}
               <div>
-                <span style={{ fontSize: "12px", color: "#589e38", fontWeight: "600", textTransform: "uppercase" }}>
+                <span style={{ fontSize: "12px", color: "#589e38", fontWeight: "600", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
                   Publicado el: {new Date(noticiaSeleccionada.fecha).toLocaleString()}
                 </span>
-                <h2 style={{ fontSize: "22px", color: "#1e293b", margin: "8px 0 0 0", lineHeight: "1.3" }}>
+                <h2 style={{ fontSize: "22px", color: "#1e293b", margin: 0, lineHeight: "1.3" }}>
                   {noticiaSeleccionada.titulo}
                 </h2>
               </div>
 
-              {/* Descripción completa (con saltos de línea preservados) */}
+              {/* Descripción completa */}
               <div style={{
                 fontSize: "15px",
                 color: "#475569",
                 lineHeight: "1.7",
-                whiteSpace: "pre-wrap", /* Mantiene los párrafos y saltos originales */
+                whiteSpace: "pre-wrap",
                 wordBreak: "break-word"
               }}>
                 {noticiaSeleccionada.descripcion}
+              </div>
+
+              {/* Autor al final del modal */}
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "15px", marginTop: "10px" }}>
+                <span style={{ fontSize: "13px", color: "#136442", fontWeight: "600" }}>
+                  Autor: {noticiaSeleccionada.autor || "Redacción"}
+                </span>
               </div>
 
             </div>

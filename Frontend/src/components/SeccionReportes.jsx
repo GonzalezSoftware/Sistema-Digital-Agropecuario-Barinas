@@ -89,8 +89,8 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
         const grisOscuro = [40, 40, 40];
 
         try {
-            doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
-            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
+            doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
         } catch (error) {
             console.warn("Logos institucionales omitidos.");
         }
@@ -240,7 +240,7 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
         if (Object.keys(existenciaAnimal).length > 0) {
             Object.entries(existenciaAnimal).forEach(([especie, detalleEspecie]) => {
                 if (!detalleEspecie || typeof detalleEspecie !== "object" || Object.keys(detalleEspecie).length === 0) return;
-                
+
                 bodySemovientes.push([{ content: `ESPECIE: ${especie.replace(/_/g, " ").toUpperCase()}`, colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
 
                 Object.entries(detalleEspecie).forEach(([subKey, subValue]) => {

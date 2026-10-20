@@ -3,15 +3,43 @@ import { Spinner } from "./ui/AdminUI";
 import ClockIcon from "@heroicons/react/24/solid/ClockIcon";
 import UserIcon from "@heroicons/react/24/solid/UserIcon";
 import DocumentTextIcon from "@heroicons/react/24/solid/DocumentTextIcon";
+import ArrowDownTrayIcon from "@heroicons/react/24/solid/ArrowDownTrayIcon";
+import Swal from "sweetalert2";
+import { generarPDFBitacora } from "./ReporteBitacoraPDF";
 
 export default function AdminBitacora() {
     const [registros, setRegistros] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [filtroModulo, setFiltroModulo] = useState("TODOS");
+    
+    // Estados para fechas
+    const [fechaInicio, setFechaInicio] = useState("");
+    const [fechaFin, setFechaFin] = useState("");
 
-    // Estados para la paginación
-    const [paginaActual, setPaginaActual] = useState(1);
-    const registrosPorPagina = 10;
+    // Fecha máxima permitida (Hoy en formato YYYY-MM-DD local)
+    const obtenerFechaLocalHoy = () => {
+        const hoy = new Date();
+        const anio = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        return `${anio}-${mes}-${dia}`;
+    };
+    const fechaMaxima = obtenerFechaLocalHoy();
+
+    // Obtener la fecha del primer registro histórico de la bitácora (en formato YYYY-MM-DD)
+    const obtenerFechaMinimaHistorica = () => {
+        if (!registros || registros.length === 0) return "";
+        // Como vienen ordenados o necesitamos el más antiguo, buscamos el menor timestamp
+        const fechasTimestamps = registros.map(item => new Date(item.fecha_hora).getTime());
+        const minTimestamp = Math.min(...fechasTimestamps);
+        const fechaMinima = new Date(minTimestamp);
+        
+        const anio = fechaMinima.getFullYear();
+        const mes = String(fechaMinima.getMonth() + 1).padStart(2, '0');
+        const dia = String(fechaMinima.getDate()).padStart(2, '0');
+        return `${anio}-${mes}-${dia}`;
+    };
+    const fechaMinimaPermitida = obtenerFechaMinimaHistorica();
 
     useEffect(() => {
         fetch("/api/bitacora/")
@@ -26,19 +54,110 @@ export default function AdminBitacora() {
             });
     }, []);
 
-    // Cada vez que cambie el filtro, regresamos a la página 1
     const manejarCambioFiltro = (e) => {
         setFiltroModulo(e.target.value);
         setPaginaActual(1);
     };
 
-    const registrosFiltrados = registros.filter(item => {
-        if (filtroModulo === "TODOS") return true;
-        
-        const normalizar = (texto) => 
-            (texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+    // Validaciones robustas de fechas con SweetAlert2
+    const validarFechas = (inicio, fin) => {
+        const hoyStr = fechaMaxima;
+        const primerRegistroStr = fechaMinimaPermitida;
 
-        return normalizar(item.modulo) === normalizar(filtroModulo);
+        if (inicio && inicio > hoyStr) {
+            Swal.fire({
+                title: 'Fecha no válida',
+                text: 'La fecha de inicio no puede ser posterior al día de hoy.',
+                icon: 'warning',
+                confirmButtonColor: '#136442'
+            });
+            return false;
+        }
+
+        if (fin && fin > hoyStr) {
+            Swal.fire({
+                title: 'Fecha no válida',
+                text: 'La fecha final no puede ser posterior al día de hoy.',
+                icon: 'warning',
+                confirmButtonColor: '#136442'
+            });
+            return false;
+        }
+
+        if (inicio && primerRegistroStr && inicio < primerRegistroStr) {
+            Swal.fire({
+                title: 'Fecha fuera de rango',
+                text: `No existen registros en la bitácora anteriores al ${primerRegistroStr.split('-').reverse().join('/')}.`,
+                icon: 'warning',
+                confirmButtonColor: '#136442'
+            });
+            return false;
+        }
+
+        if (inicio && fin && inicio > fin) {
+            Swal.fire({
+                title: 'Rango incorrecto',
+                text: 'La fecha de inicio no puede ser posterior a la fecha final.',
+                icon: 'warning',
+                confirmButtonColor: '#136442'
+            });
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleCambioFechaInicio = (e) => {
+        const nuevaFecha = e.target.value;
+        if (validarFechas(nuevaFecha, fechaFin)) {
+            setFechaInicio(nuevaFecha);
+            setPaginaActual(1);
+        } else {
+            e.target.value = fechaInicio; // Revertir input si falla
+        }
+    };
+
+    const handleCambioFechaFin = (e) => {
+        const nuevaFecha = e.target.value;
+        if (validarFechas(fechaInicio, nuevaFecha)) {
+            setFechaFin(nuevaFecha);
+            setPaginaActual(1);
+        } else {
+            e.target.value = fechaFin; // Revertir input si falla
+        }
+    };
+
+    const manejarExportarPDF = () => {
+        if (!validarFechas(fechaInicio, fechaFin)) return;
+        generarPDFBitacora(filtroModulo, fechaInicio, fechaFin, registros);
+    };
+
+    // Estados para la paginación
+    const [paginaActual, setPaginaActual] = useState(1);
+    const registrosPorPagina = 10;
+
+    // Filtrado de registros corrigiendo el desfase de zona horaria local
+    const registrosFiltrados = registros.filter(item => {
+        // Filtro por Módulo
+        if (filtroModulo !== "TODOS") {
+            const normalizar = (texto) => 
+                (texto || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+            if (normalizar(item.modulo) !== normalizar(filtroModulo)) return false;
+        }
+
+        // Filtro por Fechas (Usando fechas locales para evitar problemas de UTC / desfase de un día)
+        if (fechaInicio || fechaFin) {
+            const dItem = new Date(item.fecha_hora);
+            const anioI = dItem.getFullYear();
+            const mesI = String(dItem.getMonth() + 1).padStart(2, '0');
+            const diaI = String(dItem.getDate()).padStart(2, '0');
+            const fechaItemStr = `${anioI}-${mesI}-${diaI}`;
+
+            if (fechaInicio && fechaItemStr < fechaInicio) return false;
+            if (fechaFin && fechaItemStr > fechaFin) return false;
+        }
+
+        return true;
     });
 
     // Cálculos de paginación
@@ -57,7 +176,7 @@ export default function AdminBitacora() {
 
     return (
         <div style={{ backgroundColor: "#ffffff", padding: "24px", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "10px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "15px" }}>
                 <div>
                     <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", margin: 0 }}>
                         Historial de Movimientos y Auditoría
@@ -67,8 +186,10 @@ export default function AdminBitacora() {
                     </p>
                 </div>
 
-                {/* Filtro por Módulo */}
-                <div>
+                {/* Filtros y Botón de Exportar PDF */}
+                <div style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+                    
+                    {/* Filtro Módulo */}
                     <select
                         value={filtroModulo}
                         onChange={manejarCambioFiltro}
@@ -87,13 +208,63 @@ export default function AdminBitacora() {
                         <option value="Predios">Predios</option>
                         <option value="Produccion">Producción</option>
                     </select>
+
+                    {/* Fecha Desde */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                        <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>Desde:</span>
+                        <input
+                            type="date"
+                            value={fechaInicio}
+                            min={fechaMinimaPermitida}
+                            max={fechaMaxima}
+                            onChange={handleCambioFechaInicio}
+                            style={{ padding: "7px 10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px", backgroundColor: "#f8fafc" }}
+                        />
+                    </div>
+
+                    {/* Fecha Hasta */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                        <span style={{ fontSize: "12px", color: "#64748b", fontWeight: "600" }}>Hasta:</span>
+                        <input
+                            type="date"
+                            value={fechaFin}
+                            min={fechaMinimaPermitida}
+                            max={fechaMaxima}
+                            onChange={handleCambioFechaFin}
+                            style={{ padding: "7px 10px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px", backgroundColor: "#f8fafc" }}
+                        />
+                    </div>
+
+                    {/* Botón Exportar PDF */}
+                    <button
+                        onClick={manejarExportarPDF}
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            backgroundColor: "#136442",
+                            color: "#ffffff",
+                            border: "none",
+                            borderRadius: "8px",
+                            padding: "8px 14px",
+                            fontSize: "13px",
+                            fontWeight: "600",
+                            cursor: "pointer",
+                            transition: "background 0.2s"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#0f4d34"}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#136442"}
+                    >
+                        <ArrowDownTrayIcon style={{ width: "16px", height: "16px" }} />
+                        <span>Exportar PDF</span>
+                    </button>
                 </div>
             </div>
 
             {registrosFiltrados.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
                     <DocumentTextIcon style={{ width: "48px", height: "48px", margin: "0 auto 10px", color: "#cbd5e1" }} />
-                    <p style={{ fontSize: "14px", fontWeight: "500" }}>No hay registros en la bitácora todavía.</p>
+                    <p style={{ fontSize: "14px", fontWeight: "500" }}>No hay registros que coincidan con los filtros seleccionados.</p>
                 </div>
             ) : (
                 <>

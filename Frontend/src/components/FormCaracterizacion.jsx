@@ -264,8 +264,8 @@ export default function FormCaracterizacion({
         const grisOscuro = [40, 40, 40];
 
         try {
-            doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
-            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
+            doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
         } catch (error) {
             console.warn("Logos institucionales omitidos.");
         }
@@ -286,7 +286,7 @@ export default function FormCaracterizacion({
         doc.setLineWidth(0.6);
         doc.line(12, 25, 204, 25);
 
-doc.setFont("helvetica", "bold");
+        doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
 
         // 1. Imprimir la etiqueta en color verde

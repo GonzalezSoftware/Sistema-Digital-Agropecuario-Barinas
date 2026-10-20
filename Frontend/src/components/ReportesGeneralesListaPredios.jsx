@@ -56,8 +56,8 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, listaPred
 
     // Cintillo institucional superior
     try {
-        doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
+        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("No se pudieron cargar las imágenes de los logos en el PDF.", error);
     }
@@ -82,21 +82,21 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, listaPred
 
 
 
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
 
-        // 1. Imprimir la etiqueta en color verde
-        doc.setTextColor(...verdeBarinas);
-        const tituloVerde = "LISTA DE PREDIOS REGISTRADOS: ";
-        doc.text(tituloVerde, 12, 33);
+    // 1. Imprimir la etiqueta en color verde
+    doc.setTextColor(...verdeBarinas);
+    const tituloVerde = "LISTA DE PREDIOS REGISTRADOS: ";
+    doc.text(tituloVerde, 12, 33);
 
-        // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
-        const anchoTituloVerde = doc.getTextWidth(tituloVerde);
+    // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
+    const anchoTituloVerde = doc.getTextWidth(tituloVerde);
 
-        // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
-        doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
-        const nombreNegro = (municipioSeleccionado || "SIN NOMBRE").toUpperCase();
-        doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
+    // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
+    doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
+    const nombreNegro = (municipioSeleccionado || "SIN NOMBRE").toUpperCase();
+    doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
 
 
     let currentY = 42;

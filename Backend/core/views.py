@@ -1174,13 +1174,15 @@ def gestionar_noticias(request):
     if request.method == 'POST':
         titulo = request.data.get('titulo')
         descripcion = request.data.get('descripcion')
+        autor = request.data.get('autor', 'Redacción Agropecuaria')
         imagen = request.FILES.get('imagen')
 
         if not titulo or not descripcion:
             return Response({"error": "El título y la descripción son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
 
         noticia = Noticia.objects.create(
-            titulo=titulo, descripcion=descripcion, imagen=imagen)
+            titulo=titulo, descripcion=descripcion, autor=autor, imagen=imagen
+        )
         return Response({"mensaje": "¡Noticia registrada con éxito!"}, status=status.HTTP_201_CREATED)
 
     elif request.method == 'GET':
@@ -1190,6 +1192,7 @@ def gestionar_noticias(request):
                 "id": n.id,
                 "titulo": n.titulo,
                 "descripcion": n.descripcion,
+                "autor": n.autor,
                 "imagen": request.build_absolute_uri(n.imagen.url) if n.imagen else None,
                 "fecha": n.fecha_creacion
             }
@@ -1205,16 +1208,17 @@ def detalle_noticia(request, pk):
     except Noticia.DoesNotExist:
         return Response({"error": "Noticia no encontrada."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Capturamos el usuario si viene en el request (o un valor por defecto)
     usuario_actual = request.data.get('usuario', 'Administrador')
 
     if request.method == 'PUT':
         titulo = request.data.get('titulo', noticia.titulo)
         descripcion = request.data.get('descripcion', noticia.descripcion)
+        autor = request.data.get('autor', noticia.autor)
         imagen = request.FILES.get('imagen')
 
         noticia.titulo = titulo
         noticia.descripcion = descripcion
+        noticia.autor = autor
         if imagen:
             noticia.imagen = imagen
         noticia.save()
@@ -1243,12 +1247,13 @@ def detalle_noticia(request, pk):
 
         return Response({"mensaje": "¡Noticia eliminada con éxito!"}, status=status.HTTP_200_OK)
 
+
 @api_view(['GET', 'POST'])
 def gestionar_noticias_pendientes(request):
     if request.method == 'POST':
-        # El empleado envía la noticia para revisión
         titulo = request.data.get('titulo')
         descripcion = request.data.get('descripcion')
+        autor = request.data.get('autor', 'Redacción')
         imagen = request.FILES.get('imagen')
         empleado = request.data.get('usuario', 'Empleado')
 
@@ -1256,18 +1261,18 @@ def gestionar_noticias_pendientes(request):
             return Response({"error": "El título y la descripción son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
 
         NoticiaPendiente.objects.create(
-            titulo=titulo, descripcion=descripcion, imagen=imagen, empleado=empleado
+            titulo=titulo, descripcion=descripcion, autor=autor, imagen=imagen, empleado=empleado
         )
         return Response({"mensaje": "¡Noticia enviada al administrador para su revisión con éxito!"}, status=status.HTTP_201_CREATED)
 
     elif request.method == 'GET':
-        # Listar todas las notificaciones pendientes para el admin
         pendientes = NoticiaPendiente.objects.all().order_by('-fecha_solicitud')
         data = [
             {
                 "id": p.id,
                 "titulo": p.titulo,
                 "descripcion": p.descripcion,
+                "autor": p.autor,
                 "imagen": request.build_absolute_uri(p.imagen.url) if p.imagen else None,
                 "empleado": p.empleado,
                 "fecha": p.fecha_solicitud
@@ -1279,7 +1284,7 @@ def gestionar_noticias_pendientes(request):
 
 @api_view(['POST'])
 def resolver_noticia_pendiente(request, pk):
-    accion = request.data.get('accion') # "aprobar" o "rechazar"
+    accion = request.data.get('accion')  # "aprobar" o "rechazar"
     usuario_admin = request.data.get('usuario', 'Administrador')
 
     try:
@@ -1288,11 +1293,12 @@ def resolver_noticia_pendiente(request, pk):
         return Response({"error": "La notificación no fue encontrada."}, status=status.HTTP_404_NOT_FOUND)
 
     if accion == 'aprobar':
-        # 1. Se crea formalmente en la tabla oficial de Noticias
+        # 1. Se crea formalmente en la tabla oficial de Noticias pasando también el autor
         Noticia.objects.create(
             titulo=pendiente.titulo,
             descripcion=pendiente.descripcion,
-            imagen=pendiente.imagen # Django maneja la transferencia del archivo
+            autor=pendiente.autor,
+            imagen=pendiente.imagen
         )
 
         # 2. Registrar en bitácora
@@ -1310,7 +1316,7 @@ def resolver_noticia_pendiente(request, pk):
     elif accion == 'rechazar':
         titulo_rechazado = pendiente.titulo
         
-        # Registrar rechazo en bitácora opcionalmente
+        # Registrar rechazo en bitácora
         BitacoraAuditoria.objects.create(
             usuario=usuario_admin,
             accion="ELIMINAR",
@@ -1322,7 +1328,6 @@ def resolver_noticia_pendiente(request, pk):
         return Response({"mensaje": "La noticia propuesta fue rechazada y descartada."}, status=status.HTTP_200_OK)
 
     return Response({"error": "Acción no válida."}, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(['POST'])
 def enviar_correo_ficha_predio(request):
