@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { TrashIcon, PencilSquareIcon, XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import Swal from "sweetalert2";
 
 export default function NoticiasEditarEliminar() {
     const [noticias, setNoticias] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
-
-    // Estado para la noticia que se está editando actualmente
-    const [noticiaEditando, setNoticiaEditando] = useState(null);
-    const [nuevoTitulo, setNuevoTitulo] = useState("");
-    const [nuevaDescripcion, setNuevaDescripcion] = useState("");
-    const [nuevaImagen, setNuevaImagen] = useState(null);
 
     // Cargar noticias al montar el componente
     const obtenerNoticias = async () => {
@@ -42,13 +36,12 @@ export default function NoticiasEditarEliminar() {
             text: "¿Estás seguro de que deseas eliminar esta noticia?",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#136442", // Color verde institucional de tu app
+            confirmButtonColor: "#136442",
             cancelButtonColor: "#d33",
             confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar"
         });
 
-        // Si el usuario hace clic en cancelar, detenemos la ejecución
         if (!result.isConfirmed) return;
 
         try {
@@ -59,7 +52,6 @@ export default function NoticiasEditarEliminar() {
             if (respuesta.ok) {
                 setNoticias(noticias.filter((n) => n.id !== id));
 
-                // Opcional: También puedes mostrar una alerta de éxito con SweetAlert
                 Swal.fire({
                     icon: "success",
                     title: "¡Eliminado!",
@@ -83,44 +75,6 @@ export default function NoticiasEditarEliminar() {
                 text: "No se pudo conectar con el servidor.",
                 confirmButtonColor: "#136442"
             });
-        }
-    };
-
-    // Activar modo edición
-    const iniciarEdicion = (noticia) => {
-        setNoticiaEditando(noticia.id);
-        setNuevoTitulo(noticia.titulo);
-        setNuevaDescripcion(noticia.descripcion);
-        setNuevaImagen(null);
-    };
-
-    // Guardar cambios de edición
-    const guardarEdicion = async (id) => {
-        const formData = new FormData();
-        formData.append("titulo", nuevoTitulo);
-        formData.append("descripcion", nuevaDescripcion);
-        if (nuevaImagen) {
-            formData.append("imagen", nuevaImagen);
-        }
-
-        try {
-            const respuesta = await fetch(`http://localhost:8000/api/noticias/${id}/`, {
-                method: "PUT",
-                body: formData,
-            });
-
-            const resultado = await respuesta.json();
-
-            if (respuesta.ok) {
-                setMensaje({ texto: "¡Noticia actualizada con éxito!", tipo: "exito" });
-                setNoticiaEditando(null);
-                obtenerNoticias(); // Recargar lista
-            } else {
-                setMensaje({ texto: resultado.error || "Error al actualizar la noticia.", tipo: "error" });
-            }
-        } catch (error) {
-            console.error("Error de red:", error);
-            setMensaje({ texto: "Error de conexión al actualizar.", tipo: "error" });
         }
     };
 
@@ -150,112 +104,47 @@ export default function NoticiasEditarEliminar() {
                     {noticias.map((noticia) => (
                         <div key={noticia.id} style={{
                             display: "flex",
-                            flexDirection: "column",
-                            gap: "12px",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                            gap: "16px",
                             padding: "20px",
                             borderRadius: "10px",
                             border: "1px solid #e2e8f0",
                             backgroundColor: "#f8fafc"
                         }}>
-                            {noticiaEditando === noticia.id ? (
-                                /* Formulario de Edición en línea */
-                                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                                    <input
-                                        type="text"
-                                        value={nuevoTitulo}
-                                        onChange={(e) => setNuevoTitulo(e.target.value)}
-                                        style={{ padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "14px" }}
+                            <div style={{ display: "flex", gap: "16px", flex: 1 }}>
+                                {noticia.imagen && (
+                                    <img
+                                        src={noticia.imagen}
+                                        alt="Noticia"
+                                        style={{ width: "90px", height: "90px", objectFit: "cover", borderRadius: "8px", border: "1px solid #cbd5e1" }}
                                     />
-                                    <textarea
-                                        value={nuevaDescripcion}
-                                        onChange={(e) => setNuevaDescripcion(e.target.value)}
-                                        rows={3}
-                                        style={{ padding: "10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "14px", fontFamily: "inherit" }}
-                                    />
-                                    <div>
-                                        {/* Input de tipo file oculto */}
-                                        <input
-                                            id="input-nueva-imagen"
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => setNuevaImagen(e.target.files[0])}
-                                            style={{ display: "none" }}
-                                        />
+                                )}
+                                <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
+                                    <h4 style={{ margin: 0, fontSize: "16px", fontWeight: "600", color: "#1e293b" }}>{noticia.titulo}</h4>
+                                    <p style={{ margin: 0, fontSize: "14px", color: "#475569", lineHeight: "1.4" }}>{noticia.descripcion}</p>
+                                    
+                                    {/* Autor de la noticia */}
+                                    <span style={{ fontSize: "12px", color: "#136442", fontWeight: "600", marginTop: "2px" }}>
+                                        Autor: {noticia.autor || "Redacción"}
+                                    </span>
 
-                                        {/* Label estilizado exactamente igual al botón Ver Detalles */}
-                                        <label
-                                            htmlFor="input-nueva-imagen"
-                                            style={{
-                                                backgroundColor: "#f0fdf4",
-                                                color: "#136442",
-                                                border: "1px solid #136442",
-                                                padding: "6px 12px",
-                                                borderRadius: "6px",
-                                                cursor: "pointer",
-                                                fontSize: "12px",
-                                                fontWeight: "500",
-                                                fontFamily: "Poppins, sans-serif",
-                                                display: "inline-block",
-                                                textAlign: "center"
-                                            }}
-                                        >
-                                            {nuevaImagen ? nuevaImagen.name : "Seleccionar Imagen"}
-                                        </label>
-                                    </div>
-                                    <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
-                                        <button
-                                            onClick={() => guardarEdicion(noticia.id)}
-                                            style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: "#136442", color: "#fff", border: "none", padding: "8px 14px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "600" }}
-                                        >
-                                            <CheckIcon style={{ width: "16px", height: "16px" }} /> Guardar
-                                        </button>
-                                        <button
-                                            onClick={() => setNoticiaEditando(null)}
-                                            style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: "#64748b", color: "#fff", border: "none", padding: "8px 14px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: "600" }}
-                                        >
-                                            <XMarkIcon style={{ width: "16px", height: "16px" }} /> Cancelar
-                                        </button>
-                                    </div>
+                                    <span style={{ fontSize: "11px", color: "#94a3b8", marginTop: "2px" }}>
+                                        Publicado el: {new Date(noticia.fecha).toLocaleString()}
+                                    </span>
                                 </div>
-                            ) : (
-                                /* Vista Normal de la Noticia */
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px" }}>
-                                    <div style={{ display: "flex", gap: "16px", flex: 1 }}>
-                                        {noticia.imagen && (
-                                            <img
-                                                src={noticia.imagen}
-                                                alt="Noticia"
-                                                style={{ width: "90px", height: "90px", objectFit: "cover", borderRadius: "8px", border: "1px solid #cbd5e1" }}
-                                            />
-                                        )}
-                                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                                            <h4 style={{ margin: 0, fontSize: "16px", fontWeight: "600", color: "#1e293b" }}>{noticia.titulo}</h4>
-                                            <p style={{ margin: 0, fontSize: "14px", color: "#475569", lineHeight: "1.4" }}>{noticia.descripcion}</p>
-                                            <span style={{ fontSize: "11px", color: "#94a3b8", marginTop: "4px" }}>
-                                                Publicado el: {new Date(noticia.fecha).toLocaleString()}
-                                            </span>
-                                        </div>
-                                    </div>
+                            </div>
 
-                                    {/* Botones de Acción */}
-                                    <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                                        <button
-                                            onClick={() => iniciarEdicion(noticia)}
-                                            title="Editar"
-                                            style={{ background: "#e0f2fe", border: "none", padding: "8px", borderRadius: "6px", cursor: "pointer", color: "#0284c7" }}
-                                        >
-                                            <PencilSquareIcon style={{ width: "18px", height: "18px" }} />
-                                        </button>
-                                        <button
-                                            onClick={() => eliminarNoticia(noticia.id)}
-                                            title="Eliminar"
-                                            style={{ background: "#fee2e2", border: "none", padding: "8px", borderRadius: "6px", cursor: "pointer", color: "#dc2626" }}
-                                        >
-                                            <TrashIcon style={{ width: "18px", height: "18px" }} />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                            {/* Botón de Eliminar */}
+                            <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                                <button
+                                    onClick={() => eliminarNoticia(noticia.id)}
+                                    title="Eliminar"
+                                    style={{ background: "#fee2e2", border: "none", padding: "8px", borderRadius: "6px", cursor: "pointer", color: "#dc2626" }}
+                                >
+                                    <TrashIcon style={{ width: "18px", height: "18px" }} />
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>

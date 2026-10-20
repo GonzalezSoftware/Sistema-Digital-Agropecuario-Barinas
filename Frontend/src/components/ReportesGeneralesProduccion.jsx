@@ -61,7 +61,7 @@ export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaP
 
     prediosMunicipio.forEach(p => {
         const animalData = p.existencia_animal || {};
-        
+
         // 1. Procesamiento de Semovientes por Especie y Subespecie
         Object.entries(animalData).forEach(([especieKey, detalleEspecie]) => {
             if (especieKey.startsWith("capacidad") || especieKey === "especiesSeleccionadas") return;
@@ -124,8 +124,8 @@ export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaP
 
     // Cintillo institucional superior
     try {
-        doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
+        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("Logos institucionales omitidos en PDF.", error);
     }
@@ -148,21 +148,21 @@ export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaP
     doc.line(12, 25, 204, 25);
 
 
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
 
-        // 1. Imprimir la etiqueta en color verde
-        doc.setTextColor(...verdeBarinas);
-        const tituloVerde = "REPORTE GENERAL DE PRODUCCIÓN: ";
-        doc.text(tituloVerde, 12, 33);
+    // 1. Imprimir la etiqueta en color verde
+    doc.setTextColor(...verdeBarinas);
+    const tituloVerde = "REPORTE GENERAL DE PRODUCCIÓN: ";
+    doc.text(tituloVerde, 12, 33);
 
-        // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
-        const anchoTituloVerde = doc.getTextWidth(tituloVerde);
+    // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
+    const anchoTituloVerde = doc.getTextWidth(tituloVerde);
 
-        // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
-        doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
-        const nombreNegro = (municipioSeleccionado || "SIN NOMBRE").toUpperCase();
-        doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
+    // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
+    doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
+    const nombreNegro = (municipioSeleccionado || "SIN NOMBRE").toUpperCase();
+    doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
 
 
     let currentY = 42;
@@ -242,7 +242,7 @@ export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaP
             rubro,
             `${info.hectareas.toFixed(2)} Ha`,
             `${info.produccion.toLocaleString()} Kg`
-          ])
+        ])
         : [["-", "No se han registrado rubros vegetales.", "-", "-"]];
 
     autoTable(doc, {
@@ -273,13 +273,13 @@ export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaP
 
     let filasSistemasDestinos = [];
     filasSistemasDestinos.push([{ content: "SISTEMAS PRODUCTIVOS ACTIVOS", colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
-    
+
     Object.entries(sistemasProduccionConteo).forEach(([sis, cant]) => {
         filasSistemasDestinos.push([sis, `${cant} Predio(s) que lo implementan`]);
     });
 
     filasSistemasDestinos.push([{ content: "DESTINOS DE LA PRODUCCIÓN VEGETAL", colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
-    
+
     Object.entries(destinosProduccionConteo).forEach(([dest, cantHa]) => {
         filasSistemasDestinos.push([dest, `${cantHa.toFixed(2)} Ha asociadas`]);
     });

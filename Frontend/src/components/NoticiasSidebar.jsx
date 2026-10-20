@@ -116,7 +116,7 @@ export const NoticiasSidebar = ({
                     onMouseLeave={(e) => { if (vistaActiva !== "gestion") e.currentTarget.style.backgroundColor = "transparent"; }}
                 >
                     <TrashIcon style={{ width: "23px", height: "23px", color: vistaActiva === "gestion" ? "#ffffff" : "#86efac" }} />
-                    <span>Editar / Eliminar Noticia</span>
+                    <span>Eliminar Noticia</span>
                 </div>
             </div>
 

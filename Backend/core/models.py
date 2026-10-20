@@ -231,6 +231,7 @@ class AdministradorSistema(models.Model):
 class Noticia(models.Model):
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField()
+    autor = models.CharField(max_length=150, default="Redacción Agropecuaria") # <-- NUEVO CAMPO
     imagen = models.ImageField(upload_to='noticias/', blank=True, null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
@@ -240,6 +241,7 @@ class Noticia(models.Model):
 class NoticiaPendiente(models.Model):
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField()
+    autor = models.CharField(max_length=150, default="Empleado") # <-- NUEVO CAMPO
     imagen = models.ImageField(upload_to='noticias_pendientes/', blank=True, null=True)
     empleado = models.CharField(max_length=150, default="Empleado")
     fecha_solicitud = models.DateTimeField(auto_now_add=True)
