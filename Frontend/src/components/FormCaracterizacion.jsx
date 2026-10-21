@@ -126,6 +126,15 @@ export default function FormCaracterizacion({
     const [codigoGenerado, setCodigoGenerado] = useState("");
     const [erroresFilas, setErroresFilas] = useState({});
 
+    // Función auxiliar para formatear municipios ortográficamente
+    const formatearMunicipio = (texto) => {
+        if (!texto) return "N/A";
+        return texto
+            .replace(/_/g, " ")
+            .toLowerCase()
+            .replace(/(^\w{1})|(\s+\w{1})/g, (letra) => letra.toUpperCase());
+    };
+
     // ── EFECTO PARA GESTIONAR DATOS SEGÚN EL MODO Y EL PREDIO ACTIVO ──────────────────
     useEffect(() => {
         if (predioActivo) {
@@ -258,8 +267,15 @@ export default function FormCaracterizacion({
         setErroresFilas((prev) => ({ ...prev, [`${index}-${campo}`]: mensajeError }));
     };
 
-    const generarObjetoPDF = (predio) => {
-        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "letter" });
+const generarObjetoPDF = (predio) => {
+        if (!predio) return null;
+
+        const doc = new jsPDF({
+            orientation: "portrait",
+            unit: "mm",
+            format: "letter"
+        });
+
         const verdeBarinas = [19, 100, 66];
         const grisOscuro = [40, 40, 40];
 
@@ -273,13 +289,16 @@ export default function FormCaracterizacion({
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7.5);
         doc.setTextColor(...verdeBarinas);
-        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA PRODUCTIVA Y TIERRAS", 204, 10, { align: "right" });
+        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRAS", 204, 10, { align: "right" });
+
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
         doc.setTextColor(100, 100, 100);
-        doc.text("MPPAPT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
+        doc.text("MPPAT — DIRECCIÓN ESTADAL DE REGISTROS AGROPECUARIOS", 204, 14, { align: "right" });
 
-        const fechaEmision = predio.fecha_registro ? new Date(predio.fecha_registro).toLocaleDateString() : new Date().toLocaleDateString();
+        const fechaEmision = predio.fecha_registro
+            ? new Date(predio.fecha_registro).toLocaleDateString()
+            : new Date().toLocaleDateString();
         doc.text(`Fecha de Registro: ${fechaEmision}`, 204, 18, { align: "right" });
 
         doc.setDrawColor(...verdeBarinas);
@@ -297,8 +316,8 @@ export default function FormCaracterizacion({
         // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
         const anchoTituloVerde = doc.getTextWidth(tituloVerde);
 
-        // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
-        doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
+        // 3. Imprimir el nombre del predio en color negro
+        doc.setTextColor(0, 0, 0);
         const nombreNegro = (predio.nombre_predio || "SIN NOMBRE").toUpperCase();
         doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
 
@@ -312,9 +331,17 @@ export default function FormCaracterizacion({
         doc.setLineWidth(0.3);
         doc.line(12, currentY + 2, 204, currentY + 2);
 
+        const datosProductor = [
+            [
+                "NOMBRE COMPLETO:", predio.productor?.nombre || "N/A",
+                "CÉDULA / RIF:", predio.productor?.cedula_rif || "N/A",
+                "TELÉFONO:", predio.productor?.telefono || "N/A"
+            ]
+        ];
+
         autoTable(doc, {
             startY: currentY + 4,
-            body: [["NOMBRE COMPLETO:", predio.productor?.nombre || "N/A", "CÉDULA / RIF:", predio.productor?.cedula_rif || "N/A", "TELÉFONO:", predio.productor?.telefono || "N/A"]],
+            body: datosProductor,
             theme: "grid",
             styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
             columnStyles: {
@@ -328,8 +355,165 @@ export default function FormCaracterizacion({
             margin: { left: 12, right: 12 }
         });
 
-        const fileSanitizado = `Ficha_Tecnica_Integral_${(predio.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`;
-        doc.save(fileSanitizado);
+        currentY = doc.lastAutoTable.finalY + 6;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("II. GEORREFERENCIACIÓN Y UBICACIÓN", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const datosUbicacion = [
+            [
+                "MUNICIPIO:", formatearMunicipio(predio.municipio),
+                "PARROQUIA:", predio.parroquia || "N/A",
+                "COMUNIDAD:", predio.comunidad || "N/A"
+            ]
+        ];
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            body: datosUbicacion,
+            theme: "grid",
+            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: {
+                0: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
+                1: { width: 43 },
+                2: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
+                3: { width: 43 },
+                4: { fontStyle: "bold", textColor: grisOscuro, width: 25, fillColor: [250, 250, 250] },
+                5: { width: 31 }
+            },
+            margin: { left: 12, right: 12 }
+        });
+
+        currentY = doc.lastAutoTable.finalY + 6;
+        if (currentY > 240) { doc.addPage(); currentY = 20; }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const rubros = predio.rubros_vegetales || [];
+        const bodyRubros = rubros.length > 0
+            ? rubros.map(r => [
+                r.rubro || "N/A",
+                r.hectareas ? `${r.hectareas} Ha` : "0 Ha",
+                r.estado || "N/A",
+                r.produccion_estimada ? `${r.produccion_estimada} Kg` : "0 Kg"
+            ])
+            : [["Sin rubros vegetales declarados.", "", "", ""]];
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Rubro", "Superficie (Ha)", "Estado", "Producción Estimada"]],
+            body: bodyRubros,
+            theme: "grid",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
+            styles: { fontSize: 8, cellPadding: 2, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: { 0: { width: 65 }, 1: { width: 45 }, 2: { width: 45 }, 3: { width: 37 } },
+            margin: { left: 12, right: 12 }
+        });
+
+        currentY = doc.lastAutoTable.finalY + 6;
+        if (currentY > 230) { doc.addPage(); currentY = 20; }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("IV. INVENTARIO DE SEMOVIENTES / GANADERÍA", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const existenciaAnimal = predio.existencia_animal || {};
+        let bodySemovientes = [];
+
+        if (Object.keys(existenciaAnimal).length > 0) {
+            Object.entries(existenciaAnimal).forEach(([especie, detalleEspecie]) => {
+                if (!detalleEspecie || typeof detalleEspecie !== "object" || Object.keys(detalleEspecie).length === 0) return;
+
+                bodySemovientes.push([{ content: `ESPECIE: ${especie.replace(/_/g, " ").toUpperCase()}`, colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
+
+                Object.entries(detalleEspecie).forEach(([subKey, subValue]) => {
+                    if (subKey === "id") return;
+                    bodySemovientes.push([
+                        subKey.replace(/_/g, " ").toUpperCase(),
+                        subValue !== null && subValue !== undefined ? subValue : 0
+                    ]);
+                });
+            });
+        }
+
+        if (bodySemovientes.length === 0) {
+            bodySemovientes = [["Sin inventario animal registrado en este predio.", ""]];
+        }
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Categoría / Subtipo", "Cantidad / Unidades"]],
+            body: bodySemovientes,
+            theme: "grid",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
+            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: { 0: { width: 140 }, 1: { width: 52 } },
+            margin: { left: 12, right: 12 }
+        });
+
+        currentY = doc.lastAutoTable.finalY + 6;
+        if (currentY > 230) { doc.addPage(); currentY = 20; }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...verdeBarinas);
+        doc.text("V. MAQUINARIA, IMPLEMENTOS Y EQUIPOS", 12, currentY);
+        doc.line(12, currentY + 2, 204, currentY + 2);
+
+        const maquinaria = predio.maquinaria || {};
+        let bodyMaquinaria = [];
+
+        if (Object.keys(maquinaria).length > 0) {
+            Object.entries(maquinaria).forEach(([tipoMaq, detalleMaq]) => {
+                if (!detalleMaq || typeof detalleMaq !== "object" || Object.keys(detalleMaq).length === 0) return;
+
+                bodyMaquinaria.push([{ content: `TIPO: ${tipoMaq.replace(/_/g, " ").toUpperCase()}`, colSpan: 2, styles: { fontStyle: "bold", fillColor: [230, 240, 235], textColor: verdeBarinas } }]);
+
+                Object.entries(detalleMaq).forEach(([itemKey, itemVal]) => {
+                    if (itemKey === "id") return;
+                    bodyMaquinaria.push([
+                        itemKey.replace(/_/g, " ").toUpperCase(),
+                        itemVal !== null && itemVal !== undefined ? itemVal : 0
+                    ]);
+                });
+            });
+        }
+
+        if (bodyMaquinaria.length === 0) {
+            bodyMaquinaria = [["Sin maquinaria o equipos registrados.", ""]];
+        }
+
+        autoTable(doc, {
+            startY: currentY + 4,
+            head: [["Elemento / Equipo", "Cantidad"]],
+            body: bodyMaquinaria,
+            theme: "grid",
+            headStyles: { fillColor: verdeBarinas, fontSize: 8.5, fontStyle: "bold", textColor: [255, 255, 255] },
+            styles: { fontSize: 8, cellPadding: 1.8, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
+            columnStyles: { 0: { width: 140 }, 1: { width: 52 } },
+            margin: { left: 12, right: 12 }
+        });
+
+        const totalPaginasPDF = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPaginasPDF; i++) {
+            doc.setPage(i);
+            doc.setFontSize(7);
+            doc.setTextColor(140, 140, 140);
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(0.3);
+            doc.line(12, 268, 204, 268);
+            doc.text("Ficha Técnica Integral de Caracterización.", 12, 272);
+            doc.text(`Página ${i} de ${totalPaginasPDF}`, 204, 272, { align: "right" });
+        }
+
         return doc;
     };
 

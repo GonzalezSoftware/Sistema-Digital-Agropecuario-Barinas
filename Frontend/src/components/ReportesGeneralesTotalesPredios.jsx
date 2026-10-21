@@ -14,15 +14,6 @@ const normalizarTexto = (str) => {
 };
 
 export const generarPDFReporteTotalesPredios = (municipioSeleccionado, listaPredios = []) => {
-    if (!municipioSeleccionado) {
-        Swal.fire({
-            title: 'Selección requerida',
-            text: 'Por favor seleccione un municipio para generar el reporte de totales.',
-            icon: 'warning',
-            confirmButtonColor: '#136442'
-        });
-        return;
-    }
 
     const municipioBuscado = normalizarTexto(municipioSeleccionado);
 

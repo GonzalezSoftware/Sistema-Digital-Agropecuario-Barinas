@@ -319,7 +319,7 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
             doc.setDrawColor(220, 220, 220);
             doc.setLineWidth(0.3);
             doc.line(12, 268, 204, 268);
-            doc.text("Ficha Técnica Integral de Caracterización — UTMPPAPT.", 12, 272);
+            doc.text("Ficha Técnica Integral de Caracterización.", 12, 272);
             doc.text(`Página ${i} de ${totalPaginasPDF}`, 204, 272, { align: "right" });
         }
 

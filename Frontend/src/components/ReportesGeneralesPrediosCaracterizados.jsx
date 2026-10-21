@@ -15,15 +15,7 @@ const normalizarTexto = (str) => {
 };
 
 export const generarPDFReportePrediosCaracterizados = (municipioSeleccionado, listaPredios = []) => {
-    if (!municipioSeleccionado) {
-        Swal.fire({
-            title: 'Selección requerida',
-            text: 'Por favor seleccione un municipio para generar el reporte de predios caracterizados.',
-            icon: 'warning',
-            confirmButtonColor: '#136442'
-        });
-        return;
-    }
+
 
     const municipioBuscado = normalizarTexto(municipioSeleccionado);
 
