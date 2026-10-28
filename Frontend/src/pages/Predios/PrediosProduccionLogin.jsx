@@ -13,7 +13,7 @@ export default function LoginPrediosPage() {
   const [verClave, setVerClave] = React.useState(false);
 
   // Obtenemos la URL base del backend desde las variables de entorno de Vercel/Vite
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
+  const API_URL = "/api/";
 
   const manejarLogin = async (e) => {
     e.preventDefault();

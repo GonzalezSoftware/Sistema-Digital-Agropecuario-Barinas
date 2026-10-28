@@ -8,7 +8,7 @@ export default function AdminConfigPage() {
   const navigate = useNavigate();
 
   // Obtenemos la URL base del backend desde las variables de entorno de Vercel/Vite
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
+  const API_URL = "/api/";
 
   // 1. Iniciamos en null para evitar que pinte "Configurar" y luego cambie a "Iniciar Sesión"
   const [adminRegistrado, setAdminRegistrado] = React.useState(null);
