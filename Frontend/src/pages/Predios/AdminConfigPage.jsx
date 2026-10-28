@@ -7,9 +7,8 @@ import Swal from 'sweetalert2';
 export default function AdminConfigPage() {
   const navigate = useNavigate();
 
-  // Forzamos directamente la IP de AWS para evitar que falle si la variable de entorno no se lee en Vercel.
-  // (Si estás en tu computadora probando localmente, puedes cambiar esto condicionalmente si lo deseas).
-  const API_URL = import.meta.env.VITE_API_URL || "http://3.145.179.35/api/";
+  // Definimos la API_URL usando la variable de entorno o la ruta relativa para el proxy de Vercel
+  const API_URL = import.meta.env.VITE_API_URL || "/api/";
 
   // 1. Iniciamos en null para evitar que pinte "Configurar" y luego cambie a "Iniciar Sesión"
   const [adminRegistrado, setAdminRegistrado] = React.useState(null);
@@ -22,23 +21,16 @@ export default function AdminConfigPage() {
   const [cargando, setCargando] = React.useState(false);
   const [verClave, setVerClave] = React.useState(false);
 
-  // Consultamos a Django al cargar la página asegurando la ruta completa
+  // Consultamos a Django al cargar la página usando la URL correcta
   useEffect(() => {
     fetch(`${API_URL}admin-config/`)
-      .then(async res => {
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          // Si el servidor responde con HTML u otra cosa, lanzamos error controlado
-          throw new Error("El servidor no devolvió un JSON válido (posible error 404 o 500 en la ruta).");
-        }
-        return res.json();
-      })
+      .then(res => res.json())
       .then(data => {
-        setAdminRegistrado(data.configurado);
+        setAdminRegistrado(data.configurado); // true o false real
       })
       .catch(err => {
         console.error("Error al verificar estado del admin en la BD:", err);
-        setAdminRegistrado(false); // Por seguridad si falla, permitimos registrar
+        setAdminRegistrado(false); // Por seguridad si falla la red, permitimos registrar
       });
   }, [API_URL]);
 
@@ -53,7 +45,7 @@ export default function AdminConfigPage() {
 
     setCargando(true);
 
-    // Mostramos el SweetAlert de carga antes de la petición
+    // Mostramos el SweetAlert de carga antes de la petición (una sola vez)
     Swal.fire({
       title: "Procesando...",
       text: !adminRegistrado ? "Registrando administrador..." : "Verificando credenciales...",
@@ -77,11 +69,6 @@ export default function AdminConfigPage() {
         })
       });
 
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("El servidor respondió con un formato no válido (HTML/Error de ruta).");
-      }
-
       const data = await response.json();
 
       if (!response.ok) {
@@ -91,10 +78,12 @@ export default function AdminConfigPage() {
       // Guardamos la sesión del administrador
       sessionStorage.setItem("usuario_admin", JSON.stringify(data.usuario));
 
+      // Definimos el mensaje de éxito correspondiente
       const mensajeExito = !adminRegistrado 
         ? "¡Administrador registrado en la Base de Datos con éxito! Redirigiendo..." 
         : "¡Inicio de sesión exitoso! Redirigiendo...";
 
+      // Mostramos la alerta de éxito (esta reemplazará automáticamente a la de carga)
       await Swal.fire({
         icon: "success",
         title: "¡Éxito!",
@@ -105,12 +94,14 @@ export default function AdminConfigPage() {
         showConfirmButton: false
       });
 
+      // Redirección al panel
       navigate("/admin/dashboard");
 
     } catch (err) {
       setCargando(false);
       setError(err.message);
 
+      // Si ocurre un error, mostramos la alerta roja
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -120,6 +111,7 @@ export default function AdminConfigPage() {
     }
   };
 
+  // 2. Mientras Django responde, mostramos un estado de carga profesional con la misma imagen de fondo
   if (adminRegistrado === null) {
     return (
       <div style={{
@@ -133,6 +125,7 @@ export default function AdminConfigPage() {
         position: "relative",
         overflow: "hidden"
       }}>
+        {/* Imagen de fondo con opacidad igual al panel izquierdo */}
         <img
           src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80"
           alt="Predios"
@@ -151,6 +144,7 @@ export default function AdminConfigPage() {
           }
         `}</style>
 
+        {/* Contenido centrado con zIndex superior para que esté por encima de la imagen */}
         <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
           <div style={{
             width: "48px",
@@ -307,6 +301,7 @@ export default function AdminConfigPage() {
             {/* Formulario */}
             <form onSubmit={manejarAccion}>
 
+              {/* Si no está registrado, pedimos el Nombre Completo */}
               {!adminRegistrado && (
                 <div style={{ marginBottom: "16px" }}>
                   <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
@@ -328,6 +323,7 @@ export default function AdminConfigPage() {
                 </div>
               )}
 
+              {/* Usuario */}
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
                   Usuario
@@ -348,6 +344,7 @@ export default function AdminConfigPage() {
                 />
               </div>
 
+              {/* Contraseña */}
               <div style={{ marginBottom: "20px" }}>
                 <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
                   Contraseña
@@ -378,6 +375,7 @@ export default function AdminConfigPage() {
                 </div>
               </div>
 
+              {/* Mensaje de Error */}
               {error && (
                 <div style={{
                   background: "#fff5f5", border: "1px solid #fecaca",
@@ -388,6 +386,7 @@ export default function AdminConfigPage() {
                 </div>
               )}
 
+              {/* Mensaje de Éxito */}
               {exito && (
                 <div style={{
                   background: "#f0fdf4", border: "1px solid #bbf7d0",
@@ -398,6 +397,7 @@ export default function AdminConfigPage() {
                 </div>
               )}
 
+              {/* Botón */}
               <button
                 type="submit"
                 className="btn-login"
