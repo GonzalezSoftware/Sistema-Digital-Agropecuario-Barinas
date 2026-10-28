@@ -4,8 +4,11 @@ import { useNavigate } from "react-router-dom";
 import React, { useEffect } from "react";
 import Swal from 'sweetalert2';
 
+
 export default function AdminConfigPage() {
   const navigate = useNavigate();
+
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
 
   // 1. Iniciamos en null para evitar que pinte "Configurar" y luego cambie a "Iniciar Sesión"
   const [adminRegistrado, setAdminRegistrado] = React.useState(null);
@@ -20,7 +23,7 @@ export default function AdminConfigPage() {
 
   // Consultamos a Django al cargar la página
   useEffect(() => {
-    fetch("http://localhost:8000/api/admin-config/")
+    fetch(`${API_URL}admin-config/`)
       .then(res => res.json())
       .then(data => {
         setAdminRegistrado(data.configurado); // true o false real
@@ -64,7 +67,7 @@ export default function AdminConfigPage() {
     });
 
     try {
-      const response = await fetch("http://localhost:8000/api/admin-config/", {
+      const response = await fetch(`${API_URL}admin-config/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
