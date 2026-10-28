@@ -13,7 +13,6 @@ import { useHistorialPredios } from "../../hooks/useHistorialPredios";
 // Components
 import AdminProduccionDashboard from "../../components/AdminProduccionDashboard";
 import AdminProduccionSeleccionarPredio from "../../components/SeleccionPredio";
-import FormHierro from "../../components/FormHierro";
 import FormCaracterizacion from "../../components/FormCaracterizacion";
 import SeccionReportes from "../../components/SeccionReportes";
 import { EmpleadoHeader } from '../../components/EmpleadoHeader';
@@ -73,8 +72,6 @@ export default function EmpleadoDashboard() {
         subCaracterizacion,
         setSubCaracterizacion,
         setTabActiva,
-        licenciaHierro,
-        setLicenciaHierro,
         guardarLicencia,
     } = useDashboardProduccion();
 
@@ -483,29 +480,6 @@ export default function EmpleadoDashboard() {
                                 setTabActiva={setTabActiva}
                                 subCaracterizacion={subCaracterizacion}
                                 setSubCaracterizacion={setSubCaracterizacion}
-                            />
-                        </div>
-                    ) : vistaActiva === "produccion_hierro" ? (
-                        <div>
-                            <FormHierro
-                                predioActivo={predioActivo}
-                                licenciaHierro={licenciaHierro}
-                                setLicenciaHierro={setLicenciaHierro}
-                                guardarLicencia={guardarLicencia}
-                                FormSection={({ title, children }) => (
-                                    <div style={{ background: "#ffffff", padding: "24px", borderRadius: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "1px solid #e2e8f0" }}>
-                                        <h3 style={{ fontSize: "16px", fontWeight: "600", color: "#1e293b", marginBottom: "16px" }}>{title}</h3>
-                                        {children}
-                                    </div>
-                                )}
-                                InputField={InputField}
-                                styles={{
-                                    labelStyle: { fontSize: "12px", fontWeight: "600", color: "#374151" },
-                                    inputStyle: { width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", fontSize: "13px", boxSizing: "border-box" },
-                                    grid3: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px" },
-                                    btnPrincipal: { backgroundColor: "#136442", color: "#ffffff", border: "none", padding: "10px 20px", borderRadius: "8px", fontWeight: "600", cursor: "pointer", fontSize: "13px" },
-                                    radioLabel: { display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#374151", cursor: "pointer" }
-                                }}
                             />
                         </div>
                     ) : vistaActiva === "produccion_actualizacion" ? (

@@ -5,8 +5,8 @@ from django.db.models import Sum
 from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Predio, LicenciaHierro, Productor, Noticia
-from .serializers import PredioSerializer, LicenciaHierroSerializer
+from .models import Predio, Productor, Noticia
+from .serializers import PredioSerializer
 from .models import Predio, RubroVegetal, ExistenciaAnimal, Maquinaria, Infraestructura, Produccion, PredioServicio, Servicio
 from rest_framework import status
 from django.contrib.auth.hashers import make_password, check_password
@@ -219,7 +219,6 @@ def ejecutar_reinicio_sistema(request):
         Noticia.objects.all().delete()
         NoticiaPendiente.objects.all().delete()
         BitacoraAuditoria.objects.all().delete()
-        LicenciaHierro.objects.all().delete()
         RubroVegetal.objects.all().delete()
         ExistenciaAnimal.objects.all().delete()
         Maquinaria.objects.all().delete()
@@ -456,76 +455,6 @@ class PredioViewSet(viewsets.ModelViewSet):
             descripcion=f"Se eliminó el predio '{nombre}' del municipio {municipio}"
         )
 
-class LicenciaHierroViewSet(viewsets.ModelViewSet):
-    queryset = LicenciaHierro.objects.all()
-    serializer_class = LicenciaHierroSerializer
-
-    def perform_create(self, serializer):
-        # Capturamos el nombre real del empleado enviado desde el frontend (ej. "Carlos Gómez" o "Empleado - Juan")
-        nombre_empleado = self.request.data.get('empleado') or self.request.data.get('usuario') or self.request.data.get('rol') or 'Empleado'
-        
-        # Guardamos la licencia
-        licencia = serializer.save()
-        
-        # Obtenemos el nombre y municipio del predio asociado de forma segura
-        predio = licencia.predio
-        nombre_predio = predio.nombre_predio if predio else "Desconocido"
-        municipio_raw = predio.municipio if (predio and predio.municipio) else "Sin municipio"
-        
-        # Formateamos el municipio solo para visualización en la bitácora
-        nombre_municipio = municipio_raw.replace("_", " ").title() if municipio_raw != "Sin municipio" else "Sin municipio"
-        
-        # Combinamos el empleado con su municipio formateado para que quede registrado en la bitácora
-        usuario_con_municipio = f"{nombre_empleado} ({nombre_municipio})"
-
-        BitacoraAuditoria.objects.create(
-            usuario=usuario_con_municipio,
-            accion="CREAR",
-            modulo="Producción",
-            descripcion=f"Se creó y registró la licencia de hierro para el predio '{nombre_predio}' del municipio {nombre_municipio}"
-        ) 
-
-    def perform_update(self, serializer):
-        # Capturamos el empleado y el rol de manera segura
-        nombre_empleado = self.request.data.get('empleado') or self.request.data.get('usuario') or self.request.data.get('rol') or 'Empleado'
-        
-        # Guardamos la licencia correctamente
-        licencia = serializer.save()
-        
-        # Obtenemos el predio desde la licencia
-        predio = licencia.predio
-        nombre_predio = predio.nombre_predio if predio else "Desconocido"
-        municipio_raw = predio.municipio if (predio and predio.municipio) else "Sin municipio"
-        
-        # Formateamos el municipio solo para visualización en la bitácora
-        nombre_municipio = municipio_raw.replace("_", " ").title() if municipio_raw != "Sin municipio" else "Sin municipio"
-        
-        usuario_con_municipio = f"{nombre_empleado} ({nombre_municipio})"
-
-        BitacoraAuditoria.objects.create(
-            usuario=usuario_con_municipio,
-            accion="ACTUALIZAR",
-            modulo="Producción",
-            descripcion=f"Se actualizó la licencia de hierro del predio '{nombre_predio}' del municipio {nombre_municipio}"
-        )
-
-    def perform_destroy(self, instance):
-        nombre_empleado = self.request.data.get('empleado') or self.request.data.get('usuario') or self.request.data.get('rol') or 'Administrador'
-        
-        predio = instance.predio
-        nombre_predio = predio.nombre_predio if predio else "Desconocido"
-        nombre_municipio = predio.municipio if (predio and predio.municipio) else "Sin municipio"
-        
-        usuario_con_municipio = f"{nombre_empleado} ({nombre_municipio})"
-
-        instance.delete()
-
-        BitacoraAuditoria.objects.create(
-            usuario=usuario_con_municipio,
-            accion="ELIMINAR",
-            modulo="Producción - Licencia de Hierro",
-            descripcion=f"Se eliminó la licencia de hierro del predio '{nombre_predio}'"
-        )
 
 @api_view(['POST'])
 def enviar_codigo_correo(request):

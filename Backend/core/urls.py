@@ -5,7 +5,6 @@ from rest_framework.routers import DefaultRouter
 from django.contrib import admin
 from .views import (
     PredioViewSet, 
-    LicenciaHierroViewSet, 
     BitacoraAuditoriaViewSet, 
     buscar_productor, 
     dashboard_produccion_stats, 
@@ -28,7 +27,6 @@ from .views import (
 
 router = DefaultRouter()
 router.register(r'predios', PredioViewSet)
-router.register(r'licencias-hierro', LicenciaHierroViewSet)
 router.register(r'bitacora', BitacoraAuditoriaViewSet)
 
 urlpatterns = [

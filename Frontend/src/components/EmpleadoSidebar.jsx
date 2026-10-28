@@ -82,21 +82,6 @@ export const EmpleadoSidebar = ({
         setVistaActiva("produccion_caracterizacion");
     };
 
-    // 🔹 Función para validar antes de entrar a Licencia de Hierro
-    const manejarClickHierro = () => {
-        if (!predioActivo) {
-            Swal.fire({
-                icon: "warning",
-                title: "Predio no seleccionado",
-                text: "Debe seleccionar un predio previamente para usar la opción de licencia de hierro.",
-                confirmButtonColor: "#136442"
-            });
-            return;
-        }
-
-        setVistaActiva("produccion_hierro");
-    };
-
     return (
         <aside style={{
             width: "290px",
@@ -278,11 +263,6 @@ export const EmpleadoSidebar = ({
                             <div onClick={manejarClickCaracterizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_caracterizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_caracterizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
                                 <DocumentTextIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
                                 <span>Caracterización</span>
-                            </div>
-                            {/* 🔹 Opción de Licencia de Hierro actualizada con la validación */}
-                            <div onClick={manejarClickHierro} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_hierro" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_hierro" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                <TagIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
-                                <span>Licencia de Hierro</span>
                             </div>
                             {/* 🔹 Opción de Actualización Productiva con la validación integrada */}
                             <div onClick={manejarClickActualizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_actualizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_actualizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>

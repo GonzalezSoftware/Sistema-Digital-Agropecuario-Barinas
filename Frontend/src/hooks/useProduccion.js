@@ -21,16 +21,6 @@ export function useDashboardProduccion() {
     const [busquedaCedula, setBusquedaCedula] = useState("");
     const [busqueda, setBusqueda] = useState("");
 
-    // Estados para Licencia de Hierro
-    const [licenciaHierro, setLicenciaHierro] = useState({
-        poseeLicencia: false,
-        fechaEmision: "",
-        fechaVencimiento: "",
-        observaciones: "",
-        imagenHierro: null,
-        certificado: null
-    });
-
     const [subCaracterizacion, setSubCaracterizacion] = useState("animal");
 
     const [rubrosVegetales, setRubrosVegetales] = useState([
@@ -301,7 +291,7 @@ export function useDashboardProduccion() {
         ? listaPredios.filter(p => (p.municipio || "").trim().toLowerCase() === municipioEmpleado.trim().toLowerCase())
         : listaPredios;
 
-    // 3. CÁLCULO DE ESTADÍSTICAS GLOBAL Y LOCAL (CORREGIDO)
+    // 3. CÁLCULO DE ESTADÍSTICAS GLOBAL Y LOCAL
     useEffect(() => {
         if (!usuario || !Array.isArray(listaPredios) || listaPredios.length === 0) return;
 
@@ -450,20 +440,10 @@ export function useDashboardProduccion() {
         }
     }, [usuario?.esEmpleado, usuario?.municipio, listaPredios]);
 
-    // --- FUNCIONES DE CONTROL ---
+    // --- FUNCIONES DE CONTROL (CORREGIDAS SIN LICENCIA DE HIERRO) ---
     const seleccionarPredioParaCaracterizar = (predio) => {
         setPredioActivo(predio);
         setMostrarModal(true);
-        if (predio?.licencia_hierro) {
-            setLicenciaHierro({
-                poseeLicencia: true,
-                fechaEmision: predio.licencia_hierro.fecha_emision || "",
-                fechaVencimiento: predio.licencia_hierro.fecha_vencimiento || "",
-                observaciones: predio.licencia_hierro.observaciones || "",
-                imagenHierro: null,
-                certificado: null
-            });
-        }
     };
 
     const manejarCambioInventario = (categoria, campo, valor) => {
@@ -537,38 +517,6 @@ export function useDashboardProduccion() {
         return nombrePredio.includes(term) || nombreProductor.includes(term);
     });
 
-    const guardarLicencia = async (datosActualizados) => {
-        const licenciaData = datosActualizados || licenciaHierro;
-        if (!licenciaData.poseeLicencia) {
-            Swal.fire({ icon: "info", title: "No se requiere registro", text: "No se requiere registro si no posee licencia." });
-            return;
-        }
-
-        Swal.fire({ title: 'Procesando...', text: 'Guardando datos...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-        try {
-            const formData = new FormData();
-            formData.append("predio", predioActivo.id_predio);
-            formData.append("fecha_emision", licenciaData.fechaEmision);
-            formData.append("activa", licenciaData.activa ?? true);
-            if (licenciaData.fechaVencimiento) formData.append("fecha_vencimiento", licenciaData.fechaVencimiento);
-            if (licenciaData.observaciones) formData.append("observaciones", licenciaData.observaciones);
-            if (licenciaData.imagenHierro) formData.append("imagen_hierro", licenciaData.imagenHierro);
-            if (licenciaData.certificado) formData.append("certificado_pdf", licenciaData.certificado);
-
-            await axios.post("http://127.0.0.1:8000/api/licencias-hierro/", formData, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
-
-            Swal.fire({ title: '¡Registro Exitoso!', icon: 'success' }).then((res) => {
-                if (res.isConfirmed) window.location.reload();
-            });
-        } catch (error) {
-            console.error(error);
-            Swal.fire({ title: 'Error al guardar', icon: 'error' });
-        }
-    };
-
     const generarPDFPredio = (predio) => {
         if (!predio || !predio.caracterizacion_completada) {
             alert("No se puede exportar el PDF porque la caracterización no está completada.");
@@ -591,7 +539,7 @@ export function useDashboardProduccion() {
         editando, setEditando, predios, predioActivo, setPredioActivo,
         listaPredios: listaPrediosBase,
         busquedaCedula, setBusquedaCedula, busqueda, setBusqueda, prediosFiltrados,
-        filtrarPredios, licenciaHierro, setLicenciaHierro, subCaracterizacion, setSubCaracterizacion,
+        filtrarPredios, subCaracterizacion, setSubCaracterizacion,
         rubrosVegetales, setRubrosVegetales, inventarioInicial, setInventarioInicial,
         seleccionarPredioParaCaracterizar,
         manejarCambioInventario,
@@ -600,6 +548,6 @@ export function useDashboardProduccion() {
         agregarRubroVegetal,
         eliminarRubroVegetal,
         manejarCambioRubro,
-        cerrarSesion, guardarLicencia, generarPDFPredio, municipioEmpleado
+        cerrarSesion, generarPDFPredio, municipioEmpleado
     };
 }

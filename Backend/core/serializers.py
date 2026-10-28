@@ -15,35 +15,20 @@ from .models import (
     Productor,
     Servicio,
     PredioServicio,
-    LicenciaHierro,
     RubroVegetal,
     ExistenciaAnimal,
     Maquinaria
 )
 
-class LicenciaHierroSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LicenciaHierro
-        fields = [
-            'id', 'predio', 'fecha_emision', 
-            'observaciones', 'certificado_pdf', 'activa'
-        ]
 
 # 1. Definimos primero los serializadores de las tablas hijas
 class ProductorSerializer(serializers.ModelSerializer):
-    licencias = serializers.SerializerMethodField()
     cedula_rif = serializers.CharField(validators=[])
 
     class Meta:
         model = Productor
-        fields = ['id', 'cedula_rif', 'nombre', 'telefono', 'correo', 'licencias']
+        fields = ['id', 'cedula_rif', 'nombre', 'telefono', 'correo']
 
-    def get_licencias(self, obj):
-        predio = Predio.objects.filter(productor=obj).first()
-        if predio:
-            licencias_queryset = LicenciaHierro.objects.filter(predio=predio)
-            return LicenciaHierroSerializer(licencias_queryset, many=True).data
-        return []
 
 class InfraestructuraSerializer(serializers.ModelSerializer):
     class Meta:
