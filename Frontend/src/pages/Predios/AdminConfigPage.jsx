@@ -7,8 +7,8 @@ import Swal from 'sweetalert2';
 export default function AdminConfigPage() {
   const navigate = useNavigate();
 
-  // Definimos la API_URL usando la variable de entorno o la ruta relativa para el proxy de Vercel
-  const API_URL = import.meta.env.VITE_API_URL || "/api/";
+  // Forzamos explícitamente la URL completa de AWS para evitar cualquier fallo de variables de entorno
+  const API_URL = "http://3.145.179.35/api/";
 
   // 1. Iniciamos en null para evitar que pinte "Configurar" y luego cambie a "Iniciar Sesión"
   const [adminRegistrado, setAdminRegistrado] = React.useState(null);
@@ -21,15 +21,31 @@ export default function AdminConfigPage() {
   const [cargando, setCargando] = React.useState(false);
   const [verClave, setVerClave] = React.useState(false);
 
-  // Consultamos a Django al cargar la página usando la URL correcta
+  // Consultamos a Django al cargar la página con depuración en consola
   useEffect(() => {
-    fetch(`${API_URL}admin-config/`)
-      .then(res => res.json())
+    const urlPeticion = `${API_URL}admin-config/`;
+    console.log("🔍 [DEBUG] Intentando conectar con la API en:", urlPeticion);
+
+    fetch(urlPeticion)
+      .then(async res => {
+        console.log("📥 [DEBUG] Respuesta HTTP recibida:", res.status, res.statusText);
+        
+        // Verificamos si la respuesta es JSON o si viene un HTML por error de proxy/nginx
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const textoHtml = await res.text();
+          console.error("❌ [DEBUG CRÍTICO] El servidor devolvió HTML en lugar de JSON:", textoHtml.substring(0, 150));
+          throw new Error("El servidor respondió con HTML (posible error 404 o configuración de Nginx).");
+        }
+
+        return res.json();
+      })
       .then(data => {
+        console.log("✅ [DEBUG] Datos JSON obtenidos correctamente:", data);
         setAdminRegistrado(data.configurado); // true o false real
       })
       .catch(err => {
-        console.error("Error al verificar estado del admin en la BD:", err);
+        console.error("❌ [DEBUG] Error al verificar estado del admin en la BD:", err);
         setAdminRegistrado(false); // Por seguridad si falla la red, permitimos registrar
       });
   }, [API_URL]);
@@ -44,6 +60,8 @@ export default function AdminConfigPage() {
     if (!adminRegistrado && !nombre.trim()) { setError("Ingresa el nombre completo."); return; }
 
     setCargando(true);
+    const urlPost = `${API_URL}admin-config/`;
+    console.log("🚀 [DEBUG] Enviando POST a:", urlPost);
 
     // Mostramos el SweetAlert de carga antes de la petición (una sola vez)
     Swal.fire({
@@ -57,7 +75,7 @@ export default function AdminConfigPage() {
     });
 
     try {
-      const response = await fetch(`${API_URL}admin-config/`, {
+      const response = await fetch(urlPost, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +87,9 @@ export default function AdminConfigPage() {
         })
       });
 
+      console.log("📥 [DEBUG] Respuesta POST recibida. Status:", response.status);
       const data = await response.json();
+      console.log("📦 [DEBUG] Data POST recibida:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Ocurrió un error en el servidor.");
@@ -79,8 +99,8 @@ export default function AdminConfigPage() {
       sessionStorage.setItem("usuario_admin", JSON.stringify(data.usuario));
 
       // Definimos el mensaje de éxito correspondiente
-      const mensajeExito = !adminRegistrado 
-        ? "¡Administrador registrado en la Base de Datos con éxito! Redirigiendo..." 
+      const mensajeExito = !adminRegistrado
+        ? "¡Administrador registrado en la Base de Datos con éxito! Redirigiendo..."
         : "¡Inicio de sesión exitoso! Redirigiendo...";
 
       // Mostramos la alerta de éxito (esta reemplazará automáticamente a la de carga)
@@ -100,6 +120,7 @@ export default function AdminConfigPage() {
     } catch (err) {
       setCargando(false);
       setError(err.message);
+      console.error("❌ [DEBUG] Error capturado en el POST:", err);
 
       // Si ocurre un error, mostramos la alerta roja
       Swal.fire({
