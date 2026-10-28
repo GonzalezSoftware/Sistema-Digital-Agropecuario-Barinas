@@ -7,9 +7,8 @@ import Swal from 'sweetalert2';
 export default function AdminConfigPage() {
   const navigate = useNavigate();
 
-  // Obtenemos la URL base del backend desde las variables de entorno de Vercel/Vite
-// Asegúrate de que lea la variable de entorno de Vite
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
+  // Usamos la variable de entorno o caemos por defecto en la ruta relativa /api/ para que el proxy de Vercel la maneje de forma segura
+  const API_URL = import.meta.env.VITE_API_URL || "/api/";
 
   // 1. Iniciamos en null para evitar que pinte "Configurar" y luego cambie a "Iniciar Sesión"
   const [adminRegistrado, setAdminRegistrado] = React.useState(null);
@@ -22,7 +21,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
   const [cargando, setCargando] = React.useState(false);
   const [verClave, setVerClave] = React.useState(false);
 
-  // Consultamos a Django al cargar la página usando la variable dinámica
+  // Consultamos a Django al cargar la página
   useEffect(() => {
     fetch(`${API_URL}admin-config/`)
       .then(res => res.json())
@@ -46,7 +45,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
 
     setCargando(true);
 
-    // 1. Mostramos el SweetAlert de carga antes de la petición (una sola vez)
+    // 1. Mostramos el SweetAlert de carga antes de la petición
     Swal.fire({
       title: "Procesando...",
       text: !adminRegistrado ? "Registrando administrador..." : "Verificando credenciales...",
