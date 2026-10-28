@@ -13,7 +13,7 @@ export default function LoginPrediosPage() {
   const [verClave, setVerClave] = React.useState(false);
 
   // Obtenemos la URL base del backend desde las variables de entorno de Vercel/Vite
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
 
   const manejarLogin = async (e) => {
     e.preventDefault();
@@ -49,13 +49,12 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
           timerProgressBar: true
         });
 
-        // Usamos ruta relativa de React Router en lugar de localhost hardcodeado
-        navigate("/predios/admin-secreto");
+        window.location.href = "http://localhost:5173/predios/admin-secreto";
         return;
       }
 
-      // Petición al backend usando la variable de entorno centralizada
-      const response = await fetch(`${API_URL}login-admin/`, {
+      // Petición al backend de Django para validar credenciales en la tabla AdministradorSistema
+      const response = await fetch("http://localhost:8000/api/login-admin/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -7,8 +7,8 @@ import Swal from 'sweetalert2';
 export default function AdminConfigPage() {
   const navigate = useNavigate();
 
-  // Usamos la variable de entorno o caemos por defecto en la ruta relativa /api/ para que el proxy de Vercel la maneje de forma segura
-  const API_URL = import.meta.env.VITE_API_URL || "/api/";
+  // Definimos la URL de la API dinámicamente según el entorno (Vercel o Local)
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/";
 
   // 1. Iniciamos en null para evitar que pinte "Configurar" y luego cambie a "Iniciar Sesión"
   const [adminRegistrado, setAdminRegistrado] = React.useState(null);
@@ -21,7 +21,7 @@ export default function AdminConfigPage() {
   const [cargando, setCargando] = React.useState(false);
   const [verClave, setVerClave] = React.useState(false);
 
-  // Consultamos a Django al cargar la página
+  // Consultamos a Django al cargar la página usando la URL dinámica
   useEffect(() => {
     fetch(`${API_URL}admin-config/`)
       .then(res => res.json())
@@ -45,7 +45,7 @@ export default function AdminConfigPage() {
 
     setCargando(true);
 
-    // 1. Mostramos el SweetAlert de carga antes de la petición
+    // Mostramos el SweetAlert de carga antes de la petición (una sola vez)
     Swal.fire({
       title: "Procesando...",
       text: !adminRegistrado ? "Registrando administrador..." : "Verificando credenciales...",
@@ -78,12 +78,12 @@ export default function AdminConfigPage() {
       // Guardamos la sesión del administrador
       sessionStorage.setItem("usuario_admin", JSON.stringify(data.usuario));
 
-      // 2. Definimos el mensaje de éxito correspondiente
+      // Definimos el mensaje de éxito correspondiente
       const mensajeExito = !adminRegistrado 
         ? "¡Administrador registrado en la Base de Datos con éxito! Redirigiendo..." 
         : "¡Inicio de sesión exitoso! Redirigiendo...";
 
-      // 3. Mostramos la alerta de éxito (esta reemplazará automáticamente a la de carga)
+      // Mostramos la alerta de éxito (esta reemplazará automáticamente a la de carga)
       await Swal.fire({
         icon: "success",
         title: "¡Éxito!",
