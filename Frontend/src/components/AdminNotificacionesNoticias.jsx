@@ -6,13 +6,16 @@ import DocumentTextIcon from "@heroicons/react/24/solid/DocumentTextIcon";
 import Swal from "sweetalert2";
 
 export default function NotificacionesNoticias({ onActualizarConteo }) {
+    // URL del servidor backend en AWS con HTTPS
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const [pendientes, setPendientes] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
 
     const cargarPendientes = async () => {
         try {
-            const res = await fetch("http://localhost:8000/api/noticias/pendientes/");
+            const res = await fetch(`${API_URL}noticias/pendientes/`);
             const data = await res.json();
             setPendientes(Array.isArray(data) ? data : []);
         } catch (err) {
@@ -39,7 +42,7 @@ export default function NotificacionesNoticias({ onActualizarConteo }) {
         });
 
         try {
-            const res = await fetch(`http://localhost:8000/api/noticias/pendientes/${id}/resolver/`, {
+            const res = await fetch(`${API_URL}noticias/pendientes/${id}/resolver/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ accion, usuario: "Administrador" })

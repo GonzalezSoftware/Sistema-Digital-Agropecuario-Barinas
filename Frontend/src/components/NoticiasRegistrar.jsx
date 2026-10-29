@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 
 export default function NoticiasRegistrar() {
+    // URL del servidor backend en AWS con HTTPS
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const [titulo, setTitulo] = useState("");
     const [descripcion, setDescripcion] = useState("");
     const [autor, setAutor] = useState(""); // <-- NUEVO ESTADO
@@ -38,7 +41,7 @@ export default function NoticiasRegistrar() {
         }
 
         try {
-            const respuesta = await fetch("http://localhost:8000/api/noticias/pendientes/", {
+            const respuesta = await fetch(`${API_URL}noticias/pendientes/`, {
                 method: "POST",
                 body: formData,
             });
@@ -76,9 +79,9 @@ export default function NoticiasRegistrar() {
             Swal.fire({
                 icon: "error",
                 title: "Error de conexión",
-                text: "Error de conexión con el servidor de Django."
+                text: "Error de conexión con el servidor de AWS."
             });
-            setMensaje({ texto: "Error de conexión con el servidor de Django.", tipo: "error" });
+            setMensaje({ texto: "Error de conexión con el servidor de AWS.", tipo: "error" });
         } finally {
             setCargando(false);
         }
