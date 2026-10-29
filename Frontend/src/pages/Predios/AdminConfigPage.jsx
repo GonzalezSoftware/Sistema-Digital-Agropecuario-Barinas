@@ -8,7 +8,7 @@ export default function AdminConfigPage() {
   const navigate = useNavigate();
 
   // Forzamos explícitamente la URL completa de AWS para evitar cualquier fallo de variables de entorno
-  const API_URL = "http://3.145.179.35/api/";
+  const API_URL = "https://3.145.179.35.nip.io/api/";
 
   // 1. Iniciamos en null para evitar que pinte "Configurar" y luego cambie a "Iniciar Sesión"
   const [adminRegistrado, setAdminRegistrado] = React.useState(null);
