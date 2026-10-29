@@ -5,6 +5,9 @@ import CheckCircleIcon from "@heroicons/react/24/solid/CheckCircleIcon";
 import Swal from "sweetalert2";
 
 export default function AdminContacto() {
+    // Forzamos explícitamente la URL completa de AWS con HTTPS para evitar problemas de red y Mixed Content
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const [form, setForm] = useState({
         correo: "",
         telefono: ""
@@ -20,8 +23,8 @@ export default function AdminContacto() {
     const [guardando, setGuardando] = useState(false);
 
     useEffect(() => {
-        // Cargar datos actuales de contacto desde el backend
-        fetch("http://localhost:8000/api/contacto-info/")
+        // Cargar datos actuales de contacto desde el backend en AWS
+        fetch(`${API_URL}contacto-info/`)
             .then(res => res.json())
             .then(data => {
                 if (data) {
@@ -36,7 +39,7 @@ export default function AdminContacto() {
                 console.error("Error al cargar datos de contacto:", err);
                 setCargandoDatos(false);
             });
-    }, []);
+    }, [API_URL]);
 
     // Validar correo estrictamente para terminar en @gmail.com o @hotmail.com
     const validarCorreo = (email) => {
@@ -96,7 +99,7 @@ export default function AdminContacto() {
         });
 
         try {
-            const res = await fetch("http://localhost:8000/api/contacto-info/", {
+            const res = await fetch(`${API_URL}contacto-info/`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form)
