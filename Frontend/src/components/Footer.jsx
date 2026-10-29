@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 
 export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
+  // Forzamos explícitamente la URL completa de AWS con HTTPS para el pie de página
+  const API_URL = "https://3.145.179.35.nip.io/api/";
+
   const [contacto, setContacto] = useState({
     correo: "",
     telefono: ""
@@ -8,7 +11,7 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/contacto-info/")
+    fetch(`${API_URL}contacto-info/`)
       .then(res => res.json())
       .then(data => {
         if (data) {
@@ -23,7 +26,7 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
         console.error("Error al obtener datos de contacto en el footer:", err);
         setCargando(false);
       });
-  }, []);
+  }, [API_URL]);
 
   return (
     <footer style={{ background: "#fff", color: "#555", fontFamily: "'Poppins', sans-serif", borderTop: "1px solid #e8e8e8" }}>
