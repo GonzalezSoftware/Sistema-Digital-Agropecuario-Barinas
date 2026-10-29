@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 
 export default function PortalContactos() {
+  // Forzamos explícitamente la URL completa de AWS con HTTPS para el entorno público
+  const API_URL = "https://3.145.179.35.nip.io/api/";
+
   const [contacto, setContacto] = useState({
     correo: "",
     telefono: ""
@@ -8,7 +11,7 @@ export default function PortalContactos() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/contacto-info/")
+    fetch(`${API_URL}contacto-info/`)
       .then(res => res.json())
       .then(data => {
         if (data) {
@@ -23,7 +26,7 @@ export default function PortalContactos() {
         console.error("Error al obtener datos de contacto públicos:", err);
         setCargando(false);
       });
-  }, []);
+  }, [API_URL]);
 
   return (
     <div id="contactos" style={{
