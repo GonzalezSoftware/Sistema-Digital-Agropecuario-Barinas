@@ -8,6 +8,9 @@ import XCircleIcon from "@heroicons/react/24/solid/XCircleIcon";
 import Swal from "sweetalert2";
 
 export default function AdminConfiguracionContraseña() {
+    // URL del servidor backend en AWS con HTTPS
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const [form, setForm] = useState({
         usuario: "",
         clave_actual: "",
@@ -67,7 +70,7 @@ export default function AdminConfiguracionContraseña() {
         setCargando(true);
 
         try {
-            const res = await fetch("http://localhost:8000/api/admin/cambiar-password/", {
+            const res = await fetch(`${API_URL}admin/cambiar-password/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

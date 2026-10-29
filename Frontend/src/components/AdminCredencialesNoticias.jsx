@@ -37,11 +37,13 @@ export function AdminCredencialesNoticias({
     const [mensajeFeedback, setMensajeFeedback] = useState(null);
     const [editando, setEditando] = useState(false);
 
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     // 1. CARGAR DATOS DESDE LA BASE DE DATOS AL MONTAR EL COMPONENTE
     useEffect(() => {
         const obtenerCredenciales = async () => {
             try {
-                const response = await fetch(`/api/credenciales-noticias/`, {
+                const response = await fetch(`${API_URL}credenciales-noticias/`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json"
@@ -75,7 +77,7 @@ export function AdminCredencialesNoticias({
         setMensajeFeedback(null);
 
         try {
-            const response = await fetch(`/api/credenciales-noticias/`, {
+            const response = await fetch(`${API_URL}credenciales-noticias/`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

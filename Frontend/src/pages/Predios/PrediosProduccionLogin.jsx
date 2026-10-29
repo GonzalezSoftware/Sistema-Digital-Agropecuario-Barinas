@@ -12,7 +12,7 @@ export default function LoginPrediosPage() {
   const [cargando, setCargando] = React.useState(false);
   const [verClave, setVerClave] = React.useState(false);
 
-  // Obtenemos la URL base del backend desde las variables de entorno de Vercel/Vite
+  // Obtenemos la URL base del backend en AWS con HTTPS
   const API_URL = "https://3.145.179.35.nip.io/api/";
 
   const manejarLogin = async (e) => {
@@ -49,12 +49,13 @@ export default function LoginPrediosPage() {
           timerProgressBar: true
         });
 
-        window.location.href = "http://localhost:5173/predios/admin-secreto";
+        // Redirección usando la ruta interna de React Router (evitando localhost)
+        navigate("/predios/admin-secreto");
         return;
       }
 
-      // Petición al backend de Django para validar credenciales en la tabla AdministradorSistema
-      const response = await fetch("http://localhost:8000/api/login-admin/", {
+      // Petición al backend de Django en AWS para validar credenciales en la tabla AdministradorSistema
+      const response = await fetch(`${API_URL}login-admin/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

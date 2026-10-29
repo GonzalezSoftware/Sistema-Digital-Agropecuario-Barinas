@@ -56,6 +56,9 @@ import rojas from "../../assets/rojas.jpg";
 import sosa from "../../assets/sosa.jpg";
 
 export default function AdminPrediosDashboard() {
+
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const navigate = useNavigate();
     const [adminData, setAdminData] = useState(null);
     const [vistaActiva, setVistaActiva] = useState("inicio");
@@ -142,7 +145,7 @@ export default function AdminPrediosDashboard() {
 
     useEffect(() => {
         setCargando(true);
-        fetch("/api/predios/")
+        fetch(`${API_URL}predios/`)
             .then(res => res.json())
             .then(data => {
                 setListaPredios(Array.isArray(data) ? data : data.results || []);
@@ -167,7 +170,7 @@ export default function AdminPrediosDashboard() {
     useEffect(() => {
         if (vistaActiva === "credenciales") {
             setCargandoDatos(true);
-            fetch("/api/credenciales-municipios/")
+            fetch(`${API_URL}credenciales-municipios/`)
                 .then(res => res.json())
                 .then(data => {
                     setCredenciales(data);
@@ -183,7 +186,7 @@ export default function AdminPrediosDashboard() {
     useEffect(() => {
         if (vistaActiva === "credenciales-noticias") {
             setCargandoNoticiasDatos(true);
-            fetch("/api/credenciales-noticias-municipios/")
+            fetch(`${API_URL}credenciales-noticias-municipios/`)
                 .then(res => res.json())
                 .then(data => {
                     setCredencialesNoticias(data);
@@ -202,7 +205,7 @@ export default function AdminPrediosDashboard() {
     // 2. Crea la función para consultar las pendientes a la API:
     const obtenerContadorPendientes = async () => {
         try {
-            const res = await fetch("http://localhost:8000/api/noticias/pendientes/");
+            const res = await fetch(`${API_URL}noticias/pendientes/`);
             const data = await res.json();
             if (Array.isArray(data)) {
                 setContadorPendientes(data.length);

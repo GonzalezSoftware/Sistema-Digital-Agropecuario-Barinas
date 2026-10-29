@@ -13,6 +13,9 @@ export const CredencialesMunicipios = ({
     UserIcon,
     LockClosedIcon
 }) => {
+    // URL del servidor backend en AWS con HTTPS
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     // Estados locales para el modal y el formulario de credenciales
     const [municipioSeleccionado, setMunicipioSeleccionado] = useState(null);
     const [formUsuario, setFormUsuario] = useState("");
@@ -54,7 +57,7 @@ export const CredencialesMunicipios = ({
         setCargando(true);
 
         try {
-            const response = await fetch("/api/guardar-credencial/", {
+            const response = await fetch(`${API_URL}guardar-credencial/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
