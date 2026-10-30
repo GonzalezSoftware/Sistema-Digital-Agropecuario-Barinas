@@ -12,44 +12,46 @@ export default function PortalSolucionesIntegrales() {
 
   return (
     <>
-      <div style={{ padding: "20px", background: "#f8faf9" }}>
-        <div style={{ textAlign: "center", marginBottom: "60px" }}>
+      <div style={{ padding: "40px 16px", background: "#f8faf9" }}>
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
           <span style={{ color: "#589e38", fontSize: "12px", fontWeight: 800, letterSpacing: "2px", textTransform: "uppercase" }}>
             Soluciones Integrales
           </span>
-          <h2 style={{ color: "#1b4332", fontSize: "32px", margin: "10px 0" }}>¿Qué puedes gestionar hoy?</h2>
+          <h2 style={{ color: "#1b4332", fontSize: "clamp(24px, 4vw, 32px)", margin: "10px 0" }}>¿Qué puedes gestionar hoy?</h2>
         </div>
 
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "30px",
-          width: "95%",
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gap: "24px",
+          maxWidth: "1100px",
           margin: "0 auto",
         }}>
           {solutions.map((card, idx) => (
             <div key={idx} className="card-container" style={{
               background: "#fff",
-              borderRadius: "20px",
+              borderRadius: "16px",
               overflow: "hidden",
               boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
-              transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)"
+              transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
+              display: "flex",
+              flexDirection: "column"
             }}>
-              <div style={{ height: "180px", overflow: "hidden" }}>
+              <div style={{ height: "170px", overflow: "hidden" }}>
                 <img src={card.img} alt={card.title} className="card-img" style={{
                   width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.8s ease"
                 }} />
               </div>
 
-              <div style={{ padding: "25px" }}>
+              <div style={{ padding: "20px", display: "flex", flexDirection: "column", flex: 1 }}>
                 <div style={{
                   width: "30px", height: "3px", background: "#589e38",
-                  marginBottom: "15px", borderRadius: "2px", opacity: 0.8
+                  marginBottom: "12px", borderRadius: "2px", opacity: 0.8
                 }} />
-                <h3 style={{ color: "#1b4332", fontSize: "19px", margin: "0 0 10px", fontWeight: 700 }}>
+                <h3 style={{ color: "#1b4332", fontSize: "18px", margin: "0 0 8px", fontWeight: 700 }}>
                   {card.title}
                 </h3>
-                <p style={{ color: "#64748b", fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                <p style={{ color: "#64748b", fontSize: "13.5px", lineHeight: "1.6", margin: 0 }}>
                   {card.desc}
                 </p>
               </div>
@@ -60,7 +62,7 @@ export default function PortalSolucionesIntegrales() {
 
       <style>{`
         .card-container:hover {
-          transform: translateY(-8px);
+          transform: translateY(-6px);
           box-shadow: 0 20px 40px -10px rgba(88, 158, 56, 0.15) !important;
         }
         .card-container:hover .card-img {

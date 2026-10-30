@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 
 export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
-  // Forzamos explícitamente la URL completa de AWS con HTTPS para el pie de página
   const API_URL = "https://3.145.179.35.nip.io/api/";
 
   const [contacto, setContacto] = useState({
@@ -31,24 +30,24 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
   return (
     <footer style={{ background: "#fff", color: "#555", fontFamily: "'Poppins', sans-serif", borderTop: "1px solid #e8e8e8" }}>
 
-      {/* Cuerpo del footer */}
+      {/* Cuerpo del footer adaptado con Grid Flexible */}
       <div style={{
-        maxWidth: "1100px", margin: "0 auto", padding: "56px 80px 40px",
-        display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "48px",
+        maxWidth: "1100px", margin: "0 auto", padding: "40px 16px",
+        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "36px",
       }}>
 
         {/* Columna 1 - Logo y descripción */}
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-            {logo && <img src={logo} alt="Logo" style={{ height: 50 }} />}
-            {escudo && <img src={escudo} alt="Escudo" style={{ height: 40 }} />}
+            {logo && <img src={logo} alt="Logo" style={{ height: 45 }} />}
+            {escudo && <img src={escudo} alt="Escudo" style={{ height: 35 }} />}
           </div>
           <p style={{ fontSize: "14px", lineHeight: 1.8, color: "#777", maxWidth: "280px" }}>
             Ecosistema digital agropecuario del estado Barinas. Plataforma oficial para el registro
             y gestión de la actividad productiva del campo barinés.
           </p>
           {/* Redes sociales */}
-          <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
+          <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
             {/* Facebook */}
             <a href="#" style={{
               width: "36px", height: "36px", borderRadius: "8px",
@@ -109,10 +108,10 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
 
         {/* Columna 2 - Navegación */}
         <div>
-          <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 20px", textTransform: "uppercase", letterSpacing: "1px" }}>
+          <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "1px" }}>
             Navegación
           </h4>
-          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
             {NAV_ITEMS.map(item => (
               <li key={item.label}>
                 <a href={item.href} style={{
@@ -131,10 +130,10 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
 
         {/* Columna 3 - Contacto rápido */}
         <div>
-          <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 20px", textTransform: "uppercase", letterSpacing: "1px" }}>
+          <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "1px" }}>
             Contacto
           </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             
             {/* Correo */}
             <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
@@ -151,7 +150,7 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
                   <span style={{ fontSize: "12px", color: "#94a3b8" }}>Cargando...</span>
                 </div>
               ) : (
-                <a href={`mailto:${contacto.correo}`} style={{ color: "#777", fontSize: "13px", textDecoration: "none" }}>
+                <a href={`mailto:${contacto.correo}`} style={{ color: "#777", fontSize: "13px", textDecoration: "none", wordBreak: "break-all" }}>
                   {contacto.correo}
                 </a>
               )}
@@ -192,19 +191,18 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
       </div>
 
       {/* Línea divisora */}
-      <div style={{ borderTop: "1px solid #e8e8e8", margin: "0 80px" }} />
+      <div style={{ borderTop: "1px solid #e8e8e8", margin: "0 16px" }} />
 
       {/* Barra inferior */}
       <div style={{
-        maxWidth: "1100px", margin: "0 auto", padding: "20px 80px",
-        display: "flex", justifyContent: "center", alignItems: "center",
+        maxWidth: "1100px", margin: "0 auto", padding: "16px",
+        display: "flex", justifyContent: "center", alignItems: "center", textAlign: "center"
       }}>
-        <span style={{ fontSize: "13px", color: "#999", textAlign: "center" }}>
+        <span style={{ fontSize: "12px", color: "#999", lineHeight: "1.5" }}>
           © 2026 Ecosistema Digital Agropecuario, Estado Barinas. Todos los derechos reservados.
         </span>
       </div>
 
-      {/* Animación del spinner */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }

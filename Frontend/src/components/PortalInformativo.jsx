@@ -4,7 +4,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 export default function PortalInformativo() {
   const [noticias, setNoticias] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null); // Estado para el modal
+  const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:8000/api/noticias/")
@@ -23,44 +23,49 @@ export default function PortalInformativo() {
 
   const navButtonStyle = (side) => ({
     position: "absolute",
-    [side === "left" ? "left" : "right"]: "-20px",
+    [side === "left" ? "left" : "right"]: "-10px",
     zIndex: 10,
     background: "#589e38",
     color: "#fff",
     border: "none",
-    width: "45px",
-    height: "45px",
+    width: "40px",
+    height: "40px",
     borderRadius: "50%",
-    fontSize: "20px",
+    fontSize: "18px",
     cursor: "pointer",
     boxShadow: "0 4px 6px rgba(0,0,0,0.2)",
-    transition: "all 0.2s ease"
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   });
 
   return (
     <>
-      <div id="portal-informativo" style={{ padding: "80px 20px", background: "#f8faf9" }}>
+      <div id="portal-informativo" style={{ padding: "60px 16px", background: "#f8faf9" }}>
         <div style={{ maxWidth: "1100px", margin: "0 auto", position: "relative" }}>
 
-          <div style={{ textAlign: "center", marginBottom: "50px" }}>
-            <h2 style={{ color: "#1b4332", fontSize: "32px" }}>Noticias del Sector Agropecuario</h2>
+          <div style={{ textAlign: "center", marginBottom: "40px" }}>
+            <h2 style={{ color: "#1b4332", fontSize: "clamp(24px, 4vw, 32px)", margin: 0 }}>
+              Noticias del Sector Agropecuario
+            </h2>
           </div>
 
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
 
-            {/* BOTÓN IZQUIERDA */}
-            <button style={navButtonStyle("left")}> &lt; </button>
+            {/* BOTÓN IZQUIERDA (Oculto en móviles pequeños si estorba, o ajustado) */}
+            <button className="carrusel-btn" style={navButtonStyle("left")}> &lt; </button>
 
             {/* CONTENEDOR DE NOTICIAS */}
             <div style={{
               display: "flex",
-              gap: "25px",
+              gap: "20px",
               overflowX: "auto",
-              padding: "40px 10px",
+              padding: "20px 10px",
               width: "100%",
               maxWidth: "1010px",
               margin: "0 auto",
-              justifyContent: noticias.length > 0 ? "flex-start" : "center"
+              justifyContent: noticias.length > 0 ? "flex-start" : "center",
+              scrollbarWidth: "thin",
             }}>
               {cargando ? (
                 <p style={{ textAlign: "center", color: "#64748b", width: "100%" }}>Cargando noticias recientes...</p>
@@ -71,38 +76,39 @@ export default function PortalInformativo() {
                   <div 
                     key={item.id} 
                     className="tarjeta-noticia" 
-                    onClick={() => setNoticiaSeleccionada(item)} // Abre el modal al hacer clic
+                    onClick={() => setNoticiaSeleccionada(item)}
                     style={{
-                      minWidth: "320px",
+                      minWidth: "280px",
                       maxWidth: "320px",
+                      width: "100%",
                       background: "#fff",
                       borderRadius: "16px",
                       border: "1px solid #e2e8f0",
-                      boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)",
-                      transition: "transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease",
+                      boxShadow: "0 10px 20px rgba(0,0,0,0.06)",
                       display: "flex",
                       flexDirection: "column",
                       overflow: "hidden",
-                      cursor: "pointer"
+                      cursor: "pointer",
+                      flexShrink: 0
                     }}
                   >
                     {/* Contenedor de la Imagen */}
                     {item.imagen ? (
-                      <div style={{ height: "190px", width: "100%", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                      <div style={{ height: "180px", width: "100%", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                         <img 
                           src={item.imagen} 
                           alt={item.titulo} 
-                          style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} 
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }} 
                         />
                       </div>
                     ) : (
-                      <div style={{ height: "190px", background: "#cbd5e1", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", fontSize: "12px" }}>
+                      <div style={{ height: "180px", background: "#cbd5e1", display: "flex", alignItems: "center", justifyContent: "center", color: "#64748b", fontSize: "12px" }}>
                         Sin imagen
                       </div>
                     )}
 
                     {/* Contenido de la Tarjeta */}
-                    <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "8px", flex: 1, justifyContent: "space-between" }}>
+                    <div style={{ padding: "18px", display: "flex", flexDirection: "column", gap: "8px", flex: 1, justifyContent: "space-between" }}>
                       <div>
                         <span style={{ fontSize: "11px", color: "#589e38", fontWeight: "600", textTransform: "uppercase", display: "block", marginBottom: "4px" }}>
                           {new Date(item.fecha).toLocaleDateString()}
@@ -115,7 +121,7 @@ export default function PortalInformativo() {
                         </p>
                       </div>
 
-                      {/* Autor y Leer completo al final de la tarjeta */}
+                      {/* Autor y Leer completo */}
                       <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "12px" }}>
                         <span style={{ fontSize: "12px", color: "#136442", fontWeight: "600" }}>
                           Autor: {item.autor || "Redacción"}
@@ -131,7 +137,7 @@ export default function PortalInformativo() {
             </div>
 
             {/* BOTÓN DERECHA */}
-            <button style={navButtonStyle("right")}> &gt; </button>
+            <button className="carrusel-btn" style={navButtonStyle("right")}> &gt; </button>
           </div>
         </div>
       </div>
@@ -149,29 +155,28 @@ export default function PortalInformativo() {
           alignItems: "center",
           justifyContent: "center",
           zIndex: 1000,
-          padding: "20px",
+          padding: "16px",
           boxSizing: "border-box"
         }}>
           <div style={{
             background: "#ffffff",
             width: "100%",
             maxWidth: "700px",
-            maxHeight: "90vh",
+            maxHeight: "85vh",
             borderRadius: "16px",
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
             position: "relative",
-            animation: "aparecerModal 0.3s ease-out"
           }}>
             {/* Botón Cerrar Modal */}
             <button
               onClick={() => setNoticiaSeleccionada(null)}
               style={{
                 position: "absolute",
-                top: "16px",
-                right: "16px",
+                top: "12px",
+                right: "12px",
                 background: "rgba(0, 0, 0, 0.6)",
                 color: "#fff",
                 border: "none",
@@ -188,33 +193,31 @@ export default function PortalInformativo() {
               <XMarkIcon style={{ width: "20px", height: "20px" }} />
             </button>
 
-            {/* Contenido con scroll interno si es muy largo */}
-            <div style={{ overflowY: "auto", padding: "30px", display: "flex", flexDirection: "column", gap: "20px" }}>
+            {/* Contenido con scroll interno */}
+            <div style={{ overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               
-              {/* Imagen Grande y Completa */}
+              {/* Imagen Grande */}
               {noticiaSeleccionada.imagen && (
-                <div style={{ width: "100%", maxHeight: "350px", background: "#0f172a", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                <div style={{ width: "100%", maxHeight: "280px", background: "#0f172a", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   <img
                     src={noticiaSeleccionada.imagen}
                     alt={noticiaSeleccionada.titulo}
-                    style={{ maxWidth: "100%", maxHeight: "350px", objectFit: "contain" }}
+                    style={{ width: "100%", maxHeight: "280px", objectFit: "cover" }}
                   />
                 </div>
               )}
 
-              {/* Fecha y Título */}
               <div>
                 <span style={{ fontSize: "12px", color: "#589e38", fontWeight: "600", textTransform: "uppercase", display: "block", marginBottom: "6px" }}>
                   Publicado el: {new Date(noticiaSeleccionada.fecha).toLocaleString()}
                 </span>
-                <h2 style={{ fontSize: "22px", color: "#1e293b", margin: 0, lineHeight: "1.3" }}>
+                <h2 style={{ fontSize: "clamp(18px, 4vw, 22px)", color: "#1e293b", margin: 0, lineHeight: "1.3" }}>
                   {noticiaSeleccionada.titulo}
                 </h2>
               </div>
 
-              {/* Descripción completa */}
               <div style={{
-                fontSize: "15px",
+                fontSize: "14px",
                 color: "#475569",
                 lineHeight: "1.7",
                 whiteSpace: "pre-wrap",
@@ -223,8 +226,7 @@ export default function PortalInformativo() {
                 {noticiaSeleccionada.descripcion}
               </div>
 
-              {/* Autor al final del modal */}
-              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "15px", marginTop: "10px" }}>
+              <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "12px", marginTop: "8px" }}>
                 <span style={{ fontSize: "13px", color: "#136442", fontWeight: "600" }}>
                   Autor: {noticiaSeleccionada.autor || "Redacción"}
                 </span>
@@ -236,22 +238,16 @@ export default function PortalInformativo() {
       )}
 
       <style>{`
-        .tarjeta-noticia {
-          transform: scale(0.9); 
+        @media (max-width: 768px) {
+          .carrusel-btn {
+            display: none !important; /* Ocultar botones laterales en móviles para priorizar el gesto táctil de deslizar */
+          }
         }
         .tarjeta-noticia:hover {
-          transform: scale(1.01) !important;
-          box-shadow: 0 30px 40px -10px rgba(0,0,0,0.2) !important;
+          transform: translateY(-4px);
+          box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+          transition: all 0.3s ease;
         }
-        @keyframes aparecer {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes aparecerModal {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .tarjeta-noticia { animation: aparecer 0.8s ease-out forwards; }
       `}</style>
     </>
   );

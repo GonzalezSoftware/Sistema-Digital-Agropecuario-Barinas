@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 
 export default function PortalContactos() {
-  // Forzamos explícitamente la URL completa de AWS con HTTPS para el entorno público
   const API_URL = "https://3.145.179.35.nip.io/api/";
 
   const [contacto, setContacto] = useState({
@@ -30,32 +29,36 @@ export default function PortalContactos() {
 
   return (
     <div id="contactos" style={{
-      background: "#f5f7f5", padding: "64px 80px",
+      background: "#f5f7f5", padding: "60px 16px",
     }}>
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
 
         {/* Encabezado */}
-        <div style={{ marginBottom: "48px" }}>
+        <div style={{ marginBottom: "40px", textAlign: "center" }}>
           <span style={{
             fontSize: "12px", fontWeight: 600, letterSpacing: "2px",
             textTransform: "uppercase", color: "#589e38",
           }}>
             Contacto
           </span>
-          <h2 style={{ fontSize: "30px", fontWeight: 700, margin: "10px 0 12px", color: "#1b4332" }}>
+          <h2 style={{ fontSize: "clamp(24px, 4vw, 30px)", fontWeight: 700, margin: "10px 0 12px", color: "#1b4332" }}>
             ¿Tienes alguna pregunta?
           </h2>
-          <p style={{ color: "#666", fontSize: "15px", lineHeight: 1.7, maxWidth: "500px" }}>
+          <p style={{ color: "#666", fontSize: "15px", lineHeight: 1.7, maxWidth: "500px", margin: "0 auto" }}>
             Estamos disponibles para orientarte sobre el uso del sistema agropecuario del estado Barinas.
           </p>
         </div>
 
-        {/* Tarjetas horizontales */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "24px" }}>
+        {/* Tarjetas Adaptables (Grid de 1 a 3 columnas) */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+          gap: "20px"
+        }}>
 
           {/* Correo */}
           <div style={{
-            background: "#fff", borderRadius: "12px", padding: "32px 24px",
+            background: "#fff", borderRadius: "12px", padding: "28px 20px",
             boxShadow: "0 2px 12px rgba(0,0,0,0.06)", display: "flex",
             flexDirection: "column", alignItems: "flex-start", gap: "12px",
           }}>
@@ -81,7 +84,7 @@ export default function PortalContactos() {
               </div>
             ) : (
               <a href={`mailto:${contacto.correo}`} style={{
-                color: "#1b4332", textDecoration: "none", fontSize: "14px", fontWeight: 600,
+                color: "#1b4332", textDecoration: "none", fontSize: "14px", fontWeight: 600, wordBreak: "break-all"
               }}>
                 {contacto.correo}
               </a>
@@ -90,7 +93,7 @@ export default function PortalContactos() {
 
           {/* Teléfono */}
           <div style={{
-            background: "#fff", borderRadius: "12px", padding: "32px 24px",
+            background: "#fff", borderRadius: "12px", padding: "28px 20px",
             boxShadow: "0 2px 12px rgba(0,0,0,0.06)", display: "flex",
             flexDirection: "column", alignItems: "flex-start", gap: "12px",
           }}>
@@ -124,7 +127,7 @@ export default function PortalContactos() {
 
           {/* Ubicación */}
           <div style={{
-            background: "#fff", borderRadius: "12px", padding: "32px 24px",
+            background: "#fff", borderRadius: "12px", padding: "28px 20px",
             boxShadow: "0 2px 12px rgba(0,0,0,0.06)", display: "flex",
             flexDirection: "column", alignItems: "flex-start", gap: "12px",
           }}>
@@ -148,7 +151,6 @@ export default function PortalContactos() {
         </div>
       </div>
 
-      {/* Animación del spinner */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
