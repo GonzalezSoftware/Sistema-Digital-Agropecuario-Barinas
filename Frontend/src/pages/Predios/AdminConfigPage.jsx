@@ -190,7 +190,7 @@ export default function AdminConfigPage() {
   }
 
   return (
-    <div style={{ fontFamily: "'Poppins', sans-serif", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ fontFamily: "'Poppins', sans-serif", minHeight: "100vh", display: "flex", flexDirection: "column", overflowX: "hidden" }}>
 
       <style>{`
         @keyframes fadeInUp {
@@ -208,47 +208,82 @@ export default function AdminConfigPage() {
           box-shadow: 0 6px 20px rgba(19,100,66,0.35) !important;
         }
         .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        /* Estilos Responsive para los dos paneles */
+        .admin-main-container {
+          flex: 1;
+          display: flex;
+        }
+        .admin-panel-izq {
+          width: 50%;
+          position: relative;
+          overflow: hidden;
+          background: linear-gradient(150deg, #0a3d24 0%, #136442 60%, #1a7a50 100%);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 56px 48px;
+          gap: 28px;
+        }
+        .admin-panel-der {
+          width: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f8faf8;
+          padding: 40px;
+        }
+
+        @media (max-width: 992px) {
+          .admin-main-container {
+            flex-direction: column !important;
+          }
+          .admin-panel-izq, .admin-panel-der {
+            width: 100% !important;
+            padding: 40px 20px !important;
+          }
+          .texto-institucional {
+            display: none !important;
+          }
+        }
       `}</style>
 
       {/* ── NAVBAR ── */}
       <nav style={{
-        display: "flex", alignItems: "center",
-        padding: "0 48px", height: "68px", backgroundColor: "#fff",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 24px", height: "68px", backgroundColor: "#fff",
         boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "sticky", top: 0, zIndex: 100,
-        gap: "24px", flexShrink: 0,
+        flexShrink: 0,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "20px", marginLeft: "-30px" }}>
-          <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 45 }} />
-          <img src={escudo} alt="Logo MPPAT" style={{ height: 35 }} />
-        </div>
-        <span style={{
-          fontSize: "12px", color: "#888", fontStyle: "italic",
-          lineHeight: 1.4, borderLeft: "2px solid #e0e0e0", paddingLeft: "16px",
-        }}>
-          Estado Barinas<br />
-          <strong style={{ color: "#136442", fontStyle: "normal" }}>Venezuela</strong>
-        </span>
-        <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "12px" }}>
-          <button onClick={() => navigate("/predios/login")} style={{
-            background: "none", border: "1.5px solid #ccc", color: "#666",
-            padding: "8px 20px", borderRadius: "6px", cursor: "pointer",
-            fontWeight: 500, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => navigate("/")}>
+            <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 38 }} />
+            <img src={escudo} alt="Logo MPPAT" style={{ height: 30 }} />
+          </div>
+          <span className="texto-institucional" style={{
+            fontSize: "12px", color: "#888", fontStyle: "italic",
+            lineHeight: 1.4, borderLeft: "2px solid #e0e0e0", paddingLeft: "12px",
           }}>
-            ← Ir al Login General
-          </button>
+            Estado Barinas<br />
+            <strong style={{ color: "#136442", fontStyle: "normal" }}>Venezuela</strong>
+          </span>
         </div>
+
+        <button onClick={() => navigate("/predios/login")} style={{
+          background: "none", border: "1.5px solid #ccc", color: "#666",
+          padding: "8px 16px", borderRadius: "6px", cursor: "pointer",
+          fontWeight: 500, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
+          whiteSpace: "nowrap"
+        }}>
+          ← Ir al Login General
+        </button>
       </nav>
 
-      {/* ── DOS PANELES ── */}
-      <div style={{ flex: 1, display: "flex" }}>
+      {/* ── DOS PANELES (CONTENEDOR RESPONSIVE) ── */}
+      <div className="admin-main-container">
 
         {/* ── PANEL IZQUIERDO ── */}
-        <div style={{
-          width: "50%", position: "relative", overflow: "hidden",
-          background: "linear-gradient(150deg, #0a3d24 0%, #136442 60%, #1a7a50 100%)",
-          display: "flex", flexDirection: "column", justifyContent: "center",
-          padding: "56px 48px", gap: "28px",
-        }}>
+        <div className="admin-panel-izq">
           <img
             src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80"
             alt="Predios"
@@ -268,7 +303,7 @@ export default function AdminConfigPage() {
           </div>
 
           <div style={{ position: "relative", zIndex: 2 }}>
-            <h1 style={{ color: "#fff", fontSize: "30px", fontWeight: 700, lineHeight: 1.2, margin: "0 0 16px" }}>
+            <h1 style={{ color: "#fff", fontSize: "clamp(24px, 4vw, 30px)", fontWeight: 700, lineHeight: 1.2, margin: "0 0 16px" }}>
               {!adminRegistrado ? "Registro Único del" : "Login de acceso"}<br />
               <span style={{ color: "#86efac" }}>Administrador General</span>
             </h1>
@@ -279,7 +314,7 @@ export default function AdminConfigPage() {
             </p>
           </div>
 
-          <div style={{ position: "relative", zIndex: 2, display: "flex", gap: "14px" }}>
+          <div style={{ position: "relative", zIndex: 2, display: "flex", gap: "14px", flexWrap: "wrap" }}>
             {[
               { num: "12", label: "Municipios" },
               { num: "100%", label: "Verificado" },
@@ -287,7 +322,7 @@ export default function AdminConfigPage() {
             ].map(item => (
               <div key={item.label} style={{
                 background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: "12px", padding: "14px 18px", textAlign: "center",
+                borderRadius: "12px", padding: "14px 18px", textAlign: "center", flex: "1", minWidth: "90px"
               }}>
                 <div style={{ fontSize: "18px", fontWeight: 700, color: "#fff" }}>{item.num}</div>
                 <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", marginTop: "2px" }}>{item.label}</div>
@@ -297,7 +332,7 @@ export default function AdminConfigPage() {
         </div>
 
         {/* ── PANEL DERECHO ── */}
-        <div style={{ width: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faf8", padding: "40px" }}>
+        <div className="admin-panel-der">
           <div style={{ width: "100%", maxWidth: "400px", animation: "fadeInUp 0.5s ease" }}>
 
             <div style={{ marginBottom: "28px" }}>
@@ -401,7 +436,7 @@ export default function AdminConfigPage() {
                 <div style={{
                   background: "#fff5f5", border: "1px solid #fecaca",
                   borderRadius: "8px", padding: "10px 14px", marginBottom: "16px",
-                  fontSize: "13px", color: "#dc2626"
+                  fontSize: "13px", color: "#dc2626", boxSizing: "border-box"
                 }}>
                   {error}
                 </div>
@@ -412,7 +447,7 @@ export default function AdminConfigPage() {
                 <div style={{
                   background: "#f0fdf4", border: "1px solid #bbf7d0",
                   borderRadius: "8px", padding: "10px 14px", marginBottom: "16px",
-                  fontSize: "13px", color: "#16a34a"
+                  fontSize: "13px", color: "#16a34a", boxSizing: "border-box"
                 }}>
                   {exito}
                 </div>
@@ -429,6 +464,7 @@ export default function AdminConfigPage() {
                   borderRadius: "10px", fontSize: "14px", fontWeight: 600,
                   fontFamily: "'Poppins', sans-serif", cursor: "pointer",
                   transition: "all 0.2s", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                  boxSizing: "border-box"
                 }}
               >
                 {!adminRegistrado ? "Registrar en Base de Datos" : "Aceptar"}
