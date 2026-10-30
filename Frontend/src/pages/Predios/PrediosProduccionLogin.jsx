@@ -11,6 +11,7 @@ export default function LoginPrediosPage() {
   const [error, setError] = React.useState("");
   const [cargando, setCargando] = React.useState(false);
   const [verClave, setVerClave] = React.useState(false);
+  const [menuAbierto, setMenuAbierto] = React.useState(false); // Estado para el menú hamburguesa móvil
 
   // Obtenemos la URL base del backend en AWS con HTTPS
   const API_URL = "https://3.145.179.35.nip.io/api/";
@@ -49,7 +50,7 @@ export default function LoginPrediosPage() {
           timerProgressBar: true
         });
 
-        // Redirección usando la ruta interna de React Router (evitando localhost)
+        // Redirección usando la ruta interna de React Router
         navigate("/predios/admin-secreto");
         return;
       }
@@ -72,7 +73,7 @@ export default function LoginPrediosPage() {
         // Guardamos los datos del usuario en sessionStorage
         sessionStorage.setItem("usuario_predios", JSON.stringify(data.usuario));
 
-        // 📰 CASO ESPECÍFICO: Si es Empleado de Noticias muestra la alerta y redirige al Dashboard de Noticias
+        // 📰 CASO ESPECÍFICO: Si es Empleado de Noticias
         if (data.usuario.rol === "Empleado de Noticias") {
           await Swal.fire({
             icon: "success",
@@ -83,7 +84,6 @@ export default function LoginPrediosPage() {
             timerProgressBar: true
           });
 
-          // Redirige a la ruta asignada para el panel de noticias
           navigate("/predios/noticias-dashboard");
           return;
         }
@@ -115,7 +115,6 @@ export default function LoginPrediosPage() {
         const mensajeError = data.message || "Usuario o contraseña incorrectos.";
         setError(mensajeError);
 
-        // Reemplazamos la carga por la alerta de error
         Swal.fire({
           icon: "error",
           title: "Error de acceso",
@@ -128,7 +127,6 @@ export default function LoginPrediosPage() {
       const mensajeConexion = "Error de conexión con el servidor. Inténtalo de nuevo.";
       setError(mensajeConexion);
 
-      // Reemplazamos la carga por la alerta de error de conexión
       Swal.fire({
         icon: "error",
         title: "Error de conexión",
@@ -139,16 +137,12 @@ export default function LoginPrediosPage() {
   };
 
   return (
-    <div style={{ fontFamily: "'Poppins', sans-serif", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div style={{ fontFamily: "'Poppins', sans-serif", minHeight: "100vh", display: "flex", flexDirection: "column", overflowX: "hidden" }}>
 
       <style>{`
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(24px); }
           to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
         }
         .input-login:focus {
           border-color: #136442 !important;
@@ -161,61 +155,149 @@ export default function LoginPrediosPage() {
           box-shadow: 0 6px 20px rgba(19,100,66,0.35) !important;
         }
         .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
-        .link-volver:hover  { color: #136442 !important; }
         .nav-btn-primary:hover { background: #0d4a2f !important; transform: translateY(-1px); }
+
+        /* Estilos Responsive para los dos paneles */
+        .login-main-container {
+          flex: 1;
+          display: flex;
+        }
+        .login-panel-izq {
+          width: 50%;
+          position: relative;
+          overflow: hidden;
+          background: linear-gradient(150deg, #0a3d24 0%, #136442 60%, #1a7a50 100%);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 56px 48px;
+          gap: 28px;
+        }
+        .login-panel-der {
+          width: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f8faf8;
+          padding: 40px;
+        }
+
+        @media (max-width: 992px) {
+          .login-main-container {
+            flex-direction: column !important;
+          }
+          .login-panel-izq, .login-panel-der {
+            width: 100% !important;
+            padding: 40px 20px !important;
+          }
+        }
       `}</style>
 
       {/* ── NAVBAR ── */}
       <nav style={{
-        display: "flex", alignItems: "center",
-        padding: "0 48px", height: "68px", backgroundColor: "#fff",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "0 24px", height: "68px", backgroundColor: "#fff",
         boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "sticky", top: 0, zIndex: 100,
-        gap: "24px", flexShrink: 0,
+        flexShrink: 0,
       }}>
-        <div style={{
-          display: "flex", alignItems: "center", gap: "20px",
-          marginLeft: "-30px"
-        }}>
-          <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 45 }} />
-          <img src={escudo} alt="Logo MPPAT" style={{ height: 35 }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => navigate("/")}>
+            <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 38 }} />
+            <img src={escudo} alt="Logo MPPAT" style={{ height: 30 }} />
+          </div>
+          <span className="texto-institucional" style={{
+            fontSize: "12px", color: "#888", fontStyle: "italic",
+            lineHeight: 1.4, borderLeft: "2px solid #e0e0e0", paddingLeft: "12px",
+          }}>
+            Estado Barinas<br />
+            <strong style={{ color: "#136442", fontStyle: "normal" }}>Venezuela</strong>
+          </span>
         </div>
-        <span style={{
-          fontSize: "12px", color: "#888", fontStyle: "italic",
-          lineHeight: 1.4, borderLeft: "2px solid #e0e0e0", paddingLeft: "16px",
-        }}>
-          Estado Barinas<br />
-          <strong style={{ color: "#136442", fontStyle: "normal" }}>Venezuela</strong>
-        </span>
 
-        <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+        {/* Botones de escritorio */}
+        <div className="nav-desktop-buttons" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <button className="nav-btn-primary" style={{
             background: "#136442", border: "none", color: "#fff",
-            padding: "8px 22px", borderRadius: "6px", cursor: "pointer",
+            padding: "8px 18px", borderRadius: "6px", cursor: "pointer",
             fontWeight: 600, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
-            transition: "all 0.2s",
+            transition: "all 0.2s", whiteSpace: "nowrap"
           }}>
             Acceso Empleados
           </button>
           <button onClick={() => navigate("/")} style={{
             background: "none", border: "1.5px solid #ccc", color: "#666",
-            padding: "8px 20px", borderRadius: "6px", cursor: "pointer",
+            padding: "8px 16px", borderRadius: "6px", cursor: "pointer",
             fontWeight: 500, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
+            whiteSpace: "nowrap"
           }}>
             ← Portal
           </button>
         </div>
+
+        {/* Botón Hamburguesa para Móvil */}
+        <button 
+          onClick={() => setMenuAbierto(!menuAbierto)}
+          className="btn-hamburguesa"
+          style={{
+            display: "none", background: "none", border: "none", 
+            cursor: "pointer", fontSize: "24px", color: "#1b4332", padding: "4px"
+          }}
+          aria-label="Abrir menú"
+        >
+          {menuAbierto ? "✕" : "☰"}
+        </button>
       </nav>
 
-      {/* ── DOS PANELES ── */}
-      <div style={{ flex: 1, display: "flex" }}>
+      {/* Menú desplegable para dispositivos móviles */}
+      {menuAbierto && (
+        <div style={{
+          position: "absolute", top: "68px", left: 0, width: "100%",
+          background: "#fff", boxShadow: "0 10px 15px rgba(0,0,0,0.1)",
+          padding: "20px", display: "flex", flexDirection: "column", gap: "12px",
+          zIndex: 99, borderTop: "1px solid #eee", boxSizing: "border-box"
+        }}>
+          <button 
+            style={{
+              background: "#136442", border: "none", color: "#fff",
+              padding: "12px 18px", borderRadius: "8px", cursor: "pointer",
+              fontWeight: 600, fontSize: "14px", textAlign: "center", width: "100%"
+            }}
+          >
+            Acceso Empleados
+          </button>
+          <button 
+            onClick={() => { setMenuAbierto(false); navigate("/"); }}
+            style={{
+              background: "#f8faf9", border: "1px solid #ccc", color: "#444",
+              padding: "12px 18px", borderRadius: "8px", cursor: "pointer",
+              fontWeight: 500, fontSize: "14px", textAlign: "center", width: "100%"
+            }}
+          >
+            ← Volver al Portal
+          </button>
+        </div>
+      )}
+
+      {/* Estilos responsivos del Navbar */}
+      <style>{`
+        @media (max-width: 768px) {
+          .nav-desktop-buttons {
+            display: none !important;
+          }
+          .btn-hamburguesa {
+            display: block !important;
+          }
+          .texto-institucional {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      {/* ── DOS PANELES (CONTENEDOR RESPONSIVE) ── */}
+      <div className="login-main-container">
 
         {/* ── PANEL IZQUIERDO ── */}
-        <div style={{
-          width: "50%", position: "relative", overflow: "hidden",
-          background: "linear-gradient(150deg, #0a3d24 0%, #136442 60%, #1a7a50 100%)",
-          display: "flex", flexDirection: "column", justifyContent: "center",
-          padding: "56px 48px", gap: "28px",
-        }}>
+        <div className="login-panel-izq">
           <img
             src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200&q=80"
             alt="Predios"
@@ -245,7 +327,7 @@ export default function LoginPrediosPage() {
           {/* Texto */}
           <div style={{ position: "relative", zIndex: 2 }}>
             <h1 style={{
-              color: "#fff", fontSize: "30px", fontWeight: 700,
+              color: "#fff", fontSize: "clamp(24px, 4vw, 30px)", fontWeight: 700,
               lineHeight: 1.2, margin: "0 0 16px"
             }}>
               Login de acceso<br />
@@ -261,7 +343,7 @@ export default function LoginPrediosPage() {
           </div>
 
           {/* Stats */}
-          <div style={{ position: "relative", zIndex: 2, display: "flex", gap: "14px" }}>
+          <div style={{ position: "relative", zIndex: 2, display: "flex", gap: "14px", flexWrap: "wrap" }}>
             {[
               { num: "12", label: "Municipios" },
               { num: "100%", label: "Verificado" },
@@ -270,9 +352,9 @@ export default function LoginPrediosPage() {
               <div key={item.label} style={{
                 background: "rgba(255,255,255,0.08)",
                 border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: "12px", padding: "14px 18px", textAlign: "center",
+                borderRadius: "12px", padding: "14px 18px", textAlign: "center", flex: "1", minWidth: "90px"
               }}>
-                <div style={{ fontSize: "20px", fontWeight: 700, color: "#fff" }}>{item.num}</div>
+                <div style={{ fontSize: "18px", fontWeight: 700, color: "#fff" }}>{item.num}</div>
                 <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", marginTop: "2px" }}>{item.label}</div>
               </div>
             ))}
@@ -280,10 +362,7 @@ export default function LoginPrediosPage() {
         </div>
 
         {/* ── PANEL DERECHO ── */}
-        <div style={{
-          width: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-          background: "#f8faf8", padding: "40px",
-        }}>
+        <div className="login-panel-der">
           <div style={{ width: "100%", maxWidth: "400px", animation: "fadeInUp 0.5s ease" }}>
 
             {/* Encabezado */}
@@ -433,6 +512,7 @@ export default function LoginPrediosPage() {
                   fontFamily: "'Poppins', sans-serif", cursor: "pointer",
                   transition: "all 0.2s", display: "flex",
                   alignItems: "center", justifyContent: "center", gap: "8px",
+                  boxSizing: "border-box"
                 }}
               >
                 Aceptar
