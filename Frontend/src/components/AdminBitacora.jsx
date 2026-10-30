@@ -8,6 +8,9 @@ import Swal from "sweetalert2";
 import { generarPDFBitacora } from "./ReporteBitacoraPDF";
 
 export default function AdminBitacora() {
+    // URL del servidor backend en AWS con HTTPS
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const [registros, setRegistros] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [filtroModulo, setFiltroModulo] = useState("TODOS");
@@ -42,7 +45,7 @@ export default function AdminBitacora() {
     const fechaMinimaPermitida = obtenerFechaMinimaHistorica();
 
     useEffect(() => {
-        fetch("/api/bitacora/")
+        fetch(`${API_URL}bitacora/`)
             .then(res => res.json())
             .then(data => {
                 setRegistros(Array.isArray(data) ? data : []);

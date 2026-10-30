@@ -44,6 +44,9 @@ import {
 } from "../../components/ui/AdminUI";
 
 export default function EmpleadoDashboard() {
+    // URL del servidor backend en AWS con HTTPS
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const navigate = useNavigate();
     const [vistaActiva, setVistaActiva] = useState("inicio");
 
@@ -90,7 +93,7 @@ export default function EmpleadoDashboard() {
                 }
             });
 
-            const response = await fetch(`/api/predios/${predioSeleccionado.id_predio}/`, {
+            const response = await fetch(`${API_URL}predios/${predioSeleccionado.id_predio}/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -267,7 +270,7 @@ export default function EmpleadoDashboard() {
         datosLegales: datosLegalesMunicipio
     } = useGraficosPredios(prediosMunicipio);
 
-    const cargandoDashboard = cargando || (!listaPredios || listaPredios.length === 0);
+    const cargandoDashboard = cargando;
     const totalPrediosMunicipio = prediosMunicipio.length;
     const superficieTotalMunicipio = prediosMunicipio.reduce(
         (acc, predio) => acc + Number(predio.superficie || 0),
