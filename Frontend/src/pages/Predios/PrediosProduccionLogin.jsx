@@ -11,7 +11,6 @@ export default function LoginPrediosPage() {
   const [error, setError] = React.useState("");
   const [cargando, setCargando] = React.useState(false);
   const [verClave, setVerClave] = React.useState(false);
-  const [menuAbierto, setMenuAbierto] = React.useState(false); // Estado para el menú hamburguesa móvil
 
   // Obtenemos la URL base del backend en AWS con HTTPS
   const API_URL = "https://3.145.179.35.nip.io/api/";
@@ -190,10 +189,13 @@ export default function LoginPrediosPage() {
             width: 100% !important;
             padding: 40px 20px !important;
           }
+          .texto-institucional {
+            display: none !important;
+          }
         }
       `}</style>
 
-      {/* ── NAVBAR ── */}
+      {/* ── NAVBAR SIMPLE SIN HAMBURGUESA ── */}
       <nav style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 24px", height: "68px", backgroundColor: "#fff",
@@ -214,84 +216,15 @@ export default function LoginPrediosPage() {
           </span>
         </div>
 
-        {/* Botones de escritorio */}
-        <div className="nav-desktop-buttons" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <button className="nav-btn-primary" style={{
-            background: "#136442", border: "none", color: "#fff",
-            padding: "8px 18px", borderRadius: "6px", cursor: "pointer",
-            fontWeight: 600, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
-            transition: "all 0.2s", whiteSpace: "nowrap"
-          }}>
-            Acceso Empleados
-          </button>
-          <button onClick={() => navigate("/")} style={{
-            background: "none", border: "1.5px solid #ccc", color: "#666",
-            padding: "8px 16px", borderRadius: "6px", cursor: "pointer",
-            fontWeight: 500, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
-            whiteSpace: "nowrap"
-          }}>
-            ← Portal
-          </button>
-        </div>
-
-        {/* Botón Hamburguesa para Móvil */}
-        <button 
-          onClick={() => setMenuAbierto(!menuAbierto)}
-          className="btn-hamburguesa"
-          style={{
-            display: "none", background: "none", border: "none", 
-            cursor: "pointer", fontSize: "24px", color: "#1b4332", padding: "4px"
-          }}
-          aria-label="Abrir menú"
-        >
-          {menuAbierto ? "✕" : "☰"}
+        <button onClick={() => navigate("/")} style={{
+          background: "none", border: "1.5px solid #ccc", color: "#666",
+          padding: "8px 16px", borderRadius: "6px", cursor: "pointer",
+          fontWeight: 500, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
+          whiteSpace: "nowrap"
+        }}>
+          ← Portal
         </button>
       </nav>
-
-      {/* Menú desplegable para dispositivos móviles */}
-      {menuAbierto && (
-        <div style={{
-          position: "absolute", top: "68px", left: 0, width: "100%",
-          background: "#fff", boxShadow: "0 10px 15px rgba(0,0,0,0.1)",
-          padding: "20px", display: "flex", flexDirection: "column", gap: "12px",
-          zIndex: 99, borderTop: "1px solid #eee", boxSizing: "border-box"
-        }}>
-          <button 
-            style={{
-              background: "#136442", border: "none", color: "#fff",
-              padding: "12px 18px", borderRadius: "8px", cursor: "pointer",
-              fontWeight: 600, fontSize: "14px", textAlign: "center", width: "100%"
-            }}
-          >
-            Acceso Empleados
-          </button>
-          <button 
-            onClick={() => { setMenuAbierto(false); navigate("/"); }}
-            style={{
-              background: "#f8faf9", border: "1px solid #ccc", color: "#444",
-              padding: "12px 18px", borderRadius: "8px", cursor: "pointer",
-              fontWeight: 500, fontSize: "14px", textAlign: "center", width: "100%"
-            }}
-          >
-            ← Volver al Portal
-          </button>
-        </div>
-      )}
-
-      {/* Estilos responsivos del Navbar */}
-      <style>{`
-        @media (max-width: 768px) {
-          .nav-desktop-buttons {
-            display: none !important;
-          }
-          .btn-hamburguesa {
-            display: block !important;
-          }
-          .texto-institucional {
-            display: none !important;
-          }
-        }
-      `}</style>
 
       {/* ── DOS PANELES (CONTENEDOR RESPONSIVE) ── */}
       <div className="login-main-container">
