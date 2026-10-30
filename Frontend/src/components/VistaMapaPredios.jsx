@@ -51,28 +51,34 @@ export default function VistaMapaPredios({ listaPredios, municipios, cargando })
             
             <style>{`
                 .map-wrapper-container {
-                    height: 480px; /* Reducido de 600px a 480px para darle una proporción más cuadrada y estética */
+                    /* Se calcula para ocupar exactamente el espacio restante de la pantalla sin obligar a hacer scroll */
+                    height: calc(100vh - 170px);
+                    min-height: 350px;
+                    max-height: 520px;
                 }
                 @media (max-width: 768px) {
                     .map-wrapper-container {
-                        height: 380px !important;
+                        height: calc(100vh - 150px) !important;
+                        max-height: 440px !important;
                     }
                 }
             `}</style>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", boxSizing: "border-box" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%", boxSizing: "border-box" }}>
 
-                {/* SECCIÓN SUPERIOR: EL MAPA CON PROPORCIÓN CUADRADA */}
+                {/* SECCIÓN SUPERIOR: EL MAPA AJUSTADO A LA VISTA */}
                 <div style={{
                     width: "100%",
                     backgroundColor: "#fff",
-                    borderRadius: "16px",
-                    padding: "10px",
-                    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                    borderRadius: "14px",
+                    padding: "8px",
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
                     border: "1px solid #e0e0e0",
-                    boxSizing: "border-box"
+                    boxSizing: "border-box",
+                    display: "flex",
+                    flexDirection: "column"
                 }} className="map-wrapper-container">
-                    <div style={{ height: "100%", width: "100%", borderRadius: "12px", overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: "100%", borderRadius: "10px", overflow: "hidden" }}>
                         <MapaBarinas predios={listaPredios} />
                     </div>
                 </div>
