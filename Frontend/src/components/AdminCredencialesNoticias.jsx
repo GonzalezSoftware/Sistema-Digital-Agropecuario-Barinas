@@ -118,7 +118,8 @@ export function AdminCredencialesNoticias({
                 gap: "12px",
                 color: "#136442",
                 fontSize: "13px",
-                fontWeight: "500"
+                fontWeight: "500",
+                fontFamily: "'Poppins', sans-serif"
             }}>
                 <Spinner color="#136442" />
                 <span>Cargando datos de autenticación...</span>
@@ -127,24 +128,29 @@ export function AdminCredencialesNoticias({
     }
 
     return (
-        <div style={{ maxWidth: "800px", margin: "0 auto", paddingBottom: "40px" }}>
+        <div style={{ maxWidth: "800px", width: "100%", margin: "0 auto", paddingBottom: "40px", boxSizing: "border-box", fontFamily: "'Poppins', sans-serif" }}>
             <div style={{
                 backgroundColor: "#ffffff",
-                borderRadius: "12px",
+                borderRadius: "16px",
                 border: "1px solid #d1fae5",
                 boxShadow: "0 4px 6px -1px rgba(19, 100, 66, 0.08)",
-                overflow: "hidden"
+                overflow: "hidden",
+                width: "100%",
+                boxSizing: "border-box"
             }}>
                 {/* Cabecera corporativa */}
                 <div style={{
-                    padding: "20px 24px",
+                    padding: "18px 20px",
                     borderBottom: "1px solid #d1fae5",
                     backgroundColor: "#f0fdf4",
                     display: "flex",
+                    flexWrap: "wrap",
                     justifyContent: "space-between",
-                    alignItems: "center"
+                    alignItems: "center",
+                    gap: "10px",
+                    boxSizing: "border-box"
                 }}>
-                    <h3 style={{ fontSize: "15px", fontWeight: "600", color: "#136442", margin: 0 }}>
+                    <h3 style={{ fontSize: "15px", fontWeight: "600", color: "#136442", margin: 0, wordBreak: "break-word" }}>
                         Datos de Autenticación (Empleado de Noticias)
                     </h3>
 
@@ -164,9 +170,9 @@ export function AdminCredencialesNoticias({
                                 cursor: "pointer",
                                 fontSize: "12px",
                                 fontWeight: "600",
-                                fontFamily: "Poppins, sans-serif"
+                                fontFamily: "Poppins, sans-serif",
+                                whiteSpace: "nowrap"
                             }}
-                            
                         >
                              Editar Credenciales
                         </button>
@@ -175,7 +181,7 @@ export function AdminCredencialesNoticias({
 
                 {/* VISTA 1: Tarjeta de Resumen */}
                 {credencialesBD.activo && !editando ? (
-                    <div style={{ padding: "24px" }}>
+                    <div style={{ padding: "20px", boxSizing: "border-box" }}>
                         {mensajeFeedback && (
                             <div style={{
                                 padding: "12px 16px",
@@ -185,7 +191,8 @@ export function AdminCredencialesNoticias({
                                 fontWeight: "500",
                                 backgroundColor: "#f0fdf4",
                                 color: "#166534",
-                                border: "1px solid #bbf7d0"
+                                border: "1px solid #bbf7d0",
+                                boxSizing: "border-box"
                             }}>
                                 {mensajeFeedback.texto}
                             </div>
@@ -194,20 +201,22 @@ export function AdminCredencialesNoticias({
                         <div style={{
                             display: "flex",
                             flexDirection: "column",
-                            gap: "16px",
+                            gap: "14px",
                             backgroundColor: "#f8fafc",
-                            padding: "20px",
+                            padding: "18px",
                             borderRadius: "8px",
-                            border: "1px solid #e2e8f0"
+                            border: "1px solid #e2e8f0",
+                            boxSizing: "border-box",
+                            width: "100%"
                         }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                {UserIcon && <UserIcon style={{ width: "18px", height: "18px", color: "#136442" }} />}
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                                {UserIcon && <UserIcon style={{ width: "18px", height: "18px", color: "#136442", flexShrink: 0 }} />}
                                 <span style={{ fontSize: "13px", color: "#475569", fontWeight: "600" }}>Usuario registrado:</span>
-                                <span style={{ fontSize: "14px", color: "#136442", fontWeight: "700" }}>{credencialesBD.usuario}</span>
+                                <span style={{ fontSize: "14px", color: "#136442", fontWeight: "700", wordBreak: "break-all" }}>{credencialesBD.usuario}</span>
                             </div>
 
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                {LockClosedIcon && <LockClosedIcon style={{ width: "18px", height: "18px", color: "#136442" }} />}
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                                {LockClosedIcon && <LockClosedIcon style={{ width: "18px", height: "18px", color: "#136442", flexShrink: 0 }} />}
                                 <span style={{ fontSize: "13px", color: "#475569", fontWeight: "600" }}>Contraseña:</span>
                                 <span style={{ fontSize: "14px", color: "#1e293b", letterSpacing: "2px" }}>•••••••• (Protegida)</span>
                             </div>
@@ -215,7 +224,7 @@ export function AdminCredencialesNoticias({
                     </div>
                 ) : (
                     /* VISTA 2: Formulario */
-                    <form onSubmit={guardarCredenciales} style={{ padding: "24px" }}>
+                    <form onSubmit={guardarCredenciales} style={{ padding: "20px", boxSizing: "border-box", width: "100%" }}>
                         {mensajeFeedback && (
                             <div style={{
                                 padding: "12px 16px",
@@ -225,19 +234,20 @@ export function AdminCredencialesNoticias({
                                 fontWeight: "500",
                                 backgroundColor: mensajeFeedback.tipo === "exito" ? "#f0fdf4" : "#fee2e2",
                                 color: mensajeFeedback.tipo === "exito" ? "#166534" : "#991b1b",
-                                border: `1px solid ${mensajeFeedback.tipo === "exito" ? "#bbf7d0" : "#fecaca"}`
+                                border: `1px solid ${mensajeFeedback.tipo === "exito" ? "#bbf7d0" : "#fecaca"}`,
+                                boxSizing: "border-box"
                             }}>
                                 {mensajeFeedback.texto}
                             </div>
                         )}
 
-                        <div style={{ marginBottom: "20px" }}>
-                            <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#136442", marginBottom: "8px" }}>
+                        <div style={{ marginBottom: "18px", width: "100%", boxSizing: "border-box" }}>
+                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#136442", marginBottom: "6px" }}>
                                 Usuario
                             </label>
-                            <div style={{ position: "relative" }}>
+                            <div style={{ position: "relative", width: "100%", boxSizing: "border-box" }}>
                                 {UserIcon && (
-                                    <span style={{ position: "absolute", top: "11px", left: "12px", color: "#136442" }}>
+                                    <span style={{ position: "absolute", top: "11px", left: "12px", color: "#136442", flexShrink: 0 }}>
                                         <UserIcon style={{ width: "18px", height: "18px" }} />
                                     </span>
                                 )}
@@ -256,7 +266,8 @@ export function AdminCredencialesNoticias({
                                         boxSizing: "border-box",
                                         outline: "none",
                                         backgroundColor: "#ffffff",
-                                        color: "#1e293b"
+                                        color: "#1e293b",
+                                        fontFamily: "'Poppins', sans-serif"
                                     }}
                                     onFocus={(e) => e.target.style.borderColor = "#136442"}
                                     onBlur={(e) => e.target.style.borderColor = "#cbd5e1"}
@@ -264,13 +275,13 @@ export function AdminCredencialesNoticias({
                             </div>
                         </div>
 
-                        <div style={{ marginBottom: "24px" }}>
-                            <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#136442", marginBottom: "8px" }}>
+                        <div style={{ marginBottom: "20px", width: "100%", boxSizing: "border-box" }}>
+                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#136442", marginBottom: "6px" }}>
                                 Contraseña (Mínimo 8 caracteres)
                             </label>
-                            <div style={{ position: "relative" }}>
+                            <div style={{ position: "relative", width: "100%", boxSizing: "border-box" }}>
                                 {LockClosedIcon && (
-                                    <span style={{ position: "absolute", top: "11px", left: "12px", color: "#136442" }}>
+                                    <span style={{ position: "absolute", top: "11px", left: "12px", color: "#136442", flexShrink: 0 }}>
                                         <LockClosedIcon style={{ width: "18px", height: "18px" }} />
                                     </span>
                                 )}
@@ -289,7 +300,8 @@ export function AdminCredencialesNoticias({
                                         boxSizing: "border-box",
                                         outline: "none",
                                         backgroundColor: "#ffffff",
-                                        color: "#1e293b"
+                                        color: "#1e293b",
+                                        fontFamily: "'Poppins', sans-serif"
                                     }}
                                     onFocus={(e) => e.target.style.borderColor = "#136442"}
                                     onBlur={(e) => e.target.style.borderColor = "#cbd5e1"}
@@ -297,7 +309,7 @@ export function AdminCredencialesNoticias({
                             </div>
                         </div>
 
-                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", flexWrap: "wrap", width: "100%", boxSizing: "border-box" }}>
                             {credencialesBD.activo && (
                                 <button
                                     type="button"
@@ -310,7 +322,8 @@ export function AdminCredencialesNoticias({
                                         borderRadius: "8px",
                                         fontWeight: "600",
                                         cursor: "pointer",
-                                        fontSize: "13px"
+                                        fontSize: "13px",
+                                        fontFamily: "'Poppins', sans-serif"
                                     }}
                                 >
                                     Cancelar
@@ -329,7 +342,8 @@ export function AdminCredencialesNoticias({
                                     cursor: "pointer",
                                     fontSize: "13px",
                                     opacity: guardando ? 0.7 : 1,
-                                    transition: "background-color 0.2s"
+                                    transition: "background-color 0.2s",
+                                    fontFamily: "'Poppins', sans-serif"
                                 }}
                                 onMouseOver={(e) => { if (!guardando) e.currentTarget.style.backgroundColor = "#0f4f35"; }}
                                 onMouseOut={(e) => { if (!guardando) e.currentTarget.style.backgroundColor = "#136442"; }}
