@@ -96,7 +96,44 @@ export default function HistorialPredios({
     const estaInhabilitado = predioSeleccionado?.estado === 'inactivo' || predioSeleccionado?.inhabilitado === true;
 
     return (
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <div style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", boxSizing: "border-box" }}>
+            
+            {/* Estilos CSS Responsivos */}
+            <style>{`
+                .grid-productor {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 20px;
+                }
+                .grid-ubicacion {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 20px;
+                }
+                .grid-tenencia {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 20px;
+                }
+                .grid-explotacion {
+                    display: grid;
+                    grid-template-columns: 1fr 2fr;
+                    gap: 20px;
+                }
+
+                @media (max-width: 768px) {
+                    .grid-productor, 
+                    .grid-ubicacion, 
+                    .grid-tenencia, 
+                    .grid-explotacion {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .span-responsive {
+                        grid-column: span 1 !important;
+                    }
+                }
+            `}</style>
+
             {/* ── TÍTULO Y BUSCADOR ── */}
             <div style={{
                 display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -114,7 +151,7 @@ export default function HistorialPredios({
                         onChange={(e) => setBusqueda(e.target.value)}
                         style={{
                             width: "100%", padding: "10px 15px", borderRadius: "8px",
-                            border: "1.4px solid #ccc", fontSize: "14px", outline: "none",
+                            border: "1.4px solid #ccc", fontSize: "14px", outline: "none", boxSizing: "border-box"
                         }}
                     />
                 </div>
@@ -122,10 +159,10 @@ export default function HistorialPredios({
 
             {/* ── TABLA DE REGISTROS ── */}
             <div style={{
-                backgroundColor: "#fff", padding: "20px", borderRadius: "12px",
+                backgroundColor: "#fff", padding: "15px", borderRadius: "12px",
                 boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
             }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", minWidth: "650px" }}>
                     <thead>
                         <tr style={{ borderBottom: "2px solid #136442", color: "#136442" }}>
                             <th style={{ fontSize: "14px", padding: "12px" }}>#</th>
@@ -155,10 +192,9 @@ export default function HistorialPredios({
                                     >
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{numeroFila}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>
-                                            {p.nombre_predio} {inhabilitadoFila && <span style={{ textDecoration: 'none', color: '#dc2626', fontSize: '10px', fontWeight: 'bold', marginLeft: '6px', background: '#fee2e2', padding: '2px 6px', borderRadius: '4px' }}>INHABILITADO (CAMBIO DE DUEÑO)</span>}
+                                            {p.nombre_predio} {inhabilitadoFila && <span style={{ textDecoration: 'none', color: '#dc2626', fontSize: '10px', fontWeight: 'bold', marginLeft: '6px', background: '#fee2e2', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>INHABILITADO</span>}
                                         </td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
-                                        {/* Municipio formateado correctamente con mayúscula inicial */}
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{formatearMunicipio(p.municipio)}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
                                         <td style={{ fontSize: "13px", padding: "12px", textDecoration: "none" }}>
@@ -173,7 +209,8 @@ export default function HistorialPredios({
                                                     cursor: "pointer",
                                                     fontSize: "12px",
                                                     fontWeight: "500",
-                                                    fontFamily: "Poppins, sans-serif"
+                                                    fontFamily: "Poppins, sans-serif",
+                                                    whiteSpace: "nowrap"
                                                 }}
                                             >
                                                 {inhabilitadoFila ? "Ver Histórico" : "Ver Detalles"}
@@ -198,7 +235,7 @@ export default function HistorialPredios({
                             Mostrando del <strong>{indicePrimerElemento + 1}</strong> al <strong>{Math.min(indiceUltimoElemento, prediosFiltrados.length)}</strong> de <strong>{prediosFiltrados.length}</strong> predios
                         </span>
 
-                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                             <button
                                 onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
                                 disabled={paginaActual === 1}
@@ -240,42 +277,43 @@ export default function HistorialPredios({
                 <div style={{
                     position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
                     backgroundColor: "rgba(0,0,0,0.7)", display: "flex",
-                    justifyContent: "center", alignItems: "center", zIndex: 1000, padding: "15px"
+                    justifyContent: "center", alignItems: "center", zIndex: 1000, padding: "10px", boxSizing: "border-box"
                 }}>
                     <div style={{
-                        backgroundColor: "#fff", width: "100%", maxWidth: "950px", maxHeight: "95vh",
+                        backgroundColor: "#fff", width: "100%", maxWidth: "950px", maxHeight: "92vh",
                         borderRadius: "12px", overflowY: "auto", boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
                         display: "flex", flexDirection: "column"
                     }}>
                         {/* Encabezado Dinámico */}
                         <div style={{
                             backgroundColor: estaInhabilitado ? "#b91c1c" : "#136442",
-                            padding: "18px 25px", color: "#fff", display: "flex",
+                            padding: "16px 20px", color: "#fff", display: "flex",
                             justifyContent: "space-between", alignItems: "center",
                             position: "sticky", top: 0, zIndex: 10
                         }}>
-                            <h3 style={{ margin: 0, fontSize: "16px" }}>
+                            <h3 style={{ margin: 0, fontSize: "15px", wordBreak: "break-word" }}>
                                 {estaInhabilitado
-                                    ? `PREDIO INHABILITADO (CAMBIO DE DUEÑO): ${predioSeleccionado.nombre_predio.toUpperCase()}`
+                                    ? `PREDIO INHABILITADO: ${predioSeleccionado.nombre_predio.toUpperCase()}`
                                     : cargandoAccion ? "PROCESANDO..." : editando ? "MODO EDICIÓN ACTIVADO" : `FICHA TÉCNICA: ${predioSeleccionado.nombre_predio.toUpperCase()}`}
                             </h3>
-                            <button onClick={() => { if (!cargandoAccion) { setMostrarModal(false); setEditando(false); } }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: "22px" }}>✕</button>
+                            <button onClick={() => { if (!cargandoAccion) { setMostrarModal(false); setEditando(false); } }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: "20px", padding: "4px" }}>✕</button>
                         </div>
 
                         {/* Aviso en caso de estar inhabilitado */}
                         {estaInhabilitado && (
-                            <div style={{ backgroundColor: "#fef2f2", color: "#991b1b", padding: "12px 25px", borderBottom: "1px solid #fca5a5", fontSize: "13px", fontWeight: "bold" }}>
-                                ⚠ Este predio se encuentra inhabilitado por cambio de dueño. Sus datos están congelados únicamente para consulta histórica y conservación de gráficos.
+                            <div style={{ backgroundColor: "#fef2f2", color: "#991b1b", padding: "12px 20px", borderBottom: "1px solid #fca5a5", fontSize: "13px", fontWeight: "bold" }}>
+                                ⚠ Este predio se encuentra inhabilitado por cambio de dueño. Sus datos están congelados únicamente para consulta histórica.
                             </div>
                         )}
 
-                        <div style={{ padding: "30px", opacity: cargandoAccion ? 0.5 : 1, pointerEvents: cargandoAccion || estaInhabilitado ? 'none' : 'auto' }}>
+                        <div style={{ padding: "20px", opacity: cargandoAccion ? 0.5 : 1, pointerEvents: cargandoAccion || estaInhabilitado ? 'none' : 'auto', boxSizing: "border-box" }}>
+                            
                             {/* I. DATOS DEL PRODUCTOR */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "25px", marginBottom: "35px" }}>
-                                <div style={{ gridColumn: "span 3", borderBottom: `2px solid ${estaInhabilitado ? "#b91c1c" : "#136442"}`, paddingBottom: "5px" }}>
+                            <div className="grid-productor" style={{ marginBottom: "30px" }}>
+                                <div style={{ gridColumn: "span 3", borderBottom: `2px solid ${estaInhabilitado ? "#b91c1c" : "#136442"}`, paddingBottom: "5px" }} className="span-responsive">
                                     <strong style={{ color: estaInhabilitado ? "#b91c1c" : "#136442", fontSize: "14px" }}>I. DATOS DEL PRODUCTOR</strong>
                                 </div>
-                                <div>
+                                <div className="span-responsive">
                                     <InputField
                                         label="Nombre Completo"
                                         name="nombre"
@@ -285,7 +323,7 @@ export default function HistorialPredios({
                                         error={errors?.productor_nombre}
                                     />
                                 </div>
-                                <div>
+                                <div className="span-responsive">
                                     <InputField
                                         label="Cédula / RIF"
                                         name="productor_cedula"
@@ -294,7 +332,7 @@ export default function HistorialPredios({
                                         style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
                                     />
                                 </div>
-                                <div>
+                                <div className="span-responsive">
                                     <InputField
                                         label="Teléfono"
                                         name="telefono"
@@ -304,7 +342,7 @@ export default function HistorialPredios({
                                         error={errors?.productor_telefono}
                                     />
                                 </div>
-                                <div style={{ gridColumn: "span 3" }}>
+                                <div style={{ gridColumn: "span 3" }} className="span-responsive">
                                     <InputField
                                         label="Correo Electrónico"
                                         name="correo"
@@ -317,24 +355,23 @@ export default function HistorialPredios({
                             </div>
 
                             {/* II. GEORREFERENCIACIÓN Y UBICACIÓN */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "25px", marginBottom: "35px" }}>
-                                <div style={{ gridColumn: "span 3", borderBottom: "2px solid #136442", paddingBottom: "5px" }}>
+                            <div className="grid-ubicacion" style={{ marginBottom: "30px" }}>
+                                <div style={{ gridColumn: "span 3", borderBottom: "2px solid #136442", paddingBottom: "5px" }} className="span-responsive">
                                     <strong style={{ color: "#136442", fontSize: "14px" }}>II. GEORREFERENCIACIÓN Y UBICACIÓN</strong>
                                 </div>
-                                {/* Municipio formateado en la ficha técnica modal */}
-                                <div><InputField label="Municipio" value={formatearMunicipio(predioSeleccionado.municipio)} disabled={true} /></div>
-                                <div><InputField label="Parroquia" value={predioSeleccionado.parroquia || "N/A"} disabled={true} /></div>
-                                <div><InputField label="Comunidad / Sector" value={predioSeleccionado.comunidad || "N/A"} disabled={true} /></div>
-                                <div style={{ gridColumn: "span 2" }}><InputField label="Coordenadas" value={predioSeleccionado.coordenadas || "Sin coordenadas"} disabled={true} /></div>
-                                <div><InputField label="Centro Poblado" value={predioSeleccionado.centro_poblado || "N/A"} disabled={true} /></div>
+                                <div className="span-responsive"><InputField label="Municipio" value={formatearMunicipio(predioSeleccionado.municipio)} disabled={true} /></div>
+                                <div className="span-responsive"><InputField label="Parroquia" value={predioSeleccionado.parroquia || "N/A"} disabled={true} /></div>
+                                <div className="span-responsive"><InputField label="Comunidad / Sector" value={predioSeleccionado.comunidad || "N/A"} disabled={true} /></div>
+                                <div style={{ gridColumn: "span 2" }} className="span-responsive"><InputField label="Coordenadas" value={predioSeleccionado.coordenadas || "Sin coordenadas"} disabled={true} /></div>
+                                <div className="span-responsive"><InputField label="Centro Poblado" value={predioSeleccionado.centro_poblado || "N/A"} disabled={true} /></div>
                             </div>
 
                             {/* III y IV. IDENTIFICACIÓN Y TENENCIA */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "25px", marginBottom: "35px" }}>
-                                <div style={{ gridColumn: "span 3", borderBottom: "2px solid #ccc", paddingBottom: "5px" }}>
+                            <div className="grid-tenencia" style={{ marginBottom: "30px" }}>
+                                <div style={{ gridColumn: "span 3", borderBottom: "2px solid #ccc", paddingBottom: "5px" }} className="span-responsive">
                                     <strong style={{ color: "#136442", fontSize: "14px" }}>III. IDENTIFICACIÓN Y IV. TENENCIA</strong>
                                 </div>
-                                <div style={{ gridColumn: "span 2" }}>
+                                <div style={{ gridColumn: "span 2" }} className="span-responsive">
                                     <InputField
                                         label="Dirección Exacta"
                                         value={predioSeleccionado.direccion || "N/A"}
@@ -342,7 +379,7 @@ export default function HistorialPredios({
                                         disabled={!editando || estaInhabilitado}
                                     />
                                 </div>
-                                <div>
+                                <div className="span-responsive">
                                     <InputField
                                         label="Superficie (Ha)"
                                         value={predioSeleccionado.superficie || "N/A"}
@@ -350,11 +387,11 @@ export default function HistorialPredios({
                                         disabled={!editando || estaInhabilitado}
                                     />
                                 </div>
-                                <div>
+                                <div className="span-responsive">
                                     {editando && !estaInhabilitado ? (
                                         <>
                                             <small style={{ color: "#888", fontWeight: "bold", display: "block", marginBottom: "4px" }}>TIPO DE PROPIEDAD</small>
-                                            <select style={estiloInput} value={predioSeleccionado.tipo_propiedad || ""} onChange={(e) => actualizarPredio('tipo_propiedad', e.target.value)}>
+                                            <select style={{ ...estiloInput, width: "100%", boxSizing: "border-box" }} value={predioSeleccionado.tipo_propiedad || ""} onChange={(e) => actualizarPredio('tipo_propiedad', e.target.value)}>
                                                 <option value="Público">Público</option>
                                                 <option value="Privado">Privado</option>
                                             </select>
@@ -363,7 +400,7 @@ export default function HistorialPredios({
                                         <InputField label="Tipo de Propiedad" value={predioSeleccionado.tipo_propiedad || "N/A"} disabled={true} />
                                     )}
                                 </div>
-                                <div>
+                                <div className="span-responsive">
                                     <InputField
                                         label="Tenencia de la Tierra"
                                         value={predioSeleccionado.tenencia || "N/A"}
@@ -371,11 +408,11 @@ export default function HistorialPredios({
                                         disabled={!editando || estaInhabilitado}
                                     />
                                 </div>
-                                <div>
+                                <div className="span-responsive">
                                     {editando && !estaInhabilitado ? (
                                         <>
                                             <small style={{ color: "#888", fontWeight: "bold", display: "block", marginBottom: "4px" }}>CONDICIÓN VIALIDAD</small>
-                                            <select style={estiloInput} value={predioSeleccionado.vialidad || ""} onChange={(e) => actualizarPredio('vialidad', e.target.value)}>
+                                            <select style={{ ...estiloInput, width: "100%", boxSizing: "border-box" }} value={predioSeleccionado.vialidad || ""} onChange={(e) => actualizarPredio('vialidad', e.target.value)}>
                                                 <option value="Excelente">Excelente</option>
                                                 <option value="Bueno">Bueno</option>
                                                 <option value="Regular">Regular</option>
@@ -389,11 +426,11 @@ export default function HistorialPredios({
                             </div>
 
                             {/* VI. INFRAESTRUCTURA */}
-                            <div style={{ marginBottom: "35px" }}>
+                            <div style={{ marginBottom: "30px" }}>
                                 <div style={{ borderBottom: "2px solid #136442", paddingBottom: "5px", marginBottom: "15px" }}>
                                     <strong style={{ color: "#136442", fontSize: "14px" }}>VI. INFRAESTRUCTURA</strong>
                                 </div>
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "10px" }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: "10px" }}>
                                     {[
                                         { k: 'corrales', l: 'CORRALES' }, { k: 'galpones', l: 'GALPONES' }, { k: 'vaqueras', l: 'VAQUERAS' },
                                         { k: 'cochineras', l: 'COCHINERAS' }, { k: 'silos', l: 'SILOS' }, { k: 'caballerizas', l: 'CABALLERIZAS' },
@@ -405,7 +442,7 @@ export default function HistorialPredios({
                                         return (
                                             <div key={item.k} style={{
                                                 border: "1px solid", borderColor: tieneCantidad ? "#bbf7d0" : "#e2e8f0",
-                                                padding: "12px 10px", borderRadius: "8px", textAlign: "center",
+                                                padding: "10px 8px", borderRadius: "8px", textAlign: "center",
                                                 backgroundColor: tieneCantidad ? "#f0fdf4" : "#fff"
                                             }}>
                                                 <small style={{ color: "#64748b", fontSize: "10px", fontWeight: "700", display: "block", marginBottom: "6px" }}>{item.l}</small>
@@ -413,10 +450,10 @@ export default function HistorialPredios({
                                                     <input
                                                         type="number" min="0" value={valorAsignado}
                                                         onChange={(e) => actualizarInfraestructura(item.k, e.target.value)}
-                                                        style={{ width: "100%", background: "transparent", border: "none", outline: "none", textAlign: "center", fontWeight: "bold", fontSize: "18px", color: "#136442" }}
+                                                        style={{ width: "100%", background: "transparent", border: "none", outline: "none", textAlign: "center", fontWeight: "bold", fontSize: "16px", color: "#136442" }}
                                                     />
                                                 ) : (
-                                                    <span style={{ fontWeight: "bold", fontSize: "18px", color: tieneCantidad ? "#136442" : "#333" }}>{valorAsignado}</span>
+                                                    <span style={{ fontWeight: "bold", fontSize: "16px", color: tieneCantidad ? "#136442" : "#333" }}>{valorAsignado}</span>
                                                 )}
                                             </div>
                                         );
@@ -425,11 +462,11 @@ export default function HistorialPredios({
                             </div>
 
                             {/* V. SERVICIOS BÁSICOS */}
-                            <div style={{ marginBottom: "35px" }}>
+                            <div style={{ marginBottom: "30px" }}>
                                 <div style={{ borderBottom: "2px solid #136442", paddingBottom: "5px", marginBottom: "15px" }}>
                                     <strong style={{ color: "#136442", fontSize: "14px" }}>V. SERVICIOS BÁSICOS</strong>
                                 </div>
-                                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                                     {[
                                         { id: 'Agua', l: 'Agua' },
                                         { id: 'Electricidad', l: 'Electricidad' },
@@ -455,8 +492,8 @@ export default function HistorialPredios({
                                                 style={{
                                                     display: "flex",
                                                     alignItems: "center",
-                                                    gap: "8px",
-                                                    padding: "10px 18px",
+                                                    gap: "6px",
+                                                    padding: "8px 14px",
                                                     borderRadius: "8px",
                                                     backgroundColor: poseeServicio ? "#136442" : "#f1f5f9",
                                                     color: poseeServicio ? "#fff" : "#475569",
@@ -468,7 +505,7 @@ export default function HistorialPredios({
                                                     transition: "all 0.2s ease"
                                                 }}
                                             >
-                                                <span style={{ fontSize: "14px", fontWeight: "bold", color: poseeServicio ? "#fff" : "#94a3b8" }}>
+                                                <span style={{ fontSize: "13px", fontWeight: "bold", color: poseeServicio ? "#fff" : "#94a3b8" }}>
                                                     {poseeServicio ? "✓" : "○"}
                                                 </span>
                                                 {srv.l}
@@ -479,22 +516,22 @@ export default function HistorialPredios({
                             </div>
 
                             {/* VII. MODELO DE PRODUCCIÓN */}
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "25px" }}>
-                                <div style={{ border: "1px solid #e0e0e0", padding: "15px", borderRadius: "8px" }}>
-                                    <strong style={{ color: "#136442", fontSize: "13px", display: "block", marginBottom: "10px" }}>TIPO DE EXPLOTACIÓN</strong>
+                            <div className="grid-explotacion">
+                                <div style={{ border: "1px solid #e0e0e0", padding: "12px", borderRadius: "8px", boxSizing: "border-box" }}>
+                                    <strong style={{ color: "#136442", fontSize: "12px", display: "block", marginBottom: "8px" }}>TIPO DE EXPLOTACIÓN</strong>
                                     {editando && !estaInhabilitado ? (
-                                        <select style={estiloInput} value={predioSeleccionado.produccion?.tipo_explotacion || ""} onChange={(e) => actualizarProduccion('tipo_explotacion', e.target.value)}>
+                                        <select style={{ ...estiloInput, width: "100%", boxSizing: "border-box" }} value={predioSeleccionado.produccion?.tipo_explotacion || ""} onChange={(e) => actualizarProduccion('tipo_explotacion', e.target.value)}>
                                             <option value="Intensivo">Intensivo</option>
                                             <option value="Semi Intensivo">Semi Intensivo</option>
                                             <option value="Extensivo">Extensivo</option>
                                         </select>
                                     ) : (
-                                        <span style={{ fontSize: "18px", fontWeight: "bold" }}>{predioSeleccionado.produccion?.tipo_explotacion}</span>
+                                        <span style={{ fontSize: "16px", fontWeight: "bold" }}>{predioSeleccionado.produccion?.tipo_explotacion || "N/A"}</span>
                                     )}
                                 </div>
-                                <div style={{ border: "1px solid #e0e0e0", padding: "15px", borderRadius: "8px" }}>
-                                    <strong style={{ color: "#136442", fontSize: "13px", display: "block", marginBottom: "10px" }}>SISTEMAS DE REGISTRO</strong>
-                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                                <div style={{ border: "1px solid #e0e0e0", padding: "12px", borderRadius: "8px", boxSizing: "border-box" }}>
+                                    <strong style={{ color: "#136442", fontSize: "12px", display: "block", marginBottom: "8px" }}>SISTEMAS DE REGISTRO</strong>
+                                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                                         {[
                                             { k: 'registro_sanitario', l: 'SANITARIO' }, { k: 'registro_productivo', l: 'PRODUCTIVO' },
                                             { k: 'registro_reproductivo', l: 'REPRODUCTIVO' }, { k: 'registro_financiero', l: 'FINANCIERO' }
@@ -503,7 +540,7 @@ export default function HistorialPredios({
                                                 key={reg.k}
                                                 onClick={() => editando && !estaInhabilitado && actualizarProduccion(reg.k, !predioSeleccionado.produccion?.[reg.k])}
                                                 style={{
-                                                    display: "flex", alignItems: "center", gap: "5px", padding: "5px 12px", borderRadius: "20px",
+                                                    display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px",
                                                     backgroundColor: predioSeleccionado.produccion?.[reg.k] ? "#136442" : "#f0f0f0",
                                                     color: predioSeleccionado.produccion?.[reg.k] ? "#fff" : "#999",
                                                     fontSize: "11px", fontWeight: "bold", cursor: editando && !estaInhabilitado ? "pointer" : "default", transition: "all 0.2s"
@@ -519,9 +556,9 @@ export default function HistorialPredios({
 
                         {/* ── BOTONERA FINAL ── */}
                         <div style={{
-                            padding: "20px 30px", backgroundColor: "#f4f4f4", display: "flex",
+                            padding: "15px 20px", backgroundColor: "#f4f4f4", display: "flex",
                             justifyContent: "flex-end", gap: "10px", borderTop: "1px solid #ddd",
-                            position: "sticky", bottom: 0, zIndex: 10
+                            position: "sticky", bottom: 0, zIndex: 10, flexWrap: "wrap"
                         }}>
                             {!esAdmin && !estaInhabilitado && (
                                 <button
@@ -543,14 +580,14 @@ export default function HistorialPredios({
                                         });
                                     }}
                                     disabled={cargandoAccion}
-                                    style={{ ...estiloBoton, backgroundColor: "#b91c1c" }}
+                                    style={{ ...estiloBoton, backgroundColor: "#b91c1c", flex: "1 1 auto" }}
                                 >
                                     CAMBIO DE DUEÑO
                                 </button>
                             )}
 
                             {esAdmin && (
-                                <button type="button" onClick={eliminarDefinitivoReal} disabled={cargandoAccion} style={{ ...estiloBoton, backgroundColor: "#ce3a3a" }}>
+                                <button type="button" onClick={eliminarDefinitivoReal} disabled={cargandoAccion} style={{ ...estiloBoton, backgroundColor: "#ce3a3a", flex: "1 1 auto" }}>
                                     ELIMINAR
                                 </button>
                             )}
@@ -575,13 +612,13 @@ export default function HistorialPredios({
                                         }
                                     }} 
                                     disabled={cargandoAccion} 
-                                    style={{ ...estiloBoton, backgroundColor: "#136442" }}
+                                    style={{ ...estiloBoton, backgroundColor: "#136442", flex: "1 1 auto" }}
                                 >
                                     {editando ? "CONFIRMAR CAMBIOS" : "EDITAR FICHA"}
                                 </button>
                             )}
 
-                            <button type="button" onClick={() => { setMostrarModal(false); setEditando(false); }} style={{ ...estiloBoton, backgroundColor: "#374151" }}>
+                            <button type="button" onClick={() => { setMostrarModal(false); setEditando(false); }} style={{ ...estiloBoton, backgroundColor: "#374151", flex: "1 1 auto" }}>
                                 SALIR DE FICHA
                             </button>
                         </div>
