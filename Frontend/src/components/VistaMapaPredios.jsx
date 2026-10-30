@@ -51,18 +51,18 @@ export default function VistaMapaPredios({ listaPredios, municipios, cargando })
             
             <style>{`
                 .map-wrapper-container {
-                    height: 600px;
+                    height: 480px; /* Reducido de 600px a 480px para darle una proporción más cuadrada y estética */
                 }
                 @media (max-width: 768px) {
                     .map-wrapper-container {
-                        height: 420px !important;
+                        height: 380px !important;
                     }
                 }
             `}</style>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", boxSizing: "border-box" }}>
 
-                {/* SECCIÓN SUPERIOR: EL MAPA RESPONSIVE */}
+                {/* SECCIÓN SUPERIOR: EL MAPA CON PROPORCIÓN CUADRADA */}
                 <div style={{
                     width: "100%",
                     backgroundColor: "#fff",
