@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
-// 1. AÑADIMOS EL COMPONENTE SPINNER
+// 1. COMPONENTE SPINNER
 const Spinner = ({ color = "#136442" }) => {
     const spinnerRef = (el) => {
         if (el) {
@@ -24,9 +24,9 @@ const Spinner = ({ color = "#136442" }) => {
     );
 };
 
-// Componente InputField con el diseño solicitado
+// Componente InputField adaptado
 const InputField = ({ label, error, prefix, ...props }) => (
-    <div style={{ marginBottom: "15px" }}>
+    <div style={{ marginBottom: "15px", width: "100%" }}>
         <label style={{ display: "block", fontSize: "12px", fontWeight: 600, color: "#64748b", marginBottom: "8px", textTransform: "uppercase" }}>{label}</label>
 
         <div style={{
@@ -36,7 +36,9 @@ const InputField = ({ label, error, prefix, ...props }) => (
             overflow: "hidden",
             transition: "all 0.2s ease",
             border: error ? "1.5px solid #ef4444" : "1px solid #e2e8f0",
-            backgroundColor: error ? "#fef2f2" : "#f8fafc"
+            backgroundColor: error ? "#fef2f2" : "#f8fafc",
+            width: "100%",
+            boxSizing: "border-box"
         }}>
             {prefix && (
                 <div style={{
@@ -78,6 +80,7 @@ export default function Productores() {
     const [errors, setErrors] = useState({});
     const [buscando, setBuscando] = useState(false);
     const [resultado, setResultado] = useState(null);
+    const [menuAbierto, setMenuAbierto] = useState(false);
 
     const buscarProductorEnBD = async () => {
         const cedulaLimpia = cedula.replace(/\D/g, '');
@@ -128,8 +131,7 @@ export default function Productores() {
         validarCampoProductor(valorNumerico);
     };
 
-const exportarFichaConValidacion = async () => {
-        // Obtenemos el correo del productor (del objeto resultado o de su relación)
+    const exportarFichaConValidacion = async () => {
         const correoProductor = resultado?.productor?.correo || resultado?.correo;
 
         if (!resultado || !correoProductor) {
@@ -156,7 +158,6 @@ const exportarFichaConValidacion = async () => {
 
         let codigoServidor = "";
         try {
-            // Llamada a la API de envío de correo que ya tienes configurada en el backend
             const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo-correo/", { correo: correoProductor });
             codigoServidor = envio.data.codigo.toString();
 
@@ -238,7 +239,6 @@ const exportarFichaConValidacion = async () => {
         }
     };
 
-// FUNCIÓN DE PDF GLOBAL CON TODAS LAS SECCIONES Y CAMPOS EN 0 INCLUIDOS
     const GenerarFichaProductor = (predio) => {
         if (!predio || !predio.caracterizacion_completada) {
             alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
@@ -254,7 +254,6 @@ const exportarFichaConValidacion = async () => {
         const verdeBarinas = [19, 100, 66];
         const grisOscuro = [40, 40, 40];
 
-        // Cintillo institucional
         try {
             doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
             doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
@@ -283,25 +282,17 @@ const exportarFichaConValidacion = async () => {
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
-
-        // 1. Imprimir la etiqueta en color verde
         doc.setTextColor(...verdeBarinas);
         const tituloVerde = "FICHA TÉCNICA INTEGRAL: ";
         doc.text(tituloVerde, 12, 33);
 
-        // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
         const anchoTituloVerde = doc.getTextWidth(tituloVerde);
-
-        // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
         doc.setTextColor(0, 0, 0); 
         const nombreNegro = (predio.nombre_predio || "SIN NOMBRE").toUpperCase();
         doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
 
         let currentY = 40;
 
-        // ────────────────────────────────────────────────────────
-        // SECCIÓN I: IDENTIFICACIÓN GENERAL Y DATOS DEL PRODUCTOR
-        // ────────────────────────────────────────────────────────
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9.5);
         doc.setTextColor(...verdeBarinas);
@@ -334,9 +325,6 @@ const exportarFichaConValidacion = async () => {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // SECCIÓN II: INFRAESTRUCTURA Y ESTRUCTURAS DISPONIBLES
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         if (currentY > 230) { doc.addPage(); currentY = 20; }
 
@@ -369,9 +357,6 @@ const exportarFichaConValidacion = async () => {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // SECCIÓN III: RÉGIMEN SOCIO-PRODUCTIVO Y CONTROLES
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         if (currentY > 230) { doc.addPage(); currentY = 20; }
 
@@ -400,9 +385,6 @@ const exportarFichaConValidacion = async () => {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // SECCIÓN IV: INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         if (currentY > 230) { doc.addPage(); currentY = 20; }
 
@@ -433,9 +415,6 @@ const exportarFichaConValidacion = async () => {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // SECCIÓN V: INVENTARIO DE SEMOVIENTES Y CAPACIDAD PRODUCTIVA (Dinámico)
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         if (currentY > 230) { doc.addPage(); currentY = 20; }
 
@@ -478,9 +457,6 @@ const exportarFichaConValidacion = async () => {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // SECCIÓN VI: MAQUINARIA, IMPLEMENTOS Y EQUIPOS (Dinámico)
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         if (currentY > 230) { doc.addPage(); currentY = 20; }
 
@@ -523,9 +499,6 @@ const exportarFichaConValidacion = async () => {
             margin: { left: 12, right: 12 }
         });
 
-        // ────────────────────────────────────────────────────────
-        // SECCIÓN VII: SERVICIOS BÁSICOS INSTALADOS EN EL PREDIO
-        // ────────────────────────────────────────────────────────
         currentY = doc.lastAutoTable.finalY + 6;
         if (currentY > 235) { doc.addPage(); currentY = 20; }
 
@@ -556,7 +529,6 @@ const exportarFichaConValidacion = async () => {
             margin: { left: 12, right: 12 }
         });
 
-        // Pie de página
         const totalPaginas = doc.internal.getNumberOfPages();
         for (let i = 1; i <= totalPaginas; i++) {
             doc.setPage(i);
@@ -574,39 +546,80 @@ const exportarFichaConValidacion = async () => {
     };
 
     return (
-        <div style={{ fontFamily: "'Poppins', sans-serif" }}>
+        <div style={{ fontFamily: "'Poppins', sans-serif", overflowX: "hidden" }}>
             {/* NAVBAR */}
-            <nav style={{ display: "flex", alignItems: "center", padding: "0 48px", height: "68px", backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "sticky", top: 0, zIndex: 100, gap: "24px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "20px", cursor: "pointer" }} onClick={() => navigate("/")}>
-                    <img src={logo} alt="Logo" style={{ height: 45 }} />
-                    <img src={escudo} alt="Escudo" style={{ height: 45 }} />
+            <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: "68px", backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "sticky", top: 0, zIndex: 100 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => navigate("/")}>
+                        <img src={logo} alt="Logo" style={{ height: 38 }} />
+                        <img src={escudo} alt="Escudo" style={{ height: 38 }} />
+                    </div>
+                    <span className="texto-institucional" style={{ fontSize: "12px", color: "#888", fontStyle: "italic", lineHeight: 1.4, borderLeft: "2px solid #e0e0e0", paddingLeft: "12px" }}>
+                        Estado Barinas<br /><strong style={{ color: "#589e38", fontStyle: "normal" }}>Venezuela</strong>
+                    </span>
                 </div>
-                <span style={{ fontSize: "12px", color: "#888", fontStyle: "italic", lineHeight: 1.4, borderLeft: "2px solid #e0e0e0", paddingLeft: "16px" }}>
-                    Estado Barinas<br /><strong style={{ color: "#589e38", fontStyle: "normal" }}>Venezuela</strong>
-                </span>
-                <div style={{ flex: 1 }} />
-                <button onClick={() => navigate("/")} style={{ background: "none", border: "1.5px solid #aaa", color: "#666", padding: "8px 20px", borderRadius: "6px", cursor: "pointer", fontSize: "13px" }}>← Portal</button>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <button onClick={() => navigate("/")} style={{ background: "none", border: "1.5px solid #aaa", color: "#666", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", whiteSpace: "nowrap" }}>← Portal</button>
+                    
+                    {/* Botón Hamburguesa para Móvil */}
+                    <button 
+                        onClick={() => setMenuAbierto(!menuAbierto)}
+                        className="btn-hamburguesa"
+                        style={{
+                            display: "none", background: "none", border: "none", 
+                            cursor: "pointer", fontSize: "24px", color: "#1b4332", padding: "4px"
+                        }}
+                        aria-label="Abrir menú"
+                    >
+                        {menuAbierto ? "✕" : "☰"}
+                    </button>
+                </div>
             </nav>
 
-            {/* HERO PRODUCTORES */}
-            <div id="productor-info" style={{ position: "relative", height: "520px", overflow: "hidden", display: "flex", alignItems: "center", background: "linear-gradient(120deg, #0a3d24 0%, #136442 55%, #1a7a50 100%)" }}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.03) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 40%)", zIndex: 1 }} />
-                <img src="https://images.unsplash.com/photo-1602867741746-6df80f40b3f6?q=80&w=735&auto=format&fit=crop" alt="Productores" style={{ position: "absolute", right: 0, top: 0, width: "52%", height: "100%", objectFit: "cover", opacity: 0.3, clipPath: "polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%)" }} />
-                <div style={{ position: "absolute", right: "48%", top: 0, bottom: 0, width: "1px", background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent)", zIndex: 2 }} />
+            {/* Menú desplegable para dispositivos móviles */}
+            {menuAbierto && (
+                <div style={{
+                    position: "absolute", top: "68px", left: 0, width: "100%",
+                    background: "#fff", boxShadow: "0 10px 15px rgba(0,0,0,0.1)",
+                    padding: "20px", display: "flex", flexDirection: "column", gap: "12px",
+                    zIndex: 99, borderTop: "1px solid #eee", boxSizing: "border-box"
+                }}>
+                    {NAV_ITEMS.map((item) => (
+                        <a 
+                            key={item.label} 
+                            href={item.href}
+                            onClick={() => setMenuAbierto(false)}
+                            style={{
+                                textDecoration: "none", color: "#333", fontSize: "15px",
+                                fontWeight: 500, padding: "10px 14px", borderRadius: "6px",
+                                backgroundColor: "#f8faf9", display: "block"
+                            }}
+                        >
+                            {item.label}
+                        </a>
+                    ))}
+                </div>
+            )}
 
-                <div style={{ position: "relative", zIndex: 3, padding: "0 80px", maxWidth: "640px" }}>
+            {/* HERO PRODUCTORES */}
+            <div id="productor-info" className="portal-hero-container" style={{ position: "relative", minHeight: "480px", overflow: "hidden", display: "flex", alignItems: "center", background: "linear-gradient(120deg, #0a3d24 0%, #136442 55%, #1a7a50 100%)" }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.03) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 40%)", zIndex: 1 }} />
+                <img src="https://images.unsplash.com/photo-1602867741746-6df80f40b3f6?q=80&w=735&auto=format&fit=crop" alt="Productores" className="hero-bg-img" style={{ position: "absolute", right: 0, top: 0, width: "52%", height: "100%", objectFit: "cover", opacity: 0.3, clipPath: "polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%)" }} />
+
+                <div className="hero-content" style={{ position: "relative", zIndex: 3, padding: "50px 24px", maxWidth: "640px" }}>
                     <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.1)", borderRadius: "20px", padding: "6px 14px", marginBottom: "20px" }}>
                         <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4ade80" }} />
                         <span style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.8)" }}>Módulo de Información — MPPAT</span>
                     </div>
-                    <h1 style={{ color: "#fff", fontSize: "42px", fontWeight: 700, lineHeight: 1.15, margin: "0 0 18px" }}>Consulta y Gestión<br /><span style={{ color: "#86efac" }}>de Datos del Productor</span></h1>
+                    <h1 style={{ color: "#fff", fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 700, lineHeight: 1.15, margin: "0 0 18px" }}>Consulta y Gestión<br /><span style={{ color: "#86efac" }}>de Datos del Productor</span></h1>
                     <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "15px", lineHeight: 1.8, margin: "0 0 36px" }}>Ingrese su número de cédula para acceder a su ficha técnica, historial de predios y registros actualizados ante el sistema agropecuario del estado Barinas.</p>
                 </div>
             </div>
 
             {/* SECCIÓN DE CONSULTA */}
-            <div style={{ padding: "80px 20px", display: "flex", justifyContent: "center", background: "#f8faf9" }}>
-                <div style={{ width: "100%", maxWidth: "450px", padding: "40px", background: "#fff", borderRadius: "16px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)", border: "1px solid #eef0ee" }}>
+            <div style={{ padding: "40px 16px", display: "flex", justifyContent: "center", background: "#f8faf9" }}>
+                <div style={{ width: "100%", maxWidth: "450px", padding: "30px 20px", background: "#fff", borderRadius: "16px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)", border: "1px solid #eef0ee", boxSizing: "border-box" }}>
                     <h3 style={{ color: "#1b4332", margin: "0 0 24px", fontSize: "18px", textAlign: "center" }}>Verificar Identidad</h3>
 
                     <InputField
@@ -637,24 +650,24 @@ const exportarFichaConValidacion = async () => {
                         style={{
                             width: "100%", padding: "14px", backgroundColor: "#136442", color: "#fff", border: "none", borderRadius: "8px",
                             fontWeight: 600, fontSize: "14px", cursor: buscando ? "not-allowed" : "pointer",
-                            display: "flex", justifyContent: "center", alignItems: "center", gap: "10px"
+                            display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", boxSizing: "border-box"
                         }}
                     >
                         {buscando ? <Spinner color="#fff" /> : "Consultar Datos"}
                     </button>
 
                     {resultado && (
-                        <div style={{ marginTop: "20px", padding: "15px", borderRadius: "8px", backgroundColor: resultado.existe ? "#dcfce7" : "#fee2e2", border: resultado.existe ? "1px solid #bbf7d0" : "1px solid #fecaca" }}>
+                        <div style={{ marginTop: "20px", padding: "15px", borderRadius: "8px", backgroundColor: resultado.existe ? "#dcfce7" : "#fee2e2", border: resultado.existe ? "1px solid #bbf7d0" : "1px solid #fecaca", boxSizing: "border-box" }}>
                             {resultado.existe ? (
                                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                                    <p style={{ color: "#166534", margin: 0, fontSize: "14px" }}>
+                                    <p style={{ color: "#166534", margin: 0, fontSize: "14px", wordBreak: "break-word" }}>
                                         Productor encontrado: <strong>{resultado.nombre}</strong>
                                     </p>
                                     <button
                                         onClick={exportarFichaConValidacion}
                                         style={{
                                             width: "100%",
-                                            padding: "8px 12px",
+                                            padding: "10px 12px",
                                             backgroundColor: "#16a34a",
                                             color: "#fff",
                                             border: "none",
@@ -667,10 +680,9 @@ const exportarFichaConValidacion = async () => {
                                             justifyContent: "center",
                                             gap: "6px",
                                             boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                                            transition: "background-color 0.2s"
+                                            transition: "background-color 0.2s",
+                                            boxSizing: "border-box"
                                         }}
-                                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#15803d"}
-                                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#16a34a"}
                                     >
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -690,26 +702,50 @@ const exportarFichaConValidacion = async () => {
 
             {/* FOOTER */}
             <footer style={{ background: "#fff", color: "#555", borderTop: "1px solid #e8e8e8" }}>
-                <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "56px 80px 40px", display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "48px" }}>
+                <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 16px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "36px" }}>
                     <div>
                         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-                            <img src={logo} alt="Logo" style={{ height: 50 }} />
-                            <img src={escudo} alt="Escudo" style={{ height: 40 }} />
+                            <img src={logo} alt="Logo" style={{ height: 45 }} />
+                            <img src={escudo} alt="Escudo" style={{ height: 35 }} />
                         </div>
-                        <p style={{ fontSize: "14px", lineHeight: 1.8, color: "#777" }}>Ecosistema digital agropecuario del estado Barinas. Plataforma oficial para el registro y gestión de la actividad productiva del campo barinés.</p>
+                        <p style={{ fontSize: "14px", lineHeight: 1.8, color: "#777", maxWidth: "280px" }}>Ecosistema digital agropecuario del estado Barinas. Plataforma oficial para el registro y gestión de la actividad productiva del campo barinés.</p>
                     </div>
                     <div>
-                        <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 20px", textTransform: "uppercase" }}>Navegación</h4>
-                        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
+                        <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "1px" }}>Navegación</h4>
+                        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
                             {NAV_ITEMS.map(item => <li key={item.label}><a href={item.href} style={{ color: "#777", textDecoration: "none", fontSize: "14px" }}>{item.label}</a></li>)}
                         </ul>
                     </div>
                     <div>
-                        <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 20px", textTransform: "uppercase" }}>Contacto</h4>
-                        <p style={{ color: "#777", fontSize: "13px" }}>agrosistema@barinas.gob.ve<br />(0273) 300-0000</p>
+                        <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "1px" }}>Contacto</h4>
+                        <p style={{ color: "#777", fontSize: "13px", lineHeight: "1.6" }}>agrosistema@barinas.gob.ve<br />(0273) 300-0000</p>
                     </div>
                 </div>
             </footer>
+
+            {/* ESTILOS MEDIA QUERY PARA MÓVILES */}
+            <style>{`
+                @media (max-width: 768px) {
+                    .btn-hamburguesa {
+                        display: block !important;
+                    }
+                    .texto-institucional {
+                        display: none !important;
+                    }
+                    .portal-hero-container {
+                        text-align: center;
+                    }
+                    .hero-content {
+                        padding: 40px 16px !important;
+                        max-width: 100% !important;
+                    }
+                    .hero-bg-img {
+                        width: 100% !important;
+                        opacity: 0.15 !important;
+                        clip-path: none !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }
