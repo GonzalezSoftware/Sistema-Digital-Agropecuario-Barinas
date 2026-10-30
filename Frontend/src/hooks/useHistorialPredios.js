@@ -2,6 +2,9 @@ import { useState } from 'react';
 import Swal from 'sweetalert2';
 
 export function useHistorialPredios(listaPredios = [], municipioEmpleado = "") {
+    // URL del servidor backend en AWS con HTTPS
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const [busqueda, setBusqueda] = useState("");
     const [predioSeleccionado, setPredioSeleccionado] = useState(null);
     const [mostrarModal, setMostrarModal] = useState(false);
@@ -98,7 +101,7 @@ export function useHistorialPredios(listaPredios = [], municipioEmpleado = "") {
                 usuario: usuarioAccion
             };
 
-            const response = await fetch(`http://127.0.0.1:8000/api/predios/${predioSeleccionado.id_predio}/`, {
+            const response = await fetch(`${API_URL}predios/${predioSeleccionado.id_predio}/`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -139,7 +142,7 @@ export function useHistorialPredios(listaPredios = [], municipioEmpleado = "") {
 
         setCargandoAccion(true);
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/predios/${predioSeleccionado.id_predio}/`, {
+            const response = await fetch(`${API_URL}predios/${predioSeleccionado.id_predio}/`, {
                 method: 'DELETE',
             });
 

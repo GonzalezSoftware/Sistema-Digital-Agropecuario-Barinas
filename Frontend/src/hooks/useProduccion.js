@@ -6,6 +6,9 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export function useDashboardProduccion() {
+    // URL del servidor backend en AWS con HTTPS
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const navigate = useNavigate();
     const [usuario, setUsuario] = useState(null);
     const [tabActiva, setTabActiva] = useState("inicio");
@@ -271,7 +274,7 @@ export function useDashboardProduccion() {
         const obtenerPredios = async () => {
             try {
                 setCargando(true);
-                const response = await fetch("http://127.0.0.1:8000/api/predios/");
+                const response = await fetch(`${API_URL}predios/`);
                 const data = await response.json();
                 const prediosArray = Array.isArray(data) ? data : data.results || [];
                 setListaPredios(prediosArray);
@@ -393,7 +396,7 @@ export function useDashboardProduccion() {
         ].filter(item => item.cantidad > 0);
 
         if (!usuario.esEmpleado) {
-            axios.get("http://127.0.0.1:8000/api/dashboard-produccion/")
+            axios.get(`${API_URL}dashboard-produccion/`)
                 .then(res => {
                     const backendData = res.data || {};
                     setStatsProduccion({

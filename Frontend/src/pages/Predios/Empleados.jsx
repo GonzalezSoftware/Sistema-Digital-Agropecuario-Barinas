@@ -270,7 +270,7 @@ export default function EmpleadoDashboard() {
         datosLegales: datosLegalesMunicipio
     } = useGraficosPredios(prediosMunicipio);
 
-    const cargandoDashboard = cargando;
+    const cargandoDashboard = cargando || (!listaPredios || listaPredios.length === 0);
     const totalPrediosMunicipio = prediosMunicipio.length;
     const superficieTotalMunicipio = prediosMunicipio.reduce(
         (acc, predio) => acc + Number(predio.superficie || 0),
