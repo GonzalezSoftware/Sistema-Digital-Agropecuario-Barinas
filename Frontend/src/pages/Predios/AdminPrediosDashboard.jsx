@@ -21,7 +21,7 @@ import SeccionReportes from "../../components/SeccionReportes";
 import AdminBitacora from '../../components/AdminBitacora';
 import AdminNotificacionesNoticias from '../../components/AdminNotificacionesNoticias';
 import AdminConfiguracionContraseña from "../../components/AdminConfiguracionContraseña";
-import AdminContacto from '../../components/AdminContacto'; // <--- Importarlo arriba
+import AdminContacto from '../../components/AdminContacto';
 import { AdminReportesGenerales } from '../../components/AdminReportesGenerales';
 
 // Estilos UI
@@ -70,21 +70,18 @@ export default function AdminPrediosDashboard() {
         setTabActiva: setTabProd,
         predioActivo,
         setPredioActivo,
-        busquedaCedula,        // <-- Agrega esto
-        setBusquedaCedula,     // <-- Agrega esto
-        filtrarPredios         // <-- Agrega esto
+        busquedaCedula,
+        setBusquedaCedula,
+        filtrarPredios
     } = productionState;
 
-    // Estado de credenciales por municipio
     const [credenciales, setCredenciales] = useState({});
     const [cargando, setCargando] = useState(false);
     const [cargandoDatos, setCargandoDatos] = useState(false);
-
-    // Estado específico para las credenciales de noticias por municipio
     const [credencialesNoticias, setCredencialesNoticias] = useState({});
     const [cargandoNoticiasDatos, setCargandoNoticiasDatos] = useState(false);
+    const [contadorPendientes, setContadorPendientes] = useState(0);
 
-    // Listado oficial de los 12 municipios de Barinas vinculados a su respectiva imagen
     const MUNICIPIOS_BARINAS = [
         { id: "alberto_arvelo", nombre: "Alberto Arvelo Torrealba", capital: "Sabaneta", imagen: albertoArvelo },
         { id: "andres_eloy", nombre: "Andrés Eloy Blanco", capital: "El Cantón", imagen: andresEloy },
@@ -106,7 +103,6 @@ export default function AdminPrediosDashboard() {
         "Ezequiel Zamora", "Obispos", "Pedraza", "Rojas", "Sosa"
     ];
 
-    // ---------------------------------------- DASHBOARD ------------------------------------------------------
     const [listaPredios, setListaPredios] = useState([]);
     const {
         totalPredios,
@@ -122,7 +118,6 @@ export default function AdminPrediosDashboard() {
         datosLegales
     } = useEstadisticasPredios(listaPredios);
 
-    // ---------------------------------------- HISTORIAL --------------------------------------------------
     const {
         busqueda,
         setBusqueda,
@@ -199,10 +194,6 @@ export default function AdminPrediosDashboard() {
         }
     }, [vistaActiva]);
 
-    // 1. Agrega este estado junto con tus otros estados en AdminPrediosDashboard:
-    const [contadorPendientes, setContadorPendientes] = useState(0);
-
-    // 2. Crea la función para consultar las pendientes a la API:
     const obtenerContadorPendientes = async () => {
         try {
             const res = await fetch(`${API_URL}noticias/pendientes/`);
@@ -215,7 +206,6 @@ export default function AdminPrediosDashboard() {
         }
     };
 
-    // 3. Ejecuta esta función cuando cargue el componente (dentro de un useEffect):
     useEffect(() => {
         obtenerContadorPendientes();
     }, []);
@@ -236,22 +226,23 @@ export default function AdminPrediosDashboard() {
     }
 
     return (
-        <div style={{ minHeight: "100vh", backgroundColor: "#f8fafc", display: "flex", fontFamily: "'Poppins', sans-serif" }}>
-            <div style={{ display: "flex", flex: 1 }}>
+        <div style={{ minHeight: "100vh", backgroundColor: "#f8fafc", display: "flex", fontFamily: "'Poppins', sans-serif", overflowX: "hidden" }}>
+            <div style={{ display: "flex", flex: 1, width: "100%" }}>
                 <AdminSidebar
                     adminData={adminData}
                     vistaActiva={vistaActiva}
                     setVistaActiva={setVistaActiva}
                     cerrarSesion={cerrarSesion}
                     badgeCount={contadorPendientes}
-                    predioSeleccionado={productionState.predioSeleccionado || predioSeleccionado} // <--- ¡Añadir esto!
+                    predioSeleccionado={productionState.predioSeleccionado || predioSeleccionado}
                     PresentationChartBarIcon={PresentationChartBarIcon}
                     KeyIcon={KeyIcon}
                     ClockIcon={ClockIcon}
                     PowerIcon={PowerIcon}
                 />
 
-                <main style={{ padding: "26px 50px", flex: 1, boxSizing: "border-box", overflowY: "auto" }}>
+                {/* Contenedor Principal con padding adaptable responsivo */}
+                <main className="dashboard-main-content" style={{ padding: "24px 32px", flex: 1, boxSizing: "border-box", overflowY: "auto", minWidth: 0 }}>
                     <AdminHeader vistaActiva={vistaActiva} escudo={escudo} />
 
                     {vistaActiva === "inicio" ? (
@@ -300,11 +291,9 @@ export default function AdminPrediosDashboard() {
                             LockClosedIcon={LockClosedIcon}
                         />
                     ) : vistaActiva === "notificaciones_noticias" ? (
-
                         <AdminNotificacionesNoticias
-                            onActualizarConteo={obtenerContadorPendientes} // <--- ¡Añade esta prop aquí!
+                            onActualizarConteo={obtenerContadorPendientes}
                         />
-
                     ) : vistaActiva === "historial" ? (
                         <HistorialPredios
                             tabActiva={vistaActiva}
@@ -328,7 +317,7 @@ export default function AdminPrediosDashboard() {
                             eliminarDefinitivoReal={eliminarDefinitivoReal}
                             InputField={InputField}
                             errors={{}}
-                            esAdmin={true} // <--- ¡Añade esto solo en el Admin!
+                            esAdmin={true}
                             cargando={cargando}
                         />
                     ) : vistaActiva === "georreferenciacion" ? (
@@ -342,30 +331,32 @@ export default function AdminPrediosDashboard() {
                     ) : vistaActiva === "produccion_dashboard" ? (
                         <AdminProduccionDashboard productionState={productionState} />
                     ) : vistaActiva === "produccion_reportes" ? (
-                        <SeccionReportes listaPredios={listaPredios}cargando={cargando} />
+                        <SeccionReportes listaPredios={listaPredios} cargando={cargando} />
                     ) : vistaActiva === "configuracion" ? (
-
                         <AdminConfiguracionContraseña />
-
-                    ) :
-
-                        vistaActiva === "contacto" ? (
-
-                            <AdminContacto />
-
-                        ) : vistaActiva === "reportes_generales" ? (
-
-                            <AdminReportesGenerales listaPredios={listaPredios} />
-
-                        ) : vistaActiva === "bitacora" ? (
-                            <AdminBitacora />) : (
-
-                            <div>
-                                <p>Selecciona una sección válida en el menú lateral.</p>
-                            </div>
-                        )}
+                    ) : vistaActiva === "contacto" ? (
+                        <AdminContacto />
+                    ) : vistaActiva === "reportes_generales" ? (
+                        <AdminReportesGenerales listaPredios={listaPredios} />
+                    ) : vistaActiva === "bitacora" ? (
+                        <AdminBitacora />
+                    ) : (
+                        <div>
+                            <p>Selecciona una sección válida en el menú lateral.</p>
+                        </div>
+                    )}
                 </main>
             </div>
+
+            {/* Estilos responsivos adicionales para eliminar espacios muertos y ajustar márgenes superiores móviles */}
+            <style>{`
+                @media (max-width: 992px) {
+                    .dashboard-main-content {
+                        padding: 16px 12px !important;
+                        padding-top: 60px !important; /* Deja espacio para que el botón hamburguesa no tape el contenido */
+                    }
+                }
+            `}</style>
         </div>
     );
 }

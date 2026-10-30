@@ -21,7 +21,6 @@ export const AdminSidebar = ({
     ClockIcon,
     PowerIcon,
 }) => {
-    // Estado para controlar si el sidebar está abierto o cerrado en móviles
     const [sidebarAbierto, setSidebarAbierto] = useState(false);
 
     const [prediosAbierto, setPrediosAbierto] = useState(
@@ -48,7 +47,6 @@ export const AdminSidebar = ({
         vistaActiva === "reiniciar_sistema"
     );
 
-    // Función auxiliar para cambiar de vista y cerrar el sidebar en móviles automáticamente
     const seleccionarVista = (vista) => {
         setVistaActiva(vista);
         setSidebarAbierto(false);
@@ -135,32 +133,32 @@ export const AdminSidebar = ({
 
     return (
         <>
-            {/* ── BOTÓN HAMBURGUESA MÓVIL (Flotante o Superior) ── */}
+            {/* ── BOTÓN HAMBURGUESA MÓVIL (Posicionado arriba a la izquierda sin solapar el título) ── */}
             <button
                 onClick={() => setSidebarAbierto(!sidebarAbierto)}
                 className="btn-hamburguesa-admin"
                 style={{
                     display: "none",
                     position: "fixed",
-                    top: "16px",
-                    left: "16px",
+                    top: "12px",
+                    left: "12px",
                     zIndex: 1100,
                     backgroundColor: "#136442",
                     color: "#fff",
                     border: "none",
-                    borderRadius: "10px",
-                    padding: "10px",
+                    borderRadius: "8px",
+                    padding: "8px",
                     cursor: "pointer",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
                     alignItems: "center",
                     justifyContent: "center"
                 }}
                 aria-label="Menú de navegación"
             >
-                {sidebarAbierto ? <XMarkIcon style={{ width: "24px", height: "24px" }} /> : <Bars3Icon style={{ width: "24px", height: "24px" }} />}
+                {sidebarAbierto ? <XMarkIcon style={{ width: "22px", height: "22px" }} /> : <Bars3Icon style={{ width: "22px", height: "22px" }} />}
             </button>
 
-            {/* ── FONDO OSCURO EN MÓVIL CUANDO EL SIDEBAR ESTÁ ABIERTO ── */}
+            {/* ── FONDO OSCURO EN MÓVIL ── */}
             {sidebarAbierto && (
                 <div
                     onClick={() => setSidebarAbierto(false)}
