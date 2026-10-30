@@ -7,12 +7,14 @@ export default function PrediosProduccionHero() {
       display: "flex", alignItems: "center",
       background: "linear-gradient(120deg, #0a3d24 0%, #136442 55%, #1a7a50 100%)",
     }}>
-      {/* Patrón decorativo */}
+      {/* Patrón decorativo de fondo */}
       <div style={{
         position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
         backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.03) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 40%)",
         zIndex: 1,
       }} />
+
+      {/* Imagen lateral restaurada con recorte en diagonal */}
       <img
         src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1400&q=80"
         alt="Predios"
@@ -20,17 +22,20 @@ export default function PrediosProduccionHero() {
         style={{
           position: "absolute", right: 0, top: 0,
           width: "52%", height: "100%",
-          objectFit: "cover", opacity: 0.3,
+          objectFit: "cover", opacity: 0.35,
           clipPath: "polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%)",
+          zIndex: 2,
         }}
       />
-      {/* Línea decorativa */}
+
+      {/* Línea decorativa vertical */}
       <div className="predios-hero-line" style={{
         position: "absolute", right: "48%", top: 0, bottom: 0,
         width: "1px", background: "linear-gradient(to bottom, transparent, rgba(255,255,255,0.2), transparent)",
         zIndex: 2,
       }} />
 
+      {/* Contenido principal */}
       <div className="predios-hero-content" style={{ position: "relative", zIndex: 3, padding: "50px 40px", maxWidth: "640px" }}>
         <div style={{
           display: "inline-flex", alignItems: "center", gap: "8px",
@@ -72,7 +77,7 @@ export default function PrediosProduccionHero() {
         </div>
       </div>
 
-      {/* Badge flotante */}
+      {/* Badge flotante de municipios */}
       <div className="predios-hero-badge" style={{
         position: "absolute", right: "40px", bottom: "30px", zIndex: 3,
         background: "rgba(255,255,255,0.1)", backdropFilter: "blur(8px)",
@@ -90,6 +95,7 @@ export default function PrediosProduccionHero() {
         </div>
       </div>
 
+      {/* Estilos responsivos */}
       <style>{`
         @media (max-width: 992px) {
           .predios-hero-container {
@@ -99,10 +105,12 @@ export default function PrediosProduccionHero() {
             padding: 40px 20px !important;
             max-width: 100% !important;
           }
-          .predios-hero-img, .predios-hero-line {
-            display: none !important;
+          .predios-hero-img {
+            width: 100% !important;
+            opacity: 0.15 !important;
+            clip-path: none !important;
           }
-          .predios-hero-badge {
+          .predios-hero-line, .predios-hero-badge {
             display: none !important;
           }
           .predios-hero-buttons {
