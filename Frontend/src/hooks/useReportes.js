@@ -29,11 +29,6 @@ export const useReportes = (prediosOriginales = []) => {
     const generarPDFPredio = (predio) => {
         console.log("DATOS REALES DEL PREDIO RECIBIDOS EN EL PDF:", predio);
 
-        if (!predio || !predio.caracterizacion_completada) {
-            alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
-            return;
-        }
-
         const doc = new jsPDF({
             orientation: "portrait",
             unit: "mm",
