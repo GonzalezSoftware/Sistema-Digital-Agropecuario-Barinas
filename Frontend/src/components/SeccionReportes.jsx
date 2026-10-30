@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
+// 1. Importación correcta de los logos mediante los assets de Vite
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
+
 // 1. Componente Spinner corporativo integrado
 export const Spinner = ({ color = "#136442" }) => {
     const spinnerRef = (el) => {
@@ -89,10 +93,11 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
         const grisOscuro = [40, 40, 40];
 
         try {
-            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-            doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
+            // Se utilizan los módulos importados arriba para asegurar compatibilidad en Vercel
+            doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+            doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10);
         } catch (error) {
-            console.warn("Logos institucionales omitidos.");
+            console.warn("Logos institucionales omitidos.", error);
         }
 
         doc.setFont("helvetica", "bold");
