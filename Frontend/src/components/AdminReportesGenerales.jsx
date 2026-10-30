@@ -85,15 +85,16 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     };
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", boxSizing: "border-box", fontFamily: "'Poppins', sans-serif" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", maxWidth: "100%", margin: "0 auto", boxSizing: "border-box", fontFamily: "'Poppins', sans-serif" }}>
             
             <style>{`
                 .reportes-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
                     gap: 20px;
                     width: 100%;
                     box-sizing: border-box;
+                    margin: 0 auto;
                 }
                 @media (max-width: 480px) {
                     .reportes-grid {
@@ -284,7 +285,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     );
 };
 
-// Estilos visuales estándar adaptativos
+// Estilos visuales estándar adaptativos y centrados
 const cardStyle = {
     backgroundColor: "#ffffff",
     border: "1px solid #e2e8f0",
@@ -294,12 +295,14 @@ const cardStyle = {
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    boxSizing: "border-box"
+    boxSizing: "border-box",
+    width: "100%",
+    margin: "0 auto"
 };
 const cardHeaderStyle = { display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" };
 const cardTitleStyle = { margin: 0, fontSize: "15px", fontWeight: "700", color: "#1e293b", wordBreak: "break-word" };
 const cardDescStyle = { fontSize: "12.5px", color: "#64748b", marginBottom: "16px", lineHeight: "1.4" };
-const selectContainerStyle = { display: "flex", flexDirection: "column", gap: "6px", marginBottom: "20px" };
+const selectContainerStyle = { display: "flex", flexDirection: "column", gap: "6px", marginBottom: "20px", width: "100%", boxSizing: "border-box" };
 const selectLabelStyle = { fontSize: "12px", fontWeight: "600", color: "#334155" };
 const selectStyle = {
     padding: "10px",
