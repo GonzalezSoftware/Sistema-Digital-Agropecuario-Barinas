@@ -111,33 +111,58 @@ export default function AdminConfiguracionContraseña() {
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+        <div style={{ display: "flex", justifyContent: "center", width: "100%", boxSizing: "border-box", fontFamily: "'Poppins', sans-serif" }}>
+            
+            <style>{`
+                .password-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 20px;
+                    width: 100%;
+                }
+                .requisitos-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px;
+                }
+                @media (max-width: 768px) {
+                    .password-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .requisitos-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            `}</style>
+
             <div style={{ 
                 background: "#ffffff", 
-                padding: "32px", 
-                borderRadius: "12px", 
+                padding: "24px 20px", 
+                borderRadius: "16px", 
                 border: "1px solid #e2e8f0", 
                 width: "100%", 
                 maxWidth: "850px",
-                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)"
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
+                boxSizing: "border-box"
             }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-                    <ShieldCheckIcon style={{ width: "26px", height: "26px", color: "#136442" }} />
-                    <h3 style={{ fontSize: "20px", fontWeight: "700", color: "#1e293b", margin: 0 }}>
+                    <ShieldCheckIcon style={{ width: "24px", height: "24px", color: "#136442", flexShrink: 0 }} />
+                    <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#1e293b", margin: 0 }}>
                         Seguridad y Contraseña
                     </h3>
                 </div>
-                <p style={{ fontSize: "14px", color: "#64748b", marginBottom: "24px" }}>
+                <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px", lineHeight: "1.4" }}>
                     Actualiza la contraseña de acceso al panel de administración del sistema de forma segura.
                 </p>
 
-                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px", width: "100%", boxSizing: "border-box" }}>
+                    
                     {/* Contraseña Actual */}
-                    <div>
-                        <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
+                    <div style={{ width: "100%" }}>
+                        <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
                             Contraseña Actual
                         </label>
-                        <div style={{ position: "relative" }}>
+                        <div style={{ position: "relative", width: "100%" }}>
                             <input
                                 type={verActual ? "text" : "password"}
                                 name="clave_actual"
@@ -164,13 +189,13 @@ export default function AdminConfiguracionContraseña() {
                         </div>
                     </div>
 
-                    {/* Contenedor en 2 columnas para Nueva Contraseña y Confirmación */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-                        <div>
-                            <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
+                    {/* Contenedor responsivo para Nueva Contraseña y Confirmación */}
+                    <div className="password-grid">
+                        <div style={{ width: "100%" }}>
+                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
                                 Nueva Contraseña
                             </label>
-                            <div style={{ position: "relative" }}>
+                            <div style={{ position: "relative", width: "100%" }}>
                                 <input
                                     type={verNueva ? "text" : "password"}
                                     name="nueva_clave"
@@ -197,11 +222,11 @@ export default function AdminConfiguracionContraseña() {
                             </div>
                         </div>
 
-                        <div>
-                            <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
+                        <div style={{ width: "100%" }}>
+                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
                                 Confirmar Nueva Contraseña
                             </label>
-                            <div style={{ position: "relative" }}>
+                            <div style={{ position: "relative", width: "100%" }}>
                                 <input
                                     type={verConfirmar ? "text" : "password"}
                                     name="confirmar_clave"
@@ -230,36 +255,36 @@ export default function AdminConfiguracionContraseña() {
                     </div>
 
                     {/* Requisitos de seguridad */}
-                    <div style={{ backgroundColor: "#f8fafc", padding: "14px 16px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ backgroundColor: "#f8fafc", padding: "14px 16px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }}>
                         <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569", display: "block", marginBottom: "8px" }}>
                             Requisitos de la contraseña:
                         </span>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px" }}>
+                        <div className="requisitos-grid" style={{ fontSize: "12px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", color: tieneMinimo8 ? "#065f46" : "#64748b" }}>
-                                {tieneMinimo8 ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981" }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1" }} />}
+                                {tieneMinimo8 ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981", flexShrink: 0 }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1", flexShrink: 0 }} />}
                                 Mínimo 8 caracteres
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", color: tieneLetra ? "#065f46" : "#64748b" }}>
-                                {tieneLetra ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981" }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1" }} />}
+                                {tieneLetra ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981", flexShrink: 0 }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1", flexShrink: 0 }} />}
                                 Al menos una letra
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", color: tieneNumero ? "#065f46" : "#64748b" }}>
-                                {tieneNumero ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981" }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1" }} />}
+                                {tieneNumero ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981", flexShrink: 0 }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1", flexShrink: 0 }} />}
                                 Al menos un número
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", color: tieneEspecial ? "#065f46" : "#64748b" }}>
-                                {tieneEspecial ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981" }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1" }} />}
+                                {tieneEspecial ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981", flexShrink: 0 }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1", flexShrink: 0 }} />}
                                 Un carácter especial (!@#$...)
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: "6px", color: sonIguales ? "#065f46" : "#64748b", gridColumn: "span 2" }}>
-                                {sonIguales ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981" }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1" }} />}
+                                {sonIguales ? <CheckCircleIcon style={{ width: "16px", height: "16px", color: "#10b981", flexShrink: 0 }} /> : <XCircleIcon style={{ width: "16px", height: "16px", color: "#cbd5e1", flexShrink: 0 }} />}
                                 Las contraseñas coinciden
                             </div>
                         </div>
                     </div>
 
                     {/* Botón de envío */}
-                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "10px" }}>
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "10px", width: "100%" }}>
                         <button
                             type="submit"
                             disabled={!formularioValido || cargando}
@@ -274,9 +299,11 @@ export default function AdminConfiguracionContraseña() {
                                 cursor: formularioValido ? "pointer" : "not-allowed", 
                                 display: "flex", 
                                 alignItems: "center", 
+                                justifyContent: "center",
                                 gap: "8px",
                                 opacity: formularioValido ? 1 : 0.7,
-                                transition: "background-color 0.2s"
+                                transition: "background-color 0.2s",
+                                width: "100%"
                             }}
                         >
                             <KeyIcon style={{ width: "16px", height: "16px" }} />
