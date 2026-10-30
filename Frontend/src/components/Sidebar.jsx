@@ -133,7 +133,7 @@ export const AdminSidebar = ({
 
     return (
         <>
-            {/* ── BOTÓN HAMBURGUESA MÓVIL (Posicionado arriba a la izquierda sin solapar el título) ── */}
+            {/* ── BOTÓN HAMBURGUESA MÓVIL ── */}
             <button
                 onClick={() => setSidebarAbierto(!sidebarAbierto)}
                 className="btn-hamburguesa-admin"
@@ -185,7 +185,7 @@ export const AdminSidebar = ({
                     top: 0,
                     display: "flex",
                     flexDirection: "column",
-                    padding: "24px 22px",
+                    padding: "20px 18px",
                     boxSizing: "border-box",
                     overflow: "hidden",
                     zIndex: 1000,
@@ -197,15 +197,14 @@ export const AdminSidebar = ({
                     display: "flex",
                     alignItems: "center",
                     gap: "12px",
-                    padding: "15px",
+                    padding: "12px 15px",
                     backgroundColor: "rgba(255,255,255,0.08)",
-                    borderRadius: "18px",
-                    marginBottom: "20px",
-                    flexShrink: 0,
-                    marginTop: "8px"
+                    borderRadius: "16px",
+                    marginBottom: "16px",
+                    flexShrink: 0
                 }}>
                     <div style={{
-                        width: "45px", height: "45px", borderRadius: "12px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.2)"
+                        width: "42px", height: "42px", borderRadius: "12px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.2)"
                     }}>
                         <img
                             src={
@@ -242,8 +241,8 @@ export const AdminSidebar = ({
                 <div style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
-                    flex: 1,
+                    gap: "4px",
+                    flex: "0 1 auto",
                     overflowY: "auto",
                     paddingRight: "4px",
                     scrollbarWidth: "thin"
@@ -254,7 +253,7 @@ export const AdminSidebar = ({
                             onClick={() => setPrediosAbierto(!prediosAbierto)}
                             style={{
                                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
+                                padding: "12px 16px", borderRadius: "12px", cursor: "pointer", marginBottom: "2px",
                                 backgroundColor: "transparent",
                                 color: "#86efac",
                                 fontWeight: 500,
@@ -262,13 +261,13 @@ export const AdminSidebar = ({
                             }}
                         >
                             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />}
+                                {PresentationChartBarIcon && <PresentationChartBarIcon style={{ width: "22px", height: "22px", color: "#86efac" }} />}
                                 <span>Predios</span>
                             </div>
 
                             <ChevronDownIcon style={{
-                                width: "17px",
-                                height: "17px",
+                                width: "16px",
+                                height: "16px",
                                 color: "#86efac",
                                 transform: prediosAbierto ? "rotate(180deg)" : "rotate(0deg)",
                                 transition: "transform 0.25s ease"
@@ -279,17 +278,17 @@ export const AdminSidebar = ({
                             <div style={{
                                 display: "flex",
                                 flexDirection: "column",
-                                gap: "6px",
-                                paddingLeft: "20px",
-                                marginTop: "4px",
-                                marginBottom: "8px",
+                                gap: "4px",
+                                paddingLeft: "18px",
+                                marginTop: "2px",
+                                marginBottom: "6px",
                                 borderLeft: "2px solid rgba(134, 239, 172, 0.2)"
                             }}>
                                 <div
                                     onClick={() => seleccionarVista("inicio")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "inicio" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "inicio" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
@@ -302,7 +301,7 @@ export const AdminSidebar = ({
                                     onClick={() => seleccionarVista("historial")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "historial" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "historial" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
@@ -315,7 +314,7 @@ export const AdminSidebar = ({
                                     onClick={() => seleccionarVista("georreferenciacion")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "georreferenciacion" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "georreferenciacion" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
@@ -328,7 +327,7 @@ export const AdminSidebar = ({
                                     onClick={() => seleccionarVista("reportes")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "reportes" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "reportes" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
@@ -346,20 +345,20 @@ export const AdminSidebar = ({
                             onClick={() => setProduccionAbierto(!produccionAbierto)}
                             style={{
                                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
+                                padding: "12px 16px", borderRadius: "12px", cursor: "pointer", marginBottom: "2px",
                                 backgroundColor: "transparent",
                                 color: "#86efac",
                                 fontSize: "14px"
                             }}
                         >
                             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                <DocumentChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
+                                <DocumentChartBarIcon style={{ width: "22px", height: "22px", color: "#86efac" }} />
                                 <span>Producción</span>
                             </div>
 
                             <ChevronDownIcon style={{
-                                width: "17px",
-                                height: "17px",
+                                width: "16px",
+                                height: "16px",
                                 color: "#86efac",
                                 transform: produccionAbierto ? "rotate(180deg)" : "rotate(0deg)",
                                 transition: "transform 0.25s ease"
@@ -370,17 +369,17 @@ export const AdminSidebar = ({
                             <div style={{
                                 display: "flex",
                                 flexDirection: "column",
-                                gap: "6px",
-                                paddingLeft: "20px",
-                                marginTop: "4px",
-                                marginBottom: "8px",
+                                gap: "4px",
+                                paddingLeft: "18px",
+                                marginTop: "2px",
+                                marginBottom: "6px",
                                 borderLeft: "2px solid rgba(134, 239, 172, 0.2)"
                             }}>
                                 <div
                                     onClick={() => seleccionarVista("produccion_dashboard")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "produccion_dashboard" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "produccion_dashboard" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
@@ -393,7 +392,7 @@ export const AdminSidebar = ({
                                     onClick={() => seleccionarVista("produccion_reportes")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "produccion_reportes" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "produccion_reportes" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
@@ -410,13 +409,13 @@ export const AdminSidebar = ({
                         onClick={() => seleccionarVista("reportes_generales")}
                         style={{
                             display: "flex", alignItems: "center", gap: "12px",
-                            padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
+                            padding: "12px 16px", borderRadius: "12px", cursor: "pointer", marginBottom: "2px",
                             backgroundColor: vistaActiva === "reportes_generales" ? "rgba(255,255,255,0.15)" : "transparent",
                             color: vistaActiva === "reportes_generales" ? "#ffffff" : "#86efac",
                             fontSize: "14px"
                         }}
                     >
-                        <DocumentChartBarIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
+                        <DocumentChartBarIcon style={{ width: "22px", height: "22px", color: "#86efac" }} />
                         <span>Reportes Generales</span>
                     </div>
 
@@ -426,20 +425,20 @@ export const AdminSidebar = ({
                             onClick={() => setConfiguracionAbierto(!configuracionAbierto)}
                             style={{
                                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "14px 18px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
+                                padding: "12px 16px", borderRadius: "12px", cursor: "pointer", marginBottom: "2px",
                                 backgroundColor: "transparent",
                                 color: "#86efac",
                                 fontSize: "14px"
                             }}
                         >
                             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                <Cog6ToothIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
+                                <Cog6ToothIcon style={{ width: "22px", height: "22px", color: "#86efac" }} />
                                 <span>Configuración</span>
                             </div>
 
                             <ChevronDownIcon style={{
-                                width: "17px",
-                                height: "17px",
+                                width: "16px",
+                                height: "16px",
                                 color: "#86efac",
                                 transform: configuracionAbierto ? "rotate(180deg)" : "rotate(0deg)",
                                 transition: "transform 0.25s ease"
@@ -450,23 +449,23 @@ export const AdminSidebar = ({
                             <div style={{
                                 display: "flex",
                                 flexDirection: "column",
-                                gap: "6px",
-                                paddingLeft: "20px",
-                                marginTop: "4px",
-                                marginBottom: "28px",
+                                gap: "4px",
+                                paddingLeft: "18px",
+                                marginTop: "2px",
+                                marginBottom: "10px",
                                 borderLeft: "2px solid rgba(134, 239, 172, 0.2)"
                             }}>
                                 <div
                                     onClick={() => seleccionarVista("configuracion")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "configuracion" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "configuracion" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
                                     }}
                                 >
-                                    <Cog6ToothIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                    <Cog6ToothIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
                                     <span>Credenciales Admin</span>
                                 </div>
 
@@ -474,13 +473,13 @@ export const AdminSidebar = ({
                                     onClick={() => seleccionarVista("credenciales")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "credenciales" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "credenciales" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
                                     }}
                                 >
-                                    {KeyIcon && <KeyIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />}
+                                    {KeyIcon && <KeyIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />}
                                     <span>Credenciales Usuarios</span>
                                 </div>
 
@@ -488,13 +487,13 @@ export const AdminSidebar = ({
                                     onClick={() => seleccionarVista("noticias")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "noticias" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "noticias" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
                                     }}
                                 >
-                                    <NewspaperIcon style={{ width: "23px", height: "23px", color: "#86efac" }} />
+                                    <NewspaperIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
                                     <span>Credenciales Noticias</span>
                                 </div>
 
@@ -502,14 +501,14 @@ export const AdminSidebar = ({
                                     onClick={() => seleccionarVista("notificaciones_noticias")}
                                     style={{
                                         display: "flex", alignItems: "center", justifyContent: "space-between",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "notificaciones_noticias" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "notificaciones_noticias" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
                                     }}
                                 >
                                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                        <NewspaperIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                        <NewspaperIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
                                         <span>Notificaciones Noticias</span>
                                     </div>
 
@@ -517,11 +516,11 @@ export const AdminSidebar = ({
                                         <span style={{
                                             backgroundColor: "#ef4444",
                                             color: "#ffffff",
-                                            fontSize: "11px",
+                                            fontSize: "10px",
                                             fontWeight: "700",
                                             padding: "2px 6px",
                                             borderRadius: "9999px",
-                                            minWidth: "20px",
+                                            minWidth: "18px",
                                             textAlign: "center"
                                         }}>
                                             {badgeCount}
@@ -533,13 +532,13 @@ export const AdminSidebar = ({
                                     onClick={() => seleccionarVista("bitacora")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "bitacora" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "bitacora" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
                                     }}
                                 >
-                                    <ClipboardDocumentListIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                    <ClipboardDocumentListIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
                                     <span>Bitácora de Cambios</span>
                                 </div>
 
@@ -547,13 +546,13 @@ export const AdminSidebar = ({
                                     onClick={() => seleccionarVista("contacto")}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: vistaActiva === "contacto" ? "rgba(255,255,255,0.15)" : "transparent",
                                         color: vistaActiva === "contacto" ? "#ffffff" : "#86efac",
                                         fontSize: "13px"
                                     }}
                                 >
-                                    <EnvelopeIcon style={{ width: "21px", height: "21px", color: "#86efac" }} />
+                                    <EnvelopeIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
                                     <span>Contacto</span>
                                 </div>
 
@@ -561,7 +560,7 @@ export const AdminSidebar = ({
                                     onClick={() => { setSidebarAbierto(false); handleReiniciarSistema(); }}
                                     style={{
                                         display: "flex", alignItems: "center", gap: "10px",
-                                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
                                         backgroundColor: "rgba(239, 68, 68, 0.15)",
                                         color: "#fca5a5",
                                         fontWeight: 600,
@@ -569,7 +568,7 @@ export const AdminSidebar = ({
                                         transition: "background 0.2s"
                                     }}
                                 >
-                                    <TrashIcon style={{ width: "21px", height: "21px", color: "#fca5a5" }} />
+                                    <TrashIcon style={{ width: "20px", height: "20px", color: "#fca5a5" }} />
                                     <span>Reiniciar Sistema</span>
                                 </div>
                             </div>
@@ -577,22 +576,26 @@ export const AdminSidebar = ({
                     </div>
                 </div>
 
-                {/* Botón Cerrar Sesión */}
+                {/* Botón Cerrar Sesión (Pegado razonablemente al menú) */}
                 <div
                     onClick={cerrarSesion}
                     style={{
                         display: "flex", alignItems: "center", gap: "12px",
-                        padding: "12px 14px", borderRadius: "10px", cursor: "pointer",
+                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
                         color: "#fca5a5", fontSize: "14px", fontWeight: 600,
-                        marginTop: "16px", flexShrink: 0
+                        marginTop: "12px", flexShrink: 0,
+                        backgroundColor: "rgba(252, 165, 165, 0.08)",
+                        transition: "background 0.2s"
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.18)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.08)"}
                 >
                     {PowerIcon && <PowerIcon style={{ width: "20px", height: "20px", color: "#fca5a5" }} />}
                     <span>Cerrar Sesión</span>
                 </div>
             </aside>
 
-            {/* Estilos CSS Responsive para el Sidebar y Botón Hamburguesa */}
+            {/* Estilos CSS Responsive */}
             <style>{`
                 @media (max-width: 992px) {
                     .btn-hamburguesa-admin {
