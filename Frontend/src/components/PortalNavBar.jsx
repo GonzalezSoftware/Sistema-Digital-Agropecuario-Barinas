@@ -22,7 +22,7 @@ export default function PortalNavBar() {
         {/* Izquierda: Logos y Texto Institucional */}
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 38 }} />
+            <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 48 }} />
             <img src={escudo} alt="Logo MPPAT" style={{ height: 30 }} />
           </div>
 
