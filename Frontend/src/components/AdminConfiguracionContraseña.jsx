@@ -125,7 +125,8 @@ export default function AdminConfiguracionContraseña() {
                     grid-template-columns: 1fr 1fr;
                     gap: 8px;
                 }
-                @media (max-width: 768px) {
+                /* En pantallas medianas y teléfonos, se apilan en 1 sola columna para que queden totalmente visibles */
+                @media (max-width: 900px) {
                     .password-grid {
                         grid-template-columns: 1fr !important;
                     }
@@ -189,7 +190,7 @@ export default function AdminConfiguracionContraseña() {
                         </div>
                     </div>
 
-                    {/* Contenedor responsivo para Nueva Contraseña y Confirmación */}
+                    {/* Contenedor responsivo: en móvil la confirmación queda debajo de la nueva clave */}
                     <div className="password-grid">
                         <div style={{ width: "100%" }}>
                             <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
