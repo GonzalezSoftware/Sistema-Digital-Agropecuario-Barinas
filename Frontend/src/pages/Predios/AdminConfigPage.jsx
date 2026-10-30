@@ -275,7 +275,7 @@ export default function AdminConfigPage() {
           fontWeight: 500, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
           whiteSpace: "nowrap"
         }}>
-          ← Ir al Login General
+          ← Volver
         </button>
       </nav>
 
