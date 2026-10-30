@@ -2,6 +2,10 @@ import { useState, useMemo } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+// 1. Importamos las imágenes correctamente mediante los assets de Vite
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
+
 export const useReportes = (prediosOriginales = []) => {
     const [busqueda, setBusqueda] = useState("");
 
@@ -38,11 +42,10 @@ export const useReportes = (prediosOriginales = []) => {
         const verdeBarinas = [19, 100, 66];
         const grisOscuro = [40, 40, 40];
 
-        // Cintillo institucional superior
+        // Cintillo institucional superior utilizando las variables importadas
         try {
-            doc.addImage("/src/assets/gobierno.jpg", "JPEG",12, 5, 42, 16);
-            doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10); 
-            
+            doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+            doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10); 
         } catch (error) {
             console.warn("No se pudieron cargar las imágenes de los logos en el PDF.", error);
         }
