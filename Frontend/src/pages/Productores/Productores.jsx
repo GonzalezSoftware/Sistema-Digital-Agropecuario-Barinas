@@ -80,7 +80,6 @@ export default function Productores() {
     const [errors, setErrors] = useState({});
     const [buscando, setBuscando] = useState(false);
     const [resultado, setResultado] = useState(null);
-    const [menuAbierto, setMenuAbierto] = useState(false);
 
     const buscarProductorEnBD = async () => {
         const cedulaLimpia = cedula.replace(/\D/g, '');
@@ -104,14 +103,6 @@ export default function Productores() {
             setBuscando(false);
         }
     };
-
-    const NAV_ITEMS = [
-        { label: "Productores", href: "/productores", isRoute: true },
-        { label: "Registro de Predios", href: "/predios", isRoute: true },
-        { label: "Producción Animal y Vegetal", href: "/produccion", isRoute: true },
-        { label: "Estadísticas Generales", href: "/estadística-portalinfo", isRoute: true },
-        { label: "Contactos", href: "#contactos" },
-    ];
 
     const validarCampoProductor = (value) => {
         const regexCedula = prefijo === "V-" ? /^[0-9]{7,8}$/ : /^[0-9]{5,8}$/;
@@ -547,7 +538,7 @@ export default function Productores() {
 
     return (
         <div style={{ fontFamily: "'Poppins', sans-serif", overflowX: "hidden" }}>
-            {/* NAVBAR */}
+            {/* NAVBAR SIMPLE SIN BOTÓN HAMBURGUESA */}
             <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: "68px", backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "sticky", top: 0, zIndex: 100 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => navigate("/")}>
@@ -559,48 +550,10 @@ export default function Productores() {
                     </span>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <button onClick={() => navigate("/")} style={{ background: "none", border: "1.5px solid #aaa", color: "#666", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", whiteSpace: "nowrap" }}>← Portal</button>
-                    
-                    {/* Botón Hamburguesa para Móvil */}
-                    <button 
-                        onClick={() => setMenuAbierto(!menuAbierto)}
-                        className="btn-hamburguesa"
-                        style={{
-                            display: "none", background: "none", border: "none", 
-                            cursor: "pointer", fontSize: "24px", color: "#1b4332", padding: "4px"
-                        }}
-                        aria-label="Abrir menú"
-                    >
-                        {menuAbierto ? "✕" : "☰"}
-                    </button>
-                </div>
+                <button onClick={() => navigate("/")} style={{ background: "none", border: "1.5px solid #aaa", color: "#666", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", whiteSpace: "nowrap" }}>
+                    ← Portal
+                </button>
             </nav>
-
-            {/* Menú desplegable para dispositivos móviles */}
-            {menuAbierto && (
-                <div style={{
-                    position: "absolute", top: "68px", left: 0, width: "100%",
-                    background: "#fff", boxShadow: "0 10px 15px rgba(0,0,0,0.1)",
-                    padding: "20px", display: "flex", flexDirection: "column", gap: "12px",
-                    zIndex: 99, borderTop: "1px solid #eee", boxSizing: "border-box"
-                }}>
-                    {NAV_ITEMS.map((item) => (
-                        <a 
-                            key={item.label} 
-                            href={item.href}
-                            onClick={() => setMenuAbierto(false)}
-                            style={{
-                                textDecoration: "none", color: "#333", fontSize: "15px",
-                                fontWeight: 500, padding: "10px 14px", borderRadius: "6px",
-                                backgroundColor: "#f8faf9", display: "block"
-                            }}
-                        >
-                            {item.label}
-                        </a>
-                    ))}
-                </div>
-            )}
 
             {/* HERO PRODUCTORES */}
             <div id="productor-info" className="portal-hero-container" style={{ position: "relative", minHeight: "480px", overflow: "hidden", display: "flex", alignItems: "center", background: "linear-gradient(120deg, #0a3d24 0%, #136442 55%, #1a7a50 100%)" }}>
@@ -713,7 +666,9 @@ export default function Productores() {
                     <div>
                         <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "1px" }}>Navegación</h4>
                         <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
-                            {NAV_ITEMS.map(item => <li key={item.label}><a href={item.href} style={{ color: "#777", textDecoration: "none", fontSize: "14px" }}>{item.label}</a></li>)}
+                            <li><a href="/" style={{ color: "#777", textDecoration: "none", fontSize: "14px" }}>Portal Principal</a></li>
+                            <li><a href="/predios" style={{ color: "#777", textDecoration: "none", fontSize: "14px" }}>Registro de Predios</a></li>
+                            <li><a href="/produccion" style={{ color: "#777", textDecoration: "none", fontSize: "14px" }}>Producción</a></li>
                         </ul>
                     </div>
                     <div>
@@ -726,9 +681,6 @@ export default function Productores() {
             {/* ESTILOS MEDIA QUERY PARA MÓVILES */}
             <style>{`
                 @media (max-width: 768px) {
-                    .btn-hamburguesa {
-                        display: block !important;
-                    }
                     .texto-institucional {
                         display: none !important;
                     }
