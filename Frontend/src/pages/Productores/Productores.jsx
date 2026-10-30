@@ -538,12 +538,12 @@ export default function Productores() {
 
     return (
         <div style={{ fontFamily: "'Poppins', sans-serif", overflowX: "hidden" }}>
-            {/* NAVBAR SIMPLE SIN BOTÓN HAMBURGUESA */}
+            {/* NAVBAR SIMPLE SIN BOTÓN HAMBURGUESA - LOGOS IGUALES AL NAVBAR PRINCIPAL */}
             <nav style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", height: "68px", backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "sticky", top: 0, zIndex: 100 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => navigate("/")}>
-                        <img src={logo} alt="Logo" style={{ height: 38 }} />
-                        <img src={escudo} alt="Escudo" style={{ height: 38 }} />
+                        <img src={logo} alt="Gobierno Bolivariano de Venezuela" style={{ height: 38 }} />
+                        <img src={escudo} alt="Logo MPPAT" style={{ height: 30 }} />
                     </div>
                     <span className="texto-institucional" style={{ fontSize: "12px", color: "#888", fontStyle: "italic", lineHeight: 1.4, borderLeft: "2px solid #e0e0e0", paddingLeft: "12px" }}>
                         Estado Barinas<br /><strong style={{ color: "#589e38", fontStyle: "normal" }}>Venezuela</strong>
