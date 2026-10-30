@@ -85,14 +85,30 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     };
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px", width: "100%" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "24px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", boxSizing: "border-box", fontFamily: "'Poppins', sans-serif" }}>
+            
+            <style>{`
+                .reportes-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 20px;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                @media (max-width: 480px) {
+                    .reportes-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            `}</style>
+
+            <div className="reportes-grid">
                 
                 {/* 1. Lista General de Predios */}
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
-                            <MapIcon style={{ width: "22px", height: "22px", color: "#136442" }} />
+                            <MapIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>1. Lista General de Predios</h4>
                         </div>
                         <p style={cardDescStyle}>Exporta el catastro oficial y el detalle de todos los predios registrados (por municipio o general).</p>
@@ -114,7 +130,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
-                            <ChartPieIcon style={{ width: "22px", height: "22px", color: "#136442" }} />
+                            <ChartPieIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>2. Reporte de Totales y Estadísticas</h4>
                         </div>
                         <p style={cardDescStyle}>Exporta el resumen consolidado de predios censados, superficie, parroquias y estatus legal.</p>
@@ -136,7 +152,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
-                            <ClipboardDocumentCheckIcon style={{ width: "22px", height: "22px", color: "#136442" }} />
+                            <ClipboardDocumentCheckIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>3. Predios Ya Caracterizados</h4>
                         </div>
                         <p style={cardDescStyle}>Exporta exclusivamente el listado oficial de predios que ya han completado su caracterización.</p>
@@ -158,7 +174,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
-                            <CubeTransparentIcon style={{ width: "22px", height: "22px", color: "#136442" }} />
+                            <CubeTransparentIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>4. Reporte General de Producción</h4>
                         </div>
                         <p style={cardDescStyle}>Exporta el consolidado agronómico y pecuario: semovientes, hectáreas y rubros globales.</p>
@@ -180,7 +196,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
-                            <UserGroupIcon style={{ width: "22px", height: "22px", color: "#136442" }} />
+                            <UserGroupIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>5. Reporte General Pecuario</h4>
                         </div>
                         <p style={cardDescStyle}>Filtra por especie animal y municipio. Muestra predios ordenados de mayor a menor cantidad de cabezas con datos de productor.</p>
@@ -209,7 +225,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
-                            <ShieldCheckIcon style={{ width: "22px", height: "22px", color: "#136442" }} />
+                            <ShieldCheckIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>6. Reporte General Sistemas de Producción Animal</h4>
                         </div>
                         <p style={cardDescStyle}>Filtra por sistema productivo (Cría, Ceba, etc.) y municipio, ordenados por rendimiento/volumen.</p>
@@ -238,7 +254,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
-                            <SparklesIcon style={{ width: "22px", height: "22px", color: "#136442" }} />
+                            <SparklesIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>7. Reporte General Vegetal</h4>
                         </div>
                         <p style={cardDescStyle}>Filtra por rubro agrícola y municipio. Ordenado de mayor a menor cantidad de hectáreas e incluye datos de contacto.</p>
@@ -268,19 +284,20 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     );
 };
 
-// Estilos visuales estándar
+// Estilos visuales estándar adaptativos
 const cardStyle = {
     backgroundColor: "#ffffff",
     border: "1px solid #e2e8f0",
     borderRadius: "16px",
-    padding: "24px",
+    padding: "20px",
     boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    boxSizing: "border-box"
 };
-const cardHeaderStyle = { display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" };
-const cardTitleStyle = { margin: 0, fontSize: "15px", fontWeight: "700", color: "#1e293b" };
+const cardHeaderStyle = { display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" };
+const cardTitleStyle = { margin: 0, fontSize: "15px", fontWeight: "700", color: "#1e293b", wordBreak: "break-word" };
 const cardDescStyle = { fontSize: "12.5px", color: "#64748b", marginBottom: "16px", lineHeight: "1.4" };
 const selectContainerStyle = { display: "flex", flexDirection: "column", gap: "6px", marginBottom: "20px" };
 const selectLabelStyle = { fontSize: "12px", fontWeight: "600", color: "#334155" };
@@ -292,7 +309,9 @@ const selectStyle = {
     backgroundColor: "#f8fafc",
     color: "#1e293b",
     outline: "none",
-    cursor: "pointer"
+    cursor: "pointer",
+    width: "100%",
+    boxSizing: "border-box"
 };
 const buttonStyle = {
     display: "flex",
@@ -307,5 +326,7 @@ const buttonStyle = {
     fontSize: "13px",
     fontWeight: "600",
     cursor: "pointer",
-    transition: "background 0.2s"
+    transition: "background 0.2s",
+    width: "100%",
+    boxSizing: "border-box"
 };
