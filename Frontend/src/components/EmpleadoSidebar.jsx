@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Swal from 'sweetalert2'; // 🔹 Importamos SweetAlert2
+import Swal from 'sweetalert2';
 import {
     ChevronDownIcon,
     PresentationChartBarIcon as DefaultChartIcon,
@@ -11,11 +11,10 @@ import {
     DocumentTextIcon,
     ArrowPathIcon,
     DocumentChartBarIcon,
-    TagIcon,
-    ClockIcon,      // 🔹 Icono para Historial
-    MapPinIcon,     // 🔹 Icono para Georreferenciación
-    Bars3Icon,      // 🔹 Icono de Hamburguesa
-    XMarkIcon       // 🔹 Icono para cerrar menú móvil
+    ClockIcon,
+    MapPinIcon,
+    Bars3Icon,
+    XMarkIcon
 } from "@heroicons/react/24/outline";
 
 export const EmpleadoSidebar = ({
@@ -34,10 +33,9 @@ export const EmpleadoSidebar = ({
         vistaActiva?.startsWith("produccion")
     );
 
-    // Estado para controlar el menú hamburguesa en dispositivos móviles
-    const [menuAbiertoMovil, setMenuAbiertoMovil] = useState(false);
+    // Estado booleano limpio para abrir/cerrar el menú en móviles
+    const [menuAbierto, setMenuAbierto] = useState(false);
 
-    // 🔹 Función para validar antes de entrar a Actualización Productiva
     const manejarClickActualizacion = () => {
         if (!predioActivo) {
             Swal.fire({
@@ -60,10 +58,9 @@ export const EmpleadoSidebar = ({
         }
 
         setVistaActiva("produccion_actualizacion");
-        setMenuAbiertoMovil(false);
+        setMenuAbierto(false);
     };
 
-    // 🔹 Función para validar antes de entrar a Caracterización
     const manejarClickCaracterizacion = () => {
         if (!predioActivo) {
             Swal.fire({
@@ -86,55 +83,69 @@ export const EmpleadoSidebar = ({
         }
 
         setVistaActiva("produccion_caracterizacion");
-        setMenuAbiertoMovil(false);
+        setMenuAbierto(false);
     };
 
     const seleccionarVista = (vista) => {
         setVistaActiva(vista);
-        setMenuAbiertoMovil(false);
+        setMenuAbierto(false);
     };
 
     return (
         <>
             <style>{`
-                .empleado-sidebar-desktop {
+                .sidebar-container {
+                    width: 290px;
+                    background-color: #136442;
+                    border-right: 1px solid #0f4d34;
+                    height: 100vh;
+                    position: sticky;
+                    top: 0;
                     display: flex;
+                    flex-direction: column;
+                    padding: 24px 22px;
+                    box-sizing: border-box;
+                    overflow: hidden;
+                    transition: transform 0.3s ease-in-out;
+                    z-index: 1000;
                 }
-                .empleado-hamburger-btn {
+                .mobile-toggle-btn {
                     display: none;
                 }
-                .empleado-mobile-overlay {
+                .sidebar-overlay {
                     display: none;
                 }
+
                 @media (max-width: 900px) {
-                    .empleado-sidebar-desktop {
-                        position: fixed !important;
-                        left: -300px;
-                        top: 0;
-                        z-index: 1100;
-                        transition: left 0.3s ease-in-out;
-                        height: 100vh !important;
-                    }
-                    .empleado-sidebar-desktop.abierto {
-                        left: 0 !important;
-                    }
-                    .empleado-hamburger-btn {
-                        display: flex !important;
+                    .sidebar-container {
                         position: fixed;
-                        top: 16px;
-                        left: 16px;
+                        top: 0;
+                        left: 0;
+                        transform: translateX(-100%);
+                        z-index: 1100;
+                        height: 100vh;
+                        box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+                    }
+                    .sidebar-container.is-open {
+                        transform: translateX(0);
+                    }
+                    .mobile-toggle-btn {
+                        display: flex;
+                        position: fixed;
+                        top: 14px;
+                        left: 14px;
                         z-index: 1050;
                         background-color: #136442;
                         color: #ffffff;
                         border: none;
-                        borderRadius: 8px;
+                        border-radius: 8px;
                         padding: 8px;
                         cursor: pointer;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
                         align-items: center;
                         justify-content: center;
                     }
-                    .empleado-mobile-overlay {
+                    .sidebar-overlay {
                         display: block;
                         position: fixed;
                         top: 0;
@@ -148,61 +159,55 @@ export const EmpleadoSidebar = ({
                 }
             `}</style>
 
-            {/* Botón de Hamburguesa para Móvil */}
+            {/* Botón Hamburguesa Móvil */}
             <button
-                className="empleado-hamburger-btn"
-                onClick={() => setMenuAbiertoMovil(true)}
-                aria-label="Abrir menú"
+                className="mobile-toggle-btn"
+                onClick={() => setMenuAbierto(!menuAbierto)}
+                aria-label="Menú de navegación"
             >
-                <Bars3Icon style={{ width: "24px", height: "24px", color: "#ffffff" }} />
+                {menuAbierto ? (
+                    <XMarkIcon style={{ width: "24px", height: "24px", color: "#ffffff" }} />
+                ) : (
+                    <Bars3Icon style={{ width: "24px", height: "24px", color: "#ffffff" }} />
+                )}
             </button>
 
-            {/* Overlay para fondo oscuro en móvil cuando el menú está abierto */}
-            {menuAbiertoMovil && (
+            {/* Fondo oscuro para móvil */}
+            {menuAbierto && (
                 <div
-                    className="empleado-mobile-overlay"
-                    onClick={() => setMenuAbiertoMovil(false)}
+                    className="sidebar-overlay"
+                    onClick={() => setMenuAbierto(false)}
                 />
             )}
 
-            {/* Barra lateral principal */}
-            <aside className={`empleado-sidebar-desktop ${menuAbiertoMovil ? "abierto" : ""}`} style={{
-                width: "290px",
-                backgroundColor: "#136442",
-                borderRight: "1px solid #0f4d34",
-                height: "100vh",
-                position: "sticky",
-                top: 0,
-                flexDirection: "column",
-                padding: "24px 22px",
-                boxSizing: "border-box",
-                overflow: "hidden"
-            }}>
-                {/* Botón de cierre en vista móvil dentro del drawer */}
-                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "8px" }} className="empleado-hamburger-btn">
+            {/* Contenedor del Sidebar */}
+            <aside className={`sidebar-container ${menuAbierto ? "is-open" : ""}`}>
+                
+                {/* Botón interno de cierre solo visible en móvil dentro del menú */}
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "6px" }} className="mobile-toggle-btn">
                     <button
-                        onClick={() => setMenuAbiertoMovil(false)}
+                        onClick={() => setMenuAbierto(false)}
                         style={{ background: "transparent", border: "none", cursor: "pointer", padding: 0 }}
                     >
-                        <XMarkIcon style={{ width: "24px", height: "24px", color: "#86efac" }} />
+                        <XMarkIcon style={{ width: "22px", height: "22px", color: "#86efac" }} />
                     </button>
                 </div>
 
-                {/* Encabezado: Info del Empleado y Predio Seleccionado */}
+                {/* Perfil del empleado y predio */}
                 <div style={{
                     display: "flex",
                     flexDirection: "column",
                     gap: "10px",
-                    padding: "15px",
+                    padding: "14px",
                     backgroundColor: "rgba(255,255,255,0.08)",
-                    borderRadius: "18px",
-                    marginBottom: "20px",
+                    borderRadius: "16px",
+                    marginBottom: "18px",
                     flexShrink: 0,
                     boxSizing: "border-box"
                 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
                         <div style={{
-                            width: "45px", height: "45px", borderRadius: "12px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0
+                            width: "42px", height: "42px", borderRadius: "10px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0
                         }}>
                             <img
                                 src={
@@ -218,7 +223,7 @@ export const EmpleadoSidebar = ({
 
                         <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
                             <span style={{
-                                fontSize: "14px",
+                                fontSize: "13.5px",
                                 fontWeight: "700",
                                 color: "#fff",
                                 whiteSpace: "nowrap",
@@ -242,19 +247,18 @@ export const EmpleadoSidebar = ({
                         </div>
                     </div>
 
-                    {/* Indicador del Predio Seleccionado */}
                     <div style={{
                         backgroundColor: "rgba(0, 0, 0, 0.2)",
-                        padding: "8px 12px",
-                        borderRadius: "10px",
+                        padding: "8px 10px",
+                        borderRadius: "8px",
                         border: "1px solid rgba(134, 239, 172, 0.2)",
                         boxSizing: "border-box"
                     }}>
-                        <span style={{ fontSize: "10px", color: "#cbd5e1", display: "block", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                        <span style={{ fontSize: "9.5px", color: "#cbd5e1", display: "block", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                             Predio Activo:
                         </span>
                         <span style={{
-                            fontSize: "12px",
+                            fontSize: "11.5px",
                             fontWeight: "600",
                             color: predioActivo ? "#f8fafc" : "#94a3b8",
                             whiteSpace: "nowrap",
@@ -267,105 +271,105 @@ export const EmpleadoSidebar = ({
                     </div>
                 </div>
 
-                {/* Navegación de Opciones */}
+                {/* Opciones de navegación */}
                 <div style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
+                    gap: "6px",
                     flex: 1,
                     overflowY: "auto",
-                    paddingRight: "4px"
+                    paddingRight: "2px"
                 }}>
-                    {/* 1. PREDIOS */}
+                    {/* 1. Predios */}
                     <div>
                         <div
                             onClick={() => setPrediosAbierto(!prediosAbierto)}
                             style={{
                                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "12px 16px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
-                                transition: "all 0.25s ease", backgroundColor: "transparent", color: "#86efac", fontWeight: 500, fontSize: "14px"
+                                padding: "11px 14px", borderRadius: "12px", cursor: "pointer", marginBottom: "2px",
+                                backgroundColor: "transparent", color: "#86efac", fontWeight: 500, fontSize: "13.5px"
                             }}
                         >
-                            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                <MapIcon style={{ width: "23px", height: "23px", color: "#86efac", flexShrink: 0 }} />
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                <MapIcon style={{ width: "21px", height: "21px", color: "#86efac", flexShrink: 0 }} />
                                 <span>Predios</span>
                             </div>
                             <ChevronDownIcon style={{
-                                width: "17px", height: "17px", color: "#86efac",
+                                width: "16px", height: "16px", color: "#86efac",
                                 transform: prediosAbierto ? "rotate(180deg)" : "rotate(0deg)",
-                                transition: "transform 0.25s ease",
+                                transition: "transform 0.2s ease",
                                 flexShrink: 0
                             }} />
                         </div>
 
                         {prediosAbierto && (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingLeft: "16px", marginTop: "2px", marginBottom: "6px", borderLeft: "2px solid rgba(134, 239, 172, 0.2)" }}>
-                                <div onClick={() => seleccionarVista("inicio")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "inicio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "inicio" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ChartBarIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                            <div style={{ display: "flex", flexDirection: "column", gap: "3px", paddingLeft: "14px", marginTop: "2px", marginBottom: "4px", borderLeft: "2px solid rgba(134, 239, 172, 0.2)" }}>
+                                <div onClick={() => seleccionarVista("inicio")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "inicio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "inicio" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ChartBarIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Inicio</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("predios_registro")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "predios_registro" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_registro" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ClipboardDocumentListIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                                <div onClick={() => seleccionarVista("predios_registro")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "predios_registro" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_registro" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ClipboardDocumentListIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Registro</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("predios_historial")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "predios_historial" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_historial" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ClockIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                                <div onClick={() => seleccionarVista("predios_historial")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "predios_historial" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_historial" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ClockIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Historial</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("predios_georreferenciacion")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "predios_georreferenciacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_georreferenciacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <MapPinIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                                <div onClick={() => seleccionarVista("predios_georreferenciacion")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "predios_georreferenciacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_georreferenciacion" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <MapPinIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Georreferenciación</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("predios_reportes")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "predios_reportes" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_reportes" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <DocumentChartBarIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                                <div onClick={() => seleccionarVista("predios_reportes")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "predios_reportes" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_reportes" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <DocumentChartBarIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Reportes</span>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* 2. PRODUCCIÓN */}
+                    {/* 2. Producción */}
                     <div>
                         <div
                             onClick={() => setProduccionAbierto(!produccionAbierto)}
                             style={{
                                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "12px 16px", borderRadius: "14px", cursor: "pointer", marginBottom: "4px",
-                                transition: "all 0.25s ease", backgroundColor: "transparent", color: "#86efac", fontWeight: 500, fontSize: "14px"
+                                padding: "11px 14px", borderRadius: "12px", cursor: "pointer", marginBottom: "2px",
+                                backgroundColor: "transparent", color: "#86efac", fontWeight: 500, fontSize: "13.5px"
                             }}
                         >
-                            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                <CircleStackIcon style={{ width: "23px", height: "23px", color: "#86efac", flexShrink: 0 }} />
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                <CircleStackIcon style={{ width: "21px", height: "21px", color: "#86efac", flexShrink: 0 }} />
                                 <span>Producción</span>
                             </div>
                             <ChevronDownIcon style={{
-                                width: "17px", height: "17px", color: "#86efac",
+                                width: "16px", height: "16px", color: "#86efac",
                                 transform: produccionAbierto ? "rotate(180deg)" : "rotate(0deg)",
-                                transition: "transform 0.25s ease",
+                                transition: "transform 0.2s ease",
                                 flexShrink: 0
                             }} />
                         </div>
 
                         {produccionAbierto && (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "4px", paddingLeft: "16px", marginTop: "2px", marginBottom: "6px", borderLeft: "2px solid rgba(134, 239, 172, 0.2)" }}>
-                                <div onClick={() => seleccionarVista("produccion_inicio")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_inicio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_inicio" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ChartBarIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                            <div style={{ display: "flex", flexDirection: "column", gap: "3px", paddingLeft: "14px", marginTop: "2px", marginBottom: "4px", borderLeft: "2px solid rgba(134, 239, 172, 0.2)" }}>
+                                <div onClick={() => seleccionarVista("produccion_inicio")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_inicio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_inicio" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ChartBarIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Inicio</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("produccion_seleccionar_predio")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_seleccionar_predio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_seleccionar_predio" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <CheckCircleIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                                <div onClick={() => seleccionarVista("produccion_seleccionar_predio")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_seleccionar_predio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_seleccionar_predio" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <CheckCircleIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Seleccionar Predio</span>
                                 </div>
-                                <div onClick={manejarClickCaracterizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_caracterizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_caracterizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <DocumentTextIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                                <div onClick={manejarClickCaracterizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_caracterizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_caracterizacion" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <DocumentTextIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Caracterización</span>
                                 </div>
-                                <div onClick={manejarClickActualizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_actualizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_actualizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ArrowPathIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                                <div onClick={manejarClickActualizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_actualizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_actualizacion" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ArrowPathIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Actualización Productiva</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("produccion_reportes")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "10px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_reportes" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_reportes" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <DocumentChartBarIcon style={{ width: "20px", height: "20px", color: "#86efac", flexShrink: 0 }} />
+                                <div onClick={() => seleccionarVista("produccion_reportes")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "9px 10px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_reportes" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_reportes" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <DocumentChartBarIcon style={{ width: "18px", height: "18px", color: "#86efac", flexShrink: 0 }} />
                                     <span>Reportes</span>
                                 </div>
                             </div>
@@ -373,9 +377,9 @@ export const EmpleadoSidebar = ({
                     </div>
                 </div>
 
-                {/* Botón Cerrar Sesión */}
-                <div onClick={cerrarSesion} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px 14px", borderRadius: "10px", cursor: "pointer", color: "#fca5a5", fontSize: "14px", fontWeight: 600, marginTop: "12px", flexShrink: 0 }}>
-                    {PowerIcon && <PowerIcon style={{ width: "20px", height: "20px", color: "#fca5a5", flexShrink: 0 }} />}
+                {/* Cerrar Sesión */}
+                <div onClick={cerrarSesion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 12px", borderRadius: "8px", cursor: "pointer", color: "#fca5a5", fontSize: "13.5px", fontWeight: 600, marginTop: "10px", flexShrink: 0 }}>
+                    {PowerIcon && <PowerIcon style={{ width: "18px", height: "18px", color: "#fca5a5", flexShrink: 0 }} />}
                     <span>Cerrar Sesión</span>
                 </div>
             </aside>
