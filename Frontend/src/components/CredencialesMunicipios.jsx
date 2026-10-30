@@ -97,19 +97,31 @@ export const CredencialesMunicipios = ({
     };
 
     return (
-        <div style={{ paddingBottom: "40px" }}>
-            <div style={{ marginBottom: "28px" }}>
-                <p style={{ fontSize: "13px", color: "#64748b", margin: 0 }}>
+        <div style={{ paddingBottom: "40px", width: "100%", boxSizing: "border-box", fontFamily: "'Poppins', sans-serif" }}>
+            
+            <style>{`
+                .credenciales-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    gap: 20px;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                @media (max-width: 480px) {
+                    .credenciales-grid {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            `}</style>
+
+            <div style={{ marginBottom: "24px" }}>
+                <p style={{ fontSize: "13px", color: "#64748b", margin: 0, lineHeight: "1.4" }}>
                     Asigna usuarios y contraseñas independientes para los 12 municipios encargados del registro de predios.
                 </p>
             </div>
 
-            {/* Grid de 3 columnas */}
-            <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "28px"
-            }}>
+            {/* Grid responsive de municipios */}
+            <div className="credenciales-grid">
                 {MUNICIPIOS_BARINAS.map((mun) => {
                     const estaCreado = credenciales[mun.id]?.creado;
 
@@ -126,7 +138,9 @@ export const CredencialesMunicipios = ({
                                 overflow: "hidden",
                                 transition: "all 0.25s ease-in-out",
                                 display: "flex",
-                                flexDirection: "column"
+                                flexDirection: "column",
+                                boxSizing: "border-box",
+                                width: "100%"
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.boxShadow = "0 12px 20px -4px rgba(19, 100, 66, 0.12)";
@@ -143,7 +157,8 @@ export const CredencialesMunicipios = ({
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                overflow: "hidden"
+                                overflow: "hidden",
+                                width: "100%"
                             }}>
                                 <img
                                     src={mun.imagen}
@@ -173,12 +188,12 @@ export const CredencialesMunicipios = ({
                                         </>
                                     ) : estaCreado ? (
                                         <>
-                                            {CheckCircleIcon && <CheckCircleIcon style={{ width: "14px", height: "14px", color: "#86efac" }} />}
+                                            {CheckCircleIcon && <CheckCircleIcon style={{ width: "14px", height: "14px", color: "#86efac", flexShrink: 0 }} />}
                                             <span style={{ fontSize: "11px", color: "#ffffff", fontWeight: 600 }}>Creado</span>
                                         </>
                                     ) : (
                                         <>
-                                            {ExclamationCircleIcon && <ExclamationCircleIcon style={{ width: "14px", height: "14px", color: "#cbd5e1" }} />}
+                                            {ExclamationCircleIcon && <ExclamationCircleIcon style={{ width: "14px", height: "14px", color: "#cbd5e1", flexShrink: 0 }} />}
                                             <span style={{ fontSize: "11px", color: "#f1f5f9", fontWeight: 500 }}>Sin Credenciales</span>
                                         </>
                                     )}
@@ -186,9 +201,9 @@ export const CredencialesMunicipios = ({
                             </div>
 
                             {/* Cuerpo de la tarjeta */}
-                            <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "12px", flex: 1, justifyContent: "space-between" }}>
+                            <div style={{ padding: "18px", display: "flex", flexDirection: "column", gap: "12px", flex: 1, justifyContent: "space-between", boxSizing: "border-box" }}>
                                 <div>
-                                    <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#4b4b4b", margin: "0 0 4px 0" }}>
+                                    <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#4b4b4b", margin: "0 0 4px 0", wordBreak: "break-word" }}>
                                         {mun.nombre}
                                     </h3>
                                     <div style={{ fontSize: "12px", color: "#64748b" }}>
@@ -198,10 +213,10 @@ export const CredencialesMunicipios = ({
 
                                 <div style={{ borderTop: "1px solid #f1f5f9", paddingTop: "12px", display: "flex", flexDirection: "column", gap: "4px" }}>
                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                        <span style={{ fontSize: "12px", color: estaCreado ? "#136442" : "#64748b", fontWeight: 500 }}>
+                                        <span style={{ fontSize: "12px", color: estaCreado ? "#136442" : "#64748b", fontWeight: 500, wordBreak: "break-all", marginRight: "6px" }}>
                                             {estaCreado ? `Usuario: ${credenciales[mun.id]?.usuario}` : "Configurar acceso"}
                                         </span>
-                                        <span style={{ fontSize: "12px", fontWeight: 600, color: "#136442" }}>
+                                        <span style={{ fontSize: "12px", fontWeight: 600, color: "#136442", flexShrink: 0 }}>
                                             {estaCreado ? "Editar" : "Crear +"}
                                         </span>
                                     </div>
@@ -231,7 +246,8 @@ export const CredencialesMunicipios = ({
                     alignItems: "center",
                     justifyContent: "center",
                     zIndex: 1000,
-                    padding: "20px"
+                    padding: "16px",
+                    boxSizing: "border-box"
                 }}>
                     <div style={{
                         backgroundColor: "#ffffff",
@@ -239,50 +255,52 @@ export const CredencialesMunicipios = ({
                         width: "100%",
                         maxWidth: "460px",
                         boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-                        overflow: "hidden"
+                        overflow: "hidden",
+                        boxSizing: "border-box"
                     }}>
                         {/* Cabecera del Modal */}
                         <div style={{
                             backgroundColor: "#136442",
-                            padding: "20px 24px",
+                            padding: "18px 20px",
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "space-between"
+                            justifyContent: "space-between",
+                            boxSizing: "border-box"
                         }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                {KeyIcon && <KeyIcon style={{ width: "22px", height: "22px", color: "#95d5b2" }} />}
-                                <h3 style={{ color: "#ffffff", fontSize: "16px", fontWeight: 600, margin: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, marginRight: "10px" }}>
+                                {KeyIcon && <KeyIcon style={{ width: "22px", height: "22px", color: "#95d5b2", flexShrink: 0 }} />}
+                                <h3 style={{ color: "#ffffff", fontSize: "15px", fontWeight: 600, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                                     Credenciales: {municipioSeleccionado.nombre}
                                 </h3>
                             </div>
                             <button
                                 onClick={cerrarModal}
-                                style={{ background: "transparent", border: "none", cursor: "pointer", padding: "4px", display: "flex" }}
+                                style={{ background: "transparent", border: "none", cursor: "pointer", padding: "4px", display: "flex", flexShrink: 0 }}
                             >
                                 {XMarkIcon && <XMarkIcon style={{ width: "20px", height: "20px", color: "#95d5b2" }} />}
                             </button>
                         </div>
 
                         {/* Formulario */}
-                        <form onSubmit={guardarCredenciales} style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "18px" }}>
+                        <form onSubmit={guardarCredenciales} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px", boxSizing: "border-box" }}>
                             {errorMsg && (
-                                <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", padding: "10px 14px", borderRadius: "8px", color: "#991b1b", fontSize: "13px" }}>
+                                <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", padding: "10px 14px", borderRadius: "8px", color: "#991b1b", fontSize: "13px", boxSizing: "border-box" }}>
                                     {errorMsg}
                                 </div>
                             )}
 
                             {exitoMsg && (
-                                <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", padding: "10px 14px", borderRadius: "8px", color: "#136442", fontSize: "13px" }}>
+                                <div style={{ backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", padding: "10px 14px", borderRadius: "8px", color: "#136442", fontSize: "13px", boxSizing: "border-box" }}>
                                     {exitoMsg}
                                 </div>
                             )}
 
-                            <div>
-                                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                            <div style={{ width: "100%", boxSizing: "border-box" }}>
+                                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
                                     Usuario de Acceso
                                 </label>
-                                <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                                    {UserIcon && <UserIcon style={{ width: "18px", height: "18px", color: "#94a3b8", position: "absolute", left: "12px" }} />}
+                                <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%", boxSizing: "border-box" }}>
+                                    {UserIcon && <UserIcon style={{ width: "18px", height: "18px", color: "#94a3b8", position: "absolute", left: "12px", flexShrink: 0 }} />}
                                     <input
                                         type="text"
                                         value={formUsuario}
@@ -306,12 +324,12 @@ export const CredencialesMunicipios = ({
                                 </div>
                             </div>
 
-                            <div>
-                                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                            <div style={{ width: "100%", boxSizing: "border-box" }}>
+                                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
                                     Contraseña (Mínimo 8 caracteres)
                                 </label>
-                                <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-                                    {LockClosedIcon && <LockClosedIcon style={{ width: "18px", height: "18px", color: "#94a3b8", position: "absolute", left: "12px" }} />}
+                                <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%", boxSizing: "border-box" }}>
+                                    {LockClosedIcon && <LockClosedIcon style={{ width: "18px", height: "18px", color: "#94a3b8", position: "absolute", left: "12px", flexShrink: 0 }} />}
                                     <input
                                         type="password"
                                         value={formPassword}
@@ -338,7 +356,7 @@ export const CredencialesMunicipios = ({
                                 </span>
                             </div>
 
-                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "12px", borderTop: "1px solid #f1f5f9", paddingTop: "16px" }}>
+                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "10px", borderTop: "1px solid #f1f5f9", paddingTop: "14px", width: "100%", boxSizing: "border-box" }}>
                                 <button
                                     type="button"
                                     onClick={cerrarModal}
@@ -360,7 +378,7 @@ export const CredencialesMunicipios = ({
                                     type="submit"
                                     disabled={cargando}
                                     style={{
-                                        padding: "10px 20px",
+                                        padding: "10px 18px",
                                         borderRadius: "8px",
                                         border: "none",
                                         backgroundColor: "#136442",
