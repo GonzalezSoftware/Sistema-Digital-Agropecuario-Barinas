@@ -37,7 +37,8 @@ export default function VistaMapaPredios({ listaPredios, municipios, cargando })
                 gap: "12px",
                 color: "#136442",
                 fontSize: "13px",
-                fontWeight: "500"
+                fontWeight: "500",
+                fontFamily: "'Poppins', sans-serif"
             }}>
                 <Spinner color="#136442" />
                 <span>Cargando mapa y distribución de predios...</span>
@@ -46,19 +47,31 @@ export default function VistaMapaPredios({ listaPredios, municipios, cargando })
     }
 
     return (
-        <div style={{ maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
+        <div style={{ width: "100%", maxWidth: "100%", margin: "0 auto", animation: "fadeIn 0.5s", fontFamily: "'Poppins', sans-serif", boxSizing: "border-box" }}>
+            
+            <style>{`
+                .map-wrapper-container {
+                    height: 600px;
+                }
+                @media (max-width: 768px) {
+                    .map-wrapper-container {
+                        height: 420px !important;
+                    }
+                }
+            `}</style>
 
-                {/* SECCIÓN SUPERIOR: EL MAPA A TODO ANCHO */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", boxSizing: "border-box" }}>
+
+                {/* SECCIÓN SUPERIOR: EL MAPA RESPONSIVE */}
                 <div style={{
                     width: "100%",
                     backgroundColor: "#fff",
                     borderRadius: "16px",
-                    padding: "12px",
+                    padding: "10px",
                     boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
                     border: "1px solid #e0e0e0",
-                    height: "600px"
-                }}>
+                    boxSizing: "border-box"
+                }} className="map-wrapper-container">
                     <div style={{ height: "100%", width: "100%", borderRadius: "12px", overflow: "hidden" }}>
                         <MapaBarinas predios={listaPredios} />
                     </div>

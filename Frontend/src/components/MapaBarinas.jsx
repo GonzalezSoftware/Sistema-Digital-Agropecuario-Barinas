@@ -26,12 +26,12 @@ const MapaBarinas = ({ predios }) => {
         <MapContainer 
             center={[8.30, -69.75]} 
             zoom={8} 
-            minZoom={8}
+            minZoom={7}
             maxBounds={boundsBarinas} 
             maxBoundsViscosity={1.0} 
-            style={{ height: '100%', width: '100%' }}
+            style={{ height: '100%', width: '100%', minHeight: '350px' }}
         >
-            {/* 🛠️ Solución: Usar la capa oficial y gratuita de OpenStreetMap */}
+            {/* Capa oficial y gratuita de OpenStreetMap */}
             <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -44,7 +44,7 @@ const MapaBarinas = ({ predios }) => {
                     return (
                         <Marker key={idx} position={[coords[0], coords[1]]}>
                             <Popup>
-                                <div style={{ textAlign: 'center' }}>
+                                <div style={{ textAlign: 'center', fontFamily: "'Poppins', sans-serif" }}>
                                     <strong style={{ color: '#2d572c' }}>{p.nombre_predio}</strong><br/>
                                     <span>Municipio: {p.municipio}</span>
                                 </div>
