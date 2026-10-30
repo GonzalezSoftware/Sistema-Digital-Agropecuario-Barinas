@@ -123,6 +123,7 @@ export default function FormCaracterizacion({
     modo = "caracterizacion",
 }) {
 
+    const API_URL = "https://3.145.179.35.nip.io/api/";
     const [codigoGenerado, setCodigoGenerado] = useState("");
     const [erroresFilas, setErroresFilas] = useState({});
 
@@ -546,7 +547,7 @@ const generarObjetoPDF = (predio) => {
         if (!confirmacion.isConfirmed) return;
 
         try {
-            const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo-correo/", { correo: correoProductor });
+            const envio = await axios.post(`${API_URL}enviar-codigo-correo/`, { correo: correoProductor });
             codigoServidor = envio.data.codigo.toString();
             setCodigoGenerado(codigoServidor);
 
@@ -632,7 +633,7 @@ const generarObjetoPDF = (predio) => {
                 },
             };
 
-            await axios.patch(`http://127.0.0.1:8000/api/predios/${predioActivo.id_predio}/`, data);
+            await axios.patch(`${API_URL}predios/${predioActivo.id_predio}/`, data);
 
             const predioActualizadoParaPDF = {
                 ...predioActivo,
@@ -649,7 +650,7 @@ const generarObjetoPDF = (predio) => {
             formData.append("correo", correoProductor);
             formData.append("pdf_file", pdfBlob, `Ficha_Tecnica_Integral_${(predioActivo.nombre_predio || "Predio").replace(/\s+/g, "_")}.pdf`);
 
-            await axios.post("http://127.0.0.1:8000/api/enviar-correo-ficha/", formData);
+            await axios.post(`${API_URL}enviar-correo-ficha/`, formData);
 
             Swal.fire({
                 icon: "success",
