@@ -58,15 +58,39 @@ export default function DashboardEmpleado({
     return (
         <div style={{ maxWidth: "1100px", margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
             
+            <style>{`
+                .dashboard-grid-stats {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                    gap: 20px;
+                    margin-bottom: 24px;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                .dashboard-grid-charts {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: 20px;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                .treemap-card {
+                    grid-column: 1 / -1;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                @media (max-width: 768px) {
+                    .dashboard-grid-charts {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .treemap-card {
+                        grid-column: 1 / 1 !important;
+                    }
+                }
+            `}</style>
+
             {/* ── TARJETAS DE ESTADÍSTICAS ── */}
-            <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                gap: "20px",
-                marginBottom: "24px",
-                width: "100%",
-                boxSizing: "border-box"
-            }}>
+            <div className="dashboard-grid-stats">
                 <CardStat
                     label="Predios Censados (Municipio)"
                     value={cargando ? <Spinner /> : totalPrediosMunicipio}
@@ -81,13 +105,7 @@ export default function DashboardEmpleado({
             </div>
 
             {/* ── GRÁFICOS RESPONSIVE ── */}
-            <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: "20px",
-                width: "100%",
-                boxSizing: "border-box"
-            }}>
+            <div className="dashboard-grid-charts">
                 {/* Gráfico 1 - Estatus Legal */}
                 <div style={chartCard}>
                     <h3 style={chartTitle}>Estatus Legal de la Tierra</h3>
@@ -182,7 +200,7 @@ export default function DashboardEmpleado({
                 </div>
 
                 {/* Gráfico 5 - Treemap */}
-                <div style={{ ...chartCard, gridColumn: '1 / -1', width: '100%', boxSizing: 'border-box' }}>
+                <div style={chartCard} className="treemap-card">
                     <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
                     <div style={{ width: '100%', height: 350, marginTop: '16px' }}>
                         {cargando ? (
