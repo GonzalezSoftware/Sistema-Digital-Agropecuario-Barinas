@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function PortalInformativo() {
@@ -8,6 +8,9 @@ export default function PortalInformativo() {
   const [noticias, setNoticias] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
+  
+  // Referencia para el contenedor deslizante del carrusel
+  const carruselRef = useRef(null);
 
   useEffect(() => {
     fetch(`${API_URL}noticias/`)
@@ -24,22 +27,35 @@ export default function PortalInformativo() {
       });
   }, []);
 
+  // Función para desplazar el carrusel de manera suave por tarjeta
+  const scrollCarrusel = (direccion) => {
+    if (carruselRef.current) {
+      // Ancho aproximado de la tarjeta (300px de minWidth/ancho + 20px de gap)
+      const anchoTarjeta = 320; 
+      carruselRef.current.scrollBy({
+        left: direccion === "left" ? -anchoTarjeta : anchoTarjeta,
+        behavior: "smooth"
+      });
+    }
+  };
+
   const navButtonStyle = (side) => ({
     position: "absolute",
-    [side === "left" ? "left" : "right"]: "-10px",
+    [side === "left" ? "left" : "right"]: "-20px",
     zIndex: 10,
     background: "#589e38",
     color: "#fff",
     border: "none",
-    width: "40px",
-    height: "40px",
+    width: "44px",
+    height: "44px",
     borderRadius: "50%",
-    fontSize: "18px",
+    fontSize: "20px",
     cursor: "pointer",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.2)",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    transition: "background 0.2s ease, transform 0.2s ease",
   });
 
   return (
@@ -56,20 +72,34 @@ export default function PortalInformativo() {
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
 
             {/* BOTÓN IZQUIERDA */}
-            <button className="carrusel-btn" style={navButtonStyle("left")}> &lt; </button>
+            {!cargando && noticias.length > 3 && (
+              <button 
+                className="carrusel-btn" 
+                onClick={() => scrollCarrusel("left")}
+                style={navButtonStyle("left")}
+                aria-label="Anterior"
+              > 
+                &lt; 
+              </button>
+            )}
 
             {/* CONTENEDOR DE NOTICIAS */}
-            <div style={{
-              display: "flex",
-              gap: "20px",
-              overflowX: "auto",
-              padding: "20px 10px",
-              width: "100%",
-              maxWidth: "1010px",
-              margin: "0 auto",
-              justifyContent: noticias.length > 0 ? "flex-start" : "center",
-              scrollbarWidth: "thin",
-            }}>
+            <div 
+              ref={carruselRef}
+              style={{
+                display: "flex",
+                gap: "20px",
+                overflowX: "auto",
+                padding: "20px 10px",
+                width: "100%",
+                maxWidth: "1010px",
+                margin: "0 auto",
+                justifyContent: noticias.length > 0 && noticias.length < 3 ? "center" : "flex-start",
+                scrollbarWidth: "none", // Ocultar barra en Firefox
+                msOverflowStyle: "none", // Ocultar barra en IE/Edge
+                scrollBehavior: "smooth",
+              }}
+            >
               {cargando ? (
                 <p style={{ textAlign: "center", color: "#64748b", width: "100%" }}>Cargando noticias recientes...</p>
               ) : noticias.length === 0 ? (
@@ -81,7 +111,7 @@ export default function PortalInformativo() {
                     className="tarjeta-noticia" 
                     onClick={() => setNoticiaSeleccionada(item)}
                     style={{
-                      minWidth: "280px",
+                      minWidth: "300px",
                       maxWidth: "320px",
                       width: "100%",
                       background: "#fff",
@@ -140,7 +170,16 @@ export default function PortalInformativo() {
             </div>
 
             {/* BOTÓN DERECHA */}
-            <button className="carrusel-btn" style={navButtonStyle("right")}> &gt; </button>
+            {!cargando && noticias.length > 3 && (
+              <button 
+                className="carrusel-btn" 
+                onClick={() => scrollCarrusel("right")}
+                style={navButtonStyle("right")}
+                aria-label="Siguiente"
+              > 
+                &gt; 
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -241,6 +280,10 @@ export default function PortalInformativo() {
       )}
 
       <style>{`
+        /* Ocultar barra de desplazamiento visualmente pero mantener la funcionalidad de scroll */
+        div::-webkit-scrollbar {
+          display: none;
+        }
         @media (max-width: 768px) {
           .carrusel-btn {
             display: none !important;
@@ -250,6 +293,10 @@ export default function PortalInformativo() {
           transform: translateY(-4px);
           box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
           transition: all 0.3s ease;
+        }
+        .carrusel-btn:hover {
+          background: #467d2c !important;
+          transform: scale(1.05);
         }
       `}</style>
     </>
