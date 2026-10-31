@@ -6,6 +6,13 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import escudo from "../../assets/logo2.jpg";
+import logo from "../../assets/gobierno.jpg";
+
+import {
+  NAV_ITEMS,
+} from "../../components/ui/PrediosProduccionUI";
+
 
 // 1. COMPONENTE SPINNER
 const Spinner = ({ color = "#136442" }) => {
@@ -653,30 +660,7 @@ export default function Productores() {
                 </div>
             </div>
 
-            {/* FOOTER */}
-            <footer style={{ background: "#fff", color: "#555", borderTop: "1px solid #e8e8e8" }}>
-                <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "40px 16px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "36px" }}>
-                    <div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-                            <img src={logo} alt="Logo" style={{ height: 45 }} />
-                            <img src={escudo} alt="Escudo" style={{ height: 35 }} />
-                        </div>
-                        <p style={{ fontSize: "14px", lineHeight: 1.8, color: "#777", maxWidth: "280px" }}>Ecosistema digital agropecuario del estado Barinas. Plataforma oficial para el registro y gestión de la actividad productiva del campo barinés.</p>
-                    </div>
-                    <div>
-                        <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "1px" }}>Navegación</h4>
-                        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "10px" }}>
-                            <li><a href="/" style={{ color: "#777", textDecoration: "none", fontSize: "14px" }}>Portal Principal</a></li>
-                            <li><a href="/predios" style={{ color: "#777", textDecoration: "none", fontSize: "14px" }}>Registro de Predios</a></li>
-                            <li><a href="/produccion" style={{ color: "#777", textDecoration: "none", fontSize: "14px" }}>Producción</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 style={{ color: "#1b4332", fontSize: "14px", fontWeight: 600, margin: "0 0 16px", textTransform: "uppercase", letterSpacing: "1px" }}>Contacto</h4>
-                        <p style={{ color: "#777", fontSize: "13px", lineHeight: "1.6" }}>agrosistema@barinas.gob.ve<br />(0273) 300-0000</p>
-                    </div>
-                </div>
-            </footer>
+            <Footer logo={logo} escudo={escudo} NAV_ITEMS={NAV_ITEMS} />
 
             {/* ESTILOS MEDIA QUERY PARA MÓVILES */}
             <style>{`
