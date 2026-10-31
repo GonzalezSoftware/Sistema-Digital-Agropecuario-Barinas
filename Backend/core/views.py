@@ -898,11 +898,9 @@ def dashboard_produccion_stats(request):
 
 @api_view(['GET', 'POST'])
 def configurar_o_login_admin(request):
-    # Ver si ya existe algún administrador configurado en la BD
     admin_existe = AdministradorSistema.objects.exists()
 
     if request.method == 'GET':
-        # Indicamos a React si ya está configurado o no
         return Response({
             "configurado": admin_existe
         }, status=status.HTTP_200_OK)
@@ -912,16 +910,17 @@ def configurar_o_login_admin(request):
         usuario = data.get('usuario')
         clave = data.get('clave')
         nombre = data.get('nombre', '')
+        correo = data.get('correo', '') # <-- NUEVO
 
         if not admin_existe:
             # ── REGISTRO ÚNICO (Primer administrador) ──
-            if not usuario or not clave or not nombre:
-                return Response({"error": "Todos los campos son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
+            if not usuario or not clave or not nombre or not correo:
+                return Response({"error": "Todos los campos, incluyendo el correo, son obligatorios."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Guardamos la contraseña cifrada por seguridad
             nuevo_admin = AdministradorSistema.objects.create(
                 nombre=nombre,
                 usuario=usuario,
+                correo=correo, # <-- NUEVO
                 clave=make_password(clave),
                 rol="Administrador General"
             )
@@ -930,6 +929,7 @@ def configurar_o_login_admin(request):
                 "usuario": {
                     "nombre": nuevo_admin.nombre,
                     "usuario": nuevo_admin.usuario,
+                    "correo": nuevo_admin.correo, # <-- NUEVO
                     "rol": nuevo_admin.rol
                 }
             }, status=status.HTTP_201_CREATED)
@@ -937,13 +937,13 @@ def configurar_o_login_admin(request):
             # ── INICIO DE SESIÓN ──
             try:
                 admin = AdministradorSistema.objects.get(usuario=usuario)
-                # Verificamos la contraseña
                 if check_password(clave, admin.clave):
                     return Response({
                         "mensaje": "Login exitoso",
                         "usuario": {
                             "nombre": admin.nombre,
                             "usuario": admin.usuario,
+                            "correo": getattr(admin, 'correo', ''), # <-- NUEVO
                             "rol": admin.rol
                         }
                     }, status=status.HTTP_200_OK)

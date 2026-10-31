@@ -209,9 +209,10 @@ class Maquinaria(models.Model):
 # ─────────────────────────────
 class AdministradorSistema(models.Model):
     nombre = models.CharField(max_length=150)
-    municipio = models.CharField(max_length=100, unique=True, null=True, blank=True) # Identificador único del municipio (ej: "alberto_arvelo")
+    municipio = models.CharField(max_length=100, unique=True, null=True, blank=True)
     usuario = models.CharField(max_length=100, unique=True)
-    clave = models.CharField(max_length=255) # Contraseña encriptada
+    correo = models.EmailField(max_length=150, unique=True, null=True, blank=True) # <-- NUEVO CAMPO
+    clave = models.CharField(max_length=255)
     rol = models.CharField(max_length=100, default="Administrador Municipal")
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
