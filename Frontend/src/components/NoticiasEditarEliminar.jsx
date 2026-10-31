@@ -3,6 +3,9 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import Swal from "sweetalert2";
 
 export default function NoticiasEditarEliminar() {
+    // URL del servidor backend en AWS con HTTPS
+    const API_URL = "https://3.145.179.35.nip.io/api/";
+
     const [noticias, setNoticias] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
@@ -10,7 +13,7 @@ export default function NoticiasEditarEliminar() {
     // Cargar noticias al montar el componente
     const obtenerNoticias = async () => {
         try {
-            const respuesta = await fetch("http://localhost:8000/api/noticias/");
+            const respuesta = await fetch(`${API_URL}noticias/`);
             const datos = await respuesta.json();
             if (respuesta.ok) {
                 setNoticias(datos);
@@ -19,7 +22,7 @@ export default function NoticiasEditarEliminar() {
             }
         } catch (error) {
             console.error("Error de red:", error);
-            setMensaje({ texto: "Error de conexión con el servidor de Django.", tipo: "error" });
+            setMensaje({ texto: "Error de conexión con el servidor.", tipo: "error" });
         } finally {
             setCargando(false);
         }
@@ -45,7 +48,7 @@ export default function NoticiasEditarEliminar() {
         if (!result.isConfirmed) return;
 
         try {
-            const respuesta = await fetch(`http://localhost:8000/api/noticias/${id}/`, {
+            const respuesta = await fetch(`${API_URL}noticias/${id}/`, {
                 method: "DELETE",
             });
 
