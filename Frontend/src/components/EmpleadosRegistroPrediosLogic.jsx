@@ -3,6 +3,8 @@ import Swal from "sweetalert2";
 import { validarCampoProductor } from "../components/EmpleadosPrediosValidaciones";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import logo from "../assets/gobierno.jpg";
+import escudo from "../assets/logo2.jpg";
 
 export const grid3 = { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" };
 export const gridCheck = { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "10px" };
@@ -245,8 +247,8 @@ export function useEmpleadosRegistroPrediosLogic({ formData, setFormData, setErr
 
         // Cintillo institucional superior
         try {
-            doc.addImage("/src/assets/logo2.jpg", "JPEG", 12, 5, 22, 16);
-            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+            doc.addImage(logo, "JPEG", 12, 5, 42, 16);
+            doc.addImage(escudo, "PNG", 57, 8, 28, 10); 
         } catch (error) {
             console.warn("No se pudieron cargar las imágenes de los logos en el PDF.", error);
         }
