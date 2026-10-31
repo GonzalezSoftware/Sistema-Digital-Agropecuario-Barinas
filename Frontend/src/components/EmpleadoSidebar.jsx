@@ -99,22 +99,22 @@ export const EmpleadoSidebar = ({
                 style={{
                     display: "none",
                     position: "fixed",
-                    top: "12px",
-                    left: "12px",
+                    top: "10px",
+                    left: "10px",
                     zIndex: 1100,
                     backgroundColor: "#136442",
                     color: "#fff",
                     border: "none",
                     borderRadius: "8px",
-                    padding: "8px",
+                    padding: "6px",
                     cursor: "pointer",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
                     alignItems: "center",
                     justifyContent: "center"
                 }}
                 aria-label="Menú de navegación"
             >
-                {sidebarAbierto ? <XMarkIcon style={{ width: "22px", height: "22px" }} /> : <Bars3Icon style={{ width: "22px", height: "22px" }} />}
+                {sidebarAbierto ? <XMarkIcon style={{ width: "24px", height: "24px" }} /> : <Bars3Icon style={{ width: "24px", height: "24px" }} />}
             </button>
 
             {/* ── FONDO OSCURO EN MÓVIL ── */}

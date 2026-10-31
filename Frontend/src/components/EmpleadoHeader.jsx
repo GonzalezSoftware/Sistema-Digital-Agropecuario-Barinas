@@ -68,11 +68,12 @@ export const EmpleadoHeader = ({ vistaActiva, escudo }) => {
                     align-items: center;
                     flex-shrink: 0;
                 }
-                @media (max-width: 768px) {
+                @media (max-width: 992px) {
                     .empleado-header-container {
                         flex-direction: column;
                         align-items: flex-start;
                         gap: 10px;
+                        margin-top: 50px !important; /* 👈 Deja espacio libre para que el botón hamburguesa no tape el título */
                         margin-bottom: 20px;
                     }
                     .empleado-header-title-text {
