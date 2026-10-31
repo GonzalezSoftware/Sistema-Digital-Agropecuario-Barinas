@@ -7,7 +7,7 @@ import autoTable from "jspdf-autotable";
 
 // Importaciones de Assets y Componentes compartidos
 import logo from "../../assets/gobierno.jpg";
-import escudo from "../../assets/logo2.jpg";
+import escudo from "../../assets/logo.jpg";
 import Footer from "../../components/Footer";
 import { NAV_ITEMS } from "../../components/ui/PrediosProduccionUI";
 
@@ -234,7 +234,7 @@ export default function Productores() {
         }
     };
 
-    const GenerarFichaProductor = async (predio) => {
+    const GenerarFichaProductor = (predio) => {
         if (!predio || !predio.caracterizacion_completada) {
             alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
             return;
@@ -249,46 +249,17 @@ export default function Productores() {
         const verdeBarinas = [19, 100, 66];
         const grisOscuro = [40, 40, 40];
 
-        // Función auxiliar para convertir las imágenes importadas a Base64
-        const cargarImagenComoBase64 = (urlAsset) => {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.crossOrigin = "Anonymous";
-                img.onload = () => {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL("image/jpeg"));
-                };
-                img.onerror = (err) => {
-                    console.warn("Error al cargar la imagen del asset:", err);
-                    resolve(null);
-                };
-                img.src = urlAsset;
-            });
-        };
-
         try {
-            // Pasamos las variables importadas al principio del archivo
-            const logoBase64 = await cargarImagenComoBase64(logo);
-            const escudoBase64 = await cargarImagenComoBase64(escudo);
-
-            if (logoBase64) {
-                doc.addImage(logoBase64, "JPEG", 12, 5, 42, 16);
-            }
-            if (escudoBase64) {
-                doc.addImage(escudoBase64, "JPEG", 57, 8, 28, 10);
-            }
+            doc.addImage(logo, "JPEG", 12, 5, 42, 16);
+            doc.addImage(escudo, "PNG", 57, 8, 28, 10); 
         } catch (error) {
-            console.warn("Logos institucionales omitidos:", error);
+            console.warn("Logos institucionales omitidos.");
         }
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7.5);
         doc.setTextColor(...verdeBarinas);
-        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRAS", 204, 10, { align: "right" });
+        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRA", 204, 10, { align: "right" });
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
