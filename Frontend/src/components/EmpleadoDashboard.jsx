@@ -23,7 +23,7 @@ const CustomTreemapContent = (props) => {
                     strokeWidth: 1,
                 }}
             />
-            {width > 60 && height > 30 && (
+            {width > 50 && height > 25 && (
                 <text
                     x={x + width / 2}
                     y={y + height / 2}
@@ -32,11 +32,7 @@ const CustomTreemapContent = (props) => {
                     fill="#F8FAFC"
                     fontSize={10}
                     fontWeight="100"
-                    style={{
-                        pointerEvents: 'none',
-                        textShadow: 'none',
-                        letterSpacing: '0.02em'
-                    }}
+                    style={{ pointerEvents: 'none' }}
                 >
                     {name}
                 </text>
@@ -60,22 +56,22 @@ export default function DashboardEmpleado({
     chartPlaceholder
 }) {
     return (
-        <div className="empleado-dashboard-main-container">
-            {/* ── ESTILOS CSS RESPONSIVE DE CONTENCIÓN ESTRICTA ── */}
+        <div className="empleado-dashboard-wrapper">
+            {/* ── REGLAS CSS ISOLADAS PARA CONTROLAR EL ANCHO MÓVIL EXACTO ── */}
             <style>{`
-                .empleado-dashboard-main-container {
+                .empleado-dashboard-wrapper {
                     width: 100% !important;
                     max-width: 100% !important;
                     margin: 0 auto;
-                    box-sizing: border-box;
-                    padding: 12px;
+                    box-sizing: border-box !important;
+                    padding: 8px;
                     overflow-x: hidden !important;
                 }
                 .empleado-stats-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
                     gap: 16px;
-                    margin-bottom: 24px;
+                    margin-bottom: 20px;
                     width: 100%;
                     box-sizing: border-box;
                 }
@@ -86,27 +82,37 @@ export default function DashboardEmpleado({
                     width: 100%;
                     box-sizing: border-box;
                 }
-                .empleado-chart-box {
+                .empleado-card-container {
                     width: 100% !important;
                     max-width: 100% !important;
                     box-sizing: border-box !important;
-                    overflow: hidden !important;
                     min-width: 0 !important;
+                    overflow: hidden !important;
                 }
-                .empleado-treemap-item {
+                .empleado-treemap-card {
                     grid-column: 1 / -1;
                     width: 100%;
                     box-sizing: border-box;
                 }
+
+                /* 🔹 AJUSTES FORZADOS PARA DISPOSITIVOS MÓVILES (Heredados idénticos a Admin) */
                 @media (max-width: 768px) {
-                    .empleado-dashboard-main-container {
-                        padding: 8px !important;
+                    .empleado-dashboard-wrapper {
+                        padding: 4px !important;
+                    }
+                    .empleado-stats-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 12px !important;
                     }
                     .empleado-charts-grid {
                         grid-template-columns: 1fr !important;
+                        gap: 14px !important;
                     }
-                    .empleado-treemap-item {
+                    .empleado-treemap-card {
                         grid-column: 1 / 1 !important;
+                    }
+                    .empleado-chart-inner {
+                        height: 240px !important;
                     }
                 }
             `}</style>
@@ -126,12 +132,13 @@ export default function DashboardEmpleado({
                 />
             </div>
 
-            {/* ── GRÁFICOS ── */}
+            {/* ── GRÁFICOS RESPONSIVE ── */}
             <div className="empleado-charts-grid">
-                {/* Gráfico 1 - Estatus Legal de la Tierra (Dona) */}
-                <div style={chartCard} className="empleado-chart-box">
+                
+                {/* Gráfico 1 - Estatus Legal */}
+                <div style={chartCard} className="empleado-card-container">
                     <h3 style={chartTitle}>Estatus Legal de la Tierra</h3>
-                    <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
+                    <div className="empleado-chart-inner" style={{ width: '100%', height: 270, marginTop: '14px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -139,7 +146,7 @@ export default function DashboardEmpleado({
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={datosTenencia} cx="50%" cy="45%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value" animationDuration={1000}>
+                                    <Pie data={datosTenencia} cx="50%" cy="45%" innerRadius={48} outerRadius={68} paddingAngle={5} dataKey="value" animationDuration={1000}>
                                         {datosTenencia.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
                                     </Pie>
                                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px' }} />
@@ -151,9 +158,9 @@ export default function DashboardEmpleado({
                 </div>
 
                 {/* Gráfico 2 - Radar (Servicios Básicos) */}
-                <div style={chartCard} className="empleado-chart-box">
+                <div style={chartCard} className="empleado-card-container">
                     <h3 style={chartTitle}>Cobertura de Servicios Básicos (%)</h3>
-                    <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
+                    <div className="empleado-chart-inner" style={{ width: '100%', height: 270, marginTop: '14px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -173,9 +180,9 @@ export default function DashboardEmpleado({
                 </div>
 
                 {/* Gráfico 3 - Vialidad */}
-                <div style={chartCard} className="empleado-chart-box">
+                <div style={chartCard} className="empleado-card-container">
                     <h3 style={chartTitle}>Estado de la Vialidad</h3>
-                    <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
+                    <div className="empleado-chart-inner" style={{ width: '100%', height: 270, marginTop: '14px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -199,10 +206,10 @@ export default function DashboardEmpleado({
                     </div>
                 </div>
 
-                {/* Gráfico 4 - Dispersión: Superficie vs Infraestructura */}
-                <div style={chartCard} className="empleado-chart-box">
+                {/* Gráfico 4 - Dispersión */}
+                <div style={chartCard} className="empleado-card-container">
                     <h3 style={chartTitle}>Relación Superficie vs. Infraestructura</h3>
-                    <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
+                    <div className="empleado-chart-inner" style={{ width: '100%', height: 270, marginTop: '14px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -221,8 +228,8 @@ export default function DashboardEmpleado({
                     </div>
                 </div>
 
-                {/* Gráfico 5 - Treemap de Tenencia de Tierras (Ancho Completo) */}
-                <div style={chartCard} className="empleado-chart-box empleado-treemap-item">
+                {/* Gráfico 5 - Treemap */}
+                <div style={chartCard} className="empleado-card-container empleado-treemap-card">
                     <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
                     <div style={{ width: '100%', height: 320, marginTop: '14px' }}>
                         {cargando ? (
@@ -255,6 +262,7 @@ export default function DashboardEmpleado({
                         )}
                     </div>
                 </div>
+
             </div>
         </div>
     );
