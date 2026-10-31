@@ -11,13 +11,14 @@ export default function AdminCorreo() {
 
     const [form, setForm] = useState({
         usuario: "",
+        correo_actual: "", // <-- NUEVO: Muestra el correo que ya está registrado
         nuevo_correo: "",
         confirmar_correo: ""
     });
 
     const [cargando, setCargando] = useState(false);
 
-    // Cargar el usuario real logueado desde la sesión
+    // Cargar el usuario real logueado desde la sesión y consultar sus datos (incluyendo su correo actual)
     useEffect(() => {
         const sesion = sessionStorage.getItem("usuario_admin");
         if (sesion) {
@@ -25,6 +26,21 @@ export default function AdminCorreo() {
                 const dataAdmin = JSON.parse(sesion);
                 if (dataAdmin && dataAdmin.usuario) {
                     setForm(prev => ({ ...prev, usuario: dataAdmin.usuario }));
+                    
+                    // Opcional: Si guardaste el correo en la sesión, lo cargamos de inmediato
+                    if (dataAdmin.correo) {
+                        setForm(prev => ({ ...prev, correo_actual: dataAdmin.correo }));
+                    } else {
+                        // Si no está en la sesión, consultamos al backend el perfil del admin
+                        fetch(`${API_URL}admin/perfil/?usuario=${dataAdmin.usuario}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.correo) {
+                                    setForm(prev => ({ ...prev, correo_actual: data.correo }));
+                                }
+                            })
+                            .catch(err => console.error("No se pudo obtener el correo actual", err));
+                    }
                 }
             } catch (e) {
                 console.error("Error al leer la sesión del admin", e);
@@ -79,7 +95,23 @@ export default function AdminCorreo() {
                     timer: 2000,
                     showConfirmButton: false
                 });
-                setForm(prev => ({ ...prev, nuevo_correo: "", confirmar_correo: "" }));
+                
+                // Actualizamos el correo actual en pantalla y limpiamos los campos nuevos
+                setForm(prev => ({ 
+                    ...prev, 
+                    correo_actual: prev.nuevo_correo,
+                    nuevo_correo: "", 
+                    confirmar_correo: "" 
+                }));
+
+                // Actualizamos también el sessionStorage si almacena el objeto admin
+                const sesion = sessionStorage.getItem("usuario_admin");
+                if (sesion) {
+                    const dataAdmin = JSON.parse(sesion);
+                    dataAdmin.correo = form.nuevo_correo;
+                    sessionStorage.setItem("usuario_admin", JSON.stringify(dataAdmin));
+                }
+
             } else {
                 Swal.fire({
                     icon: "error",
@@ -114,7 +146,6 @@ export default function AdminCorreo() {
                     grid-template-columns: 1fr 1fr;
                     gap: 8px;
                 }
-                /* En pantallas medianas y teléfonos, se apilan en 1 sola columna */
                 @media (max-width: 900px) {
                     .email-grid {
                         grid-template-columns: 1fr !important;
@@ -142,12 +173,27 @@ export default function AdminCorreo() {
                     </h3>
                 </div>
                 <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px", lineHeight: "1.4" }}>
-                    Actualiza la dirección de correo electrónico institucional asociada para la recuperación de acceso del administrador.
+                    Visualiza y actualiza la dirección de correo electrónico institucional asociada para la recuperación de acceso del administrador.
                 </p>
 
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px", width: "100%", boxSizing: "border-box" }}>
                     
-                    {/* Contenedor responsivo: en móvil la confirmación queda debajo del nuevo correo */}
+                    {/* Campo de Correo Actual (Solo lectura) */}
+                    <div style={{ width: "100%" }}>
+                        <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
+                            Correo Electrónico Actual Registrado
+                        </label>
+                        <input
+                            type="email"
+                            value={form.correo_actual || "Cargando correo..."}
+                            disabled
+                            style={{
+                                width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1",
+                                fontSize: "14px", outline: "none", backgroundColor: "#f1f5f9", color: "#64748b", boxSizing: "border-box", cursor: "not-allowed"
+                            }}
+                        />
+                    </div>
+
                     <div className="email-grid">
                         <div style={{ width: "100%" }}>
                             <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
