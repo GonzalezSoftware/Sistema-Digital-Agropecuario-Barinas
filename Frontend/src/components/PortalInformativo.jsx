@@ -31,7 +31,7 @@ export default function PortalInformativo() {
   const scrollCarrusel = (direccion) => {
     if (carruselRef.current) {
       // Ancho aproximado de la tarjeta (300px de minWidth/ancho + 20px de gap)
-      const anchoTarjeta = 400; 
+      const anchoTarjeta = 300; 
       carruselRef.current.scrollBy({
         left: direccion === "left" ? -anchoTarjeta : anchoTarjeta,
         behavior: "smooth"
