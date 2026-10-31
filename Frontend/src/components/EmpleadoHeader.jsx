@@ -33,9 +33,9 @@ export const EmpleadoHeader = ({ vistaActiva, escudo }) => {
 
     const obtenerSubtitulo = () => {
         if (vistaActiva?.startsWith("produccion")) {
-            return "Empleado • Control de Producción •Barinas";
+            return "Empleado • Control de Producción";
         }
-        return "Empleado • Gestión de Predios • Estado Barinas";
+        return "Empleado • Gestión de Predios";
     };
 
     return (
