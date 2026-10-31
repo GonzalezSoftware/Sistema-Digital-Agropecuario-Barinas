@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const EmpleadoHeader = ({ vistaActiva, escudo, gobierno }) => {
+export const EmpleadoHeader = ({ vistaActiva, escudo }) => {
     const obtenerTitulo = () => {
         switch (vistaActiva) {
             case "inicio":
@@ -27,7 +27,7 @@ export const EmpleadoHeader = ({ vistaActiva, escudo, gobierno }) => {
                 if (vistaActiva?.startsWith("produccion")) {
                     return "Módulo de Producción";
                 }
-                return "Módulo de Empleados";
+                return "Dashboard Predios del Municipio";
         }
     };
 
@@ -45,9 +45,9 @@ export const EmpleadoHeader = ({ vistaActiva, escudo, gobierno }) => {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    margin-bottom: 24px;
+                    margin-bottom: 30px;
                     border-bottom: 1px solid #e2e8f0;
-                    padding-bottom: 12px;
+                    padding-bottom: 10px;
                     width: 100%;
                     box-sizing: border-box;
                     gap: 12px;
@@ -57,16 +57,15 @@ export const EmpleadoHeader = ({ vistaActiva, escudo, gobierno }) => {
                     flex: 1;
                 }
                 .empleado-header-title-text {
-                    font-size: 20px;
+                    font-size: 22px;
                     font-weight: 700;
                     color: #242525;
                     margin: 0;
                     word-break: break-word;
                 }
-                .empleado-header-logos {
+                .empleado-header-logo {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
                     flex-shrink: 0;
                 }
                 @media (max-width: 768px) {
@@ -74,13 +73,10 @@ export const EmpleadoHeader = ({ vistaActiva, escudo, gobierno }) => {
                         flex-direction: column;
                         align-items: flex-start;
                         gap: 10px;
+                        margin-bottom: 20px;
                     }
                     .empleado-header-title-text {
-                        font-size: 18px !important;
-                    }
-                    .empleado-header-logos {
-                        width: 100%;
-                        justify-content: flex-start;
+                        font-size: 19px !important;
                     }
                 }
             `}</style>
@@ -89,25 +85,18 @@ export const EmpleadoHeader = ({ vistaActiva, escudo, gobierno }) => {
                 <h2 className="empleado-header-title-text">
                     {obtenerTitulo()}
                 </h2>
-                <p style={{ margin: "2px 0 0 0", fontSize: "12.5px", color: "#64748b" }}>
+                <p style={{ margin: "0px 0 0 0", fontSize: "13px", color: "#64748b" }}>
                     {obtenerSubtitulo()}
                 </p>
             </div>
 
-            {/* --- LOGOS / ESCUDOS --- */}
-            <div className="empleado-header-logos">
+            {/* --- LOGO / ESCUDO --- */}
+            <div className="empleado-header-logo">
                 {escudo && (
                     <img
                         src={escudo}
                         alt="Logo Escudo"
-                        style={{ height: "36px", objectFit: "contain" }}
-                    />
-                )}
-                {gobierno && (
-                    <img
-                        src={gobierno}
-                        alt="Logo Gobierno"
-                        style={{ height: "42px", objectFit: "contain" }}
+                        style={{ height: "40px", objectFit: "contain" }}
                     />
                 )}
             </div>
