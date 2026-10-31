@@ -55,7 +55,6 @@ import obispos from "../../assets/obispos.jpg";
 import pedraza from "../../assets/pedraza.jpg";
 import rojas from "../../assets/rojas.jpg";
 import sosa from "../../assets/sosa.jpg";
-import AdminCorreo from "../../components/AdminCorreo";
 
 export default function AdminPrediosDashboard() {
 
