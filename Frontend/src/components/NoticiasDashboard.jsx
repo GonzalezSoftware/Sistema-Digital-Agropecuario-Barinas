@@ -46,7 +46,7 @@ export default function NoticiasDashboard() {
                     {/* VISTA 1: REGISTRAR NOTICIA */}
                     {vistaActiva === "registrar" && <NoticiasRegistrar />}
 
-                    {/* VISTA 2: EDITAR / ELIMINAR NOTICIA */}
+                    {/* VISTA 2: ELIMINAR NOTICIA */}
                     {vistaActiva === "gestion" && <NoticiasEditarEliminar />}
                 </div>
             </main>

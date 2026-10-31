@@ -7,10 +7,92 @@ export default function NoticiasRegistrar() {
 
     const [titulo, setTitulo] = useState("");
     const [descripcion, setDescripcion] = useState("");
-    const [autor, setAutor] = useState(""); // <-- NUEVO ESTADO
+    const [autor, setAutor] = useState("");
     const [imagen, setImagen] = useState(null);
     const [cargando, setCargando] = useState(false);
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
+
+    // ── FUNCIÓN DE COMPRESIÓN Y VALIDACIÓN DE IMAGEN ──
+    const manejarSeleccionImagen = (e) => {
+        const archivo = e.target.files[0];
+        if (!archivo) return;
+
+        const LIMITE_MAXIMO = 1 * 1024 * 1024; // 1 MB en bytes
+
+        // Si la imagen original ya pesa menos de 1 MB, se asigna directamente
+        if (archivo.size <= LIMITE_MAXIMO) {
+            setImagen(archivo);
+            return;
+        }
+
+        // Si supera 1 MB, se comprime automáticamente mediante un Canvas
+        const reader = new FileReader();
+        reader.readAsDataURL(archivo);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                let width = img.width;
+                let height = img.height;
+
+                // Redimensionamiento proporcional si las dimensiones superan 1200px
+                const MAX_DIMENSION = 1200;
+                if (width > height && width > MAX_DIMENSION) {
+                    height = Math.round((height * MAX_DIMENSION) / width);
+                    width = MAX_DIMENSION;
+                } else if (height > MAX_DIMENSION) {
+                    width = Math.round((width * MAX_DIMENSION) / height);
+                    height = MAX_DIMENSION;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Exportar la imagen comprimida a formato JPEG al 70% de calidad
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Error al procesar",
+                                text: "No se pudo procesar la imagen seleccionada.",
+                                confirmButtonColor: "#136442"
+                            });
+                            e.target.value = "";
+                            setImagen(null);
+                            return;
+                        }
+
+                        // Verificar si aun después de la compresión supera 1 MB
+                        if (blob.size > LIMITE_MAXIMO) {
+                            Swal.fire({
+                                icon: "warning",
+                                title: "Imagen demasiado pesada",
+                                text: `Incluso tras comprimirla, la imagen supera 1 MB (${(blob.size / (1024 * 1024)).toFixed(2)} MB). Por favor, selecciona una foto más pequeña.`,
+                                confirmButtonColor: "#136442"
+                            });
+                            e.target.value = "";
+                            setImagen(null);
+                            return;
+                        }
+
+                        // Crear archivo optimizado final
+                        const archivoComprimido = new File([blob], archivo.name.replace(/\.[^/.]+$/, ".jpg"), {
+                            type: "image/jpeg",
+                            lastModified: Date.now(),
+                        });
+
+                        setImagen(archivoComprimido);
+                    },
+                    "image/jpeg",
+                    0.70
+                );
+            };
+        };
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -35,7 +117,7 @@ export default function NoticiasRegistrar() {
         const formData = new FormData();
         formData.append("titulo", titulo);
         formData.append("descripcion", descripcion);
-        formData.append("autor", autor || "Redacción"); // <-- ENVIAR AUTOR
+        formData.append("autor", autor || "Redacción");
         if (imagen) {
             formData.append("imagen", imagen);
         }
@@ -62,7 +144,7 @@ export default function NoticiasRegistrar() {
                 setMensaje({ texto: "¡Noticia enviada al administrador para revisión!", tipo: "exito" });
                 setTitulo("");
                 setDescripcion("");
-                setAutor(""); // <-- Limpiar autor
+                setAutor("");
                 setImagen(null);
                 const inputImg = document.getElementById("input-imagen");
                 if (inputImg) inputImg.value = "";
@@ -86,7 +168,6 @@ export default function NoticiasRegistrar() {
             setCargando(false);
         }
     };
-
 
     return (
         <div style={{ background: "#ffffff", padding: "32px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
@@ -159,7 +240,7 @@ export default function NoticiasRegistrar() {
                         id="input-imagen"
                         type="file"
                         accept="image/*"
-                        onChange={(e) => setImagen(e.target.files[0])}
+                        onChange={manejarSeleccionImagen}
                         style={{ display: "none" }}
                     />
                     <label
@@ -183,7 +264,7 @@ export default function NoticiasRegistrar() {
                         Seleccionar Imagen
                     </label>
                     <span style={{ fontSize: "12px", color: "#64748b" }}>
-                        {imagen ? `Archivo seleccionado: ${imagen.name}` : "Formatos aceptados: JPG, PNG, WEBP."}
+                        {imagen ? `Archivo listo: ${imagen.name} (${(imagen.size / 1024).toFixed(0)} KB)` : "Formatos aceptados: JPG, PNG, WEBP (Máx. 1 MB)."}
                     </span>
                 </div>
 
