@@ -15,6 +15,7 @@ export default function AdminConfigPage() {
 
   const [nombre, setNombre] = React.useState("");
   const [usuario, setUsuario] = React.useState("");
+  const [correo, setCorreo] = React.useState(""); // <-- NUEVO: Estado del correo
   const [clave, setClave] = React.useState("");
   const [error, setError] = React.useState("");
   const [exito, setExito] = React.useState("");
@@ -57,7 +58,10 @@ export default function AdminConfigPage() {
 
     if (!usuario.trim()) { setError("Ingresa el usuario del administrador."); return; }
     if (!clave.trim()) { setError("Ingresa la contraseña."); return; }
-    if (!adminRegistrado && !nombre.trim()) { setError("Ingresa el nombre completo."); return; }
+    if (!adminRegistrado) {
+      if (!nombre.trim()) { setError("Ingresa el nombre completo."); return; }
+      if (!correo.trim()) { setError("Ingresa el correo electrónico."); return; } // <-- NUEVO: Validación del correo
+    }
 
     setCargando(true);
     const urlPost = `${API_URL}admin-config/`;
@@ -83,6 +87,7 @@ export default function AdminConfigPage() {
         body: JSON.stringify({
           nombre: nombre.trim(),
           usuario: usuario.trim(),
+          correo: correo.trim(), // <-- NUEVO: Enviamos el correo al backend
           clave: clave
         })
       });
@@ -357,26 +362,48 @@ export default function AdminConfigPage() {
             {/* Formulario */}
             <form onSubmit={manejarAccion}>
 
-              {/* Si no está registrado, pedimos el Nombre Completo */}
+              {/* Si no está registrado, pedimos el Nombre Completo y el Correo */}
               {!adminRegistrado && (
-                <div style={{ marginBottom: "16px" }}>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
-                    Nombre Completo
-                  </label>
-                  <input
-                    type="text"
-                    className="input-login"
-                    value={nombre}
-                    onChange={e => { setNombre(e.target.value); setError(""); }}
-                    placeholder="Ej. Ing. José González"
-                    style={{
-                      width: "100%", padding: "11px 14px",
-                      border: "1.5px solid #e0e0e0", borderRadius: "10px",
-                      fontSize: "14px", fontFamily: "'Poppins', sans-serif",
-                      background: "#fff", color: "#333", boxSizing: "border-box", transition: "all 0.2s",
-                    }}
-                  />
-                </div>
+                <>
+                  <div style={{ marginBottom: "16px" }}>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
+                      Nombre Completo
+                    </label>
+                    <input
+                      type="text"
+                      className="input-login"
+                      value={nombre}
+                      onChange={e => { setNombre(e.target.value); setError(""); }}
+                      placeholder="Ej. Ing. José González"
+                      style={{
+                        width: "100%", padding: "11px 14px",
+                        border: "1.5px solid #e0e0e0", borderRadius: "10px",
+                        fontSize: "14px", fontFamily: "'Poppins', sans-serif",
+                        background: "#fff", color: "#333", boxSizing: "border-box", transition: "all 0.2s",
+                      }}
+                    />
+                  </div>
+
+                  {/* NUEVO CAMPO: Correo Electrónico */}
+                  <div style={{ marginBottom: "16px" }}>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
+                      Correo Electrónico (Recuperación)
+                    </label>
+                    <input
+                      type="email"
+                      className="input-login"
+                      value={correo}
+                      onChange={e => { setCorreo(e.target.value); setError(""); }}
+                      placeholder="admin@barinas.gob.ve"
+                      style={{
+                        width: "100%", padding: "11px 14px",
+                        border: "1.5px solid #e0e0e0", borderRadius: "10px",
+                        fontSize: "14px", fontFamily: "'Poppins', sans-serif",
+                        background: "#fff", color: "#333", boxSizing: "border-box", transition: "all 0.2s",
+                      }}
+                    />
+                  </div>
+                </>
               )}
 
               {/* Usuario */}
