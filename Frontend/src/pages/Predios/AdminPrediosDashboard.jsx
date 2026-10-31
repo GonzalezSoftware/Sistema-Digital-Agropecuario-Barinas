@@ -22,6 +22,7 @@ import AdminBitacora from '../../components/AdminBitacora';
 import AdminNotificacionesNoticias from '../../components/AdminNotificacionesNoticias';
 import AdminConfiguracionContraseña from "../../components/AdminConfiguracionContraseña";
 import AdminContacto from '../../components/AdminContacto';
+import AdminCorreo from '../../components/AdminCorreo';
 import { AdminReportesGenerales } from '../../components/AdminReportesGenerales';
 
 // Estilos UI
@@ -54,6 +55,7 @@ import obispos from "../../assets/obispos.jpg";
 import pedraza from "../../assets/pedraza.jpg";
 import rojas from "../../assets/rojas.jpg";
 import sosa from "../../assets/sosa.jpg";
+import AdminCorreo from "../../components/AdminCorreo";
 
 export default function AdminPrediosDashboard() {
 
@@ -341,7 +343,7 @@ export default function AdminPrediosDashboard() {
                     ) : vistaActiva === "bitacora" ? (
                         <AdminBitacora />
                     ) : vistaActiva === "cambiar_correo_admin" ? (
-                        <AdminBitacora />
+                        <AdminCorreo />
                     ):(
                         <div>
                             <p>Selecciona una sección válida en el menú lateral.</p>
