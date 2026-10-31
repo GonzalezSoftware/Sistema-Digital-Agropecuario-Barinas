@@ -7,7 +7,7 @@ import autoTable from "jspdf-autotable";
 
 // Importaciones de Assets y Componentes compartidos
 import logo from "../../assets/gobierno.jpg";
-import escudo from "../../assets/logo2";
+import escudo from "../../assets/logo2.jpg";
 import Footer from "../../components/Footer";
 import { NAV_ITEMS } from "../../components/ui/PrediosProduccionUI";
 
