@@ -340,7 +340,9 @@ export default function AdminPrediosDashboard() {
                         <AdminReportesGenerales listaPredios={listaPredios} />
                     ) : vistaActiva === "bitacora" ? (
                         <AdminBitacora />
-                    ) : (
+                    ) : vistaActiva === "cambiar_correo_admin" ? (
+                        <AdminBitacora />
+                    ):(
                         <div>
                             <p>Selecciona una sección válida en el menú lateral.</p>
                         </div>
