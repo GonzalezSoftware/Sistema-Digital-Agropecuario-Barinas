@@ -4,6 +4,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import logo from "../assets/gobierno.jpg";
+import escudo from "../assets/logo2.jpg";
 
 // ── CONSTANTES Y ESTILOS INTEGRADOS ──────────────────────────
 const inputStyle = {
@@ -281,8 +283,8 @@ const generarObjetoPDF = (predio) => {
         const grisOscuro = [40, 40, 40];
 
         try {
-            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-            doc.addImage("/src/assets/logo2.jpg", "JPEG", 57, 8, 28, 10);
+            doc.addImage(logo, "JPEG", 12, 5, 42, 16);
+            doc.addImage(escudo, "PNG", 57, 8, 28, 10); 
         } catch (error) {
             console.warn("Logos institucionales omitidos.");
         }
