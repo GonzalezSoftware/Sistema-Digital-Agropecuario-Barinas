@@ -148,7 +148,8 @@ export const EmpleadoSidebar = ({
                     boxSizing: "border-box",
                     overflow: "hidden",
                     zIndex: 1000,
-                    transition: "transform 0.3s ease-in-out"
+                    transition: "transform 0.3s ease-in-out",
+                    flexShrink: 0
                 }}
             >
                 {/* Encabezado: Info del Empleado y Predio Seleccionado */}
@@ -233,7 +234,7 @@ export const EmpleadoSidebar = ({
                     display: "flex",
                     flexDirection: "column",
                     gap: "4px",
-                    flex: "0 1 auto",
+                    flex: "1",
                     overflowY: "auto",
                     paddingRight: "4px",
                     scrollbarWidth: "thin"
