@@ -6,8 +6,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
 // Importaciones de Assets y Componentes compartidos
-import logo from "../../assets/gobierno.jpg";
-import escudo from "../../assets/logo.jpg";
+
 import Footer from "../../components/Footer";
 import { NAV_ITEMS } from "../../components/ui/PrediosProduccionUI";
 
@@ -250,8 +249,8 @@ export default function Productores() {
         const grisOscuro = [40, 40, 40];
 
         try {
-            doc.addImage(logo, "JPEG", 12, 5, 42, 16);
-            doc.addImage(escudo, "PNG", 57, 8, 28, 10); 
+            doc.addImage("/src/assets/logo2.jpg", "JPEG", 12, 5, 22, 16);
+            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
         } catch (error) {
             console.warn("Logos institucionales omitidos.");
         }
