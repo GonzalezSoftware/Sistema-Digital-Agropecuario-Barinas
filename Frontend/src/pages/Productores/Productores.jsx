@@ -250,8 +250,8 @@ export default function Productores() {
         const grisOscuro = [40, 40, 40];
 
         try {
-            doc.addImage("/src/assets/logo2.jpg", "JPEG", 12, 5, 22, 16);
-            doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
+             doc.addImage(logo, "JPEG", 12, 5, 42, 16);
+             doc.addImage(escudo, "PNG", 57, 8, 28, 10); 
         } catch (error) {
             console.warn("Logos institucionales omitidos.");
         }
