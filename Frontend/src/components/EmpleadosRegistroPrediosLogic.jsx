@@ -245,7 +245,7 @@ export function useEmpleadosRegistroPrediosLogic({ formData, setFormData, setErr
 
         // Cintillo institucional superior
         try {
-            doc.addImage("/src/assets/logo.png", "PNG", 12, 5, 22, 16);
+            doc.addImage("/src/assets/logo2.jpg", "JPEG", 12, 5, 22, 16);
             doc.addImage("/src/assets/gobierno.jpg", "JPEG", 37, 5, 28, 16);
         } catch (error) {
             console.warn("No se pudieron cargar las imágenes de los logos en el PDF.", error);

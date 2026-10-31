@@ -282,7 +282,7 @@ const generarObjetoPDF = (predio) => {
 
         try {
             doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-            doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
+            doc.addImage("/src/assets/logo2.jpg", "JPEG", 57, 8, 28, 10);
         } catch (error) {
             console.warn("Logos institucionales omitidos.");
         }
