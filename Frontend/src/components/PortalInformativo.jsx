@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function PortalInformativo() {
+  // URL del servidor backend en AWS con HTTPS
+  const API_URL = "https://3.145.179.35.nip.io/api/";
+
   const [noticias, setNoticias] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [noticiaSeleccionada, setNoticiaSeleccionada] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/noticias/")
+    fetch(`${API_URL}noticias/`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -52,7 +55,7 @@ export default function PortalInformativo() {
 
           <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
 
-            {/* BOTÓN IZQUIERDA (Oculto en móviles pequeños si estorba, o ajustado) */}
+            {/* BOTÓN IZQUIERDA */}
             <button className="carrusel-btn" style={navButtonStyle("left")}> &lt; </button>
 
             {/* CONTENEDOR DE NOTICIAS */}
@@ -240,7 +243,7 @@ export default function PortalInformativo() {
       <style>{`
         @media (max-width: 768px) {
           .carrusel-btn {
-            display: none !important; /* Ocultar botones laterales en móviles para priorizar el gesto táctil de deslizar */
+            display: none !important;
           }
         }
         .tarjeta-noticia:hover {
