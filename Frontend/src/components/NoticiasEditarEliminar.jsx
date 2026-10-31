@@ -32,7 +32,7 @@ export default function NoticiasEditarEliminar() {
         obtenerNoticias();
     }, []);
 
-    // Función para eliminar noticia con SweetAlert2
+    // Función para eliminar noticia con SweetAlert2 y recarga automática
     const eliminarNoticia = async (id) => {
         const result = await Swal.fire({
             title: "¿Estás seguro?",
@@ -53,14 +53,14 @@ export default function NoticiasEditarEliminar() {
             });
 
             if (respuesta.ok) {
-                setNoticias(noticias.filter((n) => n.id !== id));
-
                 Swal.fire({
                     icon: "success",
                     title: "¡Eliminado!",
                     text: "Noticia eliminada correctamente.",
                     timer: 2000,
                     showConfirmButton: false
+                }).then(() => {
+                    window.location.reload();
                 });
             } else {
                 Swal.fire({
