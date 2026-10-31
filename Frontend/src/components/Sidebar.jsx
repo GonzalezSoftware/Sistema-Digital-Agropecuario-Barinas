@@ -39,6 +39,7 @@ export const AdminSidebar = ({
 
     const [configuracionAbierto, setConfiguracionAbierto] = useState(
         vistaActiva === "configuracion" ||
+        vistaActiva === "cambiar_correo_admin" ||
         vistaActiva === "credenciales" ||
         vistaActiva === "bitacora" ||
         vistaActiva === "noticias" ||
@@ -467,6 +468,20 @@ export const AdminSidebar = ({
                                 >
                                     <Cog6ToothIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
                                     <span>Credenciales Admin</span>
+                                </div>
+
+                                <div
+                                    onClick={() => seleccionarVista("cambiar_correo_admin")}
+                                    style={{
+                                        display: "flex", alignItems: "center", gap: "10px",
+                                        padding: "8px 12px", borderRadius: "8px", cursor: "pointer",
+                                        backgroundColor: vistaActiva === "cambiar_correo_admin" ? "rgba(255,255,255,0.15)" : "transparent",
+                                        color: vistaActiva === "cambiar_correo_admin" ? "#ffffff" : "#86efac",
+                                        fontSize: "13px"
+                                    }}
+                                >
+                                    <EnvelopeIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                    <span>Cambiar Correo Admin</span>
                                 </div>
 
                                 <div
