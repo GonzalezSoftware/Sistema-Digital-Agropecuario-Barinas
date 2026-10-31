@@ -6,6 +6,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import Footer from "../../components/Footer";
 import escudo from "../../assets/logo2.jpg";
 import logo from "../../assets/gobierno.jpg";
 
