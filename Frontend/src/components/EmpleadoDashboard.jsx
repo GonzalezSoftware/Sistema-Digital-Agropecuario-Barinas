@@ -23,7 +23,7 @@ const CustomTreemapContent = (props) => {
                     strokeWidth: 1,
                 }}
             />
-            {width > 60 && height > 30 && (
+            {width > 50 && height > 25 && (
                 <text
                     x={x + width / 2}
                     y={y + height / 2}
@@ -57,52 +57,58 @@ export default function DashboardEmpleado({
 }) {
     return (
         <div style={{ 
-            maxWidth: "1100px", 
-            margin: "0 auto", 
             width: "100%", 
+            maxWidth: "100%",
+            margin: "0 auto", 
             boxSizing: "border-box",
-            padding: "10px",
+            padding: "8px",
             overflowX: "hidden"
         }}>
             
             <style>{`
-                .dashboard-wrapper {
+                .dashboard-container {
                     width: 100%;
                     box-sizing: border-box;
                 }
-                .dashboard-grid-stats {
+                .dashboard-stats-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
                     gap: 16px;
                     margin-bottom: 20px;
                     width: 100%;
                     box-sizing: border-box;
                 }
-                .dashboard-grid-charts {
+                .dashboard-charts-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
                     gap: 16px;
                     width: 100%;
                     box-sizing: border-box;
                 }
-                .treemap-card {
+                .dashboard-card-item {
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                    min-width: 0 !important;
+                    overflow: hidden;
+                }
+                .dashboard-treemap-full {
                     grid-column: 1 / -1;
                     width: 100%;
                     box-sizing: border-box;
                 }
                 @media (max-width: 768px) {
-                    .dashboard-grid-charts {
+                    .dashboard-charts-grid {
                         grid-template-columns: 1fr !important;
                     }
-                    .treemap-card {
+                    .dashboard-treemap-full {
                         grid-column: 1 / 1 !important;
                     }
                 }
             `}</style>
 
-            <div className="dashboard-wrapper">
+            <div className="dashboard-container">
                 {/* ── TARJETAS DE ESTADÍSTICAS ── */}
-                <div className="dashboard-grid-stats">
+                <div className="dashboard-stats-grid">
                     <CardStat
                         label="Predios Censados (Municipio)"
                         value={cargando ? <Spinner /> : totalPrediosMunicipio}
@@ -117,9 +123,9 @@ export default function DashboardEmpleado({
                 </div>
 
                 {/* ── GRÁFICOS RESPONSIVE ── */}
-                <div className="dashboard-grid-charts">
+                <div className="dashboard-charts-grid">
                     {/* Gráfico 1 - Estatus Legal */}
-                    <div style={{ ...chartCard, width: "100%", boxSizing: "border-box", minWidth: 0 }}>
+                    <div style={chartCard} className="dashboard-card-item">
                         <h3 style={chartTitle}>Estatus Legal de la Tierra</h3>
                         <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
                             {cargando ? (
@@ -141,7 +147,7 @@ export default function DashboardEmpleado({
                     </div>
 
                     {/* Gráfico 2 - Radar */}
-                    <div style={{ ...chartCard, width: "100%", boxSizing: "border-box", minWidth: 0 }}>
+                    <div style={chartCard} className="dashboard-card-item">
                         <h3 style={chartTitle}>Cobertura de Servicios Básicos (%)</h3>
                         <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
                             {cargando ? (
@@ -163,7 +169,7 @@ export default function DashboardEmpleado({
                     </div>
 
                     {/* Gráfico 3 - Vialidad */}
-                    <div style={{ ...chartCard, width: "100%", boxSizing: "border-box", minWidth: 0 }}>
+                    <div style={chartCard} className="dashboard-card-item">
                         <h3 style={chartTitle}>Estado de la Vialidad</h3>
                         <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
                             {cargando ? (
@@ -190,7 +196,7 @@ export default function DashboardEmpleado({
                     </div>
 
                     {/* Gráfico 4 - Dispersión */}
-                    <div style={{ ...chartCard, width: "100%", boxSizing: "border-box", minWidth: 0 }}>
+                    <div style={chartCard} className="dashboard-card-item">
                         <h3 style={chartTitle}>Relación Superficie vs. Infraestructura</h3>
                         <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
                             {cargando ? (
@@ -212,7 +218,7 @@ export default function DashboardEmpleado({
                     </div>
 
                     {/* Gráfico 5 - Treemap */}
-                    <div style={{ ...chartCard, width: "100%", boxSizing: "border-box", minWidth: 0 }} className="treemap-card">
+                    <div style={chartCard} className="dashboard-card-item dashboard-treemap-full">
                         <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
                         <div style={{ width: '100%', height: 320, marginTop: '14px' }}>
                             {cargando ? (
