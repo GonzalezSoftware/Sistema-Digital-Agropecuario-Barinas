@@ -145,8 +145,26 @@ export default function NotificacionesNoticias({ onActualizarConteo }) {
                             </div>
 
                             {item.imagen && (
-                                <div style={{ width: "100%", overflow: "hidden", borderRadius: "8px" }}>
-                                    <img src={item.imagen} alt="Ilustración propuesta" style={{ width: "100%", maxHeight: "200px", borderRadius: "6px", objectFit: "cover", display: "block" }} />
+                                <div style={{ 
+                                    width: "100%", 
+                                    height: "260px", 
+                                    background: "#0f172a", 
+                                    overflow: "hidden", 
+                                    borderRadius: "8px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center"
+                                }}>
+                                    <img 
+                                        src={item.imagen} 
+                                        alt="Ilustración propuesta" 
+                                        style={{ 
+                                            width: "100%", 
+                                            height: "100%", 
+                                            objectFit: "cover", 
+                                            display: "block" 
+                                        }} 
+                                    />
                                 </div>
                             )}
 
