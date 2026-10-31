@@ -94,7 +94,7 @@ export default function Productores() {
         setBuscando(true);
 
         try {
-            const url = "http://127.0.0.1:8000/api/productores/buscar/" + cedulaCompleta + "/";
+            const url = "https://3.145.179.35.nip.io/api/productores/buscar/" + cedulaCompleta + "/";
             const response = await axios.get(url);
             setResultado(response.data);
         } catch (error) {
@@ -153,7 +153,7 @@ export default function Productores() {
 
         let codigoServidor = "";
         try {
-            const envio = await axios.post("http://127.0.0.1:8000/api/enviar-codigo-correo/", { correo: correoProductor });
+            const envio = await axios.post("https://3.145.179.35.nip.io/api/enviar-codigo-correo/", { correo: correoProductor });
             codigoServidor = envio.data.codigo.toString();
 
             await Swal.fire({
@@ -202,7 +202,7 @@ export default function Productores() {
                 didOpen: () => { Swal.showLoading(); }
             });
 
-            const { data } = await axios.get(`http://127.0.0.1:8000/api/predios/`, {
+            const { data } = await axios.get(`https://3.145.179.35.nip.io/api/predios/`, {
                 params: { cedula: cedulaRif }
             });
 
@@ -259,7 +259,7 @@ export default function Productores() {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7.5);
         doc.setTextColor(...verdeBarinas);
-        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRAS", 204, 10, { align: "right" });
+        doc.text("MINISTERIO DEL PODER POPULAR PARA LA AGRICULTURA Y TIERRA", 204, 10, { align: "right" });
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7);
@@ -532,7 +532,7 @@ export default function Productores() {
             doc.setDrawColor(220, 220, 220);
             doc.setLineWidth(0.3);
             doc.line(12, 268, 204, 268);
-            doc.text("Ficha Técnica Integral de Caracterización — UTMPPAPT.", 12, 272);
+            doc.text("Ficha Técnica Integral de Caracterización — MPPAT.", 12, 272);
             doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
         }
 
