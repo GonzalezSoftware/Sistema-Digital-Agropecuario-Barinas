@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/gobierno.jpg";
-import escudo from "../../assets/logo2.jpg";
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import Footer from "../../components/Footer";
-import escudo from "../../assets/logo2.jpg";
+
+// Importaciones de Assets y Componentes compartidos
 import logo from "../../assets/gobierno.jpg";
-
-import {
-  NAV_ITEMS,
-} from "../../components/ui/PrediosProduccionUI";
-
+import escudo from "../../assets/logo2.jpg";
+import Footer from "../../components/Footer";
+import { NAV_ITEMS } from "../../components/ui/PrediosProduccionUI";
 
 // 1. COMPONENTE SPINNER
 const Spinner = ({ color = "#136442" }) => {
