@@ -1,17 +1,37 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Swal from "sweetalert2";
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
 
-export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, listaPredios) => {
+export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, mesFiltro, anioFiltro, listaPredios) => {
     if (!sistemaFiltro) {
         Swal.fire({ icon: "warning", title: "Sistema requerido", text: "Debe seleccionar un sistema de producción animal.", confirmButtonColor: "#136442" });
         return;
     }
 
     let prediosFiltrados = listaPredios.filter(p => {
+        // 1. Filtrar por municipio
         const cumpleMun = municipioFiltro ? p.municipio?.toLowerCase() === municipioFiltro.toLowerCase() : true;
+        if (!cumpleMun) return false;
+
+        // 2. Filtrar por fecha exacta (`fecha_registro`)
+        const rawFecha = p.fecha_registro || p.fecha_creacion || p.fecha;
+        if (!rawFecha) return false;
+
+        const fechaPredio = new Date(rawFecha);
+        if (isNaN(fechaPredio.getTime())) return false;
+
+        const anioPredio = fechaPredio.getFullYear().toString();
+        const mesPredio = (fechaPredio.getMonth() + 1).toString();
+
+        const cumpleAnio = !anioFiltro || anioPredio === anioFiltro.toString().trim();
+        const cumpleMes = !mesFiltro || mesPredio === mesFiltro.toString().trim();
+
+        if (!cumpleAnio || !cumpleMes) return false;
+
+        // 3. Filtrar por existencia animal y sistema seleccionado
         const animales = p.existencia_animal || {};
-        
         let encontrado = false;
         Object.keys(animales).forEach(k => {
             if (k.startsWith("capacidad") && animales[k]?.sistemas && Array.isArray(animales[k].sistemas)) {
@@ -20,7 +40,7 @@ export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, 
                 }
             }
         });
-        return cumpleMun && encontrado;
+        return encontrado;
     });
 
     let datosProcesados = prediosFiltrados.map(p => {
@@ -34,7 +54,6 @@ export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, 
                 const val = Number(cap.leche_diaria || cap.carne_anual || cap.partos_anuales || cap.reproductores || 1);
                 metricaPrincipal += val;
                 
-                // Extraer detalles de producción de este sistema si existen
                 if (cap.leche_diaria) sistemasDetalle.push(`Leche Diaria: ${cap.leche_diaria} L`);
                 if (cap.carne_anual) sistemasDetalle.push(`Carne Anual: ${cap.carne_anual} Kg`);
                 if (cap.partos_anuales) sistemasDetalle.push(`Partos Anuales: ${cap.partos_anuales}`);
@@ -53,7 +72,12 @@ export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, 
     datosProcesados.sort((a, b) => b.metricaPrincipal - a.metricaPrincipal);
 
     if (datosProcesados.length === 0) {
-        Swal.fire({ icon: "info", title: "Sin registros", text: "No se encontraron predios asociados al sistema de producción seleccionado.", confirmButtonColor: "#136442" });
+        Swal.fire({ 
+            icon: "info", 
+            title: "Sin registros", 
+            text: `No se encontraron predios asociados al sistema "${sistemaFiltro}" ${municipioFiltro ? `en el municipio "${municipioFiltro}"` : 'en general'} para ${mesFiltro ? `el mes seleccionado` : 'todos los meses'} del año ${anioFiltro || 'especificado'}.`, 
+            confirmButtonColor: "#136442" 
+        });
         return;
     }
 
@@ -64,8 +88,8 @@ export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, 
 
     // ── CINTILLO INSTITUCIONAL UNIFICADO ──
     try {
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
+        doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+        doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("Logos institucionales omitidos.");
     }
@@ -90,9 +114,9 @@ export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, 
     doc.setTextColor(...verdeBarinas);
     doc.text(`REPORTE GENERAL DE SISTEMA PRODUCTIVO: (${sistemaFiltro.toUpperCase()})`, 12, 33);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(80, 80, 80);
-    doc.text(`Municipio: ${municipioFiltro || "Todos los municipios"}`, 12, 38);
+    doc.text(`Municipio: ${municipioFiltro || "Todos los municipios"} | Período: ${mesFiltro ? `Mes ${mesFiltro} /` : 'Todos los meses'} Año ${anioFiltro}`, 12, 38);
 
     // ── CONSTRUCCIÓN DE LA TABLA ──
     let bodyTabla = [];
@@ -101,7 +125,6 @@ export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, 
         const p = item.predio;
         const prod = p.productor || {};
         
-        // Fila principal verde claro con celdas organizadas
         bodyTabla.push([
             {
                 content: `#${index + 1}`,
@@ -129,7 +152,6 @@ export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, 
             }
         ]);
 
-        // Filas internas blancas con los detalles del sistema
         item.sistemasDetalle.forEach(det => {
             bodyTabla.push([
                 { content: "", styles: { fillColor: [255, 255, 255] } },
@@ -176,5 +198,5 @@ export const generarPDFReporteSistemasAnimal = (municipioFiltro, sistemaFiltro, 
         doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
     }
 
-    doc.save(`Reporte_Sistema_Animal_${sistemaFiltro}.pdf`);
+    doc.save(`Reporte_Sistema_Animal_${sistemaFiltro}_${municipioFiltro || "General"}_${anioFiltro}.pdf`);
 };

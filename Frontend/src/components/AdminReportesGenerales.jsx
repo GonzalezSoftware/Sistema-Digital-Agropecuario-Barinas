@@ -77,7 +77,9 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     // 5. Estados para Reporte General Pecuario
     const [filtroAnimal, setFiltroAnimal] = useState({ municipio: "", especie: "", mes: "", anio: "2026" });
 
-    const [filtroSistemasAnimal, setFiltroSistemasAnimal] = useState({ municipio: "", sistema: "" });
+    // 6. Estados para Reporte General Sistemas de Producción Animal
+    const [filtroSistemasAnimal, setFiltroSistemasAnimal] = useState({ municipio: "", sistema: "", mes: "", anio: "2026" });
+
     const [filtroVegetal, setFiltroVegetal] = useState({ municipio: "", rubro: "" });
 
     const handleExportarPredios = (e) => {
@@ -107,7 +109,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
     const handleExportarReporteSistemasAnimal = (e) => {
         e.preventDefault();
-        generarPDFReporteSistemasAnimal(filtroSistemasAnimal.municipio, filtroSistemasAnimal.sistema, listaPredios);
+        generarPDFReporteSistemasAnimal(filtroSistemasAnimal.municipio, filtroSistemasAnimal.sistema, filtroSistemasAnimal.mes, filtroSistemasAnimal.anio, listaPredios);
     };
 
     const handleExportarReporteVegetal = (e) => {
@@ -334,7 +336,6 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 {ESPECES_ANIMALES.map((esp, i) => <option key={i} value={esp}>{esp}</option>)}
                             </select>
 
-                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
                                 <div>
                                     <label style={selectLabelStyle}>Mes:</label>
@@ -370,7 +371,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                             <ShieldCheckIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>6. Reporte General Sistemas de Producción Animal</h4>
                         </div>
-                        <p style={cardDescStyle}>Filtra por sistema productivo (Cría, Ceba, etc.) y municipio, ordenados por rendimiento/volumen.</p>
+                        <p style={cardDescStyle}>Filtra por sistema productivo, municipio y período, ordenados por rendimiento/volumen.</p>
                         
                         <div style={selectContainerStyle}>
                             <label style={selectLabelStyle}>Seleccione el Municipio:</label>
@@ -384,6 +385,28 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 <option value="">Seleccione un sistema...</option>
                                 {SISTEMAS_PRODUCCION_ANIMAL.map((sis, i) => <option key={i} value={sis}>{sis}</option>)}
                             </select>
+
+                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
+                                <div>
+                                    <label style={selectLabelStyle}>Mes:</label>
+                                    <select value={filtroSistemasAnimal.mes} onChange={(e) => setFiltroSistemasAnimal({...filtroSistemasAnimal, mes: e.target.value})} style={selectStyle}>
+                                        <option value="">Todos...</option>
+                                        {MESES.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={selectLabelStyle}>Año (≥ 2026):</label>
+                                    <input 
+                                        type="number" 
+                                        min="2026" 
+                                        value={filtroSistemasAnimal.anio} 
+                                        onChange={(e) => setFiltroSistemasAnimal({...filtroSistemasAnimal, anio: e.target.value})} 
+                                        style={selectStyle} 
+                                        placeholder="2026"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button onClick={handleExportarReporteSistemasAnimal} style={buttonStyle}>
