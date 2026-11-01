@@ -80,9 +80,6 @@ export default function EmpleadoDashboard() {
 
     const cambiarDueñoPredio = async (predioSeleccionado) => {
         try {
-            console.log("Enviando petición para el predio ID:", predioSeleccionado.id_predio);
-
-            // 1. Mostramos la alerta de carga (Swal.showLoading)
             Swal.fire({
                 title: "Procesando...",
                 text: "Actualizando el estado del predio, por favor espere.",
@@ -97,8 +94,6 @@ export default function EmpleadoDashboard() {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Si usas token, desbanca la línea de abajo y pon tu token:
-                    // 'Authorization': `Bearer ${localStorage.getItem('token')}` 
                 },
                 body: JSON.stringify({
                     estado: 'inactivo',
@@ -106,15 +101,11 @@ export default function EmpleadoDashboard() {
                 })
             });
 
-            console.log("Código de respuesta del servidor:", response.status);
-
             if (!response.ok) {
                 const errorTexto = await response.text();
-                console.error("Detalle del error del servidor:", errorTexto);
                 throw new Error("No se pudo procesar la solicitud (Error " + response.status + ")");
             }
 
-            // 2. Mostramos el mensaje de éxito (esto reemplazará automáticamente al de carga)
             await Swal.fire({
                 title: "¡Predio Inhabilitado!",
                 text: "El predio ha sido marcado como inactivo correctamente.",
@@ -122,11 +113,9 @@ export default function EmpleadoDashboard() {
                 confirmButtonColor: "#136442"
             });
 
-            // Recargamos la página para que se refleje el cambio de inmediato
             window.location.reload();
 
         } catch (error) {
-            console.error("Error en cambio de dueño:", error);
             Swal.fire({
                 title: "Error",
                 text: error.message || "No se pudo completar la acción.",
@@ -136,7 +125,6 @@ export default function EmpleadoDashboard() {
         }
     };
 
-    // ── AQUÍ PUEDES COLOCARLO ──
     useEffect(() => {
         if (municipioEmpleado) {
             sessionStorage.setItem("municipio_empleado", municipioEmpleado);
@@ -213,8 +201,20 @@ export default function EmpleadoDashboard() {
     const [camposBloqueados, setCamposBloqueados] = useState({});
     const [prefijoCedula, setPrefijoCedula] = useState("V-");
 
+    // 🔹 Diccionario completo con las Parroquias de los 12 Municipios del Estado Barinas
     const PARROQUIAS_POR_MUNICIPIO = {
-        "Barinas": ["Catedral", "Alto Barinas", "Manuel Palacio Fajardo", "San Juan de Guanay", "Torunos"],
+        "Alberto Arvelo Torrealba": ["Sabaneta", "Rodriguez Domínguez"],
+        "Andrés Eloy Blanco": ["El Cantón", "Santa Cruz de Guacas", "Puerto Vivas"],
+        "Antonio José de Sucre": ["Ticoporo", "Andrés Bello", "Nicolás Pulido"],
+        "Arismendi": ["Arismendi", "Guadarrama", "La Unión", "San Antonio"],
+        "Barinas": ["Catedral", "Alto Barinas", "Manuel Palacio Fajardo", "San Juan de Guanay", "Torunos", "El Carmen", "San Silvestre", "Santa Inés", "Santa Lucía", "Juan Antonio Rodríguez Domínguez"],
+        "Bolívar": ["Barinitas", "Altamira de Cáceres", "Calderas"],
+        "Cruz Paredes": ["Barrancas", "El Socorro", "Masparrito"],
+        "Ezequiel Zamora": ["Santa Bárbara", "Ramón Ignacio Méndez", "José Ignacio del Pumar", "Santa Rosa"],
+        "Obispos": ["Obispos", "El Real", "La Luz", "Los Guasimitos"],
+        "Pedraza": ["Ciudad Bolivia", "Ignacio Briceño", "José Félix Ribas", "Páez"],
+        "Rojas": ["Libertad", "Dolores", "Palacios Fajardo", "Santa Rosa", "Simón Bolívar"],
+        "Sosa": ["Ciudad de Nutrias", "El Regalo", "Puerto Nutrias", "Santa Lucía"]
     };
 
     const manejarCambio = (e) => {
@@ -237,7 +237,7 @@ export default function EmpleadoDashboard() {
         (predio) => predio.municipio === municipioEmpleado
     );
 
-    // 🔹 AQUÍ INTEGRAMOS EL HOOK DE HISTORIAL (Reemplaza las funciones locales vacías)
+    // 🔹 Integración del Hook de Historial
     const {
         busqueda: busquedaHistorial,
         setBusqueda: setBusquedaHistorial,
@@ -280,25 +280,20 @@ export default function EmpleadoDashboard() {
     // ── AGRUPAR PREDIOS POR PARROQUIA PARA EL EMPLEADO ──
     const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
     
-    // Creamos un objeto o acumulador con las parroquias del municipio en 0
     const conteoParroquias = {};
     parroquiasDelMunicipio.forEach(parroquia => {
         conteoParroquias[parroquia] = 0;
     });
 
-    // Contamos los predios reales que pertenecen a cada parroquia
     prediosMunicipio.forEach(predio => {
-        // Normalizamos el texto de la parroquia del predio para evitar errores de mayúsculas/espacios
         const parroquiaPredio = predio.parroquia ? predio.parroquia.trim() : "";
         if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
             conteoParroquias[parroquiaPredio] += 1;
         } else if (parroquiaPredio) {
-            // Si viene una parroquia escrita distinta pero existe, la sumamos igual
             conteoParroquias[parroquiaPredio] = (conteoParroquias[parroquiaPredio] || 0) + 1;
         }
     });
 
-    // Transformamos el objeto en un arreglo compatible con Recharts [{ name: "Parroquia", cantidad: X }, ...]
     const datosGraficoParroquias = Object.keys(conteoParroquias).length > 0 
         ? Object.keys(conteoParroquias).map(parroquia => ({
             name: parroquia,
@@ -340,7 +335,6 @@ export default function EmpleadoDashboard() {
                                 municipiosCubiertos={1}
                                 totalMunicipiosBarinas={1}
                                 listaPredios={prediosMunicipio}
-                                // 🔹 Aquí pasamos el arreglo agrupado por parroquias
                                 datosGrafico={datosGraficoParroquias}
                                 datosTenencia={datosTenenciaMunicipio}
                                 datosServicios={datosServiciosMunicipio}
@@ -349,7 +343,6 @@ export default function EmpleadoDashboard() {
                                 datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p.superficie || 0), infraestructura: Object.values(p.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
                                 datosLegales={datosLegalesMunicipio}
                                 chartCard={chartCard}
-                                // 🔹 Cambiamos dinámicamente el título según el municipio del empleado
                                 chartTitle={`Predios por Parroquia (${municipioEmpleado || "Municipio"})`}
                                 chartPlaceholder={chartPlaceholder}
                                 Spinner={Spinner}
@@ -505,7 +498,7 @@ export default function EmpleadoDashboard() {
                     ) : vistaActiva === "produccion_caracterizacion" ? (
                         <div>
                             <FormCaracterizacion
-                                modo="caracterizacion" // 🔹 Activa el flujo completo con validación WhatsApp
+                                modo="caracterizacion"
                                 predioActivo={predioActivo}
                                 rubrosVegetales={rubrosVegetales}
                                 setRubrosVegetales={setRubrosVegetales}
@@ -519,7 +512,7 @@ export default function EmpleadoDashboard() {
                     ) : vistaActiva === "produccion_actualizacion" ? (
                         <div>
                             <FormCaracterizacion
-                                modo="actualizacion" // 🔹 Activa la precarga de datos y el guardado directo sin WhatsApp
+                                modo="actualizacion"
                                 predioActivo={predioActivo}
                                 rubrosVegetales={rubrosVegetales}
                                 setRubrosVegetales={setRubrosVegetales}
