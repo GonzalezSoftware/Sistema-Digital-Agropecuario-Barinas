@@ -82,7 +82,6 @@ export default function EmpleadoDashboard() {
         try {
             console.log("Enviando petición para el predio ID:", predioSeleccionado.id_predio);
 
-            // 1. Mostramos la alerta de carga (Swal.showLoading)
             Swal.fire({
                 title: "Procesando...",
                 text: "Actualizando el estado del predio, por favor espere.",
@@ -97,8 +96,6 @@ export default function EmpleadoDashboard() {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Si usas token, desbanca la línea de abajo y pon tu token:
-                    // 'Authorization': `Bearer ${localStorage.getItem('token')}` 
                 },
                 body: JSON.stringify({
                     estado: 'inactivo',
@@ -114,7 +111,6 @@ export default function EmpleadoDashboard() {
                 throw new Error("No se pudo procesar la solicitud (Error " + response.status + ")");
             }
 
-            // 2. Mostramos el mensaje de éxito (esto reemplazará automáticamente al de carga)
             await Swal.fire({
                 title: "¡Predio Inhabilitado!",
                 text: "El predio ha sido marcado como inactivo correctamente.",
@@ -122,7 +118,6 @@ export default function EmpleadoDashboard() {
                 confirmButtonColor: "#136442"
             });
 
-            // Recargamos la página para que se refleje el cambio de inmediato
             window.location.reload();
 
         } catch (error) {
@@ -136,7 +131,6 @@ export default function EmpleadoDashboard() {
         }
     };
 
-    // ── AQUÍ PUEDES COLOCARLO ──
     useEffect(() => {
         if (municipioEmpleado) {
             sessionStorage.setItem("municipio_empleado", municipioEmpleado);
@@ -190,19 +184,9 @@ export default function EmpleadoDashboard() {
         servicios: [],
         vialidad: "Regular",
         infraestructura: {
-            corrales: 0,
-            galpones: 0,
-            vaqueras: 0,
-            cochineras: 0,
-            silos: 0,
-            caballerizas: 0,
-            feedlot: 0,
-            lagunas: 0,
-            salas_ordeno: 0,
-            queseras: 0,
-            casas: 0,
-            trapiches: 0,
-            establos: 0
+            corrales: 0, galpones: 0, vaqueras: 0, cochineras: 0, silos: 0,
+            caballerizas: 0, feedlot: 0, lagunas: 0, salas_ordeno: 0,
+            queseras: 0, casas: 0, trapiches: 0, establos: 0
         },
         tipo_explotacion: "Extensivo",
         sistemas_registro: []
@@ -213,7 +197,6 @@ export default function EmpleadoDashboard() {
     const [camposBloqueados, setCamposBloqueados] = useState({});
     const [prefijoCedula, setPrefijoCedula] = useState("V-");
 
-    // DICCIONARIO COMPLETO Y CORREGIDO DE LOS 12 MUNICIPIOS CON SUS PARROQUIAS
     const PARROQUIAS_POR_MUNICIPIO = useMemo(() => ({
         "Alberto Arvelo Torrealba": ["Sabaneta", "Rodriguez Domínguez"],
         "Andrés Eloy Blanco": ["El Cantón", "Santa Cruz de Guacas", "Puerto Vivas"],
@@ -244,25 +227,13 @@ export default function EmpleadoDashboard() {
     };
     const esFormularioValido = () => true;
 
-    // 🔹 FILTRADO CON PRUEBAS DE DIAGNÓSTICO INTERNAS
+    // 🔹 FILTRADO DE PREDIOS
     const prediosMunicipio = useMemo(() => {
-        try {
-            console.log("[DEPURACIÓN] municipioEmpleado actual:", municipioEmpleado);
-            console.log("[DEPURACIÓN] listaPredios total recibida:", listaPredios);
-            if (!Array.isArray(listaPredios)) {
-                console.error("[ERROR DIAGNÓSTICO] listaPredios no es un arreglo válido:", listaPredios);
-                return [];
-            }
-            const filtrados = listaPredios.filter((predio) => predio && predio.municipio === municipioEmpleado);
-            console.log("[DEPURACIÓN] prediosMunicipio filtrados exitosamente:", filtrados);
-            return filtrados;
-        } catch (err) {
-            console.error("[ERROR CRÍTICO DIAGNÓSTICO] Falló el filtro de prediosMunicipio:", err);
-            return [];
-        }
+        if (!Array.isArray(listaPredios)) return [];
+        return listaPredios.filter((predio) => predio && predio.municipio === municipioEmpleado);
     }, [listaPredios, municipioEmpleado]);
 
-    // 🔹 AQUÍ INTEGRAMOS EL HOOK DE HISTORIAL
+    // 🔹 HOOK DE HISTORIAL
     const {
         busqueda: busquedaHistorial,
         setBusqueda: setBusquedaHistorial,
@@ -302,21 +273,21 @@ export default function EmpleadoDashboard() {
         0
     );
 
-    // ── AGRUPAR PREDIOS POR PARROQUIA CON PRUEBAS DE DIAGNÓSTICO INTERNAS ──
+    // ── CÁLCULO DE PARROQUIAS PARA EL GRÁFICO (CON PRUEBA VISUAL DE DIAGNÓSTICO) ──
+    const [errorCalculoParroquias, setErrorCalculoParroquias] = useState(null);
+
     const datosGraficoParroquias = useMemo(() => {
         try {
-            console.log("[DEPURACIÓN GRÁFICO] Calculando parroquias para el municipio:", municipioEmpleado);
+            setErrorCalculoParroquias(null);
             const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
-            console.log("[DEPURACIÓN GRÁFICO] Parroquias base encontradas:", parroquiasDelMunicipio);
-
+            
             const conteoParroquias = {};
             parroquiasDelMunicipio.forEach(parroquia => {
                 conteoParroquias[parroquia] = 0;
             });
 
-            prediosMunicipio.forEach((predio, index) => {
+            prediosMunicipio.forEach((predio) => {
                 const parroquiaPredio = predio?.parroquia ? String(predio.parroquia).trim() : "";
-                console.log(`[DEPURACIÓN GRÁFICO] Predio [${index}] -> parroquia registrada:`, parroquiaPredio);
                 if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
                     conteoParroquias[parroquiaPredio] += 1;
                 } else if (parroquiaPredio) {
@@ -329,13 +300,13 @@ export default function EmpleadoDashboard() {
                 cantidad: conteoParroquias[parroquia]
             }));
 
-            console.log("[DEPURACIÓN GRÁFICO] Resultado final de parroquias para Recharts:", resultado);
-            return resultado.length > 0 ? resultado : [{ name: municipioEmpleado || "Sin Parroquias", cantidad: totalPrediosMunicipio }];
+            return resultado;
         } catch (err) {
-            console.error("[ERROR CRÍTICO DIAGNÓSTICO] Falló el cálculo de datosGraficoParroquias:", err);
-            return [{ name: municipioEmpleado || "Error", cantidad: totalPrediosMunicipio }];
+            console.error("Error en datosGraficoParroquias:", err);
+            setErrorCalculoParroquias(err.message);
+            return [];
         }
-    }, [municipioEmpleado, prediosMunicipio, totalPrediosMunicipio, PARROQUIAS_POR_MUNICIPIO]);
+    }, [municipioEmpleado, prediosMunicipio, PARROQUIAS_POR_MUNICIPIO]);
 
     const chartCard = {
         backgroundColor: "#ffffff",
@@ -361,6 +332,15 @@ export default function EmpleadoDashboard() {
 
                 <main style={{ padding: "26px 50px", flex: 1, boxSizing: "border-box", overflowY: "auto", position: "relative" }}>
                     <EmpleadoHeader vistaActiva={vistaActiva} escudo={escudo} gobierno={logo} />
+
+                    {/* 🛠️ RECUADRO DE DIAGNÓSTICO VISUAL EN VIVO */}
+                    <div style={{ backgroundColor: "#1e293b", color: "#fff", padding: "12px 18px", borderRadius: "8px", marginBottom: "15px", fontSize: "12px", fontFamily: "monospace" }}>
+                        <strong>[DIAGNÓSTICO EN VIVO]</strong> | 
+                        Municipio Asignado: <code>{municipioEmpleado || "Ninguno"}</code> | 
+                        Predios en este municipio: <code>{prediosMunicipio.length}</code> | 
+                        Parroquias detectadas para el gráfico: <code>{JSON.stringify(datosGraficoParroquias)}</code>
+                        {errorCalculoParroquias && <div style={{ color: "#f87171", marginTop: "4px" }}>⚠️ Error: {errorCalculoParroquias}</div>}
+                    </div>
 
                     {vistaActiva === "inicio" ? (
                         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
