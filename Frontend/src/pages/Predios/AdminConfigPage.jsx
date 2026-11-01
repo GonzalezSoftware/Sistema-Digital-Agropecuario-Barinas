@@ -180,13 +180,14 @@ export default function AdminConfigPage() {
       // Validamos si coincide con el código enviado (el backend o el caché valida)
       if (codigoIngresado.trim() === String(dataCorreo.codigo)) {
         
-        // Alerta previa de código correcto antes de mostrar el modal de la contraseña
+        // Alerta que requiere presionar "OK" antes de avanzar
         await Swal.fire({
           icon: 'success',
           title: '¡Código verificado!',
           text: 'Por favor, establece tu nueva contraseña segura.',
-          timer: 1500,
-          showConfirmButton: false
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#136442',
+          allowOutsideClick: false
         });
 
         // Pedimos la nueva contraseña con validación estricta y ojito
