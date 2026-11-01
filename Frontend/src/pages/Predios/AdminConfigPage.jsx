@@ -250,16 +250,16 @@ export default function AdminConfigPage() {
               const reqUpper = document.getElementById('req-upper');
               const reqSymbol = document.getElementById('req-symbol');
 
-              reqLength.innerHTML = hasLength ? '✔️ Mínimo 8 caracteres' : '❌ Mínimo 8 caracteres';
+              reqLength.innerHTML = hasLength ? ' Mínimo 8 caracteres' : '❌ Mínimo 8 caracteres';
               reqLength.style.color = hasLength ? '#059669' : '#dc2626';
 
-              reqLetter.innerHTML = hasLetter ? '✔️ Al menos una letra' : '❌ Al menos una letra';
+              reqLetter.innerHTML = hasLetter ? ' Al menos una letra' : '❌ Al menos una letra';
               reqLetter.style.color = hasLetter ? '#059669' : '#dc2626';
 
-              reqUpper.innerHTML = hasUpper ? '✔️ Al menos una letra mayúscula' : '❌ Al menos una letra mayúscula';
+              reqUpper.innerHTML = hasUpper ? ' Al menos una letra mayúscula' : '❌ Al menos una letra mayúscula';
               reqUpper.style.color = hasUpper ? '#059669' : '#dc2626';
 
-              reqSymbol.innerHTML = hasSymbol ? '✔️ Al menos un signo especial (!@#$%^&*)' : '❌ Al menos un signo especial (!@#$%^&*)';
+              reqSymbol.innerHTML = hasSymbol ? ' Al menos un signo especial (!@#$%^&*)' : '❌ Al menos un signo especial (!@#$%^&*)';
               reqSymbol.style.color = hasSymbol ? '#059669' : '#dc2626';
 
               if (hasLength && hasLetter && hasUpper && hasSymbol) {
