@@ -277,6 +277,35 @@ export default function EmpleadoDashboard() {
         0
     );
 
+    // ── AGRUPAR PREDIOS POR PARROQUIA PARA EL EMPLEADO ──
+    const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
+    
+    // Creamos un objeto o acumulador con las parroquias del municipio en 0
+    const conteoParroquias = {};
+    parroquiasDelMunicipio.forEach(parroquia => {
+        conteoParroquias[parroquia] = 0;
+    });
+
+    // Contamos los predios reales que pertenecen a cada parroquia
+    prediosMunicipio.forEach(predio => {
+        // Normalizamos el texto de la parroquia del predio para evitar errores de mayúsculas/espacios
+        const parroquiaPredio = predio.parroquia ? predio.parroquia.trim() : "";
+        if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
+            conteoParroquias[parroquiaPredio] += 1;
+        } else if (parroquiaPredio) {
+            // Si viene una parroquia escrita distinta pero existe, la sumamos igual
+            conteoParroquias[parroquiaPredio] = (conteoParroquias[parroquiaPredio] || 0) + 1;
+        }
+    });
+
+    // Transformamos el objeto en un arreglo compatible con Recharts [{ name: "Parroquia", cantidad: X }, ...]
+    const datosGraficoParroquias = Object.keys(conteoParroquias).length > 0 
+        ? Object.keys(conteoParroquias).map(parroquia => ({
+            name: parroquia,
+            cantidad: conteoParroquias[parroquia]
+          }))
+        : [{ name: municipioEmpleado || "Sin Parroquias", cantidad: totalPrediosMunicipio }];
+
     const chartCard = {
         backgroundColor: "#ffffff",
         borderRadius: "14px",
@@ -311,7 +340,8 @@ export default function EmpleadoDashboard() {
                                 municipiosCubiertos={1}
                                 totalMunicipiosBarinas={1}
                                 listaPredios={prediosMunicipio}
-                                datosGrafico={[{ name: municipioEmpleado, cantidad: totalPrediosMunicipio }]}
+                                // 🔹 Aquí pasamos el arreglo agrupado por parroquias
+                                datosGrafico={datosGraficoParroquias}
                                 datosTenencia={datosTenenciaMunicipio}
                                 datosServicios={datosServiciosMunicipio}
                                 datosVialidad={datosVialidadMunicipio}
@@ -319,7 +349,8 @@ export default function EmpleadoDashboard() {
                                 datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p.superficie || 0), infraestructura: Object.values(p.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
                                 datosLegales={datosLegalesMunicipio}
                                 chartCard={chartCard}
-                                chartTitle={chartTitle}
+                                // 🔹 Cambiamos dinámicamente el título según el municipio del empleado
+                                chartTitle={`Predios por Parroquia (${municipioEmpleado || "Municipio"})`}
                                 chartPlaceholder={chartPlaceholder}
                                 Spinner={Spinner}
                             />
