@@ -19,7 +19,7 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, mesSelecc
 
     const municipioBuscado = normalizarTexto(municipioSeleccionado);
 
-    // Filtrar por municipio, mes y año de manera robusta
+    // Filtrado estricto por Municipio, Mes y el campo correcto de Django: fecha_registro
     const prediosMunicipio = listaPredios.filter(p => {
         // 1. Filtrar por municipio (si está vacío, acepta todos)
         const muniPredio = normalizarTexto(p.municipio);
@@ -30,26 +30,34 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, mesSelecc
 
         if (!cumpleMunicipio) return false;
 
-        // 2. Filtrar por fecha (Mes y Año)
-        if (p.fecha_creacion || p.fecha) {
-            const fechaPredio = new Date(p.fecha_creacion || p.fecha);
-            const anioPredio = fechaPredio.getFullYear().toString();
-            const mesPredio = (fechaPredio.getMonth() + 1).toString();
+        // 2. Extraer exactamente el campo fecha_registro del modelo Predio de Django
+        const rawFecha = p.fecha_registro || p.fecha_creacion || p.fecha;
+        
+        // Si el registro no tiene fecha, se descarta estrictamente
+        if (!rawFecha) return false;
 
-            const cumpleAnio = !anioSeleccionado || anioPredio === anioSeleccionado;
-            const cumpleMes = !mesSeleccionado || mesPredio === mesSeleccionado;
+        const fechaPredio = new Date(rawFecha);
+        
+        // Validar si la fecha generada es válida
+        if (isNaN(fechaPredio.getTime())) return false;
 
-            return cumpleAnio && cumpleMes;
-        }
+        const anioPredio = fechaPredio.getFullYear().toString();
+        const mesPredio = (fechaPredio.getMonth() + 1).toString(); // getMonth() devuelve 0 para Enero, 1 para Febrero, etc.
 
-        return true;
+        // 3. Validación estricta del Año (Debe coincidir exactamente con el año ingresado)
+        const cumpleAnio = !anioSeleccionado || anioPredio === anioSeleccionado.toString().trim();
+
+        // 4. Validación estricta del Mes (Si se seleccionó un mes del desplegable, debe coincidir exactamente)
+        const cumpleMes = !mesSeleccionado || mesPredio === mesSeleccionado.toString().trim();
+
+        return cumpleAnio && cumpleMes;
     });
 
-    // 🛑 Alerta SweetAlert2 si no se consiguen registros en el período o municipio
+    // 🛑 Alerta SweetAlert2 estricta si no se consiguen registros en ese período exacto
     if (prediosMunicipio.length === 0) {
         Swal.fire({
             title: 'Sin registros',
-            text: `No se encontraron predios registrados ${municipioSeleccionado ? `para el municipio "${municipioSeleccionado}"` : ''} ${mesSeleccionado ? `en el mes seleccionado` : ''} del año ${anioSeleccionado}.`,
+            text: `No se encontraron predios registrados ${municipioSeleccionado ? `para el municipio "${municipioSeleccionado}"` : 'en general'} para ${mesSeleccionado ? `el mes seleccionado` : 'todos los meses'} del año ${anioSeleccionado || 'especificado'}.`,
             icon: 'info',
             confirmButtonColor: '#136442'
         });
@@ -105,7 +113,7 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, mesSelecc
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...verdeBarinas);
-    doc.text(`CATASTRO OFICIAL - PERÍODO: ${mesSeleccionado ? `Mes ${mesSeleccionado} /` : ''} Año ${anioSeleccionado}`, 12, currentY);
+    doc.text(`CATASTRO OFICIAL - PERÍODO: ${mesSeleccionado ? `Mes ${mesSeleccionado} /` : 'Todos los meses'} Año ${anioSeleccionado}`, 12, currentY);
 
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
