@@ -6,7 +6,6 @@ import XCircleIcon from "@heroicons/react/24/solid/XCircleIcon";
 import Swal from "sweetalert2";
 
 export default function AdminCorreo() {
-    // URL del servidor backend en AWS con HTTPS
     const API_URL = "https://3.145.179.35.nip.io/api/";
 
     const [form, setForm] = useState({
@@ -18,7 +17,6 @@ export default function AdminCorreo() {
 
     const [cargando, setCargando] = useState(false);
 
-    // Consultar directamente al backend (Base de Datos) el correo actual del admin logueado
     useEffect(() => {
         const sesion = sessionStorage.getItem("usuario_admin");
         if (sesion) {
@@ -28,18 +26,30 @@ export default function AdminCorreo() {
                     const nombreUsuario = dataAdmin.usuario;
                     setForm(prev => ({ ...prev, usuario: nombreUsuario }));
 
-                    // Petición a la base de datos para traer el correo real almacenado
-                    fetch(`${API_URL}admin/perfil/?usuario=${nombreUsuario}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data && data.correo) {
-                                setForm(prev => ({ ...prev, correo_actual: data.correo }));
-                            } else {
-                                setForm(prev => ({ ...prev, correo_actual: "No registrado" }));
+                    // Depuración detallada de la petición al perfil
+                    const urlPerfil = `${API_URL}admin/perfil/?usuario=${nombreUsuario}`;
+                    console.log("🔍 Consultando perfil en:", urlPerfil);
+
+                    fetch(urlPerfil)
+                        .then(async res => {
+                            const textoRespuesta = await res.text();
+                            console.log("📥 Status HTTP:", res.status);
+                            console.log("📥 Respuesta cruda del servidor:", textoRespuesta);
+
+                            try {
+                                const data = JSON.parse(textoRespuesta);
+                                if (res.ok && data && data.correo) {
+                                    setForm(prev => ({ ...prev, correo_actual: data.correo }));
+                                } else {
+                                    setForm(prev => ({ ...prev, correo_actual: data.error || "No registrado" }));
+                                }
+                            } catch (parseError) {
+                                console.error("❌ El servidor no devolvió un JSON válido (¿Es un HTML 404?):", textoRespuesta);
+                                setForm(prev => ({ ...prev, correo_actual: "Error: Ruta no encontrada (404)" }));
                             }
                         })
                         .catch(err => {
-                            console.error("Error al obtener el correo de la BD", err);
+                            console.error("❌ Error de red al conectar con la BD:", err);
                             setForm(prev => ({ ...prev, correo_actual: "Error de conexión" }));
                         });
                 }
@@ -56,25 +66,20 @@ export default function AdminCorreo() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    // Validaciones del correo electrónico
     const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const esValidoNuevo = regexCorreo.test(form.nuevo_correo);
     const sonIguales = form.nuevo_correo !== "" && form.nuevo_correo === form.confirmar_correo;
-
     const formularioValido = esValidoNuevo && sonIguales;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!formularioValido) return;
 
         Swal.fire({
             title: "Actualizando correo en la base de datos...",
             text: "Por favor, espera un momento.",
             allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
+            didOpen: () => { Swal.showLoading(); }
         });
 
         setCargando(true);
@@ -100,14 +105,12 @@ export default function AdminCorreo() {
                     showConfirmButton: false
                 });
                 
-                // Actualizamos el correo actual en pantalla con el valor recién guardado y limpiamos
                 setForm(prev => ({ 
                     ...prev, 
                     correo_actual: prev.nuevo_correo,
                     nuevo_correo: "", 
                     confirmar_correo: "" 
                 }));
-
             } else {
                 Swal.fire({
                     icon: "error",
@@ -116,7 +119,7 @@ export default function AdminCorreo() {
                 });
             }
         } catch (error) {
-            console.error("Error de red:", error);
+            console.error("Error de red al actualizar:", error);
             Swal.fire({
                 icon: "error",
                 title: "Error de conexión",
@@ -129,38 +132,19 @@ export default function AdminCorreo() {
 
     return (
         <div style={{ display: "flex", justifyContent: "center", width: "100%", boxSizing: "border-box", fontFamily: "'Poppins', sans-serif" }}>
-            
             <style>{`
-                .email-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 20px;
-                    width: 100%;
-                }
-                .requisitos-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 8px;
-                }
+                .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+                .requisitos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
                 @media (max-width: 900px) {
-                    .email-grid {
-                        grid-template-columns: 1fr !important;
-                    }
-                    .requisitos-grid {
-                        grid-template-columns: 1fr !important;
-                    }
+                    .email-grid { grid-template-columns: 1fr !important; }
+                    .requisitos-grid { grid-template-columns: 1fr !important; }
                 }
             `}</style>
 
             <div style={{ 
-                background: "#ffffff", 
-                padding: "24px 20px", 
-                borderRadius: "16px", 
-                border: "1px solid #e2e8f0", 
-                width: "100%", 
-                maxWidth: "850px",
-                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
-                boxSizing: "border-box"
+                background: "#ffffff", padding: "24px 20px", borderRadius: "16px", 
+                border: "1px solid #e2e8f0", width: "100%", maxWidth: "850px",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)", boxSizing: "border-box"
             }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
                     <ShieldCheckIcon style={{ width: "24px", height: "24px", color: "#136442", flexShrink: 0 }} />
@@ -174,7 +158,6 @@ export default function AdminCorreo() {
 
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px", width: "100%", boxSizing: "border-box" }}>
                     
-                    {/* Campo de Correo Actual extraído directo de la BD */}
                     <div style={{ width: "100%" }}>
                         <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
                             Correo Registrado en la Base de Datos
@@ -228,7 +211,6 @@ export default function AdminCorreo() {
                         </div>
                     </div>
 
-                    {/* Requisitos del correo */}
                     <div style={{ backgroundColor: "#f8fafc", padding: "14px 16px", borderRadius: "8px", border: "1px solid #e2e8f0", boxSizing: "border-box" }}>
                         <span style={{ fontSize: "12px", fontWeight: "700", color: "#475569", display: "block", marginBottom: "8px" }}>
                             Verificación de correo:
@@ -245,27 +227,16 @@ export default function AdminCorreo() {
                         </div>
                     </div>
 
-                    {/* Botón de envío */}
                     <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "10px", width: "100%" }}>
                         <button
                             type="submit"
                             disabled={!formularioValido || cargando}
                             style={{
                                 backgroundColor: formularioValido ? "#136442" : "#94a3b8", 
-                                color: "#ffffff", 
-                                border: "none",
-                                padding: "11px 22px", 
-                                borderRadius: "8px", 
-                                fontSize: "14px", 
-                                fontWeight: "600",
-                                cursor: formularioValido ? "pointer" : "not-allowed", 
-                                display: "flex", 
-                                alignItems: "center", 
-                                justifyContent: "center",
-                                gap: "8px",
-                                opacity: formularioValido ? 1 : 0.7,
-                                transition: "background-color 0.2s",
-                                width: "100%"
+                                color: "#ffffff", border: "none", padding: "11px 22px", borderRadius: "8px", 
+                                fontSize: "14px", fontWeight: "600", cursor: formularioValido ? "pointer" : "not-allowed", 
+                                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                                opacity: formularioValido ? 1 : 0.7, transition: "background-color 0.2s", width: "100%"
                             }}
                         >
                             <EnvelopeIcon style={{ width: "16px", height: "16px" }} />
