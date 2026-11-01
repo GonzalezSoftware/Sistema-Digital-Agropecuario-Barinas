@@ -214,7 +214,18 @@ export default function EmpleadoDashboard() {
     const [prefijoCedula, setPrefijoCedula] = useState("V-");
 
     const PARROQUIAS_POR_MUNICIPIO = {
-        "Barinas": ["Catedral", "Alto Barinas", "Manuel Palacio Fajardo", "San Juan de Guanay", "Torunos"],
+        "Alberto Arvelo Torrealba": ["Sabaneta", "Rodriguez Domínguez"],
+        "Andrés Eloy Blanco": ["El Cantón", "Santa Cruz de Guacas", "Puerto Vivas"],
+        "Antonio José de Sucre": ["Ticoporo", "Andrés Bello", "Nicolás Pulido"],
+        "Arismendi": ["Arismendi", "Guadarrama", "La Unión", "San Antonio"],
+        "Barinas": ["Catedral", "Alto Barinas", "Manuel Palacio Fajardo", "San Juan de Guanay", "Torunos", "El Carmen", "San Silvestre", "Santa Inés", "Santa Lucía", "Juan Antonio Rodríguez Domínguez"],
+        "Bolívar": ["Barinitas", "Altamira de Cáceres", "Calderas"],
+        "Cruz Paredes": ["Barrancas", "El Socorro", "Masparrito"],
+        "Ezequiel Zamora": ["Santa Bárbara", "Ramón Ignacio Méndez", "José Ignacio del Pumar", "Santa Rosa"],
+        "Obispos": ["Obispos", "El Real", "La Luz", "Los Guasimitos"],
+        "Pedraza": ["Ciudad Bolivia", "Ignacio Briceño", "José Félix Ribas", "Páez"],
+        "Rojas": ["Libertad", "Dolores", "Palacios Fajardo", "Santa Rosa", "Simón Bolívar"],
+        "Sosa": ["Ciudad de Nutrias", "El Regalo", "Puerto Nutrias", "Santa Lucía"]
     };
 
     const manejarCambio = (e) => {
@@ -277,24 +288,9 @@ export default function EmpleadoDashboard() {
         0
     );
 
-    // ── AGRUPAR PREDIOS POR PARROQUIA PARA EL EMPLEADO ──
-    const PARROQUIAS_POR_MUNICIPIO_COMPLETO = {
-        "Alberto Arvelo Torrealba": ["Sabaneta", "Rodriguez Domínguez"],
-        "Andrés Eloy Blanco": ["El Cantón", "Santa Cruz de Guacas", "Puerto Vivas"],
-        "Antonio José de Sucre": ["Ticoporo", "Andrés Bello", "Nicolás Pulido"],
-        "Arismendi": ["Arismendi", "Guadarrama", "La Unión", "San Antonio"],
-        "Barinas": ["Catedral", "Alto Barinas", "Manuel Palacio Fajardo", "San Juan de Guanay", "Torunos", "El Carmen", "San Silvestre", "Santa Inés", "Santa Lucía", "Juan Antonio Rodríguez Domínguez"],
-        "Bolívar": ["Barinitas", "Altamira de Cáceres", "Calderas"],
-        "Cruz Paredes": ["Barrancas", "El Socorro", "Masparrito"],
-        "Ezequiel Zamora": ["Santa Bárbara", "Ramón Ignacio Méndez", "José Ignacio del Pumar", "Santa Rosa"],
-        "Obispos": ["Obispos", "El Real", "La Luz", "Los Guasimitos"],
-        "Pedraza": ["Ciudad Bolivia", "Ignacio Briceño", "José Félix Ribas", "Páez"],
-        "Rojas": ["Libertad", "Dolores", "Palacios Fajardo", "Santa Rosa", "Simón Bolívar"],
-        "Sosa": ["Ciudad de Nutrias", "El Regalo", "Puerto Nutrias", "Santa Lucía"]
-    };
+    // ── AGRUPAR PREDIOS POR PARROQUIA PARA EL GRÁFICO ──
+    const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
 
-    const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO_COMPLETO[municipioEmpleado] || [];
-    
     const conteoParroquias = {};
     parroquiasDelMunicipio.forEach(parroquia => {
         conteoParroquias[parroquia] = 0;
@@ -309,11 +305,11 @@ export default function EmpleadoDashboard() {
         }
     });
 
-    const datosGraficoParroquias = Object.keys(conteoParroquias).length > 0 
+    const datosGraficoParroquias = Object.keys(conteoParroquias).length > 0
         ? Object.keys(conteoParroquias).map(parroquia => ({
             name: parroquia,
             cantidad: conteoParroquias[parroquia]
-          }))
+        }))
         : [{ name: municipioEmpleado || "Sin Parroquias", cantidad: totalPrediosMunicipio }];
 
     const chartCard = {
