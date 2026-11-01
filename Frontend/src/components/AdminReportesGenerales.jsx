@@ -54,13 +54,16 @@ const LISTA_RUBROS_VEGETALES = [
 ];
 
 export const AdminReportesGenerales = ({ listaPredios = [] }) => {
-    // Estados para los filtros de municipio y fechas
+    // Estados para 1. Lista General de Predios
     const [municipioPredios, setMunicipioPredios] = useState("");
-    const [mesSeleccionado, setMesSeleccionado] = useState("");
-    // Se fija el 2026 por defecto como año inicial permitido
-    const [anioSeleccionado, setAnioSeleccionado] = useState("2026");
+    const [mesPredios, setMesPredios] = useState("");
+    const [anioPredios, setAnioPredios] = useState("2026");
 
+    // Estados para 2. Reporte de Totales y Estadísticas
     const [municipioTotales, setMunicipioTotales] = useState("");
+    const [mesTotales, setMesTotales] = useState("");
+    const [anioTotales, setAnioTotales] = useState("2026");
+
     const [municipioCaracterizados, setMunicipioCaracterizados] = useState("");
     const [municipioProduccion, setMunicipioProduccion] = useState("");
 
@@ -70,12 +73,12 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
     const handleExportarPredios = (e) => {
         e.preventDefault();
-        generarPDFReporteGeneralPredios(municipioPredios, mesSeleccionado, anioSeleccionado, listaPredios);
+        generarPDFReporteGeneralPredios(municipioPredios, mesPredios, anioPredios, listaPredios);
     };
 
     const handleExportarTotales = (e) => {
         e.preventDefault();
-        generarPDFReporteTotalesPredios(municipioTotales, listaPredios);
+        generarPDFReporteTotalesPredios(municipioTotales, mesTotales, anioTotales, listaPredios);
     };
 
     const handleExportarCaracterizados = (e) => {
@@ -124,7 +127,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
             <div className="reportes-grid">
                 
-                {/* 1. Lista General de Predios (Con Mes y Caja de Año >= 2026) */}
+                {/* 1. Lista General de Predios */}
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
@@ -140,11 +143,10 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 {MUNICIPIOS_BARINAS.map((mun, i) => <option key={i} value={mun}>{mun}</option>)}
                             </select>
 
-                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
                                 <div>
                                     <label style={selectLabelStyle}>Mes:</label>
-                                    <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} style={selectStyle}>
+                                    <select value={mesPredios} onChange={(e) => setMesPredios(e.target.value)} style={selectStyle}>
                                         <option value="">Todos...</option>
                                         {MESES.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
                                     </select>
@@ -154,8 +156,8 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                     <input 
                                         type="number" 
                                         min="2026" 
-                                        value={anioSeleccionado} 
-                                        onChange={(e) => setAnioSeleccionado(e.target.value)} 
+                                        value={anioPredios} 
+                                        onChange={(e) => setAnioPredios(e.target.value)} 
                                         style={selectStyle} 
                                         placeholder="2026"
                                     />
@@ -176,13 +178,36 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                             <ChartPieIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>2. Reporte de Totales y Estadísticas</h4>
                         </div>
-                        <p style={cardDescStyle}>Exporta el resumen consolidado de predios censados, superficie, parroquias y estatus legal.</p>
+                        <p style={cardDescStyle}>Exporta el resumen consolidado de predios censados, superficie, parroquias y estatus legal por período.</p>
+                        
                         <div style={selectContainerStyle}>
                             <label style={selectLabelStyle}>Seleccione el Municipio:</label>
                             <select value={municipioTotales} onChange={(e) => setMunicipioTotales(e.target.value)} style={selectStyle}>
                                 <option value="">Todos los municipios (General)...</option>
                                 {MUNICIPIOS_BARINAS.map((mun, i) => <option key={i} value={mun}>{mun}</option>)}
                             </select>
+
+                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
+                                <div>
+                                    <label style={selectLabelStyle}>Mes:</label>
+                                    <select value={mesTotales} onChange={(e) => setMesTotales(e.target.value)} style={selectStyle}>
+                                        <option value="">Todos...</option>
+                                        {MESES.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={selectLabelStyle}>Año (≥ 2026):</label>
+                                    <input 
+                                        type="number" 
+                                        min="2026" 
+                                        value={anioTotales} 
+                                        onChange={(e) => setAnioTotales(e.target.value)} 
+                                        style={selectStyle} 
+                                        placeholder="2026"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button onClick={handleExportarTotales} style={buttonStyle}>

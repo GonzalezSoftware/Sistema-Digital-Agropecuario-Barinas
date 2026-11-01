@@ -1,6 +1,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
 
 const normalizarTexto = (str) => {
     if (!str) return "";
@@ -13,23 +15,49 @@ const normalizarTexto = (str) => {
         .trim();
 };
 
-export const generarPDFReporteTotalesPredios = (municipioSeleccionado, listaPredios = []) => {
+export const generarPDFReporteTotalesPredios = (municipioSeleccionado, mesSeleccionado, anioSeleccionado, listaPredios = []) => {
 
     const municipioBuscado = normalizarTexto(municipioSeleccionado);
 
+    // Filtrado estricto por Municipio, Mes y el campo fecha_registro del modelo Predio
     const prediosMunicipio = listaPredios.filter(p => {
+        // 1. Filtrar por municipio (si está vacío, acepta todos)
         const muniPredio = normalizarTexto(p.municipio);
-        return (
+        const cumpleMunicipio = !municipioSeleccionado ||
             muniPredio === municipioBuscado ||
             municipioBuscado.includes(muniPredio) ||
-            muniPredio.includes(municipioBuscado)
-        );
+            muniPredio.includes(municipioBuscado);
+
+        if (!cumpleMunicipio) return false;
+
+        // 2. Extraer exactamente el campo fecha_registro de Django
+        const rawFecha = p.fecha_registro || p.fecha_creacion || p.fecha;
+        
+        // Si el registro no tiene fecha, se descarta estrictamente
+        if (!rawFecha) return false;
+
+        const fechaPredio = new Date(rawFecha);
+        
+        // Validar si la fecha generada es válida
+        if (isNaN(fechaPredio.getTime())) return false;
+
+        const anioPredio = fechaPredio.getFullYear().toString();
+        const mesPredio = (fechaPredio.getMonth() + 1).toString();
+
+        // 3. Validación estricta del Año
+        const cumpleAnio = !anioSeleccionado || anioPredio === anioSeleccionado.toString().trim();
+
+        // 4. Validación estricta del Mes
+        const cumpleMes = !mesSeleccionado || mesPredio === mesSeleccionado.toString().trim();
+
+        return cumpleAnio && cumpleMes;
     });
 
+    // 🛑 Alerta SweetAlert2 estricta si no se consiguen registros en ese período exacto
     if (prediosMunicipio.length === 0) {
         Swal.fire({
             title: 'Sin registros',
-            text: `No se encontraron predios registrados para el municipio "${municipioSeleccionado}".`,
+            text: `No se encontraron predios registrados ${municipioSeleccionado ? `para el municipio "${municipioSeleccionado}"` : 'en general'} para ${mesSeleccionado ? `el mes seleccionado` : 'todos los meses'} del año ${anioSeleccionado || 'especificado'}.`,
             icon: 'info',
             confirmButtonColor: '#136442'
         });
@@ -47,8 +75,8 @@ export const generarPDFReporteTotalesPredios = (municipioSeleccionado, listaPred
 
     // Cintillo institucional superior
     try {
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
+        doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+        doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("No se pudieron cargar las imágenes de los logos en el PDF.", error);
     }
@@ -70,38 +98,30 @@ export const generarPDFReporteTotalesPredios = (municipioSeleccionado, listaPred
     doc.setLineWidth(0.6);
     doc.line(12, 25, 204, 25);
 
-
-
-
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
 
-    // 1. Imprimir la etiqueta en color verde
     doc.setTextColor(...verdeBarinas);
     const tituloVerde = "REPORTE DE TOTALES Y ESTADÍSTICAS: ";
     doc.text(tituloVerde, 12, 33);
 
-    // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
     const anchoTituloVerde = doc.getTextWidth(tituloVerde);
-
-    // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
-    doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
-    const nombreNegro = (municipioSeleccionado || "SIN NOMBRE").toUpperCase();
+    doc.setTextColor(0, 0, 0);
+    const nombreNegro = (municipioSeleccionado || "GENERAL (TODOS)").toUpperCase();
     doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
-
 
     let currentY = 42;
 
-    // --- I. Resumen General ---
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...verdeBarinas);
-    doc.text("I. INDICADORES GENERALES MUNICIPALES", 12, currentY);
+    doc.text(`INDICADORES - PERÍODO: ${mesSeleccionado ? `Mes ${mesSeleccionado} /` : 'Todos los meses'} Año ${anioSeleccionado}`, 12, currentY);
 
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
     doc.line(12, currentY + 2, 204, currentY + 2);
 
+    // --- I. Resumen General ---
     const totalPredios = prediosMunicipio.length;
     const superficieTotal = prediosMunicipio.reduce((acc, p) => acc + (parseFloat(p.superficie) || 0), 0);
 
@@ -254,7 +274,6 @@ export const generarPDFReporteTotalesPredios = (municipioSeleccionado, listaPred
 
     const serviciosConteo = {};
     prediosMunicipio.forEach(p => {
-        // Soporta tanto arreglos de servicios_lectura como de servicios
         const serviciosPredio = p.servicios_lectura || p.servicios || [];
         serviciosPredio.forEach(s => {
             if (s) {
@@ -271,7 +290,7 @@ export const generarPDFReporteTotalesPredios = (municipioSeleccionado, listaPred
             `${serviciosConteo[serv]} Predios`,
             `${((serviciosConteo[serv] / totalPredios) * 100).toFixed(1)}%`
         ])
-        : [["-", "No se han declarado servicios básicos en este municipio.", "-", "-"]];
+        : [["-", "No se han declarado servicios básicos en este período.", "-", "-"]];
 
     autoTable(doc, {
         startY: currentY + 4,
@@ -302,12 +321,12 @@ export const generarPDFReporteTotalesPredios = (municipioSeleccionado, listaPred
         doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
     }
 
-    const nombreArchivo = `Reporte_Totales_Predios_${municipioSeleccionado.replace(/\s+/g, "_")}.pdf`;
+    const nombreArchivo = `Reporte_Totales_Predios_${municipioSeleccionado ? municipioSeleccionado.replace(/\s+/g, "_") : 'General'}_${anioSeleccionado}.pdf`;
     doc.save(nombreArchivo);
 
     Swal.fire({
         title: '¡Reporte de Totales Exportado!',
-        text: `El resumen estadístico detallado para ${municipioSeleccionado} se descargó correctamente.`,
+        text: `El resumen estadístico detallado se descargó correctamente.`,
         icon: 'success',
         confirmButtonColor: '#136442'
     });
