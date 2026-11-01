@@ -69,7 +69,10 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     const [mesCaracterizados, setMesCaracterizados] = useState("");
     const [anioCaracterizados, setAnioCaracterizados] = useState("2026");
 
+    // 4. Estados para Reporte General de Producción
     const [municipioProduccion, setMunicipioProduccion] = useState("");
+    const [mesProduccion, setMesProduccion] = useState("");
+    const [anioProduccion, setAnioProduccion] = useState("2026");
 
     const [filtroAnimal, setFiltroAnimal] = useState({ municipio: "", especie: "" });
     const [filtroSistemasAnimal, setFiltroSistemasAnimal] = useState({ municipio: "", sistema: "" });
@@ -92,7 +95,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
     const handleExportarProduccion = (e) => {
         e.preventDefault();
-        generarPDFReporteProduccionGeneral(municipioProduccion, listaPredios);
+        generarPDFReporteProduccionGeneral(municipioProduccion, mesProduccion, anioProduccion, listaPredios);
     };
 
     const handleExportarReporteAnimal = (e) => {
@@ -235,7 +238,6 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 {MUNICIPIOS_BARINAS.map((mun, i) => <option key={i} value={mun}>{mun}</option>)}
                             </select>
 
-                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
                                 <div>
                                     <label style={selectLabelStyle}>Mes:</label>
@@ -271,13 +273,36 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                             <CubeTransparentIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>4. Reporte General de Producción</h4>
                         </div>
-                        <p style={cardDescStyle}>Exporta el consolidado agronómico y pecuario: semovientes, hectáreas y rubros globales.</p>
+                        <p style={cardDescStyle}>Exporta el consolidado agronómico y pecuario: semovientes, hectáreas y rubros globales filtrando por período.</p>
+                        
                         <div style={selectContainerStyle}>
                             <label style={selectLabelStyle}>Seleccione el Municipio:</label>
                             <select value={municipioProduccion} onChange={(e) => setMunicipioProduccion(e.target.value)} style={selectStyle}>
                                 <option value="">Todos los municipios (General)...</option>
                                 {MUNICIPIOS_BARINAS.map((mun, i) => <option key={i} value={mun}>{mun}</option>)}
                             </select>
+
+                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
+                                <div>
+                                    <label style={selectLabelStyle}>Mes:</label>
+                                    <select value={mesProduccion} onChange={(e) => setMesProduccion(e.target.value)} style={selectStyle}>
+                                        <option value="">Todos...</option>
+                                        {MESES.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={selectLabelStyle}>Año (≥ 2026):</label>
+                                    <input 
+                                        type="number" 
+                                        min="2026" 
+                                        value={anioProduccion} 
+                                        onChange={(e) => setAnioProduccion(e.target.value)} 
+                                        style={selectStyle} 
+                                        placeholder="2026"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button onClick={handleExportarProduccion} style={buttonStyle}>
@@ -305,7 +330,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                             <label style={{...selectLabelStyle, marginTop: "8px"}}>Seleccione la Especie:</label>
                             <select value={filtroAnimal.especie} onChange={(e) => setFiltroAnimal({...filtroAnimal, especie: e.target.value})} style={selectStyle}>
                                 <option value="">Seleccione una especie...</option>
-                                {ESPECES_ANIMALES.map((esp, i) => <option key={i} value={esp}>{esp}</option>)}
+                                {ESPECES_INFORMATIVAS?.map ? null : ESPECES_ANIMALES.map((esp, i) => <option key={i} value={esp}>{esp}</option>)}
                             </select>
                         </div>
                     </div>

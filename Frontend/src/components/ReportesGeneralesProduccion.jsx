@@ -2,6 +2,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
 
 const normalizarTexto = (str) => {
     if (!str) return "";
@@ -14,26 +16,47 @@ const normalizarTexto = (str) => {
         .trim();
 };
 
-export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaPredios = []) => {
-
+export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, mesSeleccionado, anioSeleccionado, listaPredios = []) => {
 
     const municipioBuscado = normalizarTexto(municipioSeleccionado);
 
-    // Filtramos predios del municipio con caracterización completada
+    // Filtrado estricto por Municipio, Caracterización completada, Mes, Año y fecha_registro
     const prediosMunicipio = listaPredios.filter(p => {
+        // 1. Filtrar por municipio (si está vacío, acepta todos)
         const muniPredio = normalizarTexto(p.municipio);
-        const coincideMuni = (
+        const coincideMuni = !municipioSeleccionado || (
             muniPredio === municipioBuscado ||
             municipioBuscado.includes(muniPredio) ||
             muniPredio.includes(municipioBuscado)
         );
-        return coincideMuni && p.caracterizacion_completada === true;
+
+        if (!coincideMuni) return false;
+
+        // 2. Evaluar estrictamente que la caracterización esté completada
+        if (p.caracterizacion_completada !== true) return false;
+
+        // 3. Extraer el campo exacto de fecha de Django (`fecha_registro`)
+        const rawFecha = p.fecha_registro || p.fecha_creacion || p.fecha;
+        if (!rawFecha) return false;
+
+        const fechaPredio = new Date(rawFecha);
+        if (isNaN(fechaPredio.getTime())) return false;
+
+        const anioPredio = fechaPredio.getFullYear().toString();
+        const mesPredio = (fechaPredio.getMonth() + 1).toString();
+
+        // 4. Validación estricta de Año y Mes
+        const cumpleAnio = !anioSeleccionado || anioPredio === anioSeleccionado.toString().trim();
+        const cumpleMes = !mesSeleccionado || mesPredio === mesSeleccionado.toString().trim();
+
+        return cumpleAnio && cumpleMes;
     });
 
+    // 🛑 Alerta SweetAlert2 estricta si no se consiguen registros en ese período exacto
     if (prediosMunicipio.length === 0) {
         Swal.fire({
             title: 'Sin registros',
-            text: `No se encontraron predios caracterizados para el municipio "${municipioSeleccionado}".`,
+            text: `No se encontraron predios caracterizados ${municipioSeleccionado ? `para el municipio "${municipioSeleccionado}"` : 'en general'} para ${mesSeleccionado ? `el mes seleccionado` : 'todos los meses'} del año ${anioSeleccionado || 'especificado'}.`,
             icon: 'info',
             confirmButtonColor: '#136442'
         });
@@ -45,11 +68,10 @@ export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaP
     let totalSemovientesGeneral = 0;
     let totalHectareasSembradas = 0;
 
-    // Diccionarios para acumular
-    const semovientesEspecies = {}; // Ej: { Bovinos: { toro: 5, vaca: 12 }, ... }
-    const sistemasProduccionConteo = {}; // Ej: { Lechería: 10, Ceba: 15 }
-    const rubrosVegetalesConteo = {}; // Ej: { Maíz: { hectareas: 50, produccion: 12000 } }
-    const destinosProduccionConteo = {}; // Ej: { Venta: 40, Consumo: 15 }
+    const semovientesEspecies = {}; 
+    const sistemasProduccionConteo = {}; 
+    const rubrosVegetalesConteo = {}; 
+    const destinosProduccionConteo = {}; 
 
     prediosMunicipio.forEach(p => {
         const animalData = p.existencia_animal || {};
@@ -116,8 +138,8 @@ export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaP
 
     // Cintillo institucional superior
     try {
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
+        doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+        doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("Logos institucionales omitidos en PDF.", error);
     }
@@ -139,40 +161,35 @@ export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaP
     doc.setLineWidth(0.6);
     doc.line(12, 25, 204, 25);
 
-
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
 
-    // 1. Imprimir la etiqueta en color verde
     doc.setTextColor(...verdeBarinas);
     const tituloVerde = "REPORTE GENERAL DE PRODUCCIÓN: ";
     doc.text(tituloVerde, 12, 33);
 
-    // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
     const anchoTituloVerde = doc.getTextWidth(tituloVerde);
-
-    // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
-    doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
-    const nombreNegro = (municipioSeleccionado || "SIN NOMBRE").toUpperCase();
+    doc.setTextColor(0, 0, 0);
+    const nombreNegro = (municipioSeleccionado || "GENERAL (TODOS)").toUpperCase();
     doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
-
 
     let currentY = 42;
 
-    // --- I. INDICADORES MACRO DE PRODUCCIÓN ---
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(9.5);
+    doc.setFontSize(10);
     doc.setTextColor(...verdeBarinas);
-    doc.text("I. RESUMEN MACRO DE PRODUCCIÓN MUNICIPAL", 12, currentY);
+    doc.text(`PERÍODO: ${mesSeleccionado ? `Mes ${mesSeleccionado} /` : 'Todos los meses'} Año ${anioSeleccionado}`, 12, currentY);
+
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
     doc.line(12, currentY + 2, 204, currentY + 2);
 
+    // --- I. INDICADORES MACRO DE PRODUCCIÓN ---
     autoTable(doc, {
         startY: currentY + 4,
         body: [
             ["Predios Caracterizados:", `${totalPrediosCaracterizados} Predios`, "Total Semovientes Registrados:", `${totalSemovientesGeneral.toLocaleString()}`],
-            ["Superficie Agrícola Sembrada:", `${totalHectareasSembradas.toFixed(2)} Hectáreas (Ha)`, "Municipio Evaluado:", municipioSeleccionado]
+            ["Superficie Agrícola Sembrada:", `${totalHectareasSembradas.toFixed(2)} Hectáreas (Ha)`, "Municipio Evaluado:", municipioSeleccionado || "General"]
         ],
         theme: "grid",
         styles: { fontSize: 8, cellPadding: 2.5, font: "helvetica", lineColor: [210, 210, 210], lineWidth: 0.2 },
@@ -300,12 +317,12 @@ export const generarPDFReporteProduccionGeneral = (municipioSeleccionado, listaP
         doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
     }
 
-    const nombreArchivo = `Reporte_Produccion_General_${municipioSeleccionado.replace(/\s+/g, "_")}.pdf`;
+    const nombreArchivo = `Reporte_Produccion_General_${municipioSeleccionado ? municipioSeleccionado.replace(/\s+/g, "_") : 'General'}_${anioSeleccionado}.pdf`;
     doc.save(nombreArchivo);
 
     Swal.fire({
         title: '¡Reporte de Producción Exportado!',
-        text: `El reporte general de producción para ${municipioSeleccionado} se descargó correctamente.`,
+        text: `El reporte general de producción se descargó correctamente.`,
         icon: 'success',
         confirmButtonColor: '#136442'
     });
