@@ -57,7 +57,8 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     // Estados para los filtros de municipio y fechas
     const [municipioPredios, setMunicipioPredios] = useState("");
     const [mesSeleccionado, setMesSeleccionado] = useState("");
-    const [anioSeleccionado, setAnioSeleccionado] = useState(new Date().getFullYear().toString());
+    // Se fija el 2026 por defecto como año inicial permitido
+    const [anioSeleccionado, setAnioSeleccionado] = useState("2026");
 
     const [municipioTotales, setMunicipioTotales] = useState("");
     const [municipioCaracterizados, setMunicipioCaracterizados] = useState("");
@@ -123,7 +124,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
             <div className="reportes-grid">
                 
-                {/* 1. Lista General de Predios (Con filtro de Mes y Año) */}
+                {/* 1. Lista General de Predios (Con Mes y Caja de Año >= 2026) */}
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
@@ -139,7 +140,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 {MUNICIPIOS_BARINAS.map((mun, i) => <option key={i} value={mun}>{mun}</option>)}
                             </select>
 
-                            {/* Filtros de Mes y Año */}
+                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
                                 <div>
                                     <label style={selectLabelStyle}>Mes:</label>
@@ -149,12 +150,15 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label style={selectLabelStyle}>Año:</label>
-                                    <select value={anioSeleccionado} onChange={(e) => setAnioSeleccionado(e.target.value)} style={selectStyle}>
-                                        <option value="2025">2025</option>
-                                        <option value="2026">2026</option>
-                                        <option value="2027">2027</option>
-                                    </select>
+                                    <label style={selectLabelStyle}>Año (≥ 2026):</label>
+                                    <input 
+                                        type="number" 
+                                        min="2026" 
+                                        value={anioSeleccionado} 
+                                        onChange={(e) => setAnioSeleccionado(e.target.value)} 
+                                        style={selectStyle} 
+                                        placeholder="2026"
+                                    />
                                 </div>
                             </div>
                         </div>
