@@ -1,6 +1,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
 
 const normalizarTexto = (str) => {
     if (!str) return "";
@@ -21,7 +23,7 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, mesSelecc
     const prediosMunicipio = listaPredios.filter(p => {
         // 1. Filtrar por municipio (si está vacío, acepta todos)
         const muniPredio = normalizarTexto(p.municipio);
-        const cumpleMunicipio = !municipioSeleccionado || 
+        const cumpleMunicipio = !municipioSeleccionado ||
             muniPredio === municipioBuscado ||
             municipioBuscado.includes(muniPredio) ||
             muniPredio.includes(municipioBuscado);
@@ -40,7 +42,7 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, mesSelecc
             return cumpleAnio && cumpleMes;
         }
 
-        return true; 
+        return true;
     });
 
     // 🛑 Alerta SweetAlert2 si no se consiguen registros en el período o municipio
@@ -64,8 +66,8 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, mesSelecc
 
     // Cintillo institucional superior
     try {
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
+        doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+        doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("No se pudieron cargar las imágenes de los logos en el PDF.", error);
     }
