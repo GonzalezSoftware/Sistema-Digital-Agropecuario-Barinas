@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from "react-router-dom";
 import escudo from "../../assets/logo2.jpg";
 import logo from "../../assets/gobierno.jpg";
@@ -97,8 +97,6 @@ export default function EmpleadoDashboard() {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Si usas token, desbanca la línea de abajo y pon tu token:
-                    // 'Authorization': `Bearer ${localStorage.getItem('token')}` 
                 },
                 body: JSON.stringify({
                     estado: 'inactivo',
@@ -114,7 +112,7 @@ export default function EmpleadoDashboard() {
                 throw new Error("No se pudo procesar la solicitud (Error " + response.status + ")");
             }
 
-            // 2. Mostramos el mensaje de éxito (esto reemplazará automáticamente al de carga)
+            // 2. Mostramos el mensaje de éxito
             await Swal.fire({
                 title: "¡Predio Inhabilitado!",
                 text: "El predio ha sido marcado como inactivo correctamente.",
@@ -122,7 +120,6 @@ export default function EmpleadoDashboard() {
                 confirmButtonColor: "#136442"
             });
 
-            // Recargamos la página para que se refleje el cambio de inmediato
             window.location.reload();
 
         } catch (error) {
@@ -136,7 +133,6 @@ export default function EmpleadoDashboard() {
         }
     };
 
-    // ── AQUÍ PUEDES COLOCARLO ──
     useEffect(() => {
         if (municipioEmpleado) {
             sessionStorage.setItem("municipio_empleado", municipioEmpleado);
@@ -248,7 +244,7 @@ export default function EmpleadoDashboard() {
         (predio) => predio.municipio === municipioEmpleado
     );
 
-    // 🔹 AQUÍ INTEGRAMOS EL HOOK DE HISTORIAL (Reemplaza las funciones locales vacías)
+    // 🔹 AQUÍ INTEGRAMOS EL HOOK DE HISTORIAL
     const {
         busqueda: busquedaHistorial,
         setBusqueda: setBusquedaHistorial,
@@ -288,29 +284,31 @@ export default function EmpleadoDashboard() {
         0
     );
 
-    // ── AGRUPAR PREDIOS POR PARROQUIA PARA EL GRÁFICO ──
-    const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
+    // ── CÁLCULO SEGURO DE PREDIOS POR PARROQUIA (USANDO USEMEMO) ──
+    const datosGraficoParroquias = useMemo(() => {
+        const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
+        const conteoParroquias = {};
+        
+        parroquiasDelMunicipio.forEach(parroquia => {
+            conteoParroquias[parroquia] = 0;
+        });
 
-    const conteoParroquias = {};
-    parroquiasDelMunicipio.forEach(parroquia => {
-        conteoParroquias[parroquia] = 0;
-    });
+        prediosMunicipio.forEach(predio => {
+            const parroquiaPredio = predio.parroquia ? predio.parroquia.trim() : "";
+            if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
+                conteoParroquias[parroquiaPredio] += 1;
+            } else if (parroquiaPredio) {
+                conteoParroquias[parroquiaPredio] = (conteoParroquias[parroquiaPredio] || 0) + 1;
+            }
+        });
 
-    prediosMunicipio.forEach(predio => {
-        const parroquiaPredio = predio.parroquia ? predio.parroquia.trim() : "";
-        if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
-            conteoParroquias[parroquiaPredio] += 1;
-        } else if (parroquiaPredio) {
-            conteoParroquias[parroquiaPredio] = (conteoParroquias[parroquiaPredio] || 0) + 1;
-        }
-    });
-
-    const datosGraficoParroquias = Object.keys(conteoParroquias).length > 0
-        ? Object.keys(conteoParroquias).map(parroquia => ({
+        const resultado = Object.keys(conteoParroquias).map(parroquia => ({
             name: parroquia,
             cantidad: conteoParroquias[parroquia]
-        }))
-        : [{ name: municipioEmpleado || "Sin Parroquias", cantidad: totalPrediosMunicipio }];
+        }));
+
+        return resultado.length > 0 ? resultado : [{ name: municipioEmpleado || "Sin Parroquias", cantidad: totalPrediosMunicipio }];
+    }, [municipioEmpleado, prediosMunicipio]);
 
     const chartCard = {
         backgroundColor: "#ffffff",
@@ -346,12 +344,12 @@ export default function EmpleadoDashboard() {
                                 municipiosCubiertos={1}
                                 totalMunicipiosBarinas={1}
                                 listaPredios={prediosMunicipio}
-                                datosGrafico={datosGraficoParroquias}  // <-- CAMBIAR AQUÍ
+                                datosGrafico={datosGraficoParroquias}
                                 datosTenencia={datosTenenciaMunicipio}
                                 datosServicios={datosServiciosMunicipio}
                                 datosVialidad={datosVialidadMunicipio}
                                 datosIntensidad={datosIntensidadMunicipio}
-                                datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p.superficie || 0), infraestructura: Object.values(p.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
+                                datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p.superficie || 0), infrastructure: Object.values(p.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
                                 datosLegales={datosLegalesMunicipio}
                                 chartCard={chartCard}
                                 chartTitle={`Predios por Parroquia (${municipioEmpleado || "Municipio"})`}
@@ -509,7 +507,7 @@ export default function EmpleadoDashboard() {
                     ) : vistaActiva === "produccion_caracterizacion" ? (
                         <div>
                             <FormCaracterizacion
-                                modo="caracterizacion" // 🔹 Activa el flujo completo con validación WhatsApp
+                                modo="caracterizacion"
                                 predioActivo={predioActivo}
                                 rubrosVegetales={rubrosVegetales}
                                 setRubrosVegetales={setRubrosVegetales}
@@ -523,7 +521,7 @@ export default function EmpleadoDashboard() {
                     ) : vistaActiva === "produccion_actualizacion" ? (
                         <div>
                             <FormCaracterizacion
-                                modo="actualizacion" // 🔹 Activa la precarga de datos y el guardado directo sin WhatsApp
+                                modo="actualizacion"
                                 predioActivo={predioActivo}
                                 rubrosVegetales={rubrosVegetales}
                                 setRubrosVegetales={setRubrosVegetales}
