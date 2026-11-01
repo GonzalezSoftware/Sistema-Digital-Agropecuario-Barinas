@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import escudo from "../../assets/logo2.jpg";
 import logo from "../../assets/gobierno.jpg";
@@ -82,6 +82,7 @@ export default function EmpleadoDashboard() {
         try {
             console.log("Enviando petición para el predio ID:", predioSeleccionado.id_predio);
 
+            // 1. Mostramos la alerta de carga (Swal.showLoading)
             Swal.fire({
                 title: "Procesando...",
                 text: "Actualizando el estado del predio, por favor espere.",
@@ -96,6 +97,8 @@ export default function EmpleadoDashboard() {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    // Si usas token, desbanca la línea de abajo y pon tu token:
+                    // 'Authorization': `Bearer ${localStorage.getItem('token')}` 
                 },
                 body: JSON.stringify({
                     estado: 'inactivo',
@@ -111,6 +114,7 @@ export default function EmpleadoDashboard() {
                 throw new Error("No se pudo procesar la solicitud (Error " + response.status + ")");
             }
 
+            // 2. Mostramos el mensaje de éxito (esto reemplazará automáticamente al de carga)
             await Swal.fire({
                 title: "¡Predio Inhabilitado!",
                 text: "El predio ha sido marcado como inactivo correctamente.",
@@ -118,6 +122,7 @@ export default function EmpleadoDashboard() {
                 confirmButtonColor: "#136442"
             });
 
+            // Recargamos la página para que se refleje el cambio de inmediato
             window.location.reload();
 
         } catch (error) {
@@ -131,6 +136,7 @@ export default function EmpleadoDashboard() {
         }
     };
 
+    // ── AQUÍ PUEDES COLOCARLO ──
     useEffect(() => {
         if (municipioEmpleado) {
             sessionStorage.setItem("municipio_empleado", municipioEmpleado);
@@ -208,18 +214,7 @@ export default function EmpleadoDashboard() {
     const [prefijoCedula, setPrefijoCedula] = useState("V-");
 
     const PARROQUIAS_POR_MUNICIPIO = {
-        "Alberto Arvelo Torrealba": ["Sabaneta", "Rodriguez Domínguez"],
-        "Andrés Eloy Blanco": ["El Cantón", "Santa Cruz de Guacas", "Puerto Vivas"],
-        "Antonio José de Sucre": ["Ticoporo", "Andrés Bello", "Nicolás Pulido"],
-        "Arismendi": ["Arismendi", "Guadarrama", "La Unión", "San Antonio"],
-        "Barinas": ["Catedral", "Alto Barinas", "Manuel Palacio Fajardo", "San Juan de Guanay", "Torunos", "El Carmen", "San Silvestre", "Santa Inés", "Santa Lucía", "Juan Antonio Rodríguez Domínguez"],
-        "Bolívar": ["Barinitas", "Altamira de Cáceres", "Calderas"],
-        "Cruz Paredes": ["Barrancas", "El Socorro", "Masparrito"],
-        "Ezequiel Zamora": ["Santa Bárbara", "Ramón Ignacio Méndez", "José Ignacio del Pumar", "Santa Rosa"],
-        "Obispos": ["Obispos", "El Real", "La Luz", "Los Guasimitos"],
-        "Pedraza": ["Ciudad Bolivia", "Ignacio Briceño", "José Félix Ribas", "Páez"],
-        "Rojas": ["Libertad", "Dolores", "Palacios Fajardo", "Santa Rosa", "Simón Bolívar"],
-        "Sosa": ["Ciudad de Nutrias", "El Regalo", "Puerto Nutrias", "Santa Lucía"]
+        "Barinas": ["Catedral", "Alto Barinas", "Manuel Palacio Fajardo", "San Juan de Guanay", "Torunos"],
     };
 
     const manejarCambio = (e) => {
@@ -237,14 +232,12 @@ export default function EmpleadoDashboard() {
     };
     const esFormularioValido = () => true;
 
-    // 🔹 FILTRADO ESTABLE DE PREDIOS POR MUNICIPIO CON USEMEMO (Evita bucles infinitos)
-    const prediosMunicipio = useMemo(() => {
-        return listaPredios.filter(
-            (predio) => predio.municipio === municipioEmpleado
-        );
-    }, [listaPredios, municipioEmpleado]);
+    // Filtramos la lista general de predios solo para el municipio del empleado
+    const prediosMunicipio = listaPredios.filter(
+        (predio) => predio.municipio === municipioEmpleado
+    );
 
-    // 🔹 INTEGRAMOS EL HOOK DE HISTORIAL PASANDO EL ARREGLO ESTABLE
+    // 🔹 AQUÍ INTEGRAMOS EL HOOK DE HISTORIAL (Reemplaza las funciones locales vacías)
     const {
         busqueda: busquedaHistorial,
         setBusqueda: setBusquedaHistorial,
@@ -284,32 +277,6 @@ export default function EmpleadoDashboard() {
         0
     );
 
-    // ── AGRUPAR PREDIOS POR PARROQUIA DE FORMA ESTABLE CON USEMEMO ──
-    const datosGraficoParroquias = useMemo(() => {
-        const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
-        const conteoParroquias = {};
-        
-        parroquiasDelMunicipio.forEach(parroquia => {
-            conteoParroquias[parroquia] = 0;
-        });
-
-        prediosMunicipio.forEach(predio => {
-            const parroquiaPredio = predio.parroquia ? predio.parroquia.trim() : "";
-            if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
-                conteoParroquias[parroquiaPredio] += 1;
-            } else if (parroquiaPredio) {
-                conteoParroquias[parroquiaPredio] = (conteoParroquias[parroquiaPredio] || 0) + 1;
-            }
-        });
-
-        const resultado = Object.keys(conteoParroquias).map(parroquia => ({
-            name: parroquia,
-            cantidad: conteoParroquias[parroquia]
-        }));
-
-        return resultado.length > 0 ? resultado : [{ name: municipioEmpleado || "Sin Parroquias", cantidad: totalPrediosMunicipio }];
-    }, [municipioEmpleado, prediosMunicipio]);
-
     const chartCard = {
         backgroundColor: "#ffffff",
         borderRadius: "14px",
@@ -344,7 +311,7 @@ export default function EmpleadoDashboard() {
                                 municipiosCubiertos={1}
                                 totalMunicipiosBarinas={1}
                                 listaPredios={prediosMunicipio}
-                                datosGrafico={datosGraficoParroquias}
+                                datosGrafico={[{ name: municipioEmpleado, cantidad: totalPrediosMunicipio }]}
                                 datosTenencia={datosTenenciaMunicipio}
                                 datosServicios={datosServiciosMunicipio}
                                 datosVialidad={datosVialidadMunicipio}
@@ -352,7 +319,7 @@ export default function EmpleadoDashboard() {
                                 datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p.superficie || 0), infraestructura: Object.values(p.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
                                 datosLegales={datosLegalesMunicipio}
                                 chartCard={chartCard}
-                                chartTitle={`Predios por Parroquia (${municipioEmpleado || "Municipio"})`}
+                                chartTitle={chartTitle}
                                 chartPlaceholder={chartPlaceholder}
                                 Spinner={Spinner}
                             />
@@ -507,7 +474,7 @@ export default function EmpleadoDashboard() {
                     ) : vistaActiva === "produccion_caracterizacion" ? (
                         <div>
                             <FormCaracterizacion
-                                modo="caracterizacion"
+                                modo="caracterizacion" // 🔹 Activa el flujo completo con validación WhatsApp
                                 predioActivo={predioActivo}
                                 rubrosVegetales={rubrosVegetales}
                                 setRubrosVegetales={setRubrosVegetales}
@@ -521,7 +488,7 @@ export default function EmpleadoDashboard() {
                     ) : vistaActiva === "produccion_actualizacion" ? (
                         <div>
                             <FormCaracterizacion
-                                modo="actualizacion"
+                                modo="actualizacion" // 🔹 Activa la precarga de datos y el guardado directo sin WhatsApp
                                 predioActivo={predioActivo}
                                 rubrosVegetales={rubrosVegetales}
                                 setRubrosVegetales={setRubrosVegetales}
