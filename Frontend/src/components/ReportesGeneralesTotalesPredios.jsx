@@ -107,7 +107,7 @@ export const generarPDFReporteTotalesPredios = (municipioSeleccionado, mesSelecc
 
     const anchoTituloVerde = doc.getTextWidth(tituloVerde);
     doc.setTextColor(0, 0, 0);
-    const nombreNegro = (municipioSeleccionado || "GENERAL (TODOS)").toUpperCase();
+    const nombreNegro = (municipioSeleccionado || " GENERAL (TODOS)").toUpperCase();
     doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
 
     let currentY = 42;
