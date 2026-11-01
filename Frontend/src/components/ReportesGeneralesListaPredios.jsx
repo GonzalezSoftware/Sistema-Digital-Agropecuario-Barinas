@@ -13,24 +13,41 @@ const normalizarTexto = (str) => {
         .trim();
 };
 
-export const generarPDFReporteGeneralPredios = (municipioSeleccionado, listaPredios = []) => {
-
+export const generarPDFReporteGeneralPredios = (municipioSeleccionado, mesSeleccionado, anioSeleccionado, listaPredios = []) => {
 
     const municipioBuscado = normalizarTexto(municipioSeleccionado);
 
+    // Filtrar por municipio, mes y año de manera robusta
     const prediosMunicipio = listaPredios.filter(p => {
+        // 1. Filtrar por municipio (si está vacío, acepta todos)
         const muniPredio = normalizarTexto(p.municipio);
-        return (
+        const cumpleMunicipio = !municipioSeleccionado || 
             muniPredio === municipioBuscado ||
             municipioBuscado.includes(muniPredio) ||
-            muniPredio.includes(municipioBuscado)
-        );
+            muniPredio.includes(municipioBuscado);
+
+        if (!cumpleMunicipio) return false;
+
+        // 2. Filtrar por fecha (Mes y Año)
+        if (p.fecha_creacion || p.fecha) {
+            const fechaPredio = new Date(p.fecha_creacion || p.fecha);
+            const anioPredio = fechaPredio.getFullYear().toString();
+            const mesPredio = (fechaPredio.getMonth() + 1).toString();
+
+            const cumpleAnio = !anioSeleccionado || anioPredio === anioSeleccionado;
+            const cumpleMes = !mesSeleccionado || mesPredio === mesSeleccionado;
+
+            return cumpleAnio && cumpleMes;
+        }
+
+        return true; 
     });
 
+    // 🛑 Alerta SweetAlert2 si no se consiguen registros en el período o municipio
     if (prediosMunicipio.length === 0) {
         Swal.fire({
             title: 'Sin registros',
-            text: `No se encontraron predios registrados para el municipio "${municipioSeleccionado}".`,
+            text: `No se encontraron predios registrados ${municipioSeleccionado ? `para el municipio "${municipioSeleccionado}"` : ''} ${mesSeleccionado ? `en el mes seleccionado` : ''} del año ${anioSeleccionado}.`,
             icon: 'info',
             confirmButtonColor: '#136442'
         });
@@ -44,7 +61,6 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, listaPred
     });
 
     const verdeBarinas = [19, 100, 66];
-    const grisOscuro = [40, 40, 40];
 
     // Cintillo institucional superior
     try {
@@ -71,33 +87,23 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, listaPred
     doc.setLineWidth(0.6);
     doc.line(12, 25, 204, 25);
 
-
-
-
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
-
-    // 1. Imprimir la etiqueta en color verde
     doc.setTextColor(...verdeBarinas);
-    const tituloVerde = "LISTA DE PREDIOS REGISTRADOS: ";
+    const tituloVerde = "LISTA DE PREDIOS: ";
     doc.text(tituloVerde, 12, 33);
 
-    // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
     const anchoTituloVerde = doc.getTextWidth(tituloVerde);
-
-    // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
-    doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
-    const nombreNegro = (municipioSeleccionado || "SIN NOMBRE").toUpperCase();
+    doc.setTextColor(0, 0, 0);
+    const nombreNegro = (municipioSeleccionado || "GENERAL (TODOS)").toUpperCase();
     doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
-
 
     let currentY = 42;
 
-    // Única Sección: Catastro y Detalle de Predios Registrados
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...verdeBarinas);
-    doc.text("LISTAs DE PREDIOS REGISTRADOS", 12, currentY);
+    doc.text(`CATASTRO OFICIAL - PERÍODO: ${mesSeleccionado ? `Mes ${mesSeleccionado} /` : ''} Año ${anioSeleccionado}`, 12, currentY);
 
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
@@ -143,12 +149,12 @@ export const generarPDFReporteGeneralPredios = (municipioSeleccionado, listaPred
         doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
     }
 
-    const nombreArchivo = `Catastro_Predios_${municipioSeleccionado.replace(/\s+/g, "_")}.pdf`;
+    const nombreArchivo = `Catastro_Predios_${municipioSeleccionado ? municipioSeleccionado.replace(/\s+/g, "_") : 'General'}_${anioSeleccionado}.pdf`;
     doc.save(nombreArchivo);
 
     Swal.fire({
         title: '¡Reporte Exportado!',
-        text: `El reporte de catastro para el municipio ${municipioSeleccionado} se descargó correctamente.`,
+        text: `El reporte de catastro se descargó correctamente.`,
         icon: 'success',
         confirmButtonColor: '#136442'
     });

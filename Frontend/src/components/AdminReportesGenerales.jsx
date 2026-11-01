@@ -24,6 +24,21 @@ const MUNICIPIOS_BARINAS = [
     "Sosa"
 ];
 
+const MESES = [
+    { id: "1", nombre: "Enero" },
+    { id: "2", nombre: "Febrero" },
+    { id: "3", nombre: "Marzo" },
+    { id: "4", nombre: "Abril" },
+    { id: "5", nombre: "Mayo" },
+    { id: "6", nombre: "Junio" },
+    { id: "7", nombre: "Julio" },
+    { id: "8", nombre: "Agosto" },
+    { id: "9", nombre: "Septiembre" },
+    { id: "10", nombre: "Octubre" },
+    { id: "11", nombre: "Noviembre" },
+    { id: "12", nombre: "Diciembre" },
+];
+
 const ESPECES_ANIMALES = [
     "Bovino", "Bubalino", "Equino", "Ovino", "Porcino", "Caprino", "Cunicola", "Avicola", "Apicola"
 ];
@@ -39,8 +54,11 @@ const LISTA_RUBROS_VEGETALES = [
 ];
 
 export const AdminReportesGenerales = ({ listaPredios = [] }) => {
-    // Estados para los filtros de municipio (ahora con soporte global por defecto)
+    // Estados para los filtros de municipio y fechas
     const [municipioPredios, setMunicipioPredios] = useState("");
+    const [mesSeleccionado, setMesSeleccionado] = useState("");
+    const [anioSeleccionado, setAnioSeleccionado] = useState(new Date().getFullYear().toString());
+
     const [municipioTotales, setMunicipioTotales] = useState("");
     const [municipioCaracterizados, setMunicipioCaracterizados] = useState("");
     const [municipioProduccion, setMunicipioProduccion] = useState("");
@@ -51,7 +69,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
     const handleExportarPredios = (e) => {
         e.preventDefault();
-        generarPDFReporteGeneralPredios(municipioPredios, listaPredios);
+        generarPDFReporteGeneralPredios(municipioPredios, mesSeleccionado, anioSeleccionado, listaPredios);
     };
 
     const handleExportarTotales = (e) => {
@@ -105,20 +123,40 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
             <div className="reportes-grid">
                 
-                {/* 1. Lista General de Predios */}
+                {/* 1. Lista General de Predios (Con filtro de Mes y Año) */}
                 <div style={cardStyle}>
                     <div>
                         <div style={cardHeaderStyle}>
                             <MapIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>1. Lista General de Predios</h4>
                         </div>
-                        <p style={cardDescStyle}>Exporta el catastro oficial y el detalle de todos los predios registrados (por municipio o general).</p>
+                        <p style={cardDescStyle}>Exporta el catastro oficial y el detalle de todos los predios registrados filtrando por municipio, mes y año.</p>
+                        
                         <div style={selectContainerStyle}>
                             <label style={selectLabelStyle}>Seleccione el Municipio:</label>
                             <select value={municipioPredios} onChange={(e) => setMunicipioPredios(e.target.value)} style={selectStyle}>
                                 <option value="">Todos los municipios (General)...</option>
                                 {MUNICIPIOS_BARINAS.map((mun, i) => <option key={i} value={mun}>{mun}</option>)}
                             </select>
+
+                            {/* Filtros de Mes y Año */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
+                                <div>
+                                    <label style={selectLabelStyle}>Mes:</label>
+                                    <select value={mesSeleccionado} onChange={(e) => setMesSeleccionado(e.target.value)} style={selectStyle}>
+                                        <option value="">Todos...</option>
+                                        {MESES.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={selectLabelStyle}>Año:</label>
+                                    <select value={anioSeleccionado} onChange={(e) => setAnioSeleccionado(e.target.value)} style={selectStyle}>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                        <option value="2027">2027</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button onClick={handleExportarPredios} style={buttonStyle}>
