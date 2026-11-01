@@ -150,12 +150,12 @@ export default function AdminConfigPage() {
       const correoAdmin = dataPerfil.correo;
 
       // Disparamos el envío del código usando la API del backend
-      const resCorreo = await fetch(`${API_URL}enviar-correo-correo/`, {
+      const resCorreo = await fetch(`${API_URL}enviar-codigo-correo/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo: correoAdmin })
       });
-      
+
       const dataCorreo = await resCorreo.json();
       if (!resCorreo.ok) throw new Error(dataCorreo.error || "No se pudo enviar el correo.");
 
