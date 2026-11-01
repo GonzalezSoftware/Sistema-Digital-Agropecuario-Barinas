@@ -2,6 +2,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
 
 const normalizarTexto = (str) => {
     if (!str) return "";
@@ -14,26 +16,47 @@ const normalizarTexto = (str) => {
         .trim();
 };
 
-export const generarPDFReportePrediosCaracterizados = (municipioSeleccionado, listaPredios = []) => {
-
+export const generarPDFReportePrediosCaracterizados = (municipioSeleccionado, mesSeleccionado, anioSeleccionado, listaPredios = []) => {
 
     const municipioBuscado = normalizarTexto(municipioSeleccionado);
 
-    // Filtramos por municipio y evaluamos estrictamente que tengan la caracterización completada
+    // Filtrado estricto por Municipio, Caracterización completada, Mes y Año (`fecha_registro`)
     const prediosMunicipio = listaPredios.filter(p => {
+        // 1. Filtrar por municipio (si está vacío, acepta todos)
         const muniPredio = normalizarTexto(p.municipio);
-        const coincideMunicipio = (
+        const coincideMunicipio = !municipioSeleccionado || (
             muniPredio === municipioBuscado ||
             municipioBuscado.includes(muniPredio) ||
             muniPredio.includes(municipioBuscado)
         );
-        return coincideMunicipio && p.caracterizacion_completada === true;
+
+        if (!coincideMunicipio) return false;
+
+        // 2. Evaluar estrictamente que la caracterización esté completada
+        if (p.caracterizacion_completada !== true) return false;
+
+        // 3. Extraer el campo de fecha de Django (fecha_registro)
+        const rawFecha = p.fecha_registro || p.fecha_creacion || p.fecha;
+        if (!rawFecha) return false;
+
+        const fechaPredio = new Date(rawFecha);
+        if (isNaN(fechaPredio.getTime())) return false;
+
+        const anioPredio = fechaPredio.getFullYear().toString();
+        const mesPredio = (fechaPredio.getMonth() + 1).toString();
+
+        // 4. Validación estricta de Año y Mes
+        const cumpleAnio = !anioSeleccionado || anioPredio === anioSeleccionado.toString().trim();
+        const cumpleMes = !mesSeleccionado || mesPredio === mesSeleccionado.toString().trim();
+
+        return cumpleAnio && cumpleMes;
     });
 
+    // 🛑 Alerta SweetAlert2 estricta si no se consiguen registros
     if (prediosMunicipio.length === 0) {
         Swal.fire({
             title: 'Sin registros',
-            text: `No se encontraron predios con caracterización completada para el municipio "${municipioSeleccionado}".`,
+            text: `No se encontraron predios caracterizados ${municipioSeleccionado ? `para el municipio "${municipioSeleccionado}"` : 'en general'} para ${mesSeleccionado ? `el mes seleccionado` : 'todos los meses'} del año ${anioSeleccionado || 'especificado'}.`,
             icon: 'info',
             confirmButtonColor: '#136442'
         });
@@ -51,8 +74,8 @@ export const generarPDFReportePrediosCaracterizados = (municipioSeleccionado, li
 
     // Cintillo institucional superior
     try {
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
+        doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+        doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("No se pudieron cargar las imágenes de los logos en el PDF.", error);
     }
@@ -74,32 +97,24 @@ export const generarPDFReportePrediosCaracterizados = (municipioSeleccionado, li
     doc.setLineWidth(0.6);
     doc.line(12, 25, 204, 25);
 
-
-
-
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
 
-    // 1. Imprimir la etiqueta en color verde
     doc.setTextColor(...verdeBarinas);
     const tituloVerde = "LISTA DE PREDIOS CARACTERIZADOS: ";
     doc.text(tituloVerde, 12, 33);
 
-    // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
     const anchoTituloVerde = doc.getTextWidth(tituloVerde);
-
-    // 3. Imprimir el nombre del predio en color negro (o gris oscuro)
-    doc.setTextColor(0, 0, 0); // O puedes usar tu constante grisOscuro
-    const nombreNegro = (municipioSeleccionado || "SIN NOMBRE").toUpperCase();
+    doc.setTextColor(0, 0, 0);
+    const nombreNegro = (municipioSeleccionado || "GENERAL (TODOS)").toUpperCase();
     doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
-
 
     let currentY = 42;
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...verdeBarinas);
-    doc.text("LISTA OFICIAL DE PREDIOS CON CARACTERIZACIÓN COMPLETADA", 12, currentY);
+    doc.text(`PERÍODO: ${mesSeleccionado ? `Mes ${mesSeleccionado} /` : 'Todos los meses'} Año ${anioSeleccionado}`, 12, currentY);
 
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.3);
@@ -145,12 +160,12 @@ export const generarPDFReportePrediosCaracterizados = (municipioSeleccionado, li
         doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
     }
 
-    const nombreArchivo = `Predios_Caracterizados_${municipioSeleccionado.replace(/\s+/g, "_")}.pdf`;
+    const nombreArchivo = `Predios_Caracterizados_${municipioSeleccionado ? municipioSeleccionado.replace(/\s+/g, "_") : 'General'}_${anioSeleccionado}.pdf`;
     doc.save(nombreArchivo);
 
     Swal.fire({
         title: '¡Reporte Exportado!',
-        text: `El reporte de predios caracterizados para el municipio ${municipioSeleccionado} se descargó correctamente.`,
+        text: `El reporte de predios caracterizados se descargó correctamente.`,
         icon: 'success',
         confirmButtonColor: '#136442'
     });

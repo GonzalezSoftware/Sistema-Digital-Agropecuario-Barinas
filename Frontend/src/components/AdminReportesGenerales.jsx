@@ -54,17 +54,21 @@ const LISTA_RUBROS_VEGETALES = [
 ];
 
 export const AdminReportesGenerales = ({ listaPredios = [] }) => {
-    // Estados para 1. Lista General de Predios
+    // 1. Estados para Lista General de Predios
     const [municipioPredios, setMunicipioPredios] = useState("");
     const [mesPredios, setMesPredios] = useState("");
     const [anioPredios, setAnioPredios] = useState("2026");
 
-    // Estados para 2. Reporte de Totales y Estadísticas
+    // 2. Estados para Reporte de Totales y Estadísticas
     const [municipioTotales, setMunicipioTotales] = useState("");
     const [mesTotales, setMesTotales] = useState("");
     const [anioTotales, setAnioTotales] = useState("2026");
 
+    // 3. Estados para Predios Ya Caracterizados
     const [municipioCaracterizados, setMunicipioCaracterizados] = useState("");
+    const [mesCaracterizados, setMesCaracterizados] = useState("");
+    const [anioCaracterizados, setAnioCaracterizados] = useState("2026");
+
     const [municipioProduccion, setMunicipioProduccion] = useState("");
 
     const [filtroAnimal, setFiltroAnimal] = useState({ municipio: "", especie: "" });
@@ -83,7 +87,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
     const handleExportarCaracterizados = (e) => {
         e.preventDefault();
-        generarPDFReportePrediosCaracterizados(municipioCaracterizados, listaPredios);
+        generarPDFReportePrediosCaracterizados(municipioCaracterizados, mesCaracterizados, anioCaracterizados, listaPredios);
     };
 
     const handleExportarProduccion = (e) => {
@@ -187,7 +191,6 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 {MUNICIPIOS_BARINAS.map((mun, i) => <option key={i} value={mun}>{mun}</option>)}
                             </select>
 
-                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
                                 <div>
                                     <label style={selectLabelStyle}>Mes:</label>
@@ -223,13 +226,36 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                             <ClipboardDocumentCheckIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>3. Predios Ya Caracterizados</h4>
                         </div>
-                        <p style={cardDescStyle}>Exporta exclusivamente el listado oficial de predios que ya han completado su caracterización.</p>
+                        <p style={cardDescStyle}>Exporta exclusivamente el listado oficial de predios caracterizados filtrando por período.</p>
+                        
                         <div style={selectContainerStyle}>
                             <label style={selectLabelStyle}>Seleccione el Municipio:</label>
                             <select value={municipioCaracterizados} onChange={(e) => setMunicipioCaracterizados(e.target.value)} style={selectStyle}>
                                 <option value="">Todos los municipios (General)...</option>
                                 {MUNICIPIOS_BARINAS.map((mun, i) => <option key={i} value={mun}>{mun}</option>)}
                             </select>
+
+                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
+                                <div>
+                                    <label style={selectLabelStyle}>Mes:</label>
+                                    <select value={mesCaracterizados} onChange={(e) => setMesCaracterizados(e.target.value)} style={selectStyle}>
+                                        <option value="">Todos...</option>
+                                        {MESES.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={selectLabelStyle}>Año (≥ 2026):</label>
+                                    <input 
+                                        type="number" 
+                                        min="2026" 
+                                        value={anioCaracterizados} 
+                                        onChange={(e) => setAnioCaracterizados(e.target.value)} 
+                                        style={selectStyle} 
+                                        placeholder="2026"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button onClick={handleExportarCaracterizados} style={buttonStyle}>
