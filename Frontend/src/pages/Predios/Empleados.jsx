@@ -82,7 +82,6 @@ export default function EmpleadoDashboard() {
         try {
             console.log("Enviando petición para el predio ID:", predioSeleccionado.id_predio);
 
-            // 1. Mostramos la alerta de carga (Swal.showLoading)
             Swal.fire({
                 title: "Procesando...",
                 text: "Actualizando el estado del predio, por favor espere.",
@@ -112,7 +111,6 @@ export default function EmpleadoDashboard() {
                 throw new Error("No se pudo procesar la solicitud (Error " + response.status + ")");
             }
 
-            // 2. Mostramos el mensaje de éxito
             await Swal.fire({
                 title: "¡Predio Inhabilitado!",
                 text: "El predio ha sido marcado como inactivo correctamente.",
@@ -239,12 +237,14 @@ export default function EmpleadoDashboard() {
     };
     const esFormularioValido = () => true;
 
-    // Filtramos la lista general de predios solo para el municipio del empleado
-    const prediosMunicipio = listaPredios.filter(
-        (predio) => predio.municipio === municipioEmpleado
-    );
+    // 🔹 FILTRADO ESTABLE DE PREDIOS POR MUNICIPIO CON USEMEMO (Evita bucles infinitos)
+    const prediosMunicipio = useMemo(() => {
+        return listaPredios.filter(
+            (predio) => predio.municipio === municipioEmpleado
+        );
+    }, [listaPredios, municipioEmpleado]);
 
-    // 🔹 AQUÍ INTEGRAMOS EL HOOK DE HISTORIAL
+    // 🔹 INTEGRAMOS EL HOOK DE HISTORIAL PASANDO EL ARREGLO ESTABLE
     const {
         busqueda: busquedaHistorial,
         setBusqueda: setBusquedaHistorial,
@@ -284,7 +284,7 @@ export default function EmpleadoDashboard() {
         0
     );
 
-    // ── CÁLCULO SEGURO DE PREDIOS POR PARROQUIA (USANDO USEMEMO) ──
+    // ── AGRUPAR PREDIOS POR PARROQUIA DE FORMA ESTABLE CON USEMEMO ──
     const datosGraficoParroquias = useMemo(() => {
         const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
         const conteoParroquias = {};
@@ -349,7 +349,7 @@ export default function EmpleadoDashboard() {
                                 datosServicios={datosServiciosMunicipio}
                                 datosVialidad={datosVialidadMunicipio}
                                 datosIntensidad={datosIntensidadMunicipio}
-                                datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p.superficie || 0), infrastructure: Object.values(p.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
+                                datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p.superficie || 0), infraestructura: Object.values(p.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
                                 datosLegales={datosLegalesMunicipio}
                                 chartCard={chartCard}
                                 chartTitle={`Predios por Parroquia (${municipioEmpleado || "Municipio"})`}
