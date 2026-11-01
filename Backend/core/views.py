@@ -1321,3 +1321,14 @@ def gestionar_contacto(request):
         contacto.telefono = request.data.get('telefono', contacto.telefono)
         contacto.save()
         return Response({"mensaje": "Información de contacto actualizada exitosamente."})
+
+def obtener_perfil_admin(request):
+    usuario_nombre = request.GET.get('usuario')
+    try:
+        admin = AdministradorSistema.objects.get(usuario=usuario_nombre)
+        return JsonResponse({
+            "usuario": admin.usuario,
+            "correo": admin.correo
+        }, status=200)
+    except AdministradorSistema.DoesNotExist:
+        return JsonResponse({"error": "Administrador no encontrado"}, status=404)

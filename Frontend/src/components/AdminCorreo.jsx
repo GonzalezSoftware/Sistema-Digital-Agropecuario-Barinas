@@ -11,40 +11,44 @@ export default function AdminCorreo() {
 
     const [form, setForm] = useState({
         usuario: "",
-        correo_actual: "", // <-- NUEVO: Muestra el correo que ya está registrado
+        correo_actual: "Consultando base de datos...", 
         nuevo_correo: "",
         confirmar_correo: ""
     });
 
     const [cargando, setCargando] = useState(false);
 
-    // Cargar el usuario real logueado desde la sesión y consultar sus datos (incluyendo su correo actual)
+    // Consultar directamente al backend (Base de Datos) el correo actual del admin logueado
     useEffect(() => {
         const sesion = sessionStorage.getItem("usuario_admin");
         if (sesion) {
             try {
                 const dataAdmin = JSON.parse(sesion);
                 if (dataAdmin && dataAdmin.usuario) {
-                    setForm(prev => ({ ...prev, usuario: dataAdmin.usuario }));
-                    
-                    // Opcional: Si guardaste el correo en la sesión, lo cargamos de inmediato
-                    if (dataAdmin.correo) {
-                        setForm(prev => ({ ...prev, correo_actual: dataAdmin.correo }));
-                    } else {
-                        // Si no está en la sesión, consultamos al backend el perfil del admin
-                        fetch(`${API_URL}admin/perfil/?usuario=${dataAdmin.usuario}`)
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data && data.correo) {
-                                    setForm(prev => ({ ...prev, correo_actual: data.correo }));
-                                }
-                            })
-                            .catch(err => console.error("No se pudo obtener el correo actual", err));
-                    }
+                    const nombreUsuario = dataAdmin.usuario;
+                    setForm(prev => ({ ...prev, usuario: nombreUsuario }));
+
+                    // Petición a la base de datos para traer el correo real almacenado
+                    fetch(`${API_URL}admin/perfil/?usuario=${nombreUsuario}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.correo) {
+                                setForm(prev => ({ ...prev, correo_actual: data.correo }));
+                            } else {
+                                setForm(prev => ({ ...prev, correo_actual: "No registrado" }));
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Error al obtener el correo de la BD", err);
+                            setForm(prev => ({ ...prev, correo_actual: "Error de conexión" }));
+                        });
                 }
             } catch (e) {
-                console.error("Error al leer la sesión del admin", e);
+                console.error("Error al leer la sesión", e);
+                setForm(prev => ({ ...prev, correo_actual: "Error de sesión" }));
             }
+        } else {
+            setForm(prev => ({ ...prev, correo_actual: "Sin sesión activa" }));
         }
     }, []);
 
@@ -65,7 +69,7 @@ export default function AdminCorreo() {
         if (!formularioValido) return;
 
         Swal.fire({
-            title: "Actualizando correo electrónico...",
+            title: "Actualizando correo en la base de datos...",
             text: "Por favor, espera un momento.",
             allowOutsideClick: false,
             didOpen: () => {
@@ -91,26 +95,18 @@ export default function AdminCorreo() {
                 Swal.fire({
                     icon: "success",
                     title: "¡Éxito!",
-                    text: data.mensaje || "Correo institucional actualizado correctamente.",
+                    text: data.mensaje || "Correo actualizado correctamente en la base de datos.",
                     timer: 2000,
                     showConfirmButton: false
                 });
                 
-                // Actualizamos el correo actual en pantalla y limpiamos los campos nuevos
+                // Actualizamos el correo actual en pantalla con el valor recién guardado y limpiamos
                 setForm(prev => ({ 
                     ...prev, 
                     correo_actual: prev.nuevo_correo,
                     nuevo_correo: "", 
                     confirmar_correo: "" 
                 }));
-
-                // Actualizamos también el sessionStorage si almacena el objeto admin
-                const sesion = sessionStorage.getItem("usuario_admin");
-                if (sesion) {
-                    const dataAdmin = JSON.parse(sesion);
-                    dataAdmin.correo = form.nuevo_correo;
-                    sessionStorage.setItem("usuario_admin", JSON.stringify(dataAdmin));
-                }
 
             } else {
                 Swal.fire({
@@ -173,19 +169,19 @@ export default function AdminCorreo() {
                     </h3>
                 </div>
                 <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px", lineHeight: "1.4" }}>
-                    Visualiza y actualiza la dirección de correo electrónico institucional asociada para la recuperación de acceso del administrador.
+                    Visualiza el correo almacenado en la base de datos y actualiza la dirección de recuperación de acceso institucional.
                 </p>
 
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px", width: "100%", boxSizing: "border-box" }}>
                     
-                    {/* Campo de Correo Actual (Solo lectura) */}
+                    {/* Campo de Correo Actual extraído directo de la BD */}
                     <div style={{ width: "100%" }}>
                         <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#334155", marginBottom: "6px" }}>
-                            Correo Electrónico Actual Registrado
+                            Correo Registrado en la Base de Datos
                         </label>
                         <input
                             type="email"
-                            value={form.correo_actual || "Cargando correo..."}
+                            value={form.correo_actual}
                             disabled
                             style={{
                                 width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1",

@@ -22,7 +22,8 @@ from .views import (
     cambiar_password_admin,
     gestionar_contacto,
     solicitar_reinicio_sistema,
-    ejecutar_reinicio_sistema
+    ejecutar_reinicio_sistema,
+    obtener_perfil_admin
 )
 
 router = DefaultRouter()
@@ -48,6 +49,7 @@ urlpatterns = [
     path('noticias/pendientes/<int:pk>/resolver/', resolver_noticia_pendiente, name='resolver_noticia_pendiente'), 
     path('reiniciar/solicitar/', solicitar_reinicio_sistema, name='solicitar_reinicio_sistema'),
     path('reiniciar/ejecutar/', ejecutar_reinicio_sistema, name='ejecutar_reinicio_sistema'),
+    path('admin/perfil/', obtener_perfil_admin, name='obtener_perfil_admin'),
 ]
 
 # Servir archivos subidos por el usuario en desarrollo local
