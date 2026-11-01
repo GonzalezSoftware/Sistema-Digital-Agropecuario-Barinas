@@ -44,7 +44,6 @@ import {
 } from "../../components/ui/AdminUI";
 
 export default function EmpleadoDashboard() {
-    // URL del servidor backend en AWS con HTTPS
     const API_URL = "https://3.145.179.35.nip.io/api/";
 
     const navigate = useNavigate();
@@ -52,11 +51,11 @@ export default function EmpleadoDashboard() {
 
     // 🔹 Consumimos las propiedades necesarias del hook global de producción
     const {
-        usuario,
+        usuario: usuarioGlobal,
         cargando,
         statsProduccion,
         cerrarSesion,
-        municipioEmpleado,
+        municipioEmpleado: municipioGlobal,
         busquedaCedula,
         setBusquedaCedula,
         filtrarPredios,
@@ -78,10 +77,29 @@ export default function EmpleadoDashboard() {
         guardarLicencia,
     } = useDashboardProduccion();
 
+    // 🛡️ RECUPERACIÓN DE RESPALDO DESDE SESSIONSTORAGE SI EL HOOK DA NULL (POR RECARGA DIRECTA F5)
+    const usuarioSesion = useMemo(() => {
+        try {
+            const stored = sessionStorage.getItem("usuario_predios");
+            return stored ? JSON.parse(stored) : null;
+        } catch (e) {
+            return null;
+        }
+    }, []);
+
+    const municipioEmpleado = municipioGlobal || (usuarioSesion?.municipio ? usuarioSesion.municipio.replace(/_/g, ' ').toUpperCase() : null);
+    const usuario = usuarioGlobal || usuarioSesion;
+
+    // Redirección de seguridad si no hay sesión ni municipio al recargar
+    useEffect(() => {
+        if (!usuarioSesion && !municipioGlobal && !cargando) {
+            console.warn("⚠️ No se encontró sesión activa en sessionStorage. Redirigiendo al login...");
+            navigate("/predios/login");
+        }
+    }, [usuarioSesion, municipioGlobal, cargando, navigate]);
+
     const cambiarDueñoPredio = async (predioSeleccionado) => {
         try {
-            console.log("Enviando petición para el predio ID:", predioSeleccionado.id_predio);
-
             Swal.fire({
                 title: "Procesando...",
                 text: "Actualizando el estado del predio, por favor espere.",
@@ -94,20 +112,11 @@ export default function EmpleadoDashboard() {
 
             const response = await fetch(`${API_URL}predios/${predioSeleccionado.id_predio}/`, {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    estado: 'inactivo',
-                    inhabilitado: true
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: 'inactivo', inhabilitado: true })
             });
 
-            console.log("Código de respuesta del servidor:", response.status);
-
             if (!response.ok) {
-                const errorTexto = await response.text();
-                console.error("Detalle del error del servidor:", errorTexto);
                 throw new Error("No se pudo procesar la solicitud (Error " + response.status + ")");
             }
 
@@ -119,9 +128,7 @@ export default function EmpleadoDashboard() {
             });
 
             window.location.reload();
-
         } catch (error) {
-            console.error("Error en cambio de dueño:", error);
             Swal.fire({
                 title: "Error",
                 text: error.message || "No se pudo completar la acción.",
@@ -165,7 +172,6 @@ export default function EmpleadoDashboard() {
         }
     }, [vistaActiva, predioActivo]);
 
-    // ── ESTADO INICIAL COMPLETO Y LOCAL ──
     const formInicial = {
         productor_nombre: "",
         productor_cedula: "",
@@ -197,7 +203,6 @@ export default function EmpleadoDashboard() {
     const [camposBloqueados, setCamposBloqueados] = useState({});
     const [prefijoCedula, setPrefijoCedula] = useState("V-");
 
-    // DICCIONARIO COMPLETO DE LOS 12 MUNICIPIOS CON SUS PARROQUIAS
     const PARROQUIAS_POR_MUNICIPIO = useMemo(() => ({
         "Alberto Arvelo Torrealba": ["Sabaneta", "Rodriguez Domínguez"],
         "Andrés Eloy Blanco": ["El Cantón", "Santa Cruz de Guacas", "Puerto Vivas"],
@@ -215,41 +220,20 @@ export default function EmpleadoDashboard() {
 
     const manejarCambio = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const validarCampoProductor = () => true;
     const verificarCedulaDuplicada = async () => false;
-    const guardarEnDjango = async () => {
-        console.log("Guardando formulario:", formData);
-    };
+    const guardarEnDjango = async () => {};
     const esFormularioValido = () => true;
 
-    // 🔹 FILTRADO CON CONSOLE.LOG PARA LA CONSOLA
+    // 🔹 FILTRADO BLINDADO
     const prediosMunicipio = useMemo(() => {
-        try {
-            console.log("=== [DEPURACIÓN EMPLEADO] ===");
-            console.log("Municipio Asignado en sesión:", municipioEmpleado);
-            console.log("Lista completa de predios recibida:", listaPredios);
-
-            if (!Array.isArray(listaPredios)) {
-                console.warn("⚠️ listaPredios no es un arreglo válido todavía:", listaPredios);
-                return [];
-            }
-
-            const filtrados = listaPredios.filter((predio) => predio && predio.municipio === municipioEmpleado);
-            console.log("Predios filtrados para este municipio:", filtrados);
-            return filtrados;
-        } catch (err) {
-            console.error("❌ Error en el filtrado de prediosMunicipio:", err);
-            return [];
-        }
+        if (!Array.isArray(listaPredios) || !municipioEmpleado) return [];
+        return listaPredios.filter((predio) => predio && predio.municipio === municipioEmpleado);
     }, [listaPredios, municipioEmpleado]);
 
-    // 🔹 HOOK DE HISTORIAL
     const {
         busqueda: busquedaHistorial,
         setBusqueda: setBusquedaHistorial,
@@ -270,7 +254,6 @@ export default function EmpleadoDashboard() {
         eliminarDefinitivoReal,
     } = useHistorialPredios(prediosMunicipio);
 
-    // Gráficos del municipio
     const {
         datosGrafico,
         datosTenencia: datosTenenciaMunicipio,
@@ -282,48 +265,37 @@ export default function EmpleadoDashboard() {
         datosLegales: datosLegalesMunicipio
     } = useGraficosPredios(prediosMunicipio);
 
-    const cargandoDashboard = cargando;
+    const cargandoDashboard = cargando || !municipioEmpleado;
     const totalPrediosMunicipio = prediosMunicipio.length;
     const superficieTotalMunicipio = prediosMunicipio.reduce(
         (acc, predio) => acc + Number(predio?.superficie || 0),
         0
     );
 
-    // ── CÁLCULO DE PARROQUIAS CON CONSOLE.LOG PARA LA CONSOLA ──
+    // ── CÁLCULO DE PARROQUIAS ──
     const datosGraficoParroquias = useMemo(() => {
-        try {
-            console.log("=== [DEPURACIÓN GRÁFICO PARROQUIAS] ===");
-            const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
-            console.log("Parroquias oficiales del municipio:", parroquiasDelMunicipio);
+        if (!municipioEmpleado) return [];
+        const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
+        const conteoParroquias = {};
+        
+        parroquiasDelMunicipio.forEach(parroquia => {
+            conteoParroquias[parroquia] = 0;
+        });
 
-            const conteoParroquias = {};
-            parroquiasDelMunicipio.forEach(parroquia => {
-                conteoParroquias[parroquia] = 0;
-            });
+        prediosMunicipio.forEach((predio) => {
+            const parroquiaPredio = predio?.parroquia ? String(predio.parroquia).trim() : "";
+            if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
+                conteoParroquias[parroquiaPredio] += 1;
+            } else if (parroquiaPredio) {
+                conteoParroquias[parroquiaPredio] = (conteoParroquias[parroquiaPredio] || 0) + 1;
+            }
+        });
 
-            prediosMunicipio.forEach((predio, i) => {
-                const parroquiaPredio = predio?.parroquia ? String(predio.parroquia).trim() : "";
-                console.log(`Predio [${i}] tiene registrada la parroquia:`, parroquiaPredio);
-
-                if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
-                    conteoParroquias[parroquiaPredio] += 1;
-                } else if (parroquiaPredio) {
-                    conteoParroquias[parroquiaPredio] = (conteoParroquias[parroquiaPredio] || 0) + 1;
-                }
-            });
-
-            const resultado = Object.keys(conteoParroquias).map(parroquia => ({
-                name: parroquia,
-                cantidad: conteoParroquias[parroquia]
-            }));
-
-            console.log("Resultado final enviado al gráfico de barras:", resultado);
-            return resultado.length > 0 ? resultado : [{ name: municipioEmpleado || "Sin Parroquias", cantidad: totalPrediosMunicipio }];
-        } catch (err) {
-            console.error("❌ Error calculando datosGraficoParroquias:", err);
-            return [{ name: municipioEmpleado || "Error", cantidad: totalPrediosMunicipio }];
-        }
-    }, [municipioEmpleado, prediosMunicipio, totalPrediosMunicipio, PARROQUIAS_POR_MUNICIPIO]);
+        return Object.keys(conteoParroquias).map(parroquia => ({
+            name: parroquia,
+            cantidad: conteoParroquias[parroquia]
+        }));
+    }, [municipioEmpleado, prediosMunicipio, PARROQUIAS_POR_MUNICIPIO]);
 
     const chartCard = {
         backgroundColor: "#ffffff",
