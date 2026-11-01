@@ -197,6 +197,7 @@ export default function EmpleadoDashboard() {
     const [camposBloqueados, setCamposBloqueados] = useState({});
     const [prefijoCedula, setPrefijoCedula] = useState("V-");
 
+    // DICCIONARIO COMPLETO DE LOS 12 MUNICIPIOS CON SUS PARROQUIAS
     const PARROQUIAS_POR_MUNICIPIO = useMemo(() => ({
         "Alberto Arvelo Torrealba": ["Sabaneta", "Rodriguez Domínguez"],
         "Andrés Eloy Blanco": ["El Cantón", "Santa Cruz de Guacas", "Puerto Vivas"],
@@ -227,10 +228,25 @@ export default function EmpleadoDashboard() {
     };
     const esFormularioValido = () => true;
 
-    // 🔹 FILTRADO DE PREDIOS
+    // 🔹 FILTRADO CON CONSOLE.LOG PARA LA CONSOLA
     const prediosMunicipio = useMemo(() => {
-        if (!Array.isArray(listaPredios)) return [];
-        return listaPredios.filter((predio) => predio && predio.municipio === municipioEmpleado);
+        try {
+            console.log("=== [DEPURACIÓN EMPLEADO] ===");
+            console.log("Municipio Asignado en sesión:", municipioEmpleado);
+            console.log("Lista completa de predios recibida:", listaPredios);
+
+            if (!Array.isArray(listaPredios)) {
+                console.warn("⚠️ listaPredios no es un arreglo válido todavía:", listaPredios);
+                return [];
+            }
+
+            const filtrados = listaPredios.filter((predio) => predio && predio.municipio === municipioEmpleado);
+            console.log("Predios filtrados para este municipio:", filtrados);
+            return filtrados;
+        } catch (err) {
+            console.error("❌ Error en el filtrado de prediosMunicipio:", err);
+            return [];
+        }
     }, [listaPredios, municipioEmpleado]);
 
     // 🔹 HOOK DE HISTORIAL
@@ -273,21 +289,22 @@ export default function EmpleadoDashboard() {
         0
     );
 
-    // ── CÁLCULO DE PARROQUIAS PARA EL GRÁFICO (CON PRUEBA VISUAL DE DIAGNÓSTICO) ──
-    const [errorCalculoParroquias, setErrorCalculoParroquias] = useState(null);
-
+    // ── CÁLCULO DE PARROQUIAS CON CONSOLE.LOG PARA LA CONSOLA ──
     const datosGraficoParroquias = useMemo(() => {
         try {
-            setErrorCalculoParroquias(null);
+            console.log("=== [DEPURACIÓN GRÁFICO PARROQUIAS] ===");
             const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
-            
+            console.log("Parroquias oficiales del municipio:", parroquiasDelMunicipio);
+
             const conteoParroquias = {};
             parroquiasDelMunicipio.forEach(parroquia => {
                 conteoParroquias[parroquia] = 0;
             });
 
-            prediosMunicipio.forEach((predio) => {
+            prediosMunicipio.forEach((predio, i) => {
                 const parroquiaPredio = predio?.parroquia ? String(predio.parroquia).trim() : "";
+                console.log(`Predio [${i}] tiene registrada la parroquia:`, parroquiaPredio);
+
                 if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
                     conteoParroquias[parroquiaPredio] += 1;
                 } else if (parroquiaPredio) {
@@ -300,13 +317,13 @@ export default function EmpleadoDashboard() {
                 cantidad: conteoParroquias[parroquia]
             }));
 
-            return resultado;
+            console.log("Resultado final enviado al gráfico de barras:", resultado);
+            return resultado.length > 0 ? resultado : [{ name: municipioEmpleado || "Sin Parroquias", cantidad: totalPrediosMunicipio }];
         } catch (err) {
-            console.error("Error en datosGraficoParroquias:", err);
-            setErrorCalculoParroquias(err.message);
-            return [];
+            console.error("❌ Error calculando datosGraficoParroquias:", err);
+            return [{ name: municipioEmpleado || "Error", cantidad: totalPrediosMunicipio }];
         }
-    }, [municipioEmpleado, prediosMunicipio, PARROQUIAS_POR_MUNICIPIO]);
+    }, [municipioEmpleado, prediosMunicipio, totalPrediosMunicipio, PARROQUIAS_POR_MUNICIPIO]);
 
     const chartCard = {
         backgroundColor: "#ffffff",
@@ -332,15 +349,6 @@ export default function EmpleadoDashboard() {
 
                 <main style={{ padding: "26px 50px", flex: 1, boxSizing: "border-box", overflowY: "auto", position: "relative" }}>
                     <EmpleadoHeader vistaActiva={vistaActiva} escudo={escudo} gobierno={logo} />
-
-                    {/* 🛠️ RECUADRO DE DIAGNÓSTICO VISUAL EN VIVO */}
-                    <div style={{ backgroundColor: "#1e293b", color: "#fff", padding: "12px 18px", borderRadius: "8px", marginBottom: "15px", fontSize: "12px", fontFamily: "monospace" }}>
-                        <strong>[DIAGNÓSTICO EN VIVO]</strong> | 
-                        Municipio Asignado: <code>{municipioEmpleado || "Ninguno"}</code> | 
-                        Predios en este municipio: <code>{prediosMunicipio.length}</code> | 
-                        Parroquias detectadas para el gráfico: <code>{JSON.stringify(datosGraficoParroquias)}</code>
-                        {errorCalculoParroquias && <div style={{ color: "#f87171", marginTop: "4px" }}>⚠️ Error: {errorCalculoParroquias}</div>}
-                    </div>
 
                     {vistaActiva === "inicio" ? (
                         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
