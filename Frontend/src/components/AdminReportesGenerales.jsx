@@ -282,7 +282,6 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 {MUNICIPIOS_BARINAS.map((mun, i) => <option key={i} value={mun}>{mun}</option>)}
                             </select>
 
-                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
                                 <div>
                                     <label style={selectLabelStyle}>Mes:</label>
@@ -330,7 +329,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                             <label style={{...selectLabelStyle, marginTop: "8px"}}>Seleccione la Especie:</label>
                             <select value={filtroAnimal.especie} onChange={(e) => setFiltroAnimal({...filtroAnimal, especie: e.target.value})} style={selectStyle}>
                                 <option value="">Seleccione una especie...</option>
-                                {ESPECES_INFORMATIVAS?.map ? null : ESPECES_ANIMALES.map((esp, i) => <option key={i} value={esp}>{esp}</option>)}
+                                {ESPECES_ANIMALES.map((esp, i) => <option key={i} value={esp}>{esp}</option>)}
                             </select>
                         </div>
                     </div>
