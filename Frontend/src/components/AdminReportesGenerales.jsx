@@ -80,7 +80,8 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     // 6. Estados para Reporte General Sistemas de Producción Animal
     const [filtroSistemasAnimal, setFiltroSistemasAnimal] = useState({ municipio: "", sistema: "", mes: "", anio: "2026" });
 
-    const [filtroVegetal, setFiltroVegetal] = useState({ municipio: "", rubro: "" });
+    // 7. Estados para Reporte General Vegetal
+    const [filtroVegetal, setFiltroVegetal] = useState({ municipio: "", rubro: "", mes: "", anio: "2026" });
 
     const handleExportarPredios = (e) => {
         e.preventDefault();
@@ -114,7 +115,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
     const handleExportarReporteVegetal = (e) => {
         e.preventDefault();
-        generarPDFReporteVegetal(filtroVegetal.municipio, filtroVegetal.rubro, listaPredios);
+        generarPDFReporteVegetal(filtroVegetal.municipio, filtroVegetal.rubro, filtroVegetal.mes, filtroVegetal.anio, listaPredios);
     };
 
     return (
@@ -386,7 +387,6 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 {SISTEMAS_PRODUCCION_ANIMAL.map((sis, i) => <option key={i} value={sis}>{sis}</option>)}
                             </select>
 
-                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
                                 <div>
                                     <label style={selectLabelStyle}>Mes:</label>
@@ -422,7 +422,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                             <SparklesIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>7. Reporte General Vegetal</h4>
                         </div>
-                        <p style={cardDescStyle}>Filtra por rubro agrícola y municipio. Ordenado de mayor a menor cantidad de hectáreas e incluye datos de contacto.</p>
+                        <p style={cardDescStyle}>Filtra por rubro agrícola, municipio y período. Ordenado de mayor a menor cantidad de hectáreas.</p>
                         
                         <div style={selectContainerStyle}>
                             <label style={selectLabelStyle}>Seleccione el Municipio:</label>
@@ -436,6 +436,28 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 <option value="">Seleccione un rubro...</option>
                                 {LISTA_RUBROS_VEGETALES.map((rub, i) => <option key={i} value={rub}>{rub}</option>)}
                             </select>
+
+                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
+                                <div>
+                                    <label style={selectLabelStyle}>Mes:</label>
+                                    <select value={filtroVegetal.mes} onChange={(e) => setFiltroVegetal({...filtroVegetal, mes: e.target.value})} style={selectStyle}>
+                                        <option value="">Todos...</option>
+                                        {MESES.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={selectLabelStyle}>Año (≥ 2026):</label>
+                                    <input 
+                                        type="number" 
+                                        min="2026" 
+                                        value={filtroVegetal.anio} 
+                                        onChange={(e) => setFiltroVegetal({...filtroVegetal, anio: e.target.value})} 
+                                        style={selectStyle} 
+                                        placeholder="2026"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button onClick={handleExportarReporteVegetal} style={buttonStyle}>

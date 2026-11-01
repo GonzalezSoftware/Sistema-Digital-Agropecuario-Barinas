@@ -1,18 +1,39 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Swal from "sweetalert2";
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
 
-export const generarPDFReporteVegetal = (municipioFiltro, rubroFiltro, listaPredios) => {
+export const generarPDFReporteVegetal = (municipioFiltro, rubroFiltro, mesFiltro, anioFiltro, listaPredios) => {
     if (!rubroFiltro) {
         Swal.fire({ icon: "warning", title: "Rubro requerido", text: "Debe seleccionar un rubro vegetal para generar este reporte.", confirmButtonColor: "#136442" });
         return;
     }
 
     let prediosFiltrados = listaPredios.filter(p => {
+        // 1. Filtrar por municipio
         const cumpleMun = municipioFiltro ? p.municipio?.toLowerCase() === municipioFiltro.toLowerCase() : true;
+        if (!cumpleMun) return false;
+
+        // 2. Filtrar por fecha exacta (`fecha_registro`)
+        const rawFecha = p.fecha_registro || p.fecha_creacion || p.fecha;
+        if (!rawFecha) return false;
+
+        const fechaPredio = new Date(rawFecha);
+        if (isNaN(fechaPredio.getTime())) return false;
+
+        const anioPredio = fechaPredio.getFullYear().toString();
+        const mesPredio = (fechaPredio.getMonth() + 1).toString();
+
+        const cumpleAnio = !anioFiltro || anioPredio === anioFiltro.toString().trim();
+        const cumpleMes = !mesFiltro || mesPredio === mesFiltro.toString().trim();
+
+        if (!cumpleAnio || !cumpleMes) return false;
+
+        // 3. Filtrar por rubros vegetales y rubro seleccionado
         const rubros = p.rubros_vegetales || [];
         const tieneRubro = rubros.some(r => r.rubro?.toLowerCase() === rubroFiltro.toLowerCase());
-        return cumpleMun && tieneRubro;
+        return tieneRubro;
     });
 
     let datosProcesados = prediosFiltrados.map(p => {
@@ -44,7 +65,12 @@ export const generarPDFReporteVegetal = (municipioFiltro, rubroFiltro, listaPred
     datosProcesados.sort((a, b) => b.totalHectareasRubro - a.totalHectareasRubro);
 
     if (datosProcesados.length === 0) {
-        Swal.fire({ icon: "info", title: "Sin registros", text: "No se encontraron predios con el rubro vegetal seleccionado.", confirmButtonColor: "#136442" });
+        Swal.fire({ 
+            icon: "info", 
+            title: "Sin registros", 
+            text: `No se encontraron predios con el rubro "${rubroFiltro}" ${municipioFiltro ? `en el municipio "${municipioFiltro}"` : 'en general'} para ${mesFiltro ? `el mes seleccionado` : 'todos los meses'} del año ${anioFiltro || 'especificado'}.`, 
+            confirmButtonColor: "#136442" 
+        });
         return;
     }
 
@@ -55,8 +81,8 @@ export const generarPDFReporteVegetal = (municipioFiltro, rubroFiltro, listaPred
 
     // ── CINTILLO INSTITUCIONAL UNIFICADO ──
     try {
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
+        doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+        doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("Logos institucionales omitidos.");
     }
@@ -81,9 +107,9 @@ export const generarPDFReporteVegetal = (municipioFiltro, rubroFiltro, listaPred
     doc.setTextColor(...verdeBarinas);
     doc.text(`REPORTE GENERAL VEGETAL: (${rubroFiltro.toUpperCase()})`, 12, 33);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(80, 80, 80);
-    doc.text(`Municipio: ${municipioFiltro || "Todos los municipios"}`, 12, 38);
+    doc.text(`Municipio: ${municipioFiltro || "Todos los municipios"} | Período: ${mesFiltro ? `Mes ${mesFiltro} /` : 'Todos los meses'} Año ${anioFiltro}`, 12, 38);
 
     // ── CONSTRUCCIÓN DE LA TABLA ──
     let bodyTabla = [];
@@ -92,7 +118,6 @@ export const generarPDFReporteVegetal = (municipioFiltro, rubroFiltro, listaPred
         const p = item.predio;
         const prod = p.productor || {};
         
-        // Fila principal verde claro organizada en celdas
         bodyTabla.push([
             {
                 content: `#${index + 1}`,
@@ -120,7 +145,6 @@ export const generarPDFReporteVegetal = (municipioFiltro, rubroFiltro, listaPred
             }
         ]);
 
-        // Filas internas blancas con el desglose de los cultivos de ese rubro
         if (item.detalleRubrosList.length > 0) {
             item.detalleRubrosList.forEach(det => {
                 bodyTabla.push([
@@ -169,5 +193,5 @@ export const generarPDFReporteVegetal = (municipioFiltro, rubroFiltro, listaPred
         doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
     }
 
-    doc.save(`Reporte_Vegetal_${rubroFiltro}_${municipioFiltro || "General"}.pdf`);
+    doc.save(`Reporte_Vegetal_${rubroFiltro}_${municipioFiltro || "General"}_${anioFiltro}.pdf`);
 };
