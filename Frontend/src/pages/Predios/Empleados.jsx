@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from "react-router-dom";
 import escudo from "../../assets/logo2.jpg";
 import logo from "../../assets/gobierno.jpg";
@@ -213,9 +213,20 @@ export default function EmpleadoDashboard() {
     const [camposBloqueados, setCamposBloqueados] = useState({});
     const [prefijoCedula, setPrefijoCedula] = useState("V-");
 
-    const PARROQUIAS_POR_MUNICIPIO = {
-        "Barinas": ["Catedral", "Alto Barinas", "Manuel Palacio Fajardo", "San Juan de Guanay", "Torunos"],
-    };
+    const PARROQUIAS_POR_MUNICIPIO = useMemo(() => ({
+        "Alberto Arvelo Torrealba": ["Sabaneta", "Rodriguez Domínguez"],
+        "Andrés Eloy Blanco": ["El Cantón", "Santa Cruz de Guacas", "Puerto Vivas"],
+        "Antonio José de Sucre": ["Ticoporo", "Andrés Bello", "Nicolás Pulido"],
+        "Arismendi": ["Arismendi", "Guadarrama", "La Unión", "San Antonio"],
+        "Barinas": ["Catedral", "Alto Barinas", "Manuel Palacio Fajardo", "San Juan de Guanay", "Torunos", "El Carmen", "San Silvestre", "Santa Inés", "Santa Lucía", "Juan Antonio Rodríguez Domínguez"],
+        "Bolívar": ["Barinitas", "Altamira de Cáceres", "Calderas"],
+        "Cruz Paredes": ["Barrancas", "El Socorro", "Masparrito"],
+        "Ezequiel Zamora": ["Santa Bárbara", "Ramón Ignacio Méndez", "José Ignacio del Pumar", "Santa Rosa"],
+        "Obispos": ["Obispos", "El Real", "La Luz", "Los Guasimitos"],
+        "Pedraza": ["Ciudad Bolivia", "Ignacio Briceño", "José Félix Ribas", "Páez"],
+        "Rojas": ["Libertad", "Dolores", "Palacios Fajardo", "Santa Rosa", "Simón Bolívar"],
+        "Sosa": ["Ciudad de Nutrias", "El Regalo", "Puerto Nutrias", "Santa Lucía"]
+    }), []);
 
     const manejarCambio = (e) => {
         const { name, value } = e.target;
@@ -232,10 +243,23 @@ export default function EmpleadoDashboard() {
     };
     const esFormularioValido = () => true;
 
-    // Filtramos la lista general de predios solo para el municipio del empleado
-    const prediosMunicipio = listaPredios.filter(
-        (predio) => predio.municipio === municipioEmpleado
-    );
+    // 🔹 FILTRADO CON PRUEBAS DE DIAGNÓSTICO INTERNAS
+    const prediosMunicipio = useMemo(() => {
+        try {
+            console.log("[DEPURACIÓN] municipioEmpleado actual:", municipioEmpleado);
+            console.log("[DEPURACIÓN] listaPredios total recibida:", listaPredios);
+            if (!Array.isArray(listaPredios)) {
+                console.error("[ERROR DIAGNÓSTICO] listaPredios no es un arreglo válido:", listaPredios);
+                return [];
+            }
+            const filtrados = listaPredios.filter((predio) => predio && predio.municipio === municipioEmpleado);
+            console.log("[DEPURACIÓN] prediosMunicipio filtrados exitosamente:", filtrados);
+            return filtrados;
+        } catch (err) {
+            console.error("[ERROR CRÍTICO DIAGNÓSTICO] Falló el filtro de prediosMunicipio:", err);
+            return [];
+        }
+    }, [listaPredios, municipioEmpleado]);
 
     // 🔹 AQUÍ INTEGRAMOS EL HOOK DE HISTORIAL (Reemplaza las funciones locales vacías)
     const {
@@ -273,9 +297,44 @@ export default function EmpleadoDashboard() {
     const cargandoDashboard = cargando;
     const totalPrediosMunicipio = prediosMunicipio.length;
     const superficieTotalMunicipio = prediosMunicipio.reduce(
-        (acc, predio) => acc + Number(predio.superficie || 0),
+        (acc, predio) => acc + Number(predio?.superficie || 0),
         0
     );
+
+    // ── AGRUPAR PREDIOS POR PARROQUIA CON PRUEBAS DE DIAGNÓSTICO INTERNAS ──
+    const datosGraficoParroquias = useMemo(() => {
+        try {
+            console.log("[DEPURACIÓN GRÁFICO] Calculando parroquias para el municipio:", municipioEmpleado);
+            const parroquiasDelMunicipio = PARROQUIAS_POR_MUNICIPIO[municipioEmpleado] || [];
+            console.log("[DEPURACIÓN GRÁFICO] Parroquias base encontradas:", parroquiasDelMunicipio);
+
+            const conteoParroquias = {};
+            parroquiasDelMunicipio.forEach(parroquia => {
+                conteoParroquias[parroquia] = 0;
+            });
+
+            prediosMunicipio.forEach((predio, index) => {
+                const parroquiaPredio = predio?.parroquia ? String(predio.parroquia).trim() : "";
+                console.log(`[DEPURACIÓN GRÁFICO] Predio [${index}] -> parroquia registrada:`, parroquiaPredio);
+                if (conteoParroquias.hasOwnProperty(parroquiaPredio)) {
+                    conteoParroquias[parroquiaPredio] += 1;
+                } else if (parroquiaPredio) {
+                    conteoParroquias[parroquiaPredio] = (conteoParroquias[parroquiaPredio] || 0) + 1;
+                }
+            });
+
+            const resultado = Object.keys(conteoParroquias).map(parroquia => ({
+                name: parroquia,
+                cantidad: conteoParroquias[parroquia]
+            }));
+
+            console.log("[DEPURACIÓN GRÁFICO] Resultado final de parroquias para Recharts:", resultado);
+            return resultado.length > 0 ? resultado : [{ name: municipioEmpleado || "Sin Parroquias", cantidad: totalPrediosMunicipio }];
+        } catch (err) {
+            console.error("[ERROR CRÍTICO DIAGNÓSTICO] Falló el cálculo de datosGraficoParroquias:", err);
+            return [{ name: municipioEmpleado || "Error", cantidad: totalPrediosMunicipio }];
+        }
+    }, [municipioEmpleado, prediosMunicipio, totalPrediosMunicipio, PARROQUIAS_POR_MUNICIPIO]);
 
     const chartCard = {
         backgroundColor: "#ffffff",
@@ -311,15 +370,15 @@ export default function EmpleadoDashboard() {
                                 municipiosCubiertos={1}
                                 totalMunicipiosBarinas={1}
                                 listaPredios={prediosMunicipio}
-                                datosGrafico={[{ name: municipioEmpleado, cantidad: totalPrediosMunicipio }]}
+                                datosGrafico={datosGraficoParroquias}
                                 datosTenencia={datosTenenciaMunicipio}
                                 datosServicios={datosServiciosMunicipio}
                                 datosVialidad={datosVialidadMunicipio}
                                 datosIntensidad={datosIntensidadMunicipio}
-                                datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p.superficie || 0), infraestructura: Object.values(p.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
+                                datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p?.superficie || 0), infraestructura: Object.values(p?.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
                                 datosLegales={datosLegalesMunicipio}
                                 chartCard={chartCard}
-                                chartTitle={chartTitle}
+                                chartTitle={`Predios por Parroquia (${municipioEmpleado || "Municipio"})`}
                                 chartPlaceholder={chartPlaceholder}
                                 Spinner={Spinner}
                             />
