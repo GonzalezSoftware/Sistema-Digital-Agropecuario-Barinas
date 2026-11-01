@@ -1,8 +1,10 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Swal from "sweetalert2";
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
 
-export const generarPDFReporteAnimal = (municipioFiltro, especieFiltro, listaPredios) => {
+export const generarPDFReporteAnimal = (municipioFiltro, especieFiltro, mesFiltro, anioFiltro, listaPredios) => {
     if (!especieFiltro) {
         Swal.fire({ icon: "warning", title: "Especie requerida", text: "Debe seleccionar una especie animal para generar este reporte.", confirmButtonColor: "#136442" });
         return;
@@ -25,16 +27,34 @@ export const generarPDFReporteAnimal = (municipioFiltro, especieFiltro, listaPre
     };
 
     let prediosFiltrados = listaPredios.filter(p => {
+        // 1. Filtrar por municipio
         const cumpleMun = municipioFiltro ? p.municipio?.toLowerCase() === municipioFiltro.toLowerCase() : true;
+        if (!cumpleMun) return false;
+
+        // 2. Filtrar por fecha exacta (`fecha_registro`)
+        const rawFecha = p.fecha_registro || p.fecha_creacion || p.fecha;
+        if (!rawFecha) return false;
+
+        const fechaPredio = new Date(rawFecha);
+        if (isNaN(fechaPredio.getTime())) return false;
+
+        const anioPredio = fechaPredio.getFullYear().toString();
+        const mesPredio = (fechaPredio.getMonth() + 1).toString();
+
+        const cumpleAnio = !anioFiltro || anioPredio === anioFiltro.toString().trim();
+        const cumpleMes = !mesFiltro || mesPredio === mesFiltro.toString().trim();
+
+        if (!cumpleAnio || !cumpleMes) return false;
+
+        // 3. Filtrar por existencia animal y especie seleccionada
         const animalesPredio = p.existencia_animal || {};
-        
         const especiesSel = animalesPredio.especiesSeleccionadas || [];
         const estaSeleccionada = especiesSel.includes(especieFiltro);
         
         const subObj = obtenerSubObjetoAnimal(animalesPredio, especieFiltro);
         const tieneValores = subObj && typeof subObj === "object" && Object.values(subObj).some(val => Number(val) > 0);
 
-        return cumpleMun && (estaSeleccionada || tieneValores);
+        return estaSeleccionada || tieneValores;
     });
 
     let datosProcesados = prediosFiltrados.map(p => {
@@ -65,7 +85,12 @@ export const generarPDFReporteAnimal = (municipioFiltro, especieFiltro, listaPre
     datosProcesados.sort((a, b) => b.totalCabezas - a.totalCabezas);
 
     if (datosProcesados.length === 0) {
-        Swal.fire({ icon: "info", title: "Sin registros", text: "No se encontraron predios con la especie e información seleccionada.", confirmButtonColor: "#136442" });
+        Swal.fire({ 
+            icon: "info", 
+            title: "Sin registros", 
+            text: `No se encontraron predios para la especie "${especieFiltro}" ${municipioFiltro ? `en el municipio "${municipioFiltro}"` : 'en general'} para ${mesFiltro ? `el mes seleccionado` : 'todos los meses'} del año ${anioFiltro || 'especificado'}.`, 
+            confirmButtonColor: "#136442" 
+        });
         return;
     }
 
@@ -76,8 +101,8 @@ export const generarPDFReporteAnimal = (municipioFiltro, especieFiltro, listaPre
 
     // ── CINTILLO INSTITUCIONAL UNIFICADO ──
     try {
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10);
+        doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+        doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("Logos institucionales omitidos.");
     }
@@ -103,9 +128,9 @@ export const generarPDFReporteAnimal = (municipioFiltro, especieFiltro, listaPre
     doc.setTextColor(...verdeBarinas);
     doc.text(`REPORTE GENERAL PECUARIO: (${especieFiltro.toUpperCase()})`, 12, 33);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(80, 80, 80);
-    doc.text(`Municipio: ${municipioFiltro || "Todos los municipios"}`, 12, 38);
+    doc.text(`Municipio: ${municipioFiltro || "Todos los municipios"} | Período: ${mesFiltro ? `Mes ${mesFiltro} /` : 'Todos los meses'} Año ${anioFiltro}`, 12, 38);
 
     // ── CONSTRUCCIÓN DE LA TABLA CON CELDAS ORGANIZADAS ──
     let bodyTabla = [];
@@ -114,7 +139,6 @@ export const generarPDFReporteAnimal = (municipioFiltro, especieFiltro, listaPre
         const p = item.predio;
         const prod = p.productor || {};
         
-        // 1. FILA PRINCIPAL (VERDE CLARO): Número de orden individual + Predio + Superficie + Productor + Contacto + Total General
         bodyTabla.push([
             {
                 content: `#${index + 1}`,
@@ -142,7 +166,6 @@ export const generarPDFReporteAnimal = (municipioFiltro, especieFiltro, listaPre
             }
         ]);
 
-        // 2. FILAS INTERNAS (BLANCAS): Desglose limpio de subespecies sin símbolos extraños
         if (item.subespeciesMatriz.length > 0) {
             item.subespeciesMatriz.forEach(sub => {
                 bodyTabla.push([
@@ -205,5 +228,5 @@ export const generarPDFReporteAnimal = (municipioFiltro, especieFiltro, listaPre
         doc.text(`Página ${i} de ${totalPaginas}`, 204, 272, { align: "right" });
     }
 
-    doc.save(`Reporte_Animal_${especieFiltro}_${municipioFiltro || "General"}.pdf`);
+    doc.save(`Reporte_Animal_${especieFiltro}_${municipioFiltro || "General"}_${anioFiltro}.pdf`);
 };

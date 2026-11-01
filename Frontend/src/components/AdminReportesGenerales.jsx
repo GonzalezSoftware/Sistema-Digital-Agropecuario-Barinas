@@ -74,7 +74,9 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
     const [mesProduccion, setMesProduccion] = useState("");
     const [anioProduccion, setAnioProduccion] = useState("2026");
 
-    const [filtroAnimal, setFiltroAnimal] = useState({ municipio: "", especie: "" });
+    // 5. Estados para Reporte General Pecuario
+    const [filtroAnimal, setFiltroAnimal] = useState({ municipio: "", especie: "", mes: "", anio: "2026" });
+
     const [filtroSistemasAnimal, setFiltroSistemasAnimal] = useState({ municipio: "", sistema: "" });
     const [filtroVegetal, setFiltroVegetal] = useState({ municipio: "", rubro: "" });
 
@@ -100,7 +102,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
 
     const handleExportarReporteAnimal = (e) => {
         e.preventDefault();
-        generarPDFReporteAnimal(filtroAnimal.municipio, filtroAnimal.especie, listaPredios);
+        generarPDFReporteAnimal(filtroAnimal.municipio, filtroAnimal.especie, filtroAnimal.mes, filtroAnimal.anio, listaPredios);
     };
 
     const handleExportarReporteSistemasAnimal = (e) => {
@@ -317,7 +319,7 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                             <UserGroupIcon style={{ width: "22px", height: "22px", color: "#136442", flexShrink: 0 }} />
                             <h4 style={cardTitleStyle}>5. Reporte General Pecuario</h4>
                         </div>
-                        <p style={cardDescStyle}>Filtra por especie animal y municipio. Muestra predios ordenados de mayor a menor cantidad de cabezas con datos de productor.</p>
+                        <p style={cardDescStyle}>Filtra por especie animal, municipio y período. Muestra predios ordenados de mayor a menor cantidad de cabezas.</p>
                         
                         <div style={selectContainerStyle}>
                             <label style={selectLabelStyle}>Seleccione el Municipio:</label>
@@ -331,6 +333,28 @@ export const AdminReportesGenerales = ({ listaPredios = [] }) => {
                                 <option value="">Seleccione una especie...</option>
                                 {ESPECES_ANIMALES.map((esp, i) => <option key={i} value={esp}>{esp}</option>)}
                             </select>
+
+                            {/* Filtros de Mes y Cuadro de Año (mínimo 2026) */}
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
+                                <div>
+                                    <label style={selectLabelStyle}>Mes:</label>
+                                    <select value={filtroAnimal.mes} onChange={(e) => setFiltroAnimal({...filtroAnimal, mes: e.target.value})} style={selectStyle}>
+                                        <option value="">Todos...</option>
+                                        {MESES.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style={selectLabelStyle}>Año (≥ 2026):</label>
+                                    <input 
+                                        type="number" 
+                                        min="2026" 
+                                        value={filtroAnimal.anio} 
+                                        onChange={(e) => setFiltroAnimal({...filtroAnimal, anio: e.target.value})} 
+                                        style={selectStyle} 
+                                        placeholder="2026"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button onClick={handleExportarReporteAnimal} style={buttonStyle}>
