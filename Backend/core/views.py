@@ -1322,13 +1322,14 @@ def gestionar_contacto(request):
         contacto.save()
         return Response({"mensaje": "Información de contacto actualizada exitosamente."})
 
+@api_view(['GET'])
 def obtener_perfil_admin(request):
     usuario_nombre = request.GET.get('usuario')
     try:
         admin = AdministradorSistema.objects.get(usuario=usuario_nombre)
-        return JsonResponse({
+        return Response({
             "usuario": admin.usuario,
             "correo": admin.correo
-        }, status=200)
+        }, status=status.HTTP_200_OK)
     except AdministradorSistema.DoesNotExist:
-        return JsonResponse({"error": "Administrador no encontrado"}, status=404)
+        return Response({"error": "Administrador no encontrado"}, status=status.HTTP_404_NOT_FOUND)
