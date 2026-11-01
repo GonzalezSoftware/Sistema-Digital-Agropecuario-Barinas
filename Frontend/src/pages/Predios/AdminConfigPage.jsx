@@ -138,7 +138,7 @@ export default function AdminConfigPage() {
       didOpen: () => { Swal.showLoading(); }
     });
 
-    try {
+     try {
       // Usamos la API existente enviar-codigo-correo o una adaptada de recuperación
       const res = await fetch(`${API_URL}admin/perfil/?usuario=${usuarioInput}`);
       const dataPerfil = await res.json();
@@ -178,24 +178,108 @@ export default function AdminConfigPage() {
       if (!codigoIngresado) return;
 
       // Validamos si coincide con el código enviado (el backend o el caché valida)
-      // Aquí simulamos o mandamos a verificar el código
       if (codigoIngresado.trim() === String(dataCorreo.codigo)) {
-        // Pedimos la nueva contraseña
-        const { value: nuevaClave } = await Swal.fire({
+        
+        // Pedimos la nueva contraseña con validación estricta y ojito
+        let verNuevaClave = false;
+
+        const resultadoPassword = await Swal.fire({
           title: 'Nueva Contraseña',
-          input: 'password',
-          inputLabel: 'Ingresa tu nueva contraseña segura',
-          inputPlaceholder: 'Mínimo 8 caracteres',
-          inputAttributes: {
-            autocapitalize: 'off'
-          },
+          html: `
+            <div style="text-align: left; font-family: 'Poppins', sans-serif;">
+              <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+                Ingresa tu nueva contraseña cumpliendo con los requisitos de seguridad:
+              </p>
+              
+              <div style="position: relative; margin-bottom: 14px;">
+                <input 
+                  type="password" 
+                  id="swal-input-password" 
+                  class="swal2-input" 
+                  placeholder="Nueva contraseña" 
+                  style="margin: 0; width: 100%; box-sizing: border-box; padding-right: 50px;"
+                >
+                <button 
+                  type="button" 
+                  id="btn-toggle-password" 
+                  style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; font-size: 12px; font-weight: 600;"
+                >
+                  Ver
+                </button>
+              </div>
+
+              <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 12px;">
+                <span style="font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Requisitos de seguridad:</span>
+                <div id="req-length" style="color: #dc2626; margin-bottom: 4px;">❌ Mínimo 8 caracteres</div>
+                <div id="req-letter" style="color: #dc2626; margin-bottom: 4px;">❌ Al menos una letra</div>
+                <div id="req-upper" style="color: #dc2626; margin-bottom: 4px;">❌ Al menos una letra mayúscula</div>
+                <div id="req-symbol" style="color: #dc2626;">❌ Al menos un signo especial (!@#$%^&*)</div>
+              </div>
+            </div>
+          `,
+          focusConfirm: false,
           showCancelButton: true,
           confirmButtonText: 'Guardar Contraseña',
           cancelButtonText: 'Cancelar',
-          confirmButtonColor: '#136442'
+          confirmButtonColor: '#136442',
+          didOpen: () => {
+            const input = document.getElementById('swal-input-password');
+            const btnToggle = document.getElementById('btn-toggle-password');
+            const confirmBtn = Swal.getConfirmButton();
+            
+            confirmBtn.disabled = true;
+            confirmBtn.style.opacity = '0.6';
+            confirmBtn.style.cursor = 'not-allowed';
+
+            btnToggle.addEventListener('click', () => {
+              verNuevaClave = !verNuevaClave;
+              input.type = verNuevaClave ? 'text' : 'password';
+              btnToggle.textContent = verNuevaClave ? 'Ocultar' : 'Ver';
+            });
+
+            input.addEventListener('input', () => {
+              const val = input.value;
+
+              const hasLength = val.length >= 8;
+              const hasLetter = /[a-zA-Z]/.test(val);
+              const hasUpper = /[A-Z]/.test(val);
+              const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(val);
+
+              const reqLength = document.getElementById('req-length');
+              const reqLetter = document.getElementById('req-letter');
+              const reqUpper = document.getElementById('req-upper');
+              const reqSymbol = document.getElementById('req-symbol');
+
+              reqLength.innerHTML = hasLength ? '✔️ Mínimo 8 caracteres' : '❌ Mínimo 8 caracteres';
+              reqLength.style.color = hasLength ? '#059669' : '#dc2626';
+
+              reqLetter.innerHTML = hasLetter ? '✔️ Al menos una letra' : '❌ Al menos una letra';
+              reqLetter.style.color = hasLetter ? '#059669' : '#dc2626';
+
+              reqUpper.innerHTML = hasUpper ? '✔️ Al menos una letra mayúscula' : '❌ Al menos una letra mayúscula';
+              reqUpper.style.color = hasUpper ? '#059669' : '#dc2626';
+
+              reqSymbol.innerHTML = hasSymbol ? '✔️ Al menos un signo especial (!@#$%^&*)' : '❌ Al menos un signo especial (!@#$%^&*)';
+              reqSymbol.style.color = hasSymbol ? '#059669' : '#dc2626';
+
+              if (hasLength && hasLetter && hasUpper && hasSymbol) {
+                confirmBtn.disabled = false;
+                confirmBtn.style.opacity = '1';
+                confirmBtn.style.cursor = 'pointer';
+              } else {
+                confirmBtn.disabled = true;
+                confirmBtn.style.opacity = '0.6';
+                confirmBtn.style.cursor = 'not-allowed';
+              }
+            });
+          },
+          preConfirm: () => {
+            return document.getElementById('swal-input-password').value;
+          }
         });
 
-        if (!nuevaClave) return;
+        if (!resultadoPassword.isConfirmed || !resultadoPassword.value) return;
+        const nuevaClave = resultadoPassword.value;
 
         // Guardamos la nueva clave en el backend
         const resReset = await fetch(`${API_URL}admin/reset-password/`, {
