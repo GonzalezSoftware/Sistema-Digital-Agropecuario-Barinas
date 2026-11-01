@@ -213,6 +213,7 @@ export default function EmpleadoDashboard() {
     const [camposBloqueados, setCamposBloqueados] = useState({});
     const [prefijoCedula, setPrefijoCedula] = useState("V-");
 
+    // DICCIONARIO COMPLETO Y CORREGIDO DE LOS 12 MUNICIPIOS CON SUS PARROQUIAS
     const PARROQUIAS_POR_MUNICIPIO = useMemo(() => ({
         "Alberto Arvelo Torrealba": ["Sabaneta", "Rodriguez Domínguez"],
         "Andrés Eloy Blanco": ["El Cantón", "Santa Cruz de Guacas", "Puerto Vivas"],
@@ -261,7 +262,7 @@ export default function EmpleadoDashboard() {
         }
     }, [listaPredios, municipioEmpleado]);
 
-    // 🔹 AQUÍ INTEGRAMOS EL HOOK DE HISTORIAL (Reemplaza las funciones locales vacías)
+    // 🔹 AQUÍ INTEGRAMOS EL HOOK DE HISTORIAL
     const {
         busqueda: busquedaHistorial,
         setBusqueda: setBusquedaHistorial,
@@ -533,7 +534,7 @@ export default function EmpleadoDashboard() {
                     ) : vistaActiva === "produccion_caracterizacion" ? (
                         <div>
                             <FormCaracterizacion
-                                modo="caracterizacion" // 🔹 Activa el flujo completo con validación WhatsApp
+                                modo="caracterizacion"
                                 predioActivo={predioActivo}
                                 rubrosVegetales={rubrosVegetales}
                                 setRubrosVegetales={setRubrosVegetales}
@@ -547,7 +548,7 @@ export default function EmpleadoDashboard() {
                     ) : vistaActiva === "produccion_actualizacion" ? (
                         <div>
                             <FormCaracterizacion
-                                modo="actualizacion" // 🔹 Activa la precarga de datos y el guardado directo sin WhatsApp
+                                modo="actualizacion"
                                 predioActivo={predioActivo}
                                 rubrosVegetales={rubrosVegetales}
                                 setRubrosVegetales={setRubrosVegetales}
