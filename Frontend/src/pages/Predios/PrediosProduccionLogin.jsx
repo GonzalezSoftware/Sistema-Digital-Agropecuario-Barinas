@@ -69,6 +69,18 @@ export default function LoginPrediosPage() {
       if (response.ok && data.success) {
         setCargando(false);
 
+        // 🚫 BLOQUEO DE CREDENCIALES DE ADMINISTRADOR EN EL LOGIN DE EMPLEADOS
+        const rolUsuario = data.usuario.rol ? data.usuario.rol.toLowerCase() : "";
+        if (rolUsuario.includes("admin") || rolUsuario.includes("administrador")) {
+          Swal.fire({
+            icon: "warning",
+            title: "Acceso no permitido",
+            text: "Las credenciales de Administrador no tienen acceso a este portal de empleados.",
+            confirmButtonColor: "#b91c1c"
+          });
+          return;
+        }
+
         // Guardamos los datos del usuario en sessionStorage
         sessionStorage.setItem("usuario_predios", JSON.stringify(data.usuario));
 
