@@ -73,8 +73,9 @@ export default function LoginPrediosPage() {
         const rolUsuario = data.usuario.rol ? data.usuario.rol.toLowerCase() : "";
         if (rolUsuario.includes("admin") || rolUsuario.includes("administrador")) {
           Swal.fire({
-            icon: "warning",
-            title: "Acceso no permitido",
+            icon: "error",
+            title: "Error de acceso",
+            text: mensajeError,
             confirmButtonColor: "#b91c1c"
           });
           return;
