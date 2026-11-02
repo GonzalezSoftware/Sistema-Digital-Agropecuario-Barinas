@@ -73,9 +73,9 @@ export default function LoginPrediosPage() {
         const rolUsuario = data.usuario.rol ? data.usuario.rol.toLowerCase() : "";
         if (rolUsuario.includes("admin") || rolUsuario.includes("administrador")) {
           Swal.fire({
-            icon: "error",
-            title: "Error de acceso",
-            text: mensajeError,
+            icon: "warning",
+            title: "Acceso no permitido",
+            text: "Las credenciales de Administrador no tienen acceso a este portal de empleados.",
             confirmButtonColor: "#b91c1c"
           });
           return;
