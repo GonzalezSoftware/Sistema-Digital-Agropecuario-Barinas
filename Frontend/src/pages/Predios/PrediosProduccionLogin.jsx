@@ -69,12 +69,9 @@ export default function LoginPrediosPage() {
       if (response.ok && data.success) {
         setCargando(false);
 
-        // 🚫 BLOQUEO DE CREDENCIALES DE ADMINISTRADOR CON TU ALERTA PERSONALIZADA
+        // 🚫 BLOQUEO DE CREDENCIALES DE ADMINISTRADOR EN EL LOGIN DE EMPLEADOS
         const rolUsuario = data.usuario.rol ? data.usuario.rol.toLowerCase() : "";
         if (rolUsuario.includes("admin") || rolUsuario.includes("administrador")) {
-          const mensajeError = "Las credenciales de Administrador no corresponden a este módulo de empleados.";
-          setError(mensajeError);
-
           Swal.fire({
             icon: "error",
             title: "Error de acceso",
