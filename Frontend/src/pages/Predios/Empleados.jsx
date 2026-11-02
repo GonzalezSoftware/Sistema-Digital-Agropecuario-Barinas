@@ -538,7 +538,7 @@ export default function EmpleadoDashboard() {
                         </div>
                     ) : (
                         <div>
-                            <p>Selecciona una sección válida en el menú lateral.</p>
+                            <p>Selecciona una sección válida en el menú lateralll.</p>
                         </div>
                     )}
                 </main>
