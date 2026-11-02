@@ -75,7 +75,6 @@ export default function LoginPrediosPage() {
           Swal.fire({
             icon: "warning",
             title: "Acceso no permitido",
-            text: "Las credenciales de Administrador no tienen acceso a este portal de empleados.",
             confirmButtonColor: "#b91c1c"
           });
           return;
