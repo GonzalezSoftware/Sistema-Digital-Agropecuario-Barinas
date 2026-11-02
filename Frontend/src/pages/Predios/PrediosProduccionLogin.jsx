@@ -85,7 +85,7 @@ export default function LoginPrediosPage() {
         sessionStorage.setItem("usuario_predios", JSON.stringify(data.usuario));
 
         // 📰 CASO ESPECÍFICO: Si es Empleado de Noticias
-        if (data.usuario.rol === "Empleado de Noticias") {
+        if (data.usuario.rol === "Empleado de Noticiassss") {
           await Swal.fire({
             icon: "success",
             title: "¡Acceso Autorizado!",
