@@ -74,8 +74,8 @@ export default function LoginPrediosPage() {
         if (rolUsuario.includes("admin") || rolUsuario.includes("administrador")) {
           Swal.fire({
             icon: "error",
-            title: "Error de acceso",
-            text: mensajeError,
+            title: "Error de conexión",
+            text: mensajeConexion,
             confirmButtonColor: "#b91c1c"
           });
           return;
