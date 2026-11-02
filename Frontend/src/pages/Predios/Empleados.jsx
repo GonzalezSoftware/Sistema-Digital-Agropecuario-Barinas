@@ -93,7 +93,6 @@ export default function EmpleadoDashboard() {
     // Redirección de seguridad si no hay sesión ni municipio al recargar
     useEffect(() => {
         if (!usuarioSesion && !municipioGlobal && !cargando) {
-            console.warn("⚠️ No se encontró sesión activa en sessionStorage. Redirigiendo al login...");
             navigate("/predios/login");
         }
     }, [usuarioSesion, municipioGlobal, cargando, navigate]);
@@ -297,6 +296,7 @@ export default function EmpleadoDashboard() {
         }));
     }, [municipioEmpleado, prediosMunicipio, PARROQUIAS_POR_MUNICIPIO]);
 
+    // 🛡️ OBJETOS DE ESTILO VALIDADOS (Evita React Error #62)
     const chartCard = {
         backgroundColor: "#ffffff",
         borderRadius: "14px",
@@ -339,7 +339,7 @@ export default function EmpleadoDashboard() {
                                 datosDispersion={prediosMunicipio.map(p => ({ superficie: Number(p?.superficie || 0), infraestructura: Object.values(p?.infraestructura || {}).reduce((a, b) => a + Number(b), 0) }))}
                                 datosLegales={datosLegalesMunicipio}
                                 chartCard={chartCard}
-                                chartTitle={`Predios por Parroquia (${municipioEmpleado || "Municipio"})`}
+                                chartTitle={chartTitle}
                                 chartPlaceholder={chartPlaceholder}
                                 Spinner={Spinner}
                             />
