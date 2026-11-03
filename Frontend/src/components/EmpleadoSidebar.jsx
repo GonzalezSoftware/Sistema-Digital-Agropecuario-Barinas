@@ -137,6 +137,7 @@ export const EmpleadoSidebar = ({
                 className={`empleado-sidebar ${sidebarAbierto ? "abierto" : ""}`}
                 style={{
                     width: "290px",
+                    maxWidth: "80vw",
                     backgroundColor: "#136442",
                     borderRight: "1px solid #0f4d34",
                     height: "100vh",
@@ -144,7 +145,7 @@ export const EmpleadoSidebar = ({
                     top: 0,
                     display: "flex",
                     flexDirection: "column",
-                    padding: "20px 18px",
+                    padding: "16px 14px",
                     boxSizing: "border-box",
                     overflow: "hidden",
                     zIndex: 1000,
@@ -156,16 +157,16 @@ export const EmpleadoSidebar = ({
                 <div style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "10px",
-                    padding: "12px 15px",
+                    gap: "8px",
+                    padding: "10px 12px",
                     backgroundColor: "rgba(255,255,255,0.08)",
-                    borderRadius: "16px",
-                    marginBottom: "16px",
+                    borderRadius: "14px",
+                    marginBottom: "12px",
                     flexShrink: 0
                 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
                         <div style={{
-                            width: "42px", height: "42px", borderRadius: "12px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0
+                            width: "38px", height: "38px", borderRadius: "10px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0
                         }}>
                             <img
                                 src={
@@ -181,7 +182,7 @@ export const EmpleadoSidebar = ({
 
                         <div style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
                             <span style={{
-                                fontSize: "14px",
+                                fontSize: "13px",
                                 fontWeight: "700",
                                 color: "#fff",
                                 whiteSpace: "nowrap",
@@ -192,7 +193,7 @@ export const EmpleadoSidebar = ({
                             </span>
 
                             <span style={{
-                                fontSize: "11px",
+                                fontSize: "10.5px",
                                 color: "#86efac",
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
@@ -208,15 +209,15 @@ export const EmpleadoSidebar = ({
                     {/* Indicador del Predio Seleccionado */}
                     <div style={{
                         backgroundColor: "rgba(0, 0, 0, 0.2)",
-                        padding: "8px 10px",
-                        borderRadius: "8px",
+                        padding: "6px 8px",
+                        borderRadius: "6px",
                         border: "1px solid rgba(134, 239, 172, 0.2)"
                     }}>
-                        <span style={{ fontSize: "9.5px", color: "#cbd5e1", display: "block", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                        <span style={{ fontSize: "9px", color: "#cbd5e1", display: "block", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                             Predio Activo:
                         </span>
                         <span style={{
-                            fontSize: "11.5px",
+                            fontSize: "11px",
                             fontWeight: "600",
                             color: predioActivo ? "#f8fafc" : "#94a3b8",
                             whiteSpace: "nowrap",
@@ -229,15 +230,16 @@ export const EmpleadoSidebar = ({
                     </div>
                 </div>
 
-                {/* Navegación de Opciones */}
+                {/* Navegación de Opciones (Con desplazamiento y compacta) */}
                 <div style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "4px",
-                    flex: "1",
+                    gap: "2px",
+                    flex: "1 1 auto",
                     overflowY: "auto",
-                    paddingRight: "4px",
-                    scrollbarWidth: "thin"
+                    paddingRight: "2px",
+                    scrollbarWidth: "thin",
+                    marginBottom: "6px"
                 }}>
                     {/* 1. Predios */}
                     <div>
@@ -245,16 +247,16 @@ export const EmpleadoSidebar = ({
                             onClick={() => setPrediosAbierto(!prediosAbierto)}
                             style={{
                                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "12px 16px", borderRadius: "12px", cursor: "pointer", marginBottom: "2px",
-                                backgroundColor: "transparent", color: "#86efac", fontWeight: 500, fontSize: "14px"
+                                padding: "10px 14px", borderRadius: "10px", cursor: "pointer", marginBottom: "2px",
+                                backgroundColor: "transparent", color: "#86efac", fontWeight: 500, fontSize: "13.5px"
                             }}
                         >
-                            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                <MapIcon style={{ width: "22px", height: "22px", color: "#86efac" }} />
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                <MapIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
                                 <span>Predios</span>
                             </div>
                             <ChevronDownIcon style={{
-                                width: "16px", height: "16px", color: "#86efac",
+                                width: "15px", height: "15px", color: "#86efac",
                                 transform: prediosAbierto ? "rotate(180deg)" : "rotate(0deg)",
                                 transition: "transform 0.25s ease"
                             }} />
@@ -264,30 +266,30 @@ export const EmpleadoSidebar = ({
                             <div style={{
                                 display: "flex",
                                 flexDirection: "column",
-                                gap: "4px",
-                                paddingLeft: "18px",
+                                gap: "2px",
+                                paddingLeft: "14px",
                                 marginTop: "2px",
-                                marginBottom: "6px",
+                                marginBottom: "4px",
                                 borderLeft: "2px solid rgba(134, 239, 172, 0.2)"
                             }}>
-                                <div onClick={() => seleccionarVista("inicio")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "inicio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "inicio" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ChartBarIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={() => seleccionarVista("inicio")} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "inicio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "inicio" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ChartBarIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Inicio</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("predios_registro")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "predios_registro" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_registro" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ClipboardDocumentListIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={() => seleccionarVista("predios_registro")} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "predios_registro" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_registro" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ClipboardDocumentListIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Registro</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("predios_historial")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "predios_historial" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_historial" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ClockIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={() => seleccionarVista("predios_historial")} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "predios_historial" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_historial" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ClockIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Historial</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("predios_georreferenciacion")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "predios_georreferenciacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_georreferenciacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <MapPinIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={() => seleccionarVista("predios_georreferenciacion")} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "predios_georreferenciacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_georreferenciacion" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <MapPinIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Georreferenciación</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("predios_reportes")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "predios_reportes" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_reportes" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <DocumentChartBarIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={() => seleccionarVista("predios_reportes")} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "predios_reportes" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "predios_reportes" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <DocumentChartBarIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Reportes</span>
                                 </div>
                             </div>
@@ -300,16 +302,16 @@ export const EmpleadoSidebar = ({
                             onClick={() => setProduccionAbierto(!produccionAbierto)}
                             style={{
                                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "12px 16px", borderRadius: "12px", cursor: "pointer", marginBottom: "2px",
-                                backgroundColor: "transparent", color: "#86efac", fontSize: "14px"
+                                padding: "10px 14px", borderRadius: "10px", cursor: "pointer", marginBottom: "2px",
+                                backgroundColor: "transparent", color: "#86efac", fontSize: "13.5px"
                             }}
                         >
-                            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                <CircleStackIcon style={{ width: "22px", height: "22px", color: "#86efac" }} />
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                <CircleStackIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
                                 <span>Producción</span>
                             </div>
                             <ChevronDownIcon style={{
-                                width: "16px", height: "16px", color: "#86efac",
+                                width: "15px", height: "15px", color: "#86efac",
                                 transform: produccionAbierto ? "rotate(180deg)" : "rotate(0deg)",
                                 transition: "transform 0.25s ease"
                             }} />
@@ -319,30 +321,30 @@ export const EmpleadoSidebar = ({
                             <div style={{
                                 display: "flex",
                                 flexDirection: "column",
-                                gap: "4px",
-                                paddingLeft: "18px",
+                                gap: "2px",
+                                paddingLeft: "14px",
                                 marginTop: "2px",
-                                marginBottom: "10px",
+                                marginBottom: "4px",
                                 borderLeft: "2px solid rgba(134, 239, 172, 0.2)"
                             }}>
-                                <div onClick={() => seleccionarVista("produccion_inicio")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_inicio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_inicio" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ChartBarIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={() => seleccionarVista("produccion_inicio")} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_inicio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_inicio" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ChartBarIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Inicio</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("produccion_seleccionar_predio")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_seleccionar_predio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_seleccionar_predio" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <CheckCircleIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={() => seleccionarVista("produccion_seleccionar_predio")} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_seleccionar_predio" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_seleccionar_predio" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <CheckCircleIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Seleccionar Predio</span>
                                 </div>
-                                <div onClick={manejarClickCaracterizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_caracterizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_caracterizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <DocumentTextIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={manejarClickCaracterizacion} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_caracterizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_caracterizacion" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <DocumentTextIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Caracterización</span>
                                 </div>
-                                <div onClick={manejarClickActualizacion} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_actualizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_actualizacion" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <ArrowPathIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={manejarClickActualizacion} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_actualizacion" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_actualizacion" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <ArrowPathIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Actualización Productiva</span>
                                 </div>
-                                <div onClick={() => seleccionarVista("produccion_reportes")} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", borderRadius: "8px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_reportes" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_reportes" ? "#ffffff" : "#86efac", fontSize: "13px" }}>
-                                    <DocumentChartBarIcon style={{ width: "20px", height: "20px", color: "#86efac" }} />
+                                <div onClick={() => seleccionarVista("produccion_reportes")} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "7px 10px", borderRadius: "6px", cursor: "pointer", backgroundColor: vistaActiva === "produccion_reportes" ? "rgba(255,255,255,0.15)" : "transparent", color: vistaActiva === "produccion_reportes" ? "#ffffff" : "#86efac", fontSize: "12.5px" }}>
+                                    <DocumentChartBarIcon style={{ width: "18px", height: "18px", color: "#86efac" }} />
                                     <span>Reportes</span>
                                 </div>
                             </div>
@@ -350,21 +352,21 @@ export const EmpleadoSidebar = ({
                     </div>
                 </div>
 
-                {/* Cerrar Sesión */}
+                {/* Cerrar Sesión (Pegado y compacto al final del menú) */}
                 <div
                     onClick={cerrarSesion}
                     style={{
-                        display: "flex", alignItems: "center", gap: "12px",
-                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
-                        color: "#fca5a5", fontSize: "14px", fontWeight: 600,
-                        marginTop: "12px", flexShrink: 0,
+                        display: "flex", alignItems: "center", gap: "10px",
+                        padding: "9px 12px", borderRadius: "8px", cursor: "pointer",
+                        color: "#fca5a5", fontSize: "13.5px", fontWeight: 600,
+                        flexShrink: 0,
                         backgroundColor: "rgba(252, 165, 165, 0.08)",
                         transition: "background 0.2s"
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.18)"}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.08)"}
                 >
-                    {PowerIcon && <PowerIcon style={{ width: "20px", height: "20px", color: "#fca5a5" }} />}
+                    {PowerIcon && <PowerIcon style={{ width: "18px", height: "18px", color: "#fca5a5" }} />}
                     <span>Cerrar Sesión</span>
                 </div>
             </aside>
@@ -385,6 +387,8 @@ export const EmpleadoSidebar = ({
                         transform: translateX(-100%);
                         z-index: 1050 !important;
                         box-shadow: 5px 0 25px rgba(0,0,0,0.3);
+                        max-width: 280px !important;
+                        width: 80% !important;
                     }
                     .empleado-sidebar.abierto {
                         transform: translateX(0) !important;

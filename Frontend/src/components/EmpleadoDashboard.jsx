@@ -56,28 +56,28 @@ export default function DashboardEmpleado({
     chartPlaceholder
 }) {
     return (
-        <div className="empleado-dashboard-container">
+        <div className="empleado-dashboard-wrapper">
             <style>{`
-                .empleado-dashboard-container {
+                .empleado-dashboard-wrapper {
                     width: 100% !important;
                     max-width: 1100px;
                     margin: 0 auto;
                     box-sizing: border-box !important;
-                    padding: 0 10px;
+                    padding: 0 8px;
                     overflow-x: hidden !important;
                 }
                 .empleado-stats-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-                    gap: 20px;
-                    margin-bottom: 24px;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 16px;
+                    margin-bottom: 20px;
                     width: 100%;
                     box-sizing: border-box;
                 }
                 .empleado-charts-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                    gap: 20px;
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    gap: 16px;
                     width: 100%;
                     box-sizing: border-box;
                 }
@@ -94,16 +94,16 @@ export default function DashboardEmpleado({
                     box-sizing: border-box;
                 }
                 @media (max-width: 768px) {
-                    .empleado-dashboard-container {
-                        padding: 0 4px !important;
+                    .empleado-dashboard-wrapper {
+                        padding: 0 2px !important;
                     }
                     .empleado-stats-grid {
                         grid-template-columns: 1fr !important;
-                        gap: 14px !important;
+                        gap: 12px !important;
                     }
                     .empleado-charts-grid {
                         grid-template-columns: 1fr !important;
-                        gap: 14px !important;
+                        gap: 12px !important;
                     }
                     .empleado-treemap-full {
                         grid-column: 1 / 1 !important;
@@ -131,7 +131,7 @@ export default function DashboardEmpleado({
                 {/* Gráfico 1 - Estatus Legal de la Tierra (Dona) */}
                 <div style={chartCard} className="empleado-card-item">
                     <h3 style={chartTitle}>Estatus Legal de la Tierra</h3>
-                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
+                    <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -139,7 +139,7 @@ export default function DashboardEmpleado({
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={datosTenencia} cx="50%" cy="45%" innerRadius={55} outerRadius={75} paddingAngle={5} dataKey="value" animationDuration={1000}>
+                                    <Pie data={datosTenencia} cx="50%" cy="45%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value" animationDuration={1000}>
                                         {datosTenencia.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
                                     </Pie>
                                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px' }} />
@@ -153,14 +153,14 @@ export default function DashboardEmpleado({
                 {/* Gráfico 2 - Radar (Servicios Básicos) */}
                 <div style={chartCard} className="empleado-card-item">
                     <h3 style={chartTitle}>Cobertura de Servicios Básicos (%)</h3>
-                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
+                    <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><p style={{ color: '#999' }}>Sin datos de servicios</p></div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <RadarChart cx="50%" cy="50%" outerRadius="65%" data={datosServicios}>
+                                <RadarChart cx="50%" cy="50%" outerRadius="60%" data={datosServicios}>
                                     <PolarGrid stroke="#e0e0e0" />
                                     <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 10, fontWeight: 'bold' }} />
                                     <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9 }} axisLine={false} />
@@ -175,19 +175,19 @@ export default function DashboardEmpleado({
                 {/* Gráfico 3 - Vialidad */}
                 <div style={chartCard} className="empleado-card-item">
                     <h3 style={chartTitle}>Estado de la Vialidad</h3>
-                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
+                    <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><p style={{ color: '#999' }}>Sin datos de vialidad</p></div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart layout="vertical" data={datosVialidad} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                                <BarChart layout="vertical" data={datosVialidad} margin={{ top: 5, right: 15, left: 5, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                                     <XAxis type="number" hide />
-                                    <YAxis dataKey="estado" type="category" tick={{ fontSize: 11, fontWeight: 'bold' }} width={75} />
+                                    <YAxis dataKey="estado" type="category" tick={{ fontSize: 11, fontWeight: 'bold' }} width={70} />
                                     <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px' }} />
-                                    <Bar dataKey="cantidad" radius={[0, 5, 5, 0]} barSize={25}>
+                                    <Bar dataKey="cantidad" radius={[0, 5, 5, 0]} barSize={22}>
                                         {datosVialidad.map((entry, index) => {
                                             const colors = { Excelente: '#0d5437', Bueno: '#338261', Regular: '#82ca9d', Malo: '#c8e6c9' };
                                             return <Cell key={`cell-${index}`} fill={colors[entry.estado] || '#8884d8'} />;
@@ -202,7 +202,7 @@ export default function DashboardEmpleado({
                 {/* Gráfico 4 - Dispersión: Superficie vs Infraestructura */}
                 <div style={chartCard} className="empleado-card-item">
                     <h3 style={chartTitle}>Relación Superficie vs. Infraestructura</h3>
-                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
+                    <div style={{ width: '100%', height: 260, marginTop: '14px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -224,7 +224,7 @@ export default function DashboardEmpleado({
                 {/* Gráfico 5 - Treemap de Tenencia de Tierras (Ancho Completo) */}
                 <div style={chartCard} className="empleado-card-item empleado-treemap-full">
                     <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
-                    <div style={{ width: '100%', height: 350, marginTop: '16px' }}>
+                    <div style={{ width: '100%', height: 320, marginTop: '14px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
