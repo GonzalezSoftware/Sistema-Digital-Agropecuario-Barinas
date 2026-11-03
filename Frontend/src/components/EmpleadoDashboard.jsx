@@ -61,7 +61,7 @@ export default function DashboardEmpleado({
 }) {
     return (
         <div className="empleado-dashboard-wrapper">
-            {/* ── ESTILOS CSS RESPONSIVE Y UNIFICADOS ── */}
+            {/* ── ESTILOS IDÉNTICOS AL ADMIN PARA UNIFORMIDAD VISUAL ── */}
             <style>{`
                 .empleado-dashboard-wrapper {
                     width: 100% !important;

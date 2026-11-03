@@ -6,7 +6,6 @@ import {
 } from 'recharts';
 import { Spinner, CardStat } from './ui/AdminUI';
 
-// ── COMPONENTE PERSONALIZADO PARA EL TREEMAP ──
 const CustomTreemapContent = (props) => {
     const { x, y, width, height, name, index } = props;
     const colors = ['#136442', '#1b8a5b', '#34d399', '#6ee7b7', '#a7f3d0'];
@@ -66,7 +65,7 @@ export default function DashboardInicio({
 }) {
     return (
         <div className="admin-dashboard-wrapper">
-            {/* ── ESTILOS CSS RESPONSIVE Y UNIFICADOS ── */}
+            {/* ── ESTILOS CSS RESPONSIVE IDÉNTICOS AL EMPLEADO ── */}
             <style>{`
                 .admin-dashboard-wrapper {
                     width: 100% !important;
