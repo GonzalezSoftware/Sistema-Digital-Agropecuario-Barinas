@@ -96,10 +96,13 @@ export default function HistorialPredios({
     const estaInhabilitado = predioSeleccionado?.estado === 'inactivo' || predioSeleccionado?.inhabilitado === true;
 
     return (
-        <div style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", boxSizing: "border-box" }}>
+        <div className="historial-wrapper" style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", boxSizing: "border-box" }}>
             
-            {/* Estilos CSS Responsivos */}
+            {/* Estilos CSS Responsivos Avanzados */}
             <style>{`
+                .historial-wrapper {
+                    padding: 0 10px;
+                }
                 .grid-productor {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
@@ -121,7 +124,18 @@ export default function HistorialPredios({
                     gap: 20px;
                 }
 
+                @media (max-width: 992px) {
+                    .grid-productor, 
+                    .grid-ubicacion, 
+                    .grid-tenencia {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+                }
+
                 @media (max-width: 768px) {
+                    .historial-wrapper {
+                        padding: 0 4px !important;
+                    }
                     .grid-productor, 
                     .grid-ubicacion, 
                     .grid-tenencia, 
@@ -131,11 +145,25 @@ export default function HistorialPredios({
                     .span-responsive {
                         grid-column: span 1 !important;
                     }
+                    .historial-header-flex {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                    }
+                    .historial-search-box {
+                        max-width: 100% !important;
+                    }
+                    .modal-acciones-footer {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                    }
+                    .modal-acciones-footer button {
+                        width: 100% !important;
+                    }
                 }
             `}</style>
 
             {/* ── TÍTULO Y BUSCADOR ── */}
-            <div style={{
+            <div className="historial-header-flex" style={{
                 display: "flex", justifyContent: "space-between", alignItems: "center",
                 marginBottom: "20px", flexWrap: "wrap", gap: "10px"
             }}>
@@ -143,7 +171,7 @@ export default function HistorialPredios({
                     Historial de Predios Registrados
                 </h2>
 
-                <div style={{ position: "relative", width: "100%", maxWidth: "350px" }}>
+                <div className="historial-search-box" style={{ position: "relative", width: "100%", maxWidth: "350px" }}>
                     <input
                         type="text"
                         placeholder="Buscar por productor o predio..."
@@ -282,7 +310,7 @@ export default function HistorialPredios({
                     <div style={{
                         backgroundColor: "#fff", width: "100%", maxWidth: "950px", maxHeight: "92vh",
                         borderRadius: "12px", overflowY: "auto", boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-                        display: "flex", flexDirection: "column"
+                        display: "flex", flexDirection: "column", boxSizing: "border-box"
                     }}>
                         {/* Encabezado Dinámico */}
                         <div style={{
@@ -555,10 +583,10 @@ export default function HistorialPredios({
                         </div>
 
                         {/* ── BOTONERA FINAL ── */}
-                        <div style={{
+                        <div className="modal-acciones-footer" style={{
                             padding: "15px 20px", backgroundColor: "#f4f4f4", display: "flex",
                             justifyContent: "flex-end", gap: "10px", borderTop: "1px solid #ddd",
-                            position: "sticky", bottom: 0, zIndex: 10, flexWrap: "wrap"
+                            position: "sticky", bottom: 0, zIndex: 10, flexWrap: "wrap", boxSizing: "border-box"
                         }}>
                             {!esAdmin && !estaInhabilitado && (
                                 <button

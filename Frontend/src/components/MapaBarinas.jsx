@@ -23,38 +23,62 @@ const MapaBarinas = ({ predios }) => {
     ];
 
     return (
-        <MapContainer 
-            center={[8.30, -69.75]} 
-            zoom={8} 
-            minZoom={7}
-            maxBounds={boundsBarinas} 
-            maxBoundsViscosity={1.0} 
-            style={{ height: '100%', width: '100%', minHeight: '350px' }}
-        >
-            {/* Capa oficial y gratuita de OpenStreetMap */}
-            <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
-
-            {predios.map((p, idx) => {
-                const coords = p.coordenadas ? p.coordenadas.split(',').map(Number) : null;
-                
-                if (coords && coords.length === 2 && !isNaN(coords[0])) {
-                    return (
-                        <Marker key={idx} position={[coords[0], coords[1]]}>
-                            <Popup>
-                                <div style={{ textAlign: 'center', fontFamily: "'Poppins', sans-serif" }}>
-                                    <strong style={{ color: '#2d572c' }}>{p.nombre_predio}</strong><br/>
-                                    <span>Municipio: {p.municipio}</span>
-                                </div>
-                            </Popup>
-                        </Marker>
-                    );
+        <div className="mapa-responsive-container">
+            <style>{`
+                .mapa-responsive-container {
+                    width: 100%;
+                    height: 500px; /* Altura ideal en escritorio */
+                    min-height: 400px;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    box-sizing: border-box;
                 }
-                return null;
-            })}
-        </MapContainer>
+                @media (max-width: 992px) {
+                    .mapa-responsive-container {
+                        height: 400px !important;
+                    }
+                }
+                @media (max-width: 768px) {
+                    .mapa-responsive-container {
+                        height: 320px !important; /* Altura perfecta y compacta en móviles para evitar el efecto alargado */
+                        min-height: 300px !important;
+                    }
+                }
+            `}</style>
+
+            <MapContainer 
+                center={[8.30, -69.75]} 
+                zoom={8} 
+                minZoom={7}
+                maxBounds={boundsBarinas} 
+                maxBoundsViscosity={1.0} 
+                style={{ height: '100%', width: '100%' }}
+            >
+                {/* Capa oficial y gratuita de OpenStreetMap */}
+                <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+
+                {predios.map((p, idx) => {
+                    const coords = p.coordenadas ? p.coordenadas.split(',').map(Number) : null;
+                    
+                    if (coords && coords.length === 2 && !isNaN(coords[0])) {
+                        return (
+                            <Marker key={idx} position={[coords[0], coords[1]]}>
+                                <Popup>
+                                    <div style={{ textAlign: 'center', fontFamily: "'Poppins', sans-serif" }}>
+                                        <strong style={{ color: '#2d572c' }}>{p.nombre_predio}</strong><br/>
+                                        <span>Municipio: {p.municipio}</span>
+                                    </div>
+                                </Popup>
+                            </Marker>
+                        );
+                    }
+                    return null;
+                })}
+            </MapContainer>
+        </div>
     );
 };
 

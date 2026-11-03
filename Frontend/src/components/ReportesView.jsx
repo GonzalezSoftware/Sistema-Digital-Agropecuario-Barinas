@@ -74,17 +74,63 @@ export const ReportesView = ({ predios = [], cargando }) => {
     const totalPaginas = Math.ceil(prediosFiltrados.length / elementosPorPagina);
 
     return (
-        <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        <div className="reportes-wrapper" style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", boxSizing: "border-box" }}>
+            
+            {/* ── ESTILOS CSS RESPONSIVOS ── */}
+            <style>{`
+                .reportes-wrapper {
+                    padding: 0 10px;
+                }
+                .reportes-header-flex {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                }
+                .reportes-search-box {
+                    position: relative;
+                    width: 100%;
+                    max-width: 350px;
+                }
+                .reportes-paginacion-container {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 20px;
+                    padding-top: 15px;
+                    border-top: 1px solid #eee;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                }
+
+                @media (max-width: 768px) {
+                    .reportes-wrapper {
+                        padding: 0 4px !important;
+                    }
+                    .reportes-header-flex {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                    }
+                    .reportes-search-box {
+                        max-width: 100% !important;
+                    }
+                    .reportes-paginacion-container {
+                        flex-direction: column !important;
+                        align-items: center !important;
+                        text-align: center;
+                    }
+                }
+            `}</style>
+
             {/* ── TÍTULO Y BUSCADOR ── */}
-            <div style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                marginBottom: "20px", flexWrap: "wrap", gap: "10px"
-            }}>
+            <div className="reportes-header-flex">
                 <h2 style={{ color: "#136442", fontSize: "16px", fontWeight: "bold", margin: 0 }}>
                     Reportes de Predios
                 </h2>
 
-                <div style={{ position: "relative", width: "100%", maxWidth: "350px" }}>
+                <div className="reportes-search-box">
                     <input
                         type="text"
                         placeholder="Buscar por productor o predio..."
@@ -92,7 +138,7 @@ export const ReportesView = ({ predios = [], cargando }) => {
                         onChange={(e) => setBusqueda(e.target.value)}
                         style={{
                             width: "100%", padding: "10px 15px", borderRadius: "8px",
-                            border: "1.4px solid #ccc", fontSize: "14px", outline: "none",
+                            border: "1.4px solid #ccc", fontSize: "14px", outline: "none", boxSizing: "border-box"
                         }}
                     />
                 </div>
@@ -100,10 +146,10 @@ export const ReportesView = ({ predios = [], cargando }) => {
 
             {/* ── TABLA DE REGISTROS ── */}
             <div style={{
-                backgroundColor: "#fff", padding: "20px", borderRadius: "12px",
+                backgroundColor: "#fff", padding: "15px", borderRadius: "12px",
                 boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
             }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", minWidth: "650px" }}>
                     <thead>
                         <tr style={{ borderBottom: "2px solid #136442", color: "#136442" }}>
                             <th style={{ fontSize: "14px", padding: "12px" }}>#</th>
@@ -132,7 +178,6 @@ export const ReportesView = ({ predios = [], cargando }) => {
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{numeroFila}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.nombre_predio}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
-                                        {/* Municipio formateado correctamente en la tabla */}
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{formatearMunicipio(p.municipio)}</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
                                         <td style={{ fontSize: "13px", padding: "12px" }}>
@@ -154,7 +199,8 @@ export const ReportesView = ({ predios = [], cargando }) => {
                                                     cursor: "pointer",
                                                     fontSize: "12px",
                                                     fontWeight: "500",
-                                                    fontFamily: "Poppins, sans-serif"
+                                                    fontFamily: "Poppins, sans-serif",
+                                                    whiteSpace: "nowrap"
                                                 }}
                                             >
                                                 Generar Ficha PDF
@@ -175,15 +221,12 @@ export const ReportesView = ({ predios = [], cargando }) => {
 
                 {/* ── CONTROLES DE PAGINACIÓN ── */}
                 {totalPaginas > 1 && (
-                    <div style={{
-                        display: "flex", justifyContent: "space-between", alignItems: "center",
-                        marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #eee", flexWrap: "wrap", gap: "10px"
-                    }}>
+                    <div className="reportes-paginacion-container">
                         <span style={{ fontSize: "13px", color: "#666" }}>
                             Mostrando del <strong>{indicePrimerElemento + 1}</strong> al <strong>{Math.min(indiceUltimoElemento, prediosFiltrados.length)}</strong> de <strong>{prediosFiltrados.length}</strong> predios
                         </span>
 
-                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap", justifyContent: "center" }}>
                             <button
                                 onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
                                 disabled={paginaActual === 1}

@@ -44,18 +44,93 @@ export default function EmpleadosRegistroPredios({
     const abrirGoogleMaps = () => {
         const coordenadas = formData.coordenadas ? formData.coordenadas.trim() : "";
         if (coordenadas) {
-            // Abre Google Maps buscando directamente las coordenadas escritas
             window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coordenadas)}`, "_blank");
         } else {
-            // Si está vacío, abre Google Maps de manera genérica
             window.open("https://www.google.com/maps", "_blank");
         }
     };
 
     return (
-        <div style={{ maxWidth: "950px", margin: "0 auto" }}>
+        <div className="registro-predios-wrapper">
+            {/* ── ESTILOS CSS RESPONSIVE ── */}
+            <style>{`
+                .registro-predios-wrapper {
+                    width: 100% !important;
+                    max-width: 950px;
+                    margin: 0 auto;
+                    box-sizing: border-box !important;
+                    padding: 0 12px;
+                    overflow-x: hidden !important;
+                }
+                .registro-grid-productor {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(0, 1fr));
+                    gap: 16px;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                .productor-accion-cell {
+                    grid-column: span 3;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    gap: 12px;
+                    margin-top: 16px;
+                }
+                .registro-btn-finalizar-container {
+                    text-align: right;
+                    padding-bottom: 50px;
+                    width: 100%;
+                }
+                .registro-btn-finalizar {
+                    padding: 12px 28px;
+                    border-radius: 8px;
+                    color: #fff;
+                    font-weight: 600;
+                    border: none;
+                    cursor: pointer;
+                    width: auto;
+                }
+
+                @media (max-width: 992px) {
+                    .registro-grid-productor {
+                        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                    }
+                    .productor-accion-cell {
+                        grid-column: span 2 !important;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .registro-predios-wrapper {
+                        padding: 0 6px !important;
+                    }
+                    .registro-grid-productor {
+                        grid-template-columns: 1fr !important;
+                        gap: 12px !important;
+                    }
+                    .productor-accion-cell {
+                        grid-column: span 1 !important;
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                        justify-content: flex-start !important;
+                    }
+                    .productor-accion-cell button {
+                        width: 100% !important;
+                        border-radius: 10px !important;
+                        height: 44px !important;
+                    }
+                    .registro-btn-finalizar-container {
+                        text-align: center !important;
+                    }
+                    .registro-btn-finalizar {
+                        width: 100% !important;
+                    }
+                }
+            `}</style>
+
             <FormSection title="I. Datos del Productor">
-                <div style={grid3}>
+                <div className="registro-grid-productor">
                     <InputField
                         label="Nombre Completo"
                         name="productor_nombre"
@@ -113,8 +188,8 @@ export default function EmpleadosRegistroPredios({
                         error={errors.productor_correo}
                     />
 
-                    <div style={{ gridColumn: "span 2", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
-                        <span style={{ fontSize: "12px", color: "#64748b", fontStyle: "italic" }}>
+                    <div className="productor-accion-cell">
+                        <span style={{ fontSize: "12px", color: "#64748b", fontStyle: "italic", textAlign: "right" }}>
                             Si el productor ya se encuentra registrado, presionar la lupa para cargar sus datos.
                         </span>
 
@@ -134,7 +209,8 @@ export default function EmpleadosRegistroPredios({
                                 width: "42px",
                                 display: "flex",
                                 alignItems: "center",
-                                justifyContent: "center"
+                                justifyContent: "center",
+                                flexShrink: 0
                             }}
                         >
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -153,9 +229,9 @@ export default function EmpleadosRegistroPredios({
                         name="municipio"
                         value={
                             (municipioEmpleado || formData.municipio || "")
-                                .replace(/_/g, " ") // Reemplaza los guiones bajos por espacios
+                                .replace(/_/g, " ")
                                 .toLowerCase()
-                                .replace(/(^\w{1})|(\s+\w{1})/g, letra => letra.toUpperCase()) // Convierte la primera letra en mayúscula
+                                .replace(/(^\w{1})|(\s+\w{1})/g, letra => letra.toUpperCase())
                         }
                         disabled={true}
                     />
@@ -374,17 +450,13 @@ export default function EmpleadosRegistroPredios({
                 </div>
             </FormSection>
 
-            <div style={{ textAlign: "right", paddingBottom: "50px" }}>
+            <div className="registro-btn-finalizar-container">
                 <button
                     type="button"
                     onClick={guardarEnDjango}
                     disabled={!esFormularioValido()}
+                    className="registro-btn-finalizar"
                     style={{
-                        padding: "12px 28px",
-                        borderRadius: "8px",
-                        color: "#fff",
-                        fontWeight: "600",
-                        border: "none",
                         backgroundColor: esFormularioValido() ? "#136442" : "#ccc",
                         cursor: esFormularioValido() ? "pointer" : "not-allowed",
                         opacity: esFormularioValido() ? 1 : 0.7,
