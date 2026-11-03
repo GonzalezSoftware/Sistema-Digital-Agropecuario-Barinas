@@ -227,12 +227,18 @@ export default function EmpleadoDashboard() {
     const guardarEnDjango = async () => {};
     const esFormularioValido = () => true;
 
-    // 🔹 FILTRADO BLINDADO
+    // 🔹 FILTRADO BLINDADO ESTRICTO POR MUNICIPIO DE SESIÓN
     const prediosMunicipio = useMemo(() => {
         if (!Array.isArray(listaPredios) || !municipioEmpleado) return [];
-        return listaPredios.filter((predio) => predio && predio.municipio === municipioEmpleado);
+        const municipioNormalizado = municipioEmpleado.trim().toLowerCase();
+        return listaPredios.filter((predio) => {
+            if (!predio || !predio.municipio) return false;
+            const predioMun = String(predio.municipio).replace(/_/g, " ").trim().toLowerCase();
+            return predioMun === municipioNormalizado;
+        });
     }, [listaPredios, municipioEmpleado]);
 
+    // 🔹 INSTANCIAMOS EL HOOK DE HISTORIAL EXACTAMENTE IGUAL AL ADMIN PERO ALIMENTADO CON LOS PREDIOS FILTRADOS DEL MUNICIPIO
     const {
         busqueda: busquedaHistorial,
         setBusqueda: setBusquedaHistorial,
