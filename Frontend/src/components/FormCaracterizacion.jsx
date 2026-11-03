@@ -16,6 +16,7 @@ const inputStyle = {
     fontSize: "14px",
     outline: "none",
     backgroundColor: "#f8fafc",
+    boxSizing: "border-box",
 };
 
 const labelStyle = {
@@ -24,18 +25,6 @@ const labelStyle = {
     fontWeight: "700",
     color: "#475569",
     marginBottom: "8px",
-};
-
-const grid3 = {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "20px",
-};
-
-const gridCheck = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-    gap: "15px",
 };
 
 const radioLabel = {
@@ -54,11 +43,13 @@ const btnPrincipal = {
     background: "#136442",
     color: "#fff",
     border: "none",
-    padding: "16px 40px",
+    padding: "14px 28px",
     borderRadius: "12px",
     fontWeight: "700",
     cursor: "pointer",
     boxShadow: "0 4px 14px rgba(19, 100, 66, 0.3)",
+    fontSize: "14px",
+    transition: "background 0.2s ease",
 };
 
 // ── COMPONENTES INTEGRADOS ──────────────────────────────────
@@ -66,21 +57,24 @@ export const FormSection = ({ title, children }) => (
     <div
         style={{
             background: "#fff",
-            padding: "28px",
+            padding: "24px",
             borderRadius: "20px",
             boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
             marginBottom: "24px",
             border: "1px solid #e2e8f0",
+            boxSizing: "border-box",
+            width: "100%",
         }}
     >
         <h3
             style={{
                 fontSize: "13px",
                 color: "#136442",
-                marginBottom: "25px",
+                marginBottom: "20px",
                 fontWeight: 800,
                 textTransform: "uppercase",
                 letterSpacing: "1px",
+                wordBreak: "break-word",
             }}
         >
             {title}
@@ -90,14 +84,14 @@ export const FormSection = ({ title, children }) => (
 );
 
 export const InputField = ({ label, ...props }) => (
-    <div style={{ marginBottom: "15px" }}>
+    <div style={{ marginBottom: "15px", width: "100%", boxSizing: "border-box" }}>
         <label style={labelStyle}>{label}</label>
         <input {...props} style={inputStyle} />
     </div>
 );
 
 export const SelectField = ({ label, options, error, ...props }) => (
-    <div style={{ marginBottom: "15px" }}>
+    <div style={{ marginBottom: "15px", width: "100%", boxSizing: "border-box" }}>
         <label style={labelStyle}>{label}</label>
         <select
             {...props}
@@ -226,7 +220,7 @@ export default function FormCaracterizacion({
                     </svg>
                 )}
             </div>
-            <span>{label}</span>
+            <span style={{ wordBreak: "break-word" }}>{label}</span>
         </div>
     );
 
@@ -270,7 +264,7 @@ export default function FormCaracterizacion({
         setErroresFilas((prev) => ({ ...prev, [`${index}-${campo}`]: mensajeError }));
     };
 
-const generarObjetoPDF = (predio) => {
+    const generarObjetoPDF = (predio) => {
         if (!predio) return null;
 
         const doc = new jsPDF({
@@ -311,15 +305,12 @@ const generarObjetoPDF = (predio) => {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
 
-        // 1. Imprimir la etiqueta en color verde
         doc.setTextColor(...verdeBarinas);
         const tituloVerde = "FICHA TÉCNICA INTEGRAL: ";
         doc.text(tituloVerde, 12, 33);
 
-        // 2. Calcular el ancho del texto verde para posicionar el nombre a continuación
         const anchoTituloVerde = doc.getTextWidth(tituloVerde);
 
-        // 3. Imprimir el nombre del predio en color negro
         doc.setTextColor(0, 0, 0);
         const nombreNegro = (predio.nombre_predio || "SIN NOMBRE").toUpperCase();
         doc.text(nombreNegro, 12 + anchoTituloVerde, 33);
@@ -669,7 +660,60 @@ const generarObjetoPDF = (predio) => {
     };
 
     return (
-        <div style={{ maxWidth: "950px", margin: "0 auto" }}>
+        <div className="form-caracterizacion-wrapper">
+            <style>{`
+                .form-caracterizacion-wrapper {
+                    width: 100% !important;
+                    max-width: 950px;
+                    margin: 0 auto;
+                    box-sizing: border-box !important;
+                    padding: 0 8px;
+                    overflow-x: hidden !important;
+                    font-family: 'Poppins', sans-serif;
+                }
+                .form-caracterizacion-wrapper * {
+                    box-sizing: border-box !important;
+                    min-width: 0;
+                }
+                .grid-responsive-3 {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 16px;
+                }
+                .grid-responsive-check {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                    gap: 12px;
+                }
+                .botones-tabs-container {
+                    display: flex;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                    margin-bottom: 25px;
+                }
+
+                @media (max-width: 992px) {
+                    .grid-responsive-3 {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .form-caracterizacion-wrapper {
+                        padding: 0 4px !important;
+                    }
+                    .grid-responsive-3 {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .botones-tabs-container {
+                        flex-direction: column !important;
+                    }
+                    .botones-tabs-container button {
+                        width: 100% !important;
+                    }
+                }
+            `}</style>
+
             {/* 🔴 BLOQUE DE VALIDACIÓN */}
             {!predioActivo ? (
                 <FormSection title="⚠️ Selección requerida">
@@ -679,14 +723,7 @@ const generarObjetoPDF = (predio) => {
                 </FormSection>
             ) : (
                 <>
-                    <div
-                        style={{
-                            display: "flex",
-                            gap: "10px",
-                            flexWrap: "wrap",
-                            marginBottom: "25px",
-                        }}
-                    >
+                    <div className="botones-tabs-container">
                         <button
                             onClick={() => setSubCaracterizacion("animal")}
                             style={btnPrincipal}
@@ -711,7 +748,7 @@ const generarObjetoPDF = (predio) => {
 
                     {subCaracterizacion === "animal" && (
                         <FormSection title="Existencia Animal">
-                            <div style={gridCheck}>
+                            <div className="grid-responsive-check">
                                 {[
                                     "Bovino",
                                     "Bubalino",
@@ -723,7 +760,6 @@ const generarObjetoPDF = (predio) => {
                                     "Avicola",
                                     "Apicola",
                                 ].map((item) => {
-                                    // Evaluamos si la especie actual ya está seleccionada
                                     const estaSeleccionado =
                                         inventarioInicial.especiesSeleccionadas.includes(item);
 
@@ -738,8 +774,8 @@ const generarObjetoPDF = (predio) => {
                                                     especiesSeleccionadas: estaSeleccionado
                                                         ? prev.especiesSeleccionadas.filter(
                                                             (i) => i !== item,
-                                                        ) // Si existe, la quita
-                                                        : [...prev.especiesSeleccionadas, item], // Si no existe, la agrega
+                                                        )
+                                                        : [...prev.especiesSeleccionadas, item],
                                                 }));
                                             }}
                                         />
@@ -752,7 +788,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Bovino") && (
                             <FormSection title="Bovinos">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.bovinos).map((item) => (
                                         <InputField
                                             key={item}
@@ -761,15 +797,12 @@ const generarObjetoPDF = (predio) => {
                                             min="0"
                                             value={inventarioInicial.bovinos[item] ?? ""}
                                             onKeyDown={(e) => {
-                                                // Bloquea el signo menos (-), la letra e, el signo más (+) y el punto decimal (.)
                                                 if (e.key === "-" || e.key === "e" || e.key === "+" || e.key === ".") {
                                                     e.preventDefault();
                                                 }
                                             }}
                                             onChange={(e) => {
                                                 const val = e.target.value;
-
-                                                // Establece el límite máximo de caracteres (ej. máximo 6 dígitos, ej. 999,999)
                                                 const LIMITE_DIGITOS = 6;
                                                 if (val.length > LIMITE_DIGITOS) return;
 
@@ -804,20 +837,19 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Bovino") && (
                             <FormSection title="Capacidad Productiva Bovina">
-                                {/* SISTEMAS PRODUCTIVOS */}
                                 <div>
                                     <p
                                         style={{
                                             fontWeight: "700",
                                             color: "#136442",
                                             marginBottom: "15px",
-                                            fontSize: "15px",
+                                            fontSize: "14px",
                                         }}
                                     >
                                         Sistemas Productivos
                                     </p>
 
-                                    <div style={gridCheck}>
+                                    <div className="grid-responsive-check">
                                         {[
                                             "Cría",
                                             "Ceba",
@@ -854,10 +886,8 @@ const generarObjetoPDF = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* CAMPOS DINÁMICOS PROTEGIDOS CONTRA NEGATIVOS */}
-                                <div style={{ marginTop: "25px" }}>
-                                    <div style={grid3}>
-                                        {/* LECHE */}
+                                <div style={{ marginTop: "20px" }}>
+                                    <div className="grid-responsive-3">
                                         {(inventarioInicial.capacidadBovina.sistemas.includes(
                                             "Lechería",
                                         ) ||
@@ -890,7 +920,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* CARNE */}
                                         {(inventarioInicial.capacidadBovina.sistemas.includes(
                                             "Ceba",
                                         ) ||
@@ -923,7 +952,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* CRÍA */}
                                         {inventarioInicial.capacidadBovina.sistemas.includes(
                                             "Cría",
                                         ) && (
@@ -953,7 +981,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* GENÉTICA */}
                                         {inventarioInicial.capacidadBovina.sistemas.includes(
                                             "Genética",
                                         ) && (
@@ -990,7 +1017,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Bubalino") && (
                             <FormSection title="Bubalinos">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.bubalinos).map((item) => (
                                         <InputField
                                             key={item}
@@ -1039,20 +1066,19 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Bubalino") && (
                             <FormSection title="Capacidad Productiva Bubalina">
-                                {/* SISTEMAS PRODUCTIVOS */}
                                 <div>
                                     <p
                                         style={{
                                             fontWeight: "700",
                                             color: "#136442",
                                             marginBottom: "15px",
-                                            fontSize: "15px",
+                                            fontSize: "14px",
                                         }}
                                     >
                                         Sistemas Productivos
                                     </p>
 
-                                    <div style={gridCheck}>
+                                    <div className="grid-responsive-check">
                                         {[
                                             "Cría",
                                             "Ceba",
@@ -1088,10 +1114,8 @@ const generarObjetoPDF = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* CAMPOS DINÁMICOS */}
-                                <div style={{ marginTop: "25px" }}>
-                                    <div style={grid3}>
-                                        {/* LECHE */}
+                                <div style={{ marginTop: "20px" }}>
+                                    <div className="grid-responsive-3">
                                         {(inventarioInicial.capacidadBubalina.sistemas.includes(
                                             "Lechería",
                                         ) ||
@@ -1124,7 +1148,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* CARNE */}
                                         {(inventarioInicial.capacidadBubalina.sistemas.includes(
                                             "Ceba",
                                         ) ||
@@ -1157,7 +1180,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* CRÍA */}
                                         {inventarioInicial.capacidadBubalina.sistemas.includes(
                                             "Cría",
                                         ) && (
@@ -1187,7 +1209,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* GENÉTICA */}
                                         {inventarioInicial.capacidadBubalina.sistemas.includes(
                                             "Genética",
                                         ) && (
@@ -1224,7 +1245,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Equino") && (
                             <FormSection title="Equinos">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.equinos).map((item) => (
                                         <InputField
                                             key={item}
@@ -1273,20 +1294,19 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Equino") && (
                             <FormSection title="Capacidad Productiva Equina">
-                                {/* SISTEMAS PRODUCTIVOS */}
                                 <div>
                                     <p
                                         style={{
                                             fontWeight: "700",
                                             color: "#136442",
                                             marginBottom: "15px",
-                                            fontSize: "15px",
+                                            fontSize: "14px",
                                         }}
                                     >
                                         Sistemas Productivos
                                     </p>
 
-                                    <div style={gridCheck}>
+                                    <div className="grid-responsive-check">
                                         {[
                                             { nombre: "Trabajo agrícola", llave: "trabajo_agricola" },
                                             { nombre: "Transporte", llave: "transporte" },
@@ -1314,7 +1334,6 @@ const generarObjetoPDF = (predio) => {
                                                             capacidadEquina: {
                                                                 ...prev.capacidadEquina,
                                                                 sistemas: nuevosSistemas,
-                                                                // Si se desmarca, resetea automáticamente su cantidad a "" o 0
                                                                 ...(existe ? { [item.llave]: "" } : {}),
                                                             },
                                                         };
@@ -1325,9 +1344,8 @@ const generarObjetoPDF = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* CAMPOS DINÁMICOS */}
-                                <div style={{ marginTop: "25px" }}>
-                                    <div style={grid3}>
+                                <div style={{ marginTop: "20px" }}>
+                                    <div className="grid-responsive-3">
                                         {[
                                             {
                                                 sistema: "Trabajo agrícola",
@@ -1404,7 +1422,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Ovino") && (
                             <FormSection title="Ovinos">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.ovinos).map((item) => (
                                         <InputField
                                             key={item}
@@ -1453,20 +1471,19 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Ovino") && (
                             <FormSection title="Capacidad Productiva Ovina">
-                                {/* SISTEMAS PRODUCTIVOS */}
                                 <div>
                                     <p
                                         style={{
                                             fontWeight: "700",
                                             color: "#136442",
                                             marginBottom: "15px",
-                                            fontSize: "15px",
+                                            fontSize: "14px",
                                         }}
                                     >
                                         Sistemas Productivos
                                     </p>
 
-                                    <div style={gridCheck}>
+                                    <div className="grid-responsive-check">
                                         {[
                                             { nombre: "Carne", llave: "carne_anual" },
                                             { nombre: "Leche", llave: "leche_diaria" },
@@ -1494,7 +1511,6 @@ const generarObjetoPDF = (predio) => {
                                                             capacidadOvina: {
                                                                 ...prev.capacidadOvina,
                                                                 sistemas: nuevosSistemas,
-                                                                // Si se desmarca, resetea automáticamente su valor a ""
                                                                 ...(existe ? { [item.llave]: "" } : {}),
                                                             },
                                                         };
@@ -1505,10 +1521,8 @@ const generarObjetoPDF = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* CAMPOS DINÁMICOS */}
-                                <div style={{ marginTop: "25px" }}>
-                                    <div style={grid3}>
-                                        {/* CARNE */}
+                                <div style={{ marginTop: "20px" }}>
+                                    <div className="grid-responsive-3">
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Carne",
                                         ) && (
@@ -1538,7 +1552,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* LECHE */}
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Leche",
                                         ) && (
@@ -1568,7 +1581,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* LANA */}
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Lana",
                                         ) && (
@@ -1598,7 +1610,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* CRÍA */}
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Cría",
                                         ) && (
@@ -1628,7 +1639,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* REPRODUCCIÓN */}
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Reproducción",
                                         ) && (
@@ -1658,7 +1668,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* DOBLE PROPÓSITO */}
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Doble propósito",
                                         ) && (
@@ -1688,7 +1697,6 @@ const generarObjetoPDF = (predio) => {
                                                 />
                                             )}
 
-                                        {/* GENÉTICA */}
                                         {inventarioInicial.capacidadOvina.sistemas.includes(
                                             "Genética",
                                         ) && (
@@ -1725,7 +1733,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Porcino") && (
                             <FormSection title="Porcinos">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.porcinos).map((item) => (
                                         <InputField
                                             key={item}
@@ -1774,20 +1782,19 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Porcino") && (
                             <FormSection title="Capacidad Productiva Porcina">
-                                {/* SISTEMAS PRODUCTIVOS */}
                                 <div>
                                     <p
                                         style={{
                                             fontWeight: "700",
                                             color: "#136442",
                                             marginBottom: "15px",
-                                            fontSize: "15px",
+                                            fontSize: "14px",
                                         }}
                                     >
                                         Sistemas Productivos
                                     </p>
 
-                                    <div style={gridCheck}>
+                                    <div className="grid-responsive-check">
                                         {[
                                             "Cría",
                                             "Engorde",
@@ -1818,10 +1825,8 @@ const generarObjetoPDF = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* CAMPOS DINÁMICOS */}
-                                <div style={{ marginTop: "25px" }}>
-                                    <div style={grid3}>
-                                        {/* CRÍA */}
+                                <div style={{ marginTop: "20px" }}>
+                                    <div className="grid-responsive-3">
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Cría") && (
                                             <InputField
                                                 label="Cantidad destinada a cría"
@@ -1849,7 +1854,6 @@ const generarObjetoPDF = (predio) => {
                                             />
                                         )}
 
-                                        {/* ENGORDE */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Engorde") && (
                                             <InputField
                                                 label="Capacidad de engorde"
@@ -1877,7 +1881,6 @@ const generarObjetoPDF = (predio) => {
                                             />
                                         )}
 
-                                        {/* REPRODUCCIÓN */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Reproducción") && (
                                             <InputField
                                                 label="Reproductores activos"
@@ -1905,7 +1908,6 @@ const generarObjetoPDF = (predio) => {
                                             />
                                         )}
 
-                                        {/* CICLO COMPLETO */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Ciclo completo") && (
                                             <InputField
                                                 label="Capacidad ciclo completo"
@@ -1933,7 +1935,6 @@ const generarObjetoPDF = (predio) => {
                                             />
                                         )}
 
-                                        {/* GENÉTICA */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Genética") && (
                                             <InputField
                                                 label="Animales de genética"
@@ -1961,7 +1962,6 @@ const generarObjetoPDF = (predio) => {
                                             />
                                         )}
 
-                                        {/* PRODUCCIÓN CARNE */}
                                         {inventarioInicial.capacidadPorcina.sistemas.includes("Producción de carne") && (
                                             <InputField
                                                 label="Producción carne anual (Kg)"
@@ -1996,7 +1996,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Caprino") && (
                             <FormSection title="Caprinos">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.caprinos).map((item) => (
                                         <InputField
                                             key={item}
@@ -2045,19 +2045,18 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Caprino") && (
                             <FormSection title="Capacidad Productiva Caprina">
-                                {/* SISTEMAS PRODUCTIVOS */}
                                 <div>
                                     <p
                                         style={{
                                             fontWeight: "700",
                                             color: "#136442",
                                             marginBottom: "15px",
-                                            fontSize: "15px",
+                                            fontSize: "14px",
                                         }}
                                     >
                                         Sistemas Productivos Caprinos
                                     </p>
-                                    <div style={gridCheck}>
+                                    <div className="grid-responsive-check">
                                         {[
                                             "Cría y Recría",
                                             "Engorde",
@@ -2094,9 +2093,8 @@ const generarObjetoPDF = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* CAMPOS DINÁMICOS */}
-                                <div style={{ marginTop: "25px" }}>
-                                    <div style={grid3}>
+                                <div style={{ marginTop: "20px" }}>
+                                    <div className="grid-responsive-3">
                                         {inventarioInicial.capacidadCaprino.sistemas.includes(
                                             "Cría y Recría",
                                         ) && (
@@ -2223,7 +2221,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Cunicola") && (
                             <FormSection title="Cunícola">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.cunicola).map((item) => (
                                         <InputField
                                             key={item}
@@ -2272,19 +2270,18 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Cunicola") && (
                             <FormSection title="Capacidad Productiva Cunícola">
-                                {/* SISTEMAS PRODUCTIVOS */}
                                 <div>
                                     <p
                                         style={{
                                             fontWeight: "700",
                                             color: "#136442",
                                             marginBottom: "15px",
-                                            fontSize: "15px",
+                                            fontSize: "14px",
                                         }}
                                     >
                                         Sistemas Productivos Cunícolas
                                     </p>
-                                    <div style={gridCheck}>
+                                    <div className="grid-responsive-check">
                                         {[
                                             "Producción de Carne",
                                             "Pie de Cría (Genética)",
@@ -2313,9 +2310,8 @@ const generarObjetoPDF = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* CAMPOS DINÁMICOS */}
-                                <div style={{ marginTop: "25px" }}>
-                                    <div style={grid3}>
+                                <div style={{ marginTop: "20px" }}>
+                                    <div className="grid-responsive-3">
                                         <InputField
                                             label="Número total de jaulas madre"
                                             type="number"
@@ -2402,7 +2398,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Avicola") && (
                             <FormSection title="Avícola">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.avicola).map((item) => (
                                         <InputField
                                             key={item}
@@ -2451,19 +2447,18 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Avicola") && (
                             <FormSection title="Capacidad Productiva Avícola">
-                                {/* SISTEMAS PRODUCTIVOS */}
                                 <div>
                                     <p
                                         style={{
                                             fontWeight: "700",
                                             color: "#136442",
                                             marginBottom: "15px",
-                                            fontSize: "15px",
+                                            fontSize: "14px",
                                         }}
                                     >
                                         Sistemas Productivos Avícolas
                                     </p>
-                                    <div style={gridCheck}>
+                                    <div className="grid-responsive-check">
                                         {[
                                             "Producción de Huevo (Postura)",
                                             "Pollo de Engorde",
@@ -2493,9 +2488,8 @@ const generarObjetoPDF = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* CAMPOS DINÁMICOS */}
-                                <div style={{ marginTop: "25px" }}>
-                                    <div style={grid3}>
+                                <div style={{ marginTop: "20px" }}>
+                                    <div className="grid-responsive-3">
                                         {inventarioInicial.capacidadAvicola.sistemas.includes(
                                             "Producción de Huevo (Postura)"
                                         ) && (
@@ -2585,7 +2579,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Apicola") && (
                             <FormSection title="Apícola">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.apicola).map((item) => (
                                         <InputField
                                             key={item}
@@ -2634,19 +2628,18 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "animal" &&
                         inventarioInicial.especiesSeleccionadas.includes("Apicola") && (
                             <FormSection title="Capacidad Productiva Apícola">
-                                {/* SISTEMAS PRODUCTIVOS */}
                                 <div>
                                     <p
                                         style={{
                                             fontWeight: "700",
                                             color: "#136442",
                                             marginBottom: "15px",
-                                            fontSize: "15px",
+                                            fontSize: "14px",
                                         }}
                                     >
                                         Sistemas Productivos Apícolas
                                     </p>
-                                    <div style={gridCheck}>
+                                    <div className="grid-responsive-check">
                                         {[
                                             "Producción de Miel",
                                             "Producción de Derivados (Polen/Cera)",
@@ -2675,9 +2668,8 @@ const generarObjetoPDF = (predio) => {
                                     </div>
                                 </div>
 
-                                {/* CAMPOS DINÁMICOS */}
-                                <div style={{ marginTop: "25px" }}>
-                                    <div style={grid3}>
+                                <div style={{ marginTop: "20px" }}>
+                                    <div className="grid-responsive-3">
                                         <InputField
                                             label="Número de colmenas activas"
                                             type="number"
@@ -2767,12 +2759,11 @@ const generarObjetoPDF = (predio) => {
                                 style={{
                                     display: "flex",
                                     flexDirection: "column",
-                                    gap: "24px",
+                                    gap: "20px",
                                     marginBottom: "20px",
                                 }}
                             >
                                 {rubrosVegetales.map((item, index) => {
-                                    // Base de estilos estilizada para los select de esta sección
                                     const selectStyleBase = {
                                         ...inputStyle,
                                         appearance: "none",
@@ -2795,35 +2786,32 @@ const generarObjetoPDF = (predio) => {
                                             style={{
                                                 border: "1px solid #e2e8f0",
                                                 borderRadius: "14px",
-                                                padding: "20px",
+                                                padding: "16px",
                                                 background: "#ffffff",
                                                 position: "relative",
                                                 boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
                                             }}
                                         >
-                                            {/* Encabezado del ítem */}
                                             <div
                                                 style={{
                                                     display: "flex",
                                                     justifyContent: "space-between",
                                                     alignItems: "center",
-                                                    marginBottom: "15px",
+                                                    marginBottom: "12px",
                                                 }}
                                             >
                                                 <span
                                                     style={{
                                                         fontWeight: "600",
                                                         color: "#475569",
-                                                        fontSize: "14px",
+                                                        fontSize: "13px",
                                                     }}
                                                 >
                                                     Rubro #{index + 1}
                                                 </span>
                                             </div>
 
-                                            {/* Grid estructurado simétricamente */}
-                                            <div style={grid3}>
-                                                {/* 1. Campo Rubro como SELECT */}
+                                            <div className="grid-responsive-3">
                                                 <div>
                                                     <label style={labelStyle}>Rubro</label>
                                                     <select
@@ -2850,7 +2838,6 @@ const generarObjetoPDF = (predio) => {
                                                     )}
                                                 </div>
 
-                                                {/* 2. Campo Hectáreas */}
                                                 <div>
                                                     <InputField
                                                         label="Hectáreas Sembradas (ha)"
@@ -2861,17 +2848,14 @@ const generarObjetoPDF = (predio) => {
                                                             const valorIngresado = parseFloat(e.target.value) || 0;
                                                             const superficieTotal = parseFloat(predioActivo?.superficie) || 0;
 
-                                                            // Actualizamos el estado normalmente
                                                             actualizarRubroVegetal(index, "hectareas", e.target.value);
 
-                                                            // Validación en tiempo real sobre el objeto de errores de la fila
                                                             if (valorIngresado > superficieTotal) {
                                                                 setErroresFilas(prev => ({
                                                                     ...prev,
                                                                     [`${index}-hectareas`]: `No puede superar la superficie total del predio (${superficieTotal} ha).`
                                                                 }));
                                                             } else {
-                                                                // Si el valor es correcto, removemos el error de este campo
                                                                 setErroresFilas(prev => {
                                                                     const copiaErrores = { ...prev };
                                                                     delete copiaErrores[`${index}-hectareas`];
@@ -2890,7 +2874,6 @@ const generarObjetoPDF = (predio) => {
                                                     )}
                                                 </div>
 
-                                                {/* 3. Estado del Cultivo */}
                                                 <div>
                                                     <label style={labelStyle}>Estado del Cultivo</label>
                                                     <select
@@ -2916,7 +2899,6 @@ const generarObjetoPDF = (predio) => {
                                                     )}
                                                 </div>
 
-                                                {/* 4. Tipo de Riego */}
                                                 <div>
                                                     <label style={labelStyle}>Tipo de Riego</label>
                                                     <select
@@ -2942,7 +2924,6 @@ const generarObjetoPDF = (predio) => {
                                                     )}
                                                 </div>
 
-                                                {/* 5. Ciclo Productivo */}
                                                 <div>
                                                     <label style={labelStyle}>Ciclo Productivo</label>
                                                     <select
@@ -2968,7 +2949,6 @@ const generarObjetoPDF = (predio) => {
                                                     )}
                                                 </div>
 
-                                                {/* 6. Tipo de Producción */}
                                                 <div>
                                                     <label style={labelStyle}>Tipo de Producción</label>
                                                     <select
@@ -2995,7 +2975,6 @@ const generarObjetoPDF = (predio) => {
                                                     )}
                                                 </div>
 
-                                                {/* 7. Campo Producción Estimada */}
                                                 <div>
                                                     <InputField
                                                         label="Producción Estimada (Kg)"
@@ -3016,7 +2995,6 @@ const generarObjetoPDF = (predio) => {
                                                     )}
                                                 </div>
 
-                                                {/* 8. Destino de Producción */}
                                                 <div>
                                                     <label style={labelStyle}>Destino de Producción</label>
                                                     <select
@@ -3042,7 +3020,6 @@ const generarObjetoPDF = (predio) => {
                                                     )}
                                                 </div>
 
-                                                {/* Contenedor del botón eliminar */}
                                                 <div
                                                     style={{
                                                         display: "flex",
@@ -3066,8 +3043,6 @@ const generarObjetoPDF = (predio) => {
                                                             marginBottom: "15px",
                                                             transition: "background 0.2s ease",
                                                         }}
-                                                        onMouseOver={(e) => e.currentTarget.style.background = "#b91c1c"}
-                                                        onMouseOut={(e) => e.currentTarget.style.background = "#dc2626"}
                                                     >
                                                         Eliminar Rubro
                                                     </button>
@@ -3078,7 +3053,6 @@ const generarObjetoPDF = (predio) => {
                                 })}
                             </div>
 
-                            {/* Botón principal de agregar */}
                             <button
                                 type="button"
                                 onClick={agregarRubroVegetal}
@@ -3093,10 +3067,7 @@ const generarObjetoPDF = (predio) => {
                                     display: "inline-flex",
                                     alignItems: "center",
                                     gap: "8px",
-                                    transition: "background 0.2s ease",
                                 }}
-                                onMouseOver={(e) => e.currentTarget.style.background = "#0f5235"}
-                                onMouseOut={(e) => e.currentTarget.style.background = "#136442"}
                             >
                                 <span style={{ fontSize: "16px" }}>+</span> Agregar Rubro
                             </button>
@@ -3105,7 +3076,7 @@ const generarObjetoPDF = (predio) => {
 
                     {subCaracterizacion === "maquinaria" && (
                         <FormSection title="Maquinarias y Equipos">
-                            <div style={gridCheck}>
+                            <div className="grid-responsive-check">
                                 {[
                                     "Maquinaria Agrícola de Ruedas",
                                     "Implementos Agrícolas",
@@ -3136,7 +3107,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "maquinaria" &&
                         inventarioInicial.maquinariaSeleccionada.includes("Maquinaria Agrícola de Ruedas") && (
                             <FormSection title="Maquinaria Agrícola de Ruedas">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.maquinaria_ruedas).map((item) => (
                                         <InputField
                                             key={item}
@@ -3171,7 +3142,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "maquinaria" &&
                         inventarioInicial.maquinariaSeleccionada.includes("Implementos Agrícolas") && (
                             <FormSection title="Implementos Agrícolas">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.implementos).map((item) => (
                                         <InputField
                                             key={item}
@@ -3206,7 +3177,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "maquinaria" &&
                         inventarioInicial.maquinariaSeleccionada.includes("Equipos de Riego") && (
                             <FormSection title="Equipos de Riego">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.riego).map((item) => (
                                         <InputField
                                             key={item}
@@ -3241,7 +3212,7 @@ const generarObjetoPDF = (predio) => {
                     {subCaracterizacion === "maquinaria" &&
                         inventarioInicial.maquinariaSeleccionada.includes("Otros Equipos") && (
                             <FormSection title="Otros Equipos">
-                                <div style={grid3}>
+                                <div className="grid-responsive-3">
                                     {Object.keys(inventarioInicial.otros_equipos).map((item) => (
                                         <InputField
                                             key={item}
