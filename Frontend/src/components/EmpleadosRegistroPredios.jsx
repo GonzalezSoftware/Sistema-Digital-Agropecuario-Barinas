@@ -50,42 +50,44 @@ export default function EmpleadosRegistroPredios({
 
     return (
         <div className="registro-predios-wrapper">
-            {/* ── ESTILOS CSS RESPONSIVE ── */}
+            {/* ── ESTILOS CSS RESPONSIVE ESTRICTOS ── */}
             <style>{`
                 .registro-predios-wrapper {
                     width: 100% !important;
                     max-width: 950px;
                     margin: 0 auto;
                     box-sizing: border-box !important;
-                    padding: 0 12px;
+                    padding: 0 8px !important;
                     overflow-x: hidden !important;
+                }
+                .registro-predios-wrapper * {
+                    box-sizing: border-box !important;
+                    min-width: 0;
                 }
                 .registro-grid-productor,
                 .registro-grid-3 {
                     display: grid;
                     grid-template-columns: repeat(3, minmax(0, 1fr));
-                    gap: 16px;
+                    gap: 12px;
                     width: 100%;
-                    box-sizing: border-box;
                 }
                 .registro-grid-check {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                    gap: 12px;
+                    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                    gap: 10px;
                     width: 100%;
-                    box-sizing: border-box;
                 }
                 .productor-accion-cell {
                     grid-column: span 3;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-                    gap: 12px;
-                    margin-top: 16px;
+                    gap: 10px;
+                    margin-top: 12px;
                 }
                 .registro-btn-finalizar-container {
                     text-align: right;
-                    padding-bottom: 50px;
+                    padding-bottom: 40px;
                     width: 100%;
                 }
                 .registro-btn-finalizar {
@@ -110,13 +112,13 @@ export default function EmpleadosRegistroPredios({
 
                 @media (max-width: 768px) {
                     .registro-predios-wrapper {
-                        padding: 0 8px !important;
+                        padding: 0 4px !important;
                     }
                     .registro-grid-productor,
                     .registro-grid-3,
                     .registro-grid-check {
                         grid-template-columns: 1fr !important;
-                        gap: 12px !important;
+                        gap: 10px !important;
                     }
                     .productor-accion-cell {
                         grid-column: span 1 !important;
@@ -162,7 +164,7 @@ export default function EmpleadosRegistroPredios({
                             <select
                                 value={prefijoCedula}
                                 onChange={(e) => setPrefijoCedula(e.target.value)}
-                                style={{ backgroundColor: "transparent", border: "none", outline: "none", color: "#475569", fontSize: "14px", fontWeight: "600", padding: "0 10px", cursor: "pointer", height: "100%" }}
+                                style={{ backgroundColor: "transparent", border: "none", outline: "none", color: "#475569", fontSize: "14px", fontWeight: "600", padding: "0 6px", cursor: "pointer", height: "100%" }}
                             >
                                 <option value="V-">V-</option>
                                 <option value="E-">E-</option>
@@ -182,7 +184,7 @@ export default function EmpleadosRegistroPredios({
                         maxLength={10}
                         placeholder="4141234567"
                         prefix={
-                            <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "0 12px", color: "#475569", fontSize: "14px", fontWeight: "600", userSelect: "none", height: "100%" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "0 8px", color: "#475569", fontSize: "13px", fontWeight: "600", userSelect: "none", height: "100%" }}>
                                 <span>🇻🇪</span>
                                 <span>+58</span>
                             </div>
@@ -198,7 +200,7 @@ export default function EmpleadosRegistroPredios({
                     />
 
                     <div className="productor-accion-cell">
-                        <span style={{ fontSize: "12px", color: "#64748b", fontStyle: "italic", textAlign: "right" }}>
+                        <span style={{ fontSize: "11px", color: "#64748b", fontStyle: "italic", textAlign: "right" }}>
                             Si el productor ya se encuentra registrado, presionar la lupa para cargar sus datos.
                         </span>
 
@@ -274,7 +276,7 @@ export default function EmpleadosRegistroPredios({
                         <label style={{ ...labelStyle, whiteSpace: "nowrap" }}>
                             Coordenadas (Latitud, Longitud)
                         </label>
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center", width: "100%" }}>
                             <input
                                 type="text"
                                 name="coordenadas"
@@ -283,13 +285,13 @@ export default function EmpleadosRegistroPredios({
                                 onChange={manejarCambio}
                                 style={{
                                     flex: 1,
-                                    padding: "12px",
+                                    minWidth: 0,
+                                    padding: "10px",
                                     borderRadius: "10px",
                                     border: errors.coordenadas ? "1.5px solid #ef4444" : "1px solid #e2e8f0",
                                     fontSize: "14px",
                                     outline: "none",
-                                    backgroundColor: "#f8fafc",
-                                    boxSizing: "border-box"
+                                    backgroundColor: "#f8fafc"
                                 }}
                             />
                             <button
@@ -301,22 +303,19 @@ export default function EmpleadosRegistroPredios({
                                     color: "#ffffff",
                                     border: "none",
                                     borderRadius: "10px",
-                                    height: "44px",
-                                    padding: "0 14px",
+                                    height: "42px",
+                                    padding: "0 10px",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                     gap: "4px",
                                     cursor: "pointer",
                                     fontWeight: "600",
-                                    fontSize: "13px",
-                                    flexShrink: 0,
-                                    transition: "background 0.2s"
+                                    fontSize: "12px",
+                                    flexShrink: 0
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#0f4d34"}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#136442"}
                             >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                     <circle cx="12" cy="10" r="3"></circle>
                                 </svg>
@@ -324,7 +323,7 @@ export default function EmpleadosRegistroPredios({
                             </button>
                         </div>
                         {errors.coordenadas && (
-                            <p style={{ color: "#ef4444", fontSize: "11px", marginTop: "5px", fontWeight: "600" }}>
+                            <p style={{ color: "#ef4444", fontSize: "11px", marginTop: "4px", fontWeight: "600" }}>
                                 {errors.coordenadas}
                             </p>
                         )}
@@ -401,7 +400,7 @@ export default function EmpleadosRegistroPredios({
                         </label>
                     ))}
                 </div>
-                <div style={{ marginTop: "20px" }}>
+                <div style={{ marginTop: "16px" }}>
                     <SelectField
                         label="Condición de la Vialidad"
                         name="vialidad"
@@ -443,7 +442,7 @@ export default function EmpleadosRegistroPredios({
                     onChange={manejarCambio}
                     error={errors.tipo_explotacion}
                 />
-                <div style={{ marginTop: "20px" }}>
+                <div style={{ marginTop: "16px" }}>
                     <p style={labelStyle}>Sistemas de Registro</p>
                     <div className="registro-grid-check">
                         {["Sanitario", "Productivo", "Reproductivo", "Financiero"].map(s => (
