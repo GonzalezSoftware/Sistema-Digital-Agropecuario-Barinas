@@ -72,7 +72,7 @@ export const NoticiasSidebar = ({
                 `}</style>
 
                 {/* Botón de cierre para móviles */}
-                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px", flexShrink: 0 }}>
                     <button
                         onClick={() => setIsOpen(false)}
                         className="close-sidebar-btn"
@@ -137,7 +137,7 @@ export const NoticiasSidebar = ({
                     </div>
                 </div>
 
-                {/* Opciones de Navegación Principal */}
+                {/* Opciones de Navegación Principal (Ocupa el espacio central disponible) */}
                 <div style={{
                     display: "flex",
                     flexDirection: "column",
@@ -188,16 +188,28 @@ export const NoticiasSidebar = ({
                     </div>
                 </div>
 
-                {/* Botón Cerrar Sesión */}
+                {/* Botón Cerrar Sesión (Anclado firmemente en la parte inferior del sidebar) */}
                 <div
                     onClick={cerrarSesion}
                     style={{
-                        display: "flex", alignItems: "center", gap: "12px",
-                        padding: "12px 14px", borderRadius: "10px", cursor: "pointer",
-                        color: "#fca5a5", fontSize: "13px", fontWeight: 600,
-                        marginTop: "16px", flexShrink: 0,
-                        boxSizing: "border-box"
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: "12px",
+                        padding: "12px 14px", 
+                        borderRadius: "10px", 
+                        cursor: "pointer",
+                        backgroundColor: "rgba(239, 68, 68, 0.1)",
+                        color: "#fca5a5", 
+                        fontSize: "13px", 
+                        fontWeight: 600,
+                        marginTop: "auto", 
+                        flexShrink: 0,
+                        boxSizing: "border-box",
+                        border: "1px solid rgba(239, 68, 68, 0.2)",
+                        transition: "background 0.2s"
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.25)"}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.1)"}
                 >
                     <PowerIcon style={{ width: "20px", height: "20px", flexShrink: 0, color: "#fca5a5" }} />
                     <span>Cerrar Sesión</span>

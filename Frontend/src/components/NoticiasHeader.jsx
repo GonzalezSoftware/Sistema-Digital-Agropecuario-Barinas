@@ -1,7 +1,6 @@
 import React from 'react';
-import { Bars3Icon } from "@heroicons/react/24/outline";
 
-export const NoticiasHeader = ({ vistaActiva, escudo, gobierno, onToggleSidebar }) => {
+export const NoticiasHeader = ({ vistaActiva, escudo }) => {
     const obtenerTitulo = () => {
         switch (vistaActiva) {
             case "registrar":
@@ -14,102 +13,71 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno, onToggleSidebar 
     };
 
     const obtenerSubtitulo = () => {
-        return "Módulo de Empleados • Gestión de Comunicados • Estado Barinas";
+        return "Empleado • Gestión de Comunicados";
     };
 
     return (
-        <header className="noticias-header-container" style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-            marginBottom: "24px",
-            borderBottom: "1px solid #e2e8f0",
-            paddingBottom: "16px",
-            backgroundColor: "#ffffff",
-            boxSizing: "border-box",
-            width: "100%"
-        }}>
+        <header className="noticias-header-container">
             <style>{`
-                .noticias-header-top {
+                .noticias-header-container {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
+                    margin-bottom: 24px;
+                    border-bottom: 1px solid #e2e8f0;
+                    padding-bottom: 10px;
                     width: 100%;
                     box-sizing: border-box;
+                    gap: 12px;
                 }
-                .menu-hamburguesa-btn {
-                    display: flex !important;
-                    background: none;
-                    border: 1px solid #cbd5e1;
-                    borderRadius: 8px;
-                    padding: 8px;
-                    cursor: pointer;
-                    align-items: center;
-                    justify-content: center;
-                    color: "#136442";
-                    flex-shrink: 0;
+                .noticias-header-titles {
+                    min-width: 0;
+                    flex: 1;
                 }
-                .header-logos-wrapper {
+                .noticias-header-title-text {
+                    font-size: 22px;
+                    font-weight: 700;
+                    color: #242525;
+                    margin: 0;
+                    word-break: break-word;
+                }
+                .noticias-header-logo {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
                     flex-shrink: 0;
                 }
-                .header-textos-wrapper {
-                    width: 100%;
-                    box-sizing: border-box;
+                @media (max-width: 992px) {
+                    .noticias-header-container {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 10px;
+                        margin-top: 48px !important; /* Espacio exacto para el botón de menú flotante */
+                        margin-bottom: 16px;
+                    }
+                    .noticias-header-title-text {
+                        font-size: 19px !important;
+                    }
                 }
             `}</style>
 
-            {/* Fila superior: Botón de menú y los logos a los extremos */}
-            <div className="noticias-header-top">
-                <button
-                    onClick={onToggleSidebar}
-                    className="menu-hamburguesa-btn"
-                    title="Abrir menú"
-                >
-                    <Bars3Icon style={{ width: "24px", height: "24px", color: "#136442" }} />
-                </button>
-
-                <div className="header-logos-wrapper">
-                    {escudo && (
-                        <img
-                            src={escudo}
-                            alt="Logo Escudo"
-                            style={{ height: "32px", objectFit: "contain" }}
-                        />
-                    )}
-                    {gobierno && (
-                        <img
-                            src={gobierno}
-                            alt="Logo Gobierno"
-                            style={{ height: "42px", objectFit: "contain" }}
-                        />
-                    )}
-                </div>
-            </div>
-
-            {/* Fila inferior: Títulos completos y subtítulos visibles sin recortes */}
-            <div className="header-textos-wrapper">
-                <h2 style={{ 
-                    fontSize: "18px", 
-                    fontWeight: 700, 
-                    color: "#1e293b", 
-                    margin: 0, 
-                    wordBreak: "break-word",
-                    lineHeight: "1.3"
-                }}>
+            <div className="noticias-header-titles">
+                <h2 className="noticias-header-title-text">
                     {obtenerTitulo()}
                 </h2>
-                <p style={{ 
-                    margin: "4px 0 0 0", 
-                    fontSize: "12px", 
-                    color: "#64748b", 
-                    wordBreak: "break-word",
-                    lineHeight: "1.4"
-                }}>
+                <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "#64748b" }}>
                     {obtenerSubtitulo()}
                 </p>
+            </div>
+
+            {/* --- LOGO / ESCUDO --- */}
+            <div className="noticias-header-logo">
+                {escudo && (
+                    <img
+                        src={escudo}
+                        alt="Logo Escudo"
+                        style={{ height: "40px", objectFit: "contain" }}
+                    />
+                )}
             </div>
         </header>
     );
