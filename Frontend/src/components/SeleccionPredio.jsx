@@ -36,13 +36,14 @@ export default function AdminProduccionSeleccionarPredio({
     const prediosPaginados = filtrarPredios.slice(indicePrimerElemento, indiceUltimoElemento);
     const totalPaginas = Math.ceil(filtrarPredios.length / elementosPorPagina);
 
-    // Estilos internos reutilizados para el modal
+    // Estilos internos reutilizados
     const estiloContenedorSeccion = {
         background: "#f9fafb",
         border: "1px solid #e5e7eb",
         borderRadius: "10px",
         padding: "16px",
-        marginBottom: "20px"
+        marginBottom: "20px",
+        boxSizing: "border-box"
     };
 
     const estiloTituloSeccion = {
@@ -52,12 +53,6 @@ export default function AdminProduccionSeleccionarPredio({
         marginBottom: "12px",
         borderBottom: "2px solid #136442",
         paddingBottom: "5px"
-    };
-
-    const estiloGridTresColumnas = {
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "15px"
     };
 
     const estiloLabel = {
@@ -71,7 +66,8 @@ export default function AdminProduccionSeleccionarPredio({
         color: "#1f2937",
         fontSize: "13px",
         fontWeight: "600",
-        margin: 0
+        margin: 0,
+        wordBreak: "break-word"
     };
 
     const estiloTh = {
@@ -83,16 +79,99 @@ export default function AdminProduccionSeleccionarPredio({
     const estiloTd = {
         padding: "10px",
         borderBottom: "1px solid #eee",
-        color: "#374151"
+        color: "#374151",
+        wordBreak: "break-word"
     };
 
     return (
-        <div style={{ maxWidth: "900px", margin: "0 auto", fontFamily: "'Poppins', sans-serif" }}>
+        <div className="seleccionar-predio-wrapper">
+            <style>{`
+                .seleccionar-predio-wrapper {
+                    width: 100% !important;
+                    max-width: 950px;
+                    margin: 0 auto;
+                    box-sizing: border-box !important;
+                    padding: 0 8px;
+                    overflow-x: hidden !important;
+                    font-family: 'Poppins', sans-serif;
+                }
+                .seleccionar-predio-wrapper * {
+                    box-sizing: border-box !important;
+                    min-width: 0;
+                }
+                .predio-card-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 15px;
+                    border: 1px solid #e2e8f0;
+                    borderRadius: 12px;
+                    margin-bottom: 12px;
+                    background: #fff;
+                    width: 100%;
+                    gap: 12px;
+                }
+                .predio-card-botones {
+                    display: flex;
+                    gap: 8px;
+                    flex-shrink: 0;
+                }
+                .grid-modal-productor {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 15px;
+                }
+                .grid-modal-ubicacion {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 15px;
+                }
+                .grid-modal-animales {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 10px;
+                }
+
+                @media (max-width: 992px) {
+                    .grid-modal-productor {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+                    .grid-modal-ubicacion {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+                    .grid-modal-animales {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .seleccionar-predio-wrapper {
+                        padding: 0 4px !important;
+                    }
+                    .predio-card-item {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                        gap: 12px !important;
+                    }
+                    .predio-card-botones {
+                        width: 100% !important;
+                        flex-direction: column !important;
+                    }
+                    .predio-card-botones button {
+                        width: 100% !important;
+                    }
+                    .grid-modal-productor,
+                    .grid-modal-ubicacion,
+                    .grid-modal-animales {
+                        grid-template-columns: 1fr !important;
+                    }
+                }
+            `}</style>
 
             {/* SECCIÓN BUSCAR */}
-            <div style={{ background: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", marginBottom: "20px" }}>
-                <h3 style={{ color: "#136442", marginBottom: "15px", fontSize: "16px" }}>Buscar Predio por Productor</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "15px" }}>
+            <div style={{ background: "#fff", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", marginBottom: "16px", width: "100%" }}>
+                <h3 style={{ color: "#136442", marginBottom: "12px", fontSize: "15px" }}>Buscar Predio por Productor</h3>
+                <div style={{ width: "100%" }}>
                     <InputField
                         label="Cédula del Productor"
                         placeholder="Ej: 12345678"
@@ -103,8 +182,8 @@ export default function AdminProduccionSeleccionarPredio({
             </div>
 
             {/* LISTA DE RESULTADOS */}
-            <div style={{ background: "#fff", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-                <h3 style={{ color: "#136442", marginBottom: "15px", fontSize: "16px" }}>Predios Disponibles</h3>
+            <div style={{ background: "#fff", padding: "16px", borderRadius: "12px", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", width: "100%" }}>
+                <h3 style={{ color: "#136442", marginBottom: "12px", fontSize: "15px" }}>Predios Disponibles</h3>
 
                 {cargando ? (
                     <div style={{
@@ -116,7 +195,7 @@ export default function AdminProduccionSeleccionarPredio({
                         gap: "10px"
                     }}>
                         <Spinner color="#136442" />
-                        <p style={{ color: "#136442", fontWeight: "600", fontSize: "14px", margin: 0 }}>
+                        <p style={{ color: "#136442", fontWeight: "600", fontSize: "13px", margin: 0 }}>
                             Buscando información...
                         </p>
                     </div>
@@ -126,23 +205,14 @@ export default function AdminProduccionSeleccionarPredio({
                     prediosPaginados.map((p) => (
                         <div
                             key={p.id_predio}
+                            className="predio-card-item"
                             style={{
-                                padding: "15px",
-                                border: "1px solid #e2e8f0",
-                                borderRadius: "12px",
-                                marginBottom: "12px",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                background:
-                                    predioActivo?.id_predio === p.id_predio
-                                        ? "#e6f4ea"
-                                        : "#fff",
+                                background: predioActivo?.id_predio === p.id_predio ? "#e6f4ea" : "#fff",
                             }}
                         >
-                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                    <p style={{ margin: 0, fontWeight: "700", color: "#0f172a" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "6px", minWidth: 0, flex: 1 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                                    <p style={{ margin: 0, fontWeight: "700", color: "#0f172a", wordBreak: "break-word" }}>
                                         {p.nombre_predio}
                                     </p>
                                     <span style={{
@@ -153,21 +223,22 @@ export default function AdminProduccionSeleccionarPredio({
                                         {p.caracterizacion_completada ? "Caracterizado" : "No Caracterizado"}
                                     </span>
                                 </div>
-                                <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
+                                <p style={{ margin: 0, fontSize: "12px", color: "#64748b", wordBreak: "break-word" }}>
                                     {p.productor?.nombre} - CI: {p.productor?.cedula_rif}
                                 </p>
                             </div>
 
-                            <div style={{ display: "flex", gap: "10px" }}>
+                            <div className="predio-card-botones">
                                 <button
                                     style={{
                                         background: "#136442",
                                         color: "#fff",
                                         border: "none",
-                                        padding: "10px 18px",
-                                        borderRadius: "10px",
+                                        padding: "10px 16px",
+                                        borderRadius: "8px",
                                         cursor: "pointer",
-                                        fontWeight: "600"
+                                        fontWeight: "600",
+                                        fontSize: "12px"
                                     }}
                                     onClick={() => {
                                         setPredioActivo(p);
@@ -182,10 +253,11 @@ export default function AdminProduccionSeleccionarPredio({
                                         background: "#0ea5e9",
                                         color: "#fff",
                                         border: "none",
-                                        padding: "10px 18px",
-                                        borderRadius: "10px",
+                                        padding: "10px 16px",
+                                        borderRadius: "8px",
                                         cursor: "pointer",
-                                        fontWeight: "600"
+                                        fontWeight: "600",
+                                        fontSize: "12px"
                                     }}
                                     onClick={() => {
                                         setPredioSeleccionado(p);
@@ -203,13 +275,13 @@ export default function AdminProduccionSeleccionarPredio({
                 {!cargando && totalPaginas > 1 && (
                     <div style={{
                         display: "flex", justifyContent: "space-between", alignItems: "center",
-                        marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #eee", flexWrap: "wrap", gap: "10px"
+                        marginTop: "16px", paddingTop: "12px", borderTop: "1px solid #eee", flexWrap: "wrap", gap: "10px"
                     }}>
-                        <span style={{ fontSize: "13px", color: "#666" }}>
+                        <span style={{ fontSize: "12px", color: "#666" }}>
                             Mostrando del <strong>{indicePrimerElemento + 1}</strong> al <strong>{Math.min(indiceUltimoElemento, filtrarPredios.length)}</strong> de <strong>{filtrarPredios.length}</strong> predios
                         </span>
 
-                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                             <button
                                 onClick={() => setPaginaActual(prev => Math.max(prev - 1, 1))}
                                 disabled={paginaActual === 1}
@@ -224,8 +296,8 @@ export default function AdminProduccionSeleccionarPredio({
                                 Anterior
                             </button>
 
-                            <span style={{ fontSize: "13px", padding: "0 8px", fontWeight: "bold", color: "#333" }}>
-                                Página {paginaActual} de {totalPaginas}
+                            <span style={{ fontSize: "12px", padding: "0 6px", fontWeight: "bold", color: "#333" }}>
+                                Pág. {paginaActual} de {totalPaginas}
                             </span>
 
                             <button
@@ -260,7 +332,8 @@ export default function AdminProduccionSeleccionarPredio({
                         justifyContent: "center",
                         alignItems: "center",
                         zIndex: 1000,
-                        padding: "15px",
+                        padding: "8px",
+                        boxSizing: "border-box"
                     }}
                 >
                     <div
@@ -268,20 +341,20 @@ export default function AdminProduccionSeleccionarPredio({
                             backgroundColor: "#fff",
                             width: "100%",
                             maxWidth: "1000px",
-                            maxHeight: "95vh",
+                            maxHeight: "92vh",
                             borderRadius: "12px",
                             overflowY: "auto",
                             boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
                             display: "flex",
                             flexDirection: "column",
-                            fontFamily: "sans-serif"
+                            boxSizing: "border-box"
                         }}
                     >
                         {/* HEADER DEL MODAL */}
                         <div
                             style={{
                                 backgroundColor: "#136442",
-                                padding: "18px 25px",
+                                padding: "14px 16px",
                                 color: "#fff",
                                 display: "flex",
                                 justifyContent: "space-between",
@@ -291,7 +364,7 @@ export default function AdminProduccionSeleccionarPredio({
                                 zIndex: 10,
                             }}
                         >
-                            <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "bold" }}>
+                            <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "bold", wordBreak: "break-word" }}>
                                 {`FICHA TÉCNICA INTEGRAL: ${(predioSeleccionado.nombre_predio || "").toUpperCase()}`}
                             </h3>
 
@@ -302,7 +375,8 @@ export default function AdminProduccionSeleccionarPredio({
                                     border: "none",
                                     color: "#fff",
                                     cursor: "pointer",
-                                    fontSize: "22px",
+                                    fontSize: "18px",
+                                    padding: "4px"
                                 }}
                             >
                                 ✕
@@ -310,12 +384,12 @@ export default function AdminProduccionSeleccionarPredio({
                         </div>
 
                         {/* CONTENIDO DEL MODAL */}
-                        <div style={{ padding: "30px", overflowY: "auto" }}>
+                        <div style={{ padding: "16px", overflowY: "auto" }}>
 
                             {/* I. DATOS DEL PRODUCTOR */}
                             <div style={estiloContenedorSeccion}>
                                 <div style={estiloTituloSeccion}>I. DATOS DEL PRODUCTOR</div>
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr) repeat(2, 1fr)", gap: "15px" }}>
+                                <div className="grid-modal-productor">
                                     <div>
                                         <small style={estiloLabel}>NOMBRE COMPLETO</small>
                                         <p style={estiloP}>{predioSeleccionado.productor?.nombre || "N/A"}</p>
@@ -338,8 +412,7 @@ export default function AdminProduccionSeleccionarPredio({
                             {/* II. GEORREFERENCIACIÓN Y UBICACIÓN */}
                             <div style={estiloContenedorSeccion}>
                                 <div style={estiloTituloSeccion}>II. GEORREFERENCIACIÓN Y UBICACIÓN</div>
-                                <div style={estiloGridTresColumnas}>
-                                    {/* Municipio formateado correctamente */}
+                                <div className="grid-modal-ubicacion">
                                     <div><small style={estiloLabel}>MUNICIPIO</small><p style={estiloP}>{formatearMunicipio(predioSeleccionado.municipio)}</p></div>
                                     <div><small style={estiloLabel}>PARROQUIA</small><p style={estiloP}>{predioSeleccionado.parroquia || "N/A"}</p></div>
                                     <div><small style={estiloLabel}>COMUNIDAD</small><p style={estiloP}>{predioSeleccionado.comunidad || "N/A"}</p></div>
@@ -350,26 +423,28 @@ export default function AdminProduccionSeleccionarPredio({
                             <div style={estiloContenedorSeccion}>
                                 <div style={estiloTituloSeccion}>III. INTENCIONALIDAD DE SIEMBRA (RUBROS VEGETALES)</div>
                                 {predioSeleccionado.rubros_vegetales && predioSeleccionado.rubros_vegetales.length > 0 ? (
-                                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", marginTop: "10px" }}>
-                                        <thead>
-                                            <tr style={{ backgroundColor: "#136442", color: "#fff" }}>
-                                                <th style={estiloTh}>Rubro</th>
-                                                <th style={estiloTh}>Superficie (Ha)</th>
-                                                <th style={estiloTh}>Estado</th>
-                                                <th style={estiloTh}>Producción Estimada</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {predioSeleccionado.rubros_vegetales.map((rubro, i) => (
-                                                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
-                                                    <td style={estiloTd}><strong>{rubro.rubro}</strong></td>
-                                                    <td style={estiloTd}>{rubro.hectareas} Ha</td>
-                                                    <td style={estiloTd}>{rubro.estado}</td>
-                                                    <td style={estiloTd}>{rubro.produccion_estimada} Kg</td>
+                                    <div style={{ width: "100%", overflowX: "auto" }}>
+                                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", marginTop: "10px", minWidth: "500px" }}>
+                                            <thead>
+                                                <tr style={{ backgroundColor: "#136442", color: "#fff" }}>
+                                                    <th style={estiloTh}>Rubro</th>
+                                                    <th style={estiloTh}>Superficie (Ha)</th>
+                                                    <th style={estiloTh}>Estado</th>
+                                                    <th style={estiloTh}>Producción Estimada</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {predioSeleccionado.rubros_vegetales.map((rubro, i) => (
+                                                    <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
+                                                        <td style={estiloTd}><strong>{rubro.rubro}</strong></td>
+                                                        <td style={estiloTd}>{rubro.hectareas} Ha</td>
+                                                        <td style={estiloTd}>{rubro.estado}</td>
+                                                        <td style={estiloTd}>{rubro.produccion_estimada} Kg</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 ) : (
                                     <p style={{ fontSize: "13px", color: "#666" }}>Sin rubros vegetales declarados.</p>
                                 )}
@@ -407,7 +482,7 @@ export default function AdminProduccionSeleccionarPredio({
                                                         <p style={{ fontSize: "13px", fontWeight: "600", color: "#136442", marginBottom: "8px", textTransform: "capitalize" }}>
                                                             {especie.replace(/_/g, " ")}:
                                                         </p>
-                                                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
+                                                        <div className="grid-modal-animales">
                                                             {subElementosFiltrados.map(([subKey, subValue], idxSub) => (
                                                                 <div key={idxSub} style={{ background: "#fff", padding: "8px", borderRadius: "6px", border: "1px solid #e5e7eb" }}>
                                                                     <small style={{ ...estiloLabel, textTransform: "uppercase" }}>{subKey.replace(/_/g, " ")}</small>
@@ -441,22 +516,24 @@ export default function AdminProduccionSeleccionarPredio({
                                                     <p style={{ fontSize: "13px", fontWeight: "600", color: "#136442", marginBottom: "8px", textTransform: "capitalize" }}>
                                                         {tipoMaquinaria.replace(/_/g, " ")}:
                                                     </p>
-                                                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-                                                        <thead>
-                                                            <tr style={{ backgroundColor: "#136442", color: "#fff" }}>
-                                                                <th style={estiloTh}>Elemento / Equipo</th>
-                                                                <th style={estiloTh}>Cantidad</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {Object.entries(detalleMaquinaria).map(([itemKey, itemValue], i) => (
-                                                                <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
-                                                                    <td style={estiloTd}><strong>{itemKey.replace(/_/g, " ").toUpperCase()}</strong></td>
-                                                                    <td style={estiloTd}>{itemValue !== null && itemValue !== undefined ? itemValue : 0}</td>
+                                                    <div style={{ width: "100%", overflowX: "auto" }}>
+                                                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", minWidth: "400px" }}>
+                                                            <thead>
+                                                                <tr style={{ backgroundColor: "#136442", color: "#fff" }}>
+                                                                    <th style={estiloTh}>Elemento / Equipo</th>
+                                                                    <th style={estiloTh}>Cantidad</th>
                                                                 </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
+                                                            </thead>
+                                                            <tbody>
+                                                                {Object.entries(detalleMaquinaria).map(([itemKey, itemValue], i) => (
+                                                                    <tr key={i} style={{ backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb" }}>
+                                                                        <td style={estiloTd}><strong>{itemKey.replace(/_/g, " ").toUpperCase()}</strong></td>
+                                                                        <td style={estiloTd}>{itemValue !== null && itemValue !== undefined ? itemValue : 0}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             );
                                         })}
@@ -471,11 +548,14 @@ export default function AdminProduccionSeleccionarPredio({
                         {/* FOOTER DEL MODAL */}
                         <div
                             style={{
-                                padding: "20px 30px",
+                                padding: "12px 16px",
                                 backgroundColor: "#f4f4f4",
                                 display: "flex",
                                 justifyContent: "space-between",
                                 borderTop: "1px solid #ddd",
+                                position: "sticky",
+                                bottom: 0,
+                                zIndex: 10
                             }}
                         >
                             <button
@@ -485,9 +565,11 @@ export default function AdminProduccionSeleccionarPredio({
                                     color: "#fff",
                                     border: "none",
                                     padding: "10px 18px",
-                                    borderRadius: "10px",
+                                    borderRadius: "8px",
                                     fontWeight: "600",
-                                    cursor: "pointer"
+                                    cursor: "pointer",
+                                    fontSize: "13px",
+                                    width: "100%"
                                 }}
                             >
                                 CERRAR
