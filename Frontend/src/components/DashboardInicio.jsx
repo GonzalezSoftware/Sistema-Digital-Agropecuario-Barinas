@@ -21,7 +21,7 @@ const CustomTreemapContent = (props) => {
                 style={{
                     fill: colors[index % colors.length],
                     stroke: '#fff',
-                    strokeWidth: 1, // Reducimos el borde para que no "contamine" la vista
+                    strokeWidth: 1,
                 }}
             />
             {width > 60 && height > 30 && (
@@ -30,12 +30,12 @@ const CustomTreemapContent = (props) => {
                     y={y + height / 2}
                     textAnchor="middle"
                     dominantBaseline="central"
-                    fill="#F8FAFC" // Usamos un blanco tipo "Humo" (Slate 50) que quita el efecto de brillo agresivo
+                    fill="#F8FAFC"
                     fontSize={10}
-                    fontWeight="100" // Bajamos de 600 al 100 para que la letra sea más fina y nítida
+                    fontWeight="100"
                     style={{
                         pointerEvents: 'none',
-                        textShadow: 'none', // Forzamos a que no tenga sombras
+                        textShadow: 'none',
                         letterSpacing: '0.02em'
                     }}
                 >
@@ -65,10 +65,10 @@ export default function DashboardInicio({
     chartPlaceholder
 }) {
     return (
-        <div className="admin-dashboard-container">
-            {/* ── ESTILOS CSS RESPONSIVE AISLADOS PARA MÓVIL ── */}
+        <div className="admin-dashboard-wrapper">
+            {/* ── ESTILOS CSS RESPONSIVE Y UNIFICADOS ── */}
             <style>{`
-                .admin-dashboard-container {
+                .admin-dashboard-wrapper {
                     width: 100% !important;
                     max-width: 1100px;
                     margin: 0 auto;
@@ -91,7 +91,7 @@ export default function DashboardInicio({
                     width: 100%;
                     box-sizing: border-box;
                 }
-                .admin-chart-item {
+                .admin-card-item {
                     width: 100% !important;
                     max-width: 100% !important;
                     box-sizing: border-box !important;
@@ -104,14 +104,13 @@ export default function DashboardInicio({
                     box-sizing: border-box;
                 }
 
-                /* 🔹 ADAPTACIÓN EXACTA PARA TELÉFONOS */
                 @media (max-width: 768px) {
-                    .admin-dashboard-container {
+                    .admin-dashboard-wrapper {
                         padding: 0 4px !important;
                     }
                     .admin-stats-grid {
                         grid-template-columns: 1fr !important;
-                        gap: 14px !important;
+                        gap: 12px !important;
                     }
                     .admin-charts-grid {
                         grid-template-columns: 1fr !important;
@@ -147,7 +146,7 @@ export default function DashboardInicio({
             {/* ── GRÁFICOS ── */}
             <div className="admin-charts-grid">
                 {/* Gráfico 1 - Barras */}
-                <div style={chartCard} className="admin-chart-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Predios por Municipio</h3>
                     <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
@@ -173,7 +172,7 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 2 - Circular (Dona) */}
-                <div style={chartCard} className="admin-chart-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Estatus Legal de la Tierra</h3>
                     <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
@@ -195,7 +194,7 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 3 - Radar (Servicios Básicos) */}
-                <div style={chartCard} className="admin-chart-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Cobertura de Servicios Básicos (%)</h3>
                     <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
@@ -217,7 +216,7 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 4 - Vialidad */}
-                <div style={chartCard} className="admin-chart-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Estado de la Vialidad</h3>
                     <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
@@ -244,7 +243,7 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 5 - Intensidad de Producción */}
-                <div style={chartCard} className="admin-chart-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Intensidad de Producción por Municipio</h3>
                     <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
@@ -269,7 +268,7 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 6 - Dispersión: Superficie vs Infraestructura */}
-                <div style={chartCard} className="admin-chart-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Relación Superficie vs. Infraestructura</h3>
                     <div style={{ width: '100%', height: 300, marginTop: '16px' }}>
                         {cargando ? (
@@ -291,7 +290,7 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 7 - Treemap de Tenencia de Tierras (Ancho Completo) */}
-                <div style={chartCard} className="admin-chart-item admin-treemap-full">
+                <div style={chartCard} className="admin-card-item admin-treemap-full">
                     <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
                     <div style={{ width: '100%', height: 350, marginTop: '16px' }}>
                         {cargando ? (
