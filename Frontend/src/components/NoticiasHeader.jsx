@@ -5,16 +5,16 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno, onToggleSidebar 
     const obtenerTitulo = () => {
         switch (vistaActiva) {
             case "registrar":
-                return "Registro de Nuevas Noticias";
+                return "Registrar Noticia";
             case "gestion":
-                return "Edición y Eliminación de Artículos";
+                return "Gestión de Artículos";
             default:
-                return "Módulo del Empleado de Noticias";
+                return "Módulo de Noticias";
         }
     };
 
     const obtenerSubtitulo = () => {
-        return "Módulo de Empleados • Gestión de Comunicados • Estado Barinas";
+        return "Gestión de Comunicados • Estado Barinas";
     };
 
     return (
@@ -22,16 +22,16 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno, onToggleSidebar 
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginBottom: "30px",
+            marginBottom: "20px",
             borderBottom: "1px solid #e2e8f0",
-            paddingBottom: "16px",
+            paddingBottom: "12px",
             backgroundColor: "#ffffff",
-            flexWrap: "nowrap", // Evita que los elementos bajen automáticamente de forma vertical
-            gap: "16px",
+            flexWrap: "nowrap",
+            gap: "8px",
             boxSizing: "border-box",
             width: "100%"
         }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0, flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
                 {/* Botón de Hamburguesa */}
                 <button
                     onClick={onToggleSidebar}
@@ -40,7 +40,7 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno, onToggleSidebar 
                         background: "none",
                         border: "1px solid #cbd5e1",
                         borderRadius: "8px",
-                        padding: "8px",
+                        padding: "6px",
                         cursor: "pointer",
                         display: "none",
                         alignItems: "center",
@@ -49,42 +49,47 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno, onToggleSidebar 
                         flexShrink: 0
                     }}
                 >
-                    <Bars3Icon style={{ width: "24px", height: "24px" }} />
+                    <Bars3Icon style={{ width: "22px", height: "22px" }} />
                 </button>
                 
-                {/* Contenedor de textos con minWidth: 0 obligatorio para prevenir desbordes o columnas forzadas */}
                 <div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column" }}>
-                    <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#1e293b", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <h2 className="header-titulo-principal" style={{ fontSize: "17px", fontWeight: 700, color: "#1e293b", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {obtenerTitulo()}
                     </h2>
-                    <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <p className="header-subtitulo-texto" style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {obtenerSubtitulo()}
                     </p>
                 </div>
             </div>
 
             {/* Logos / Escudos */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
+            <div className="header-logos-container" style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
                 {escudo && (
                     <img
                         src={escudo}
                         alt="Logo Escudo"
-                        style={{ height: "35px", objectFit: "contain" }}
+                        style={{ height: "30px", objectFit: "contain" }}
                     />
                 )}
                 {gobierno && (
                     <img
                         src={gobierno}
                         alt="Logo Gobierno"
-                        style={{ height: "45px", objectFit: "contain" }}
+                        style={{ height: "38px", objectFit: "contain" }}
                     />
                 )}
             </div>
 
             <style>{`
-                @media (max-width: 992px) {
-                    .menu-hamburguesa-btn {
-                        display: flex !important;
+                .menu-hamburguesa-btn {
+                    display: flex !important;
+                }
+                @media (max-width: 576px) {
+                    .header-subtitulo-texto {
+                        display: none !important;
+                    }
+                    .header-titulo-principal {
+                        font-size: 15px !important;
                     }
                 }
             `}</style>
