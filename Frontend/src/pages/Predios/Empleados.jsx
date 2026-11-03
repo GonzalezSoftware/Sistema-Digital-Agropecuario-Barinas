@@ -33,7 +33,7 @@ const InputField = ({ label, placeholder, value, onChange, type = "text" }) => (
             placeholder={placeholder}
             value={value}
             onChange={onChange}
-            style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", fontSize: "13px" }}
+            style={{ padding: "10px 14px", borderRadius: "8px", border: "1px solid #d1d5db", outline: "none", fontSize: "13px", boxSizing: "border-box", width: "100%" }}
         />
     </div>
 );
@@ -238,7 +238,7 @@ export default function EmpleadoDashboard() {
         });
     }, [listaPredios, municipioEmpleado]);
 
-    // 🔹 INSTANCIAMOS EL HOOK DE HISTORIAL EXACTAMENTE IGUAL AL ADMIN PERO ALIMENTADO CON LOS PREDIOS FILTRADOS DEL MUNICIPIO
+    // 🔹 INSTANCIAMOS EL HOOK DE HISTORIAL
     const {
         busqueda: busquedaHistorial,
         setBusqueda: setBusquedaHistorial,
@@ -302,7 +302,6 @@ export default function EmpleadoDashboard() {
         }));
     }, [municipioEmpleado, prediosMunicipio, PARROQUIAS_POR_MUNICIPIO]);
 
-    // 🛡️ OBJETOS DE ESTILO VALIDADOS (Evita React Error #62)
     const chartCard = {
         backgroundColor: "#ffffff",
         borderRadius: "14px",
@@ -314,8 +313,8 @@ export default function EmpleadoDashboard() {
     const chartPlaceholder = { display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#64748b" };
 
     return (
-        <div style={{ minHeight: "100vh", backgroundColor: "#f8fafc", display: "flex", fontFamily: "'Poppins', sans-serif" }}>
-            <div style={{ display: "flex", flex: 1 }}>
+        <div style={{ minHeight: "100vh", backgroundColor: "#f8fafc", display: "flex", fontFamily: "'Poppins', sans-serif", width: "100%", overflowX: "hidden" }}>
+            <div style={{ display: "flex", flex: 1, width: "100%", minWidth: 0, boxSizing: "border-box" }}>
 
                 <EmpleadoSidebar
                     empleadoData={usuario}
@@ -325,11 +324,12 @@ export default function EmpleadoDashboard() {
                     predioActivo={predioActivo}
                 />
 
-                <main style={{ padding: "26px 50px", flex: 1, boxSizing: "border-box", overflowY: "auto", position: "relative" }}>
+                {/* 🛡️ CONTENEDOR PRINCIPAL CORREGIDO CON PADDING RESPONSIVO ESTRICTO Y OVERFLOW-X: HIDDEN */}
+                <main className="dashboard-main-content" style={{ padding: "20px 16px", flex: 1, boxSizing: "border-box", overflowY: "auto", overflowX: "hidden", position: "relative", minWidth: 0, width: "100%" }}>
                     <EmpleadoHeader vistaActiva={vistaActiva} escudo={escudo} gobierno={logo} />
 
                     {vistaActiva === "inicio" ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", boxSizing: "border-box" }}>
                             <DashboardInicio
                                 cargando={cargandoDashboard}
                                 totalPredios={totalPrediosMunicipio}
@@ -351,7 +351,7 @@ export default function EmpleadoDashboard() {
                             />
                         </div>
                     ) : vistaActiva === "predios_registro" ? (
-                        <div>
+                        <div style={{ width: "100%", boxSizing: "border-box" }}>
                             <EmpleadosRegistroPredios
                                 formData={formData}
                                 setFormData={setFormData}
@@ -370,7 +370,7 @@ export default function EmpleadoDashboard() {
                             />
                         </div>
                     ) : vistaActiva === "predios_historial" ? (
-                        <div style={{ maxWidth: "1100px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
+                        <div style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", animation: "fadeIn 0.5s", boxSizing: "border-box" }}>
                             {cargandoDashboard ? (
                                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
                                     <Spinner />
@@ -404,17 +404,17 @@ export default function EmpleadoDashboard() {
                             )}
                         </div>
                     ) : vistaActiva === "predios_georreferenciacion" ? (
-                        <div style={{ maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
+                        <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s", boxSizing: "border-box" }}>
                             {cargandoDashboard ? (
                                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
                                     <Spinner />
                                 </div>
                             ) : (
-                                <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "25px", width: "100%", boxSizing: "border-box" }}>
                                     <div style={{
                                         width: "100%", backgroundColor: "#fff", borderRadius: "16px",
                                         padding: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                                        border: "1px solid #e0e0e0", height: "600px"
+                                        border: "1px solid #e0e0e0", height: "600px", boxSizing: "border-box"
                                     }}>
                                         <div style={{ height: "100%", width: "100%", borderRadius: "12px", overflow: "hidden" }}>
                                             <MapaBarinas predios={prediosMunicipio} />
@@ -423,7 +423,7 @@ export default function EmpleadoDashboard() {
                                     <div style={{
                                         width: "100%", backgroundColor: "#fff", padding: "25px",
                                         borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
-                                        border: "1px solid #eee"
+                                        border: "1px solid #eee", boxSizing: "border-box"
                                     }}>
                                         <h4 style={{
                                             color: "#136442", marginBottom: "20px", fontWeight: "700",
@@ -437,7 +437,7 @@ export default function EmpleadoDashboard() {
                                             display: "flex", flexDirection: "column", alignItems: "center",
                                             justifyContent: "center", padding: "20px", borderRadius: "8px",
                                             border: "1px solid #bbf7d0", backgroundColor: "#f0fdf4",
-                                            boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+                                            boxShadow: "0 1px 2px rgba(0,0,0,0.02)", boxSizing: "border-box"
                                         }}>
                                             <span style={{
                                                 fontSize: "12px", fontWeight: "bold", color: "#136442",
@@ -454,16 +454,16 @@ export default function EmpleadoDashboard() {
                             )}
                         </div>
                     ) : vistaActiva === "predios_reportes" ? (
-                        <div style={{ maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
+                        <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s", boxSizing: "border-box" }}>
                             {cargandoDashboard ? (
                                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
                                     <Spinner />
                                 </div>
                             ) : (
-                                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", boxSizing: "border-box" }}>
                                     <div style={{
                                         backgroundColor: "#fff", padding: "20px", borderRadius: "12px",
-                                        boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
+                                        boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto", boxSizing: "border-box"
                                     }}>
                                         <ReportesView predios={prediosMunicipio} />
                                     </div>
@@ -471,7 +471,7 @@ export default function EmpleadoDashboard() {
                             )}
                         </div>
                     ) : vistaActiva === "produccion_inicio" ? (
-                        <div>
+                        <div style={{ width: "100%", boxSizing: "border-box" }}>
                             <AdminProduccionDashboard
                                 productionState={{
                                     cargando: cargando,
@@ -480,7 +480,7 @@ export default function EmpleadoDashboard() {
                             />
                         </div>
                     ) : vistaActiva === "produccion_seleccionar_predio" ? (
-                        <div>
+                        <div style={{ width: "100%", boxSizing: "border-box" }}>
                             <AdminProduccionSeleccionarPredio
                                 busquedaCedula={busquedaCedula}
                                 setBusquedaCedula={setBusquedaCedula}
@@ -498,7 +498,7 @@ export default function EmpleadoDashboard() {
                             />
                         </div>
                     ) : vistaActiva === "produccion_caracterizacion" ? (
-                        <div>
+                        <div style={{ width: "100%", boxSizing: "border-box" }}>
                             <FormCaracterizacion
                                 modo="caracterizacion"
                                 predioActivo={predioActivo}
@@ -512,7 +512,7 @@ export default function EmpleadoDashboard() {
                             />
                         </div>
                     ) : vistaActiva === "produccion_actualizacion" ? (
-                        <div>
+                        <div style={{ width: "100%", boxSizing: "border-box" }}>
                             <FormCaracterizacion
                                 modo="actualizacion"
                                 predioActivo={predioActivo}
@@ -526,16 +526,16 @@ export default function EmpleadoDashboard() {
                             />
                         </div>
                     ) : vistaActiva === "produccion_reportes" ? (
-                        <div style={{ maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s" }}>
+                        <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s", boxSizing: "border-box" }}>
                             {cargandoDashboard ? (
                                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "400px" }}>
                                     <Spinner />
                                 </div>
                             ) : (
-                                <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%", boxSizing: "border-box" }}>
                                     <div style={{
                                         backgroundColor: "#fff", padding: "20px", borderRadius: "12px",
-                                        boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
+                                        boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto", boxSizing: "border-box"
                                     }}>
                                         <SeccionReportes listaPredios={listaPredios} cargando={cargandoDashboard} />
                                     </div>
@@ -549,6 +549,16 @@ export default function EmpleadoDashboard() {
                     )}
                 </main>
             </div>
+
+            {/* Estilos CSS responsivos para garantizar adaptación perfecta en móviles */}
+            <style>{`
+                @media (max-width: 992px) {
+                    .dashboard-main-content {
+                        padding: 16px 8px !important;
+                        padding-top: 55px !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }
