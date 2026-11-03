@@ -190,7 +190,8 @@ export const AdminSidebar = ({
                     boxSizing: "border-box",
                     overflow: "hidden",
                     zIndex: 1000,
-                    transition: "transform 0.3s ease-in-out"
+                    transition: "transform 0.3s ease-in-out",
+                    flexShrink: 0
                 }}
             >
                 {/* Encabezado: Info del Usuario */}
@@ -591,7 +592,7 @@ export const AdminSidebar = ({
                     </div>
                 </div>
 
-                {/* Botón Cerrar Sesión (Pegado razonablemente al menú) */}
+                {/* Botón Cerrar Sesión */}
                 <div
                     onClick={cerrarSesion}
                     style={{

@@ -60,10 +60,10 @@ export default function DashboardEmpleado({
     chartPlaceholder
 }) {
     return (
-        <div className="empleado-dashboard-wrapper">
-            {/* ── ESTILOS IDÉNTICOS AL ADMIN PARA UNIFORMIDAD VISUAL ── */}
+        <div className="admin-dashboard-wrapper">
+            {/* ── ESTILOS 100% UNIFICADOS CON EL ADMIN ── */}
             <style>{`
-                .empleado-dashboard-wrapper {
+                .admin-dashboard-wrapper {
                     width: 100% !important;
                     max-width: 1100px;
                     margin: 0 auto;
@@ -71,7 +71,7 @@ export default function DashboardEmpleado({
                     padding: 0 10px;
                     overflow-x: hidden !important;
                 }
-                .empleado-stats-grid {
+                .admin-stats-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
                     gap: 20px;
@@ -79,46 +79,46 @@ export default function DashboardEmpleado({
                     width: 100%;
                     box-sizing: border-box;
                 }
-                .empleado-charts-grid {
+                .admin-charts-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
                     gap: 20px;
                     width: 100%;
                     box-sizing: border-box;
                 }
-                .empleado-card-item {
+                .admin-card-item {
                     width: 100% !important;
                     max-width: 100% !important;
                     box-sizing: border-box !important;
                     min-width: 0 !important;
                     overflow: hidden !important;
                 }
-                .empleado-treemap-full {
+                .admin-treemap-full {
                     grid-column: 1 / -1;
                     width: 100%;
                     box-sizing: border-box;
                 }
 
                 @media (max-width: 768px) {
-                    .empleado-dashboard-wrapper {
+                    .admin-dashboard-wrapper {
                         padding: 0 4px !important;
                     }
-                    .empleado-stats-grid {
+                    .admin-stats-grid {
                         grid-template-columns: 1fr !important;
                         gap: 12px !important;
                     }
-                    .empleado-charts-grid {
+                    .admin-charts-grid {
                         grid-template-columns: 1fr !important;
                         gap: 14px !important;
                     }
-                    .empleado-treemap-full {
+                    .admin-treemap-full {
                         grid-column: 1 / 1 !important;
                     }
                 }
             `}</style>
 
             {/* ── TARJETAS DE ESTADÍSTICAS ── */}
-            <div className="empleado-stats-grid">
+            <div className="admin-stats-grid">
                 <CardStat
                     label="Predios Censados (Municipio)"
                     value={cargando ? <Spinner /> : totalPrediosMunicipio}
@@ -133,9 +133,9 @@ export default function DashboardEmpleado({
             </div>
 
             {/* ── GRÁFICOS ── */}
-            <div className="empleado-charts-grid">
+            <div className="admin-charts-grid">
                 {/* Gráfico 1 - Estatus Legal de la Tierra (Dona) */}
-                <div style={chartCard} className="empleado-card-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Estatus Legal de la Tierra</h3>
                     <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
@@ -157,7 +157,7 @@ export default function DashboardEmpleado({
                 </div>
 
                 {/* Gráfico 2 - Radar (Servicios Básicos) */}
-                <div style={chartCard} className="empleado-card-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Cobertura de Servicios Básicos (%)</h3>
                     <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
@@ -179,7 +179,7 @@ export default function DashboardEmpleado({
                 </div>
 
                 {/* Gráfico 3 - Vialidad */}
-                <div style={chartCard} className="empleado-card-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Estado de la Vialidad</h3>
                     <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
@@ -206,7 +206,7 @@ export default function DashboardEmpleado({
                 </div>
 
                 {/* Gráfico 4 - Dispersión: Superficie vs Infraestructura */}
-                <div style={chartCard} className="empleado-card-item">
+                <div style={chartCard} className="admin-card-item">
                     <h3 style={chartTitle}>Relación Superficie vs. Infraestructura</h3>
                     <div style={{ width: '100%', height: 300, marginTop: '16px' }}>
                         {cargando ? (
@@ -228,7 +228,7 @@ export default function DashboardEmpleado({
                 </div>
 
                 {/* Gráfico 5 - Treemap de Tenencia de Tierras (Ancho Completo) */}
-                <div style={chartCard} className="empleado-card-item empleado-treemap-full">
+                <div style={chartCard} className="admin-card-item admin-treemap-full">
                     <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
                     <div style={{ width: '100%', height: 350, marginTop: '16px' }}>
                         {cargando ? (
