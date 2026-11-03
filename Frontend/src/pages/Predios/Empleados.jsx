@@ -403,6 +403,8 @@ export default function EmpleadoDashboard() {
                                 />
                             )}
                         </div>
+// Remplaza este bloque exacto dentro de tu EmpleadoDashboard.jsx en la sección "predios_georreferenciacion"
+
                     ) : vistaActiva === "predios_georreferenciacion" ? (
                         <div style={{ width: "100%", maxWidth: "1200px", margin: "0 auto", animation: "fadeIn 0.5s", boxSizing: "border-box" }}>
                             {cargandoDashboard ? (
@@ -410,42 +412,42 @@ export default function EmpleadoDashboard() {
                                     <Spinner />
                                 </div>
                             ) : (
-                                <div style={{ display: "flex", flexDirection: "column", gap: "25px", width: "100%", boxSizing: "border-box" }}>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "15px", width: "100%", boxSizing: "border-box" }}>
                                     <div style={{
-                                        width: "100%", backgroundColor: "#fff", borderRadius: "16px",
-                                        padding: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                                        border: "1px solid #e0e0e0", height: "600px", boxSizing: "border-box"
+                                        width: "100%", backgroundColor: "#fff", borderRadius: "14px",
+                                        padding: "8px", boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+                                        border: "1px solid #e0e0e0", height: "420px", boxSizing: "border-box"
                                     }}>
-                                        <div style={{ height: "100%", width: "100%", borderRadius: "12px", overflow: "hidden" }}>
+                                        <div style={{ height: "100%", width: "100%", borderRadius: "10px", overflow: "hidden" }}>
                                             <MapaBarinas predios={prediosMunicipio} />
                                         </div>
                                     </div>
                                     <div style={{
-                                        width: "100%", backgroundColor: "#fff", padding: "25px",
+                                        width: "100%", backgroundColor: "#fff", padding: "18px",
                                         borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
                                         border: "1px solid #eee", boxSizing: "border-box"
                                     }}>
                                         <h4 style={{
-                                            color: "#136442", marginBottom: "20px", fontWeight: "700",
-                                            borderBottom: "2px solid #ccc", paddingBottom: "10px",
+                                            color: "#136442", marginBottom: "12px", fontWeight: "700",
+                                            borderBottom: "2px solid #ccc", paddingBottom: "8px",
                                             display: "flex", alignItems: "center", gap: "10px",
-                                            fontSize: "14px", textTransform: "uppercase", letterSpacing: "0.5px"
+                                            fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px"
                                         }}>
                                             Resumen Jurisdiccional - Municipio {municipioEmpleado || "Asignado"}
                                         </h4>
                                         <div style={{
                                             display: "flex", flexDirection: "column", alignItems: "center",
-                                            justifyContent: "center", padding: "20px", borderRadius: "8px",
+                                            justifyContent: "center", padding: "14px", borderRadius: "8px",
                                             border: "1px solid #bbf7d0", backgroundColor: "#f0fdf4",
                                             boxShadow: "0 1px 2px rgba(0,0,0,0.02)", boxSizing: "border-box"
                                         }}>
                                             <span style={{
-                                                fontSize: "12px", fontWeight: "bold", color: "#136442",
-                                                marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px"
+                                                fontSize: "11px", fontWeight: "bold", color: "#136442",
+                                                marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px"
                                             }}>
                                                 Total Predios Georreferenciados en {municipioEmpleado}
                                             </span>
-                                            <span style={{ fontSize: "24px", fontWeight: "bold", color: "#136442", lineHeight: "1" }}>
+                                            <span style={{ fontSize: "22px", fontWeight: "bold", color: "#136442", lineHeight: "1" }}>
                                                 {prediosMunicipio.length}
                                             </span>
                                         </div>

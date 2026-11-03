@@ -27,22 +27,11 @@ const MapaBarinas = ({ predios }) => {
             <style>{`
                 .mapa-responsive-container {
                     width: 100%;
-                    height: 420px; /* Altura optimizada y equilibrada en escritorio */
-                    min-height: 350px;
-                    border-radius: 12px;
+                    height: 100%;
+                    min-height: 320px;
+                    border-radius: 10px;
                     overflow: hidden;
                     box-sizing: border-box;
-                }
-                @media (max-width: 992px) {
-                    .mapa-responsive-container {
-                        height: 360px !important;
-                    }
-                }
-                @media (max-width: 768px) {
-                    .mapa-responsive-container {
-                        height: 280px !important; /* Altura compacta ideal para móviles, evitando espacios muertos */
-                        min-height: 260px !important;
-                    }
                 }
             `}</style>
 
