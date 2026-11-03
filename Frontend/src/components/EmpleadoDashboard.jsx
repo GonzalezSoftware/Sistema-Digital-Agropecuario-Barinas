@@ -76,7 +76,7 @@ export default function DashboardEmpleado({
                 }
                 .empleado-charts-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                     gap: 20px;
                     width: 100%;
                     box-sizing: border-box;
@@ -95,13 +95,15 @@ export default function DashboardEmpleado({
                 }
                 @media (max-width: 768px) {
                     .empleado-dashboard-container {
-                        padding: 0 6px !important;
+                        padding: 0 4px !important;
                     }
                     .empleado-stats-grid {
                         grid-template-columns: 1fr !important;
+                        gap: 14px !important;
                     }
                     .empleado-charts-grid {
                         grid-template-columns: 1fr !important;
+                        gap: 14px !important;
                     }
                     .empleado-treemap-full {
                         grid-column: 1 / 1 !important;
@@ -129,7 +131,7 @@ export default function DashboardEmpleado({
                 {/* Gráfico 1 - Estatus Legal de la Tierra (Dona) */}
                 <div style={chartCard} className="empleado-card-item">
                     <h3 style={chartTitle}>Estatus Legal de la Tierra</h3>
-                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -137,7 +139,7 @@ export default function DashboardEmpleado({
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={datosTenencia} cx="50%" cy="45%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" animationDuration={1000}>
+                                    <Pie data={datosTenencia} cx="50%" cy="45%" innerRadius={55} outerRadius={75} paddingAngle={5} dataKey="value" animationDuration={1000}>
                                         {datosTenencia.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
                                     </Pie>
                                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px' }} />
@@ -151,17 +153,17 @@ export default function DashboardEmpleado({
                 {/* Gráfico 2 - Radar (Servicios Básicos) */}
                 <div style={chartCard} className="empleado-card-item">
                     <h3 style={chartTitle}>Cobertura de Servicios Básicos (%)</h3>
-                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><p style={{ color: '#999' }}>Sin datos de servicios</p></div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={datosServicios}>
+                                <RadarChart cx="50%" cy="50%" outerRadius="65%" data={datosServicios}>
                                     <PolarGrid stroke="#e0e0e0" />
-                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 11, fontWeight: 'bold' }} />
-                                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} axisLine={false} />
+                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 10, fontWeight: 'bold' }} />
+                                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9 }} axisLine={false} />
                                     <Radar name="Cobertura" dataKey="A" stroke="#136442" fill="#136442" fillOpacity={0.5} />
                                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} formatter={(value) => [`${value.toFixed(1)}%`, "Cobertura"]} />
                                 </RadarChart>
@@ -173,19 +175,19 @@ export default function DashboardEmpleado({
                 {/* Gráfico 3 - Vialidad */}
                 <div style={chartCard} className="empleado-card-item">
                     <h3 style={chartTitle}>Estado de la Vialidad</h3>
-                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><p style={{ color: '#999' }}>Sin datos de vialidad</p></div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart layout="vertical" data={datosVialidad} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                <BarChart layout="vertical" data={datosVialidad} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                                     <XAxis type="number" hide />
-                                    <YAxis dataKey="estado" type="category" tick={{ fontSize: 12, fontWeight: 'bold' }} width={80} />
+                                    <YAxis dataKey="estado" type="category" tick={{ fontSize: 11, fontWeight: 'bold' }} width={75} />
                                     <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px' }} />
-                                    <Bar dataKey="cantidad" radius={[0, 5, 5, 0]} barSize={30}>
+                                    <Bar dataKey="cantidad" radius={[0, 5, 5, 0]} barSize={25}>
                                         {datosVialidad.map((entry, index) => {
                                             const colors = { Excelente: '#0d5437', Bueno: '#338261', Regular: '#82ca9d', Malo: '#c8e6c9' };
                                             return <Cell key={`cell-${index}`} fill={colors[entry.estado] || '#8884d8'} />;
@@ -200,17 +202,17 @@ export default function DashboardEmpleado({
                 {/* Gráfico 4 - Dispersión: Superficie vs Infraestructura */}
                 <div style={chartCard} className="empleado-card-item">
                     <h3 style={chartTitle}>Relación Superficie vs. Infraestructura</h3>
-                    <div style={{ width: '100%', height: 350, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><p style={{ color: '#999' }}>No hay datos para mostrar</p></div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: -10 }}>
+                                <ScatterChart margin={{ top: 10, right: 10, bottom: 10, left: -15 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                    <XAxis type="number" dataKey="superficie" name="Superficie" unit=" Ha" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 11 }} />
-                                    <YAxis type="number" dataKey="infraestructura" name="Infraestructura" unit=" und" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 11 }} allowDecimals={false} />
+                                    <XAxis type="number" dataKey="superficie" name="Superficie" unit=" Ha" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 10 }} />
+                                    <YAxis type="number" dataKey="infraestructura" name="Infraestructura" unit=" und" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 10 }} allowDecimals={false} />
                                     <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '12px' }} />
                                     <Scatter name="Predios" data={datosDispersion} fill="#136442" fillOpacity={0.6} />
                                 </ScatterChart>
@@ -222,7 +224,7 @@ export default function DashboardEmpleado({
                 {/* Gráfico 5 - Treemap de Tenencia de Tierras (Ancho Completo) */}
                 <div style={chartCard} className="empleado-card-item empleado-treemap-full">
                     <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
-                    <div style={{ width: '100%', height: 400, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 350, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
