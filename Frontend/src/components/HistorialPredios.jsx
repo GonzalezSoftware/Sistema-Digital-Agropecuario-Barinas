@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 
-// 1. El componente Spinner corporativo
+// 1. El Spinner corporativo
 export const Spinner = ({ color = "#136442" }) => {
     const spinnerRef = (el) => {
         if (el) {
@@ -96,32 +96,41 @@ export default function HistorialPredios({
     const estaInhabilitado = predioSeleccionado?.estado === 'inactivo' || predioSeleccionado?.inhabilitado === true;
 
     return (
-        <div className="historial-wrapper" style={{ width: "100%", maxWidth: "1100px", margin: "0 auto", boxSizing: "border-box" }}>
+        <div className="historial-wrapper">
             
-            {/* Estilos CSS Responsivos Avanzados */}
+            {/* Estilos CSS Responsivos Avanzados y Estrictos para Empleado y Admin */}
             <style>{`
                 .historial-wrapper {
-                    padding: 0 10px;
+                    width: 100% !important;
+                    max-width: 1100px;
+                    margin: 0 auto;
+                    box-sizing: border-box !important;
+                    padding: 0 8px !important;
+                    overflow-x: hidden !important;
+                }
+                .historial-wrapper * {
+                    box-sizing: border-box !important;
+                    min-width: 0;
                 }
                 .grid-productor {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    gap: 20px;
+                    gap: 16px;
                 }
                 .grid-ubicacion {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    gap: 20px;
+                    gap: 16px;
                 }
                 .grid-tenencia {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    gap: 20px;
+                    gap: 16px;
                 }
                 .grid-explotacion {
                     display: grid;
                     grid-template-columns: 1fr 2fr;
-                    gap: 20px;
+                    gap: 16px;
                 }
 
                 @media (max-width: 992px) {
@@ -141,6 +150,7 @@ export default function HistorialPredios({
                     .grid-tenencia, 
                     .grid-explotacion {
                         grid-template-columns: 1fr !important;
+                        gap: 12px !important;
                     }
                     .span-responsive {
                         grid-column: span 1 !important;
@@ -187,18 +197,18 @@ export default function HistorialPredios({
 
             {/* ── TABLA DE REGISTROS ── */}
             <div style={{
-                backgroundColor: "#fff", padding: "15px", borderRadius: "12px",
+                backgroundColor: "#fff", padding: "12px", borderRadius: "12px",
                 boxShadow: "0 4px 6px rgba(0,0,0,0.05)", border: "1px solid #eee", overflowX: "auto"
             }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", minWidth: "650px" }}>
                     <thead>
                         <tr style={{ borderBottom: "2px solid #136442", color: "#136442" }}>
-                            <th style={{ fontSize: "14px", padding: "12px" }}>#</th>
-                            <th style={{ fontSize: "14px", padding: "12px" }}>Nombre del Predio</th>
-                            <th style={{ fontSize: "14px", padding: "12px" }}>Productor</th>
-                            <th style={{ fontSize: "14px", padding: "12px" }}>Municipio</th>
-                            <th style={{ fontSize: "14px", padding: "12px" }}>Superficie</th>
-                            <th style={{ fontSize: "14px", padding: "12px" }}>Acciones</th>
+                            <th style={{ fontSize: "14px", padding: "10px" }}>#</th>
+                            <th style={{ fontSize: "14px", padding: "10px" }}>Nombre del Predio</th>
+                            <th style={{ fontSize: "14px", padding: "10px" }}>Productor</th>
+                            <th style={{ fontSize: "14px", padding: "10px" }}>Municipio</th>
+                            <th style={{ fontSize: "14px", padding: "10px" }}>Superficie</th>
+                            <th style={{ fontSize: "14px", padding: "10px" }}>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -218,14 +228,14 @@ export default function HistorialPredios({
                                             textDecoration: inhabilitadoFila ? "line-through" : "none"
                                         }}
                                     >
-                                        <td style={{ fontSize: "13px", padding: "12px" }}>{numeroFila}</td>
-                                        <td style={{ fontSize: "13px", padding: "12px" }}>
+                                        <td style={{ fontSize: "13px", padding: "10px" }}>{numeroFila}</td>
+                                        <td style={{ fontSize: "13px", padding: "10px", wordBreak: "break-word" }}>
                                             {p.nombre_predio} {inhabilitadoFila && <span style={{ textDecoration: 'none', color: '#dc2626', fontSize: '10px', fontWeight: 'bold', marginLeft: '6px', background: '#fee2e2', padding: '2px 6px', borderRadius: '4px', display: 'inline-block' }}>INHABILITADO</span>}
                                         </td>
-                                        <td style={{ fontSize: "13px", padding: "12px" }}>{p.productor?.nombre || "Sin nombre"}</td>
-                                        <td style={{ fontSize: "13px", padding: "12px" }}>{formatearMunicipio(p.municipio)}</td>
-                                        <td style={{ fontSize: "13px", padding: "12px" }}>{p.superficie} Ha</td>
-                                        <td style={{ fontSize: "13px", padding: "12px", textDecoration: "none" }}>
+                                        <td style={{ fontSize: "13px", padding: "10px", wordBreak: "break-word" }}>{p.productor?.nombre || "Sin nombre"}</td>
+                                        <td style={{ fontSize: "13px", padding: "10px" }}>{formatearMunicipio(p.municipio)}</td>
+                                        <td style={{ fontSize: "13px", padding: "10px" }}>{p.superficie} Ha</td>
+                                        <td style={{ fontSize: "13px", padding: "10px", textDecoration: "none" }}>
                                             <button
                                                 onClick={() => manejarVerDetalles(p)}
                                                 style={{
@@ -257,9 +267,9 @@ export default function HistorialPredios({
                 {totalPaginas > 1 && (
                     <div style={{
                         display: "flex", justifyContent: "space-between", alignItems: "center",
-                        marginTop: "20px", paddingTop: "15px", borderTop: "1px solid #eee", flexWrap: "wrap", gap: "10px"
+                        marginTop: "16px", paddingTop: "12px", borderTop: "1px solid #eee", flexWrap: "wrap", gap: "10px"
                     }}>
-                        <span style={{ fontSize: "13px", color: "#666" }}>
+                        <span style={{ fontSize: "12px", color: "#666" }}>
                             Mostrando del <strong>{indicePrimerElemento + 1}</strong> al <strong>{Math.min(indiceUltimoElemento, prediosFiltrados.length)}</strong> de <strong>{prediosFiltrados.length}</strong> predios
                         </span>
 
@@ -278,8 +288,8 @@ export default function HistorialPredios({
                                 Anterior
                             </button>
 
-                            <span style={{ fontSize: "13px", padding: "0 8px", fontWeight: "bold", color: "#333" }}>
-                                Página {paginaActual} de {totalPaginas}
+                            <span style={{ fontSize: "12px", padding: "0 6px", fontWeight: "bold", color: "#333" }}>
+                                Pág. {paginaActual} de {totalPaginas}
                             </span>
 
                             <button
@@ -305,7 +315,7 @@ export default function HistorialPredios({
                 <div style={{
                     position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
                     backgroundColor: "rgba(0,0,0,0.7)", display: "flex",
-                    justifyContent: "center", alignItems: "center", zIndex: 1000, padding: "10px", boxSizing: "border-box"
+                    justifyContent: "center", alignItems: "center", zIndex: 1000, padding: "8px", boxSizing: "border-box"
                 }}>
                     <div style={{
                         backgroundColor: "#fff", width: "100%", maxWidth: "950px", maxHeight: "92vh",
@@ -315,31 +325,31 @@ export default function HistorialPredios({
                         {/* Encabezado Dinámico */}
                         <div style={{
                             backgroundColor: estaInhabilitado ? "#b91c1c" : "#136442",
-                            padding: "16px 20px", color: "#fff", display: "flex",
+                            padding: "14px 16px", color: "#fff", display: "flex",
                             justifyContent: "space-between", alignItems: "center",
                             position: "sticky", top: 0, zIndex: 10
                         }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", wordBreak: "break-word" }}>
+                            <h3 style={{ margin: 0, fontSize: "14px", wordBreak: "break-word" }}>
                                 {estaInhabilitado
                                     ? `PREDIO INHABILITADO: ${predioSeleccionado.nombre_predio.toUpperCase()}`
                                     : cargandoAccion ? "PROCESANDO..." : editando ? "MODO EDICIÓN ACTIVADO" : `FICHA TÉCNICA: ${predioSeleccionado.nombre_predio.toUpperCase()}`}
                             </h3>
-                            <button onClick={() => { if (!cargandoAccion) { setMostrarModal(false); setEditando(false); } }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: "20px", padding: "4px" }}>✕</button>
+                            <button onClick={() => { if (!cargandoAccion) { setMostrarModal(false); setEditando(false); } }} style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", fontSize: "18px", padding: "4px" }}>✕</button>
                         </div>
 
                         {/* Aviso en caso de estar inhabilitado */}
                         {estaInhabilitado && (
-                            <div style={{ backgroundColor: "#fef2f2", color: "#991b1b", padding: "12px 20px", borderBottom: "1px solid #fca5a5", fontSize: "13px", fontWeight: "bold" }}>
+                            <div style={{ backgroundColor: "#fef2f2", color: "#991b1b", padding: "10px 16px", borderBottom: "1px solid #fca5a5", fontSize: "12px", fontWeight: "bold" }}>
                                 ⚠ Este predio se encuentra inhabilitado por cambio de dueño. Sus datos están congelados únicamente para consulta histórica.
                             </div>
                         )}
 
-                        <div style={{ padding: "20px", opacity: cargandoAccion ? 0.5 : 1, pointerEvents: cargandoAccion || estaInhabilitado ? 'none' : 'auto', boxSizing: "border-box" }}>
+                        <div style={{ padding: "16px", opacity: cargandoAccion ? 0.5 : 1, pointerEvents: cargandoAccion || estaInhabilitado ? 'none' : 'auto', boxSizing: "border-box" }}>
                             
                             {/* I. DATOS DEL PRODUCTOR */}
-                            <div className="grid-productor" style={{ marginBottom: "30px" }}>
-                                <div style={{ gridColumn: "span 3", borderBottom: `2px solid ${estaInhabilitado ? "#b91c1c" : "#136442"}`, paddingBottom: "5px" }} className="span-responsive">
-                                    <strong style={{ color: estaInhabilitado ? "#b91c1c" : "#136442", fontSize: "14px" }}>I. DATOS DEL PRODUCTOR</strong>
+                            <div className="grid-productor" style={{ marginBottom: "24px" }}>
+                                <div style={{ gridColumn: "span 3", borderBottom: `2px solid ${estaInhabilitado ? "#b91c1c" : "#136442"}`, paddingBottom: "4px" }} className="span-responsive">
+                                    <strong style={{ color: estaInhabilitado ? "#b91c1c" : "#136442", fontSize: "13px" }}>I. DATOS DEL PRODUCTOR</strong>
                                 </div>
                                 <div className="span-responsive">
                                     <InputField
@@ -383,9 +393,9 @@ export default function HistorialPredios({
                             </div>
 
                             {/* II. GEORREFERENCIACIÓN Y UBICACIÓN */}
-                            <div className="grid-ubicacion" style={{ marginBottom: "30px" }}>
-                                <div style={{ gridColumn: "span 3", borderBottom: "2px solid #136442", paddingBottom: "5px" }} className="span-responsive">
-                                    <strong style={{ color: "#136442", fontSize: "14px" }}>II. GEORREFERENCIACIÓN Y UBICACIÓN</strong>
+                            <div className="grid-ubicacion" style={{ marginBottom: "24px" }}>
+                                <div style={{ gridColumn: "span 3", borderBottom: "2px solid #136442", paddingBottom: "4px" }} className="span-responsive">
+                                    <strong style={{ color: "#136442", fontSize: "13px" }}>II. GEORREFERENCIACIÓN Y UBICACIÓN</strong>
                                 </div>
                                 <div className="span-responsive"><InputField label="Municipio" value={formatearMunicipio(predioSeleccionado.municipio)} disabled={true} /></div>
                                 <div className="span-responsive"><InputField label="Parroquia" value={predioSeleccionado.parroquia || "N/A"} disabled={true} /></div>
@@ -395,9 +405,9 @@ export default function HistorialPredios({
                             </div>
 
                             {/* III y IV. IDENTIFICACIÓN Y TENENCIA */}
-                            <div className="grid-tenencia" style={{ marginBottom: "30px" }}>
-                                <div style={{ gridColumn: "span 3", borderBottom: "2px solid #ccc", paddingBottom: "5px" }} className="span-responsive">
-                                    <strong style={{ color: "#136442", fontSize: "14px" }}>III. IDENTIFICACIÓN Y IV. TENENCIA</strong>
+                            <div className="grid-tenencia" style={{ marginBottom: "24px" }}>
+                                <div style={{ gridColumn: "span 3", borderBottom: "2px solid #ccc", paddingBottom: "4px" }} className="span-responsive">
+                                    <strong style={{ color: "#136442", fontSize: "13px" }}>III. IDENTIFICACIÓN Y IV. TENENCIA</strong>
                                 </div>
                                 <div style={{ gridColumn: "span 2" }} className="span-responsive">
                                     <InputField
@@ -454,11 +464,11 @@ export default function HistorialPredios({
                             </div>
 
                             {/* VI. INFRAESTRUCTURA */}
-                            <div style={{ marginBottom: "30px" }}>
-                                <div style={{ borderBottom: "2px solid #136442", paddingBottom: "5px", marginBottom: "15px" }}>
-                                    <strong style={{ color: "#136442", fontSize: "14px" }}>VI. INFRAESTRUCTURA</strong>
+                            <div style={{ marginBottom: "24px" }}>
+                                <div style={{ borderBottom: "2px solid #136442", paddingBottom: "4px", marginBottom: "12px" }}>
+                                    <strong style={{ color: "#136442", fontSize: "13px" }}>VI. INFRAESTRUCTURA</strong>
                                 </div>
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: "10px" }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: "8px" }}>
                                     {[
                                         { k: 'corrales', l: 'CORRALES' }, { k: 'galpones', l: 'GALPONES' }, { k: 'vaqueras', l: 'VAQUERAS' },
                                         { k: 'cochineras', l: 'COCHINERAS' }, { k: 'silos', l: 'SILOS' }, { k: 'caballerizas', l: 'CABALLERIZAS' },
@@ -470,18 +480,18 @@ export default function HistorialPredios({
                                         return (
                                             <div key={item.k} style={{
                                                 border: "1px solid", borderColor: tieneCantidad ? "#bbf7d0" : "#e2e8f0",
-                                                padding: "10px 8px", borderRadius: "8px", textAlign: "center",
+                                                padding: "8px 6px", borderRadius: "8px", textAlign: "center",
                                                 backgroundColor: tieneCantidad ? "#f0fdf4" : "#fff"
                                             }}>
-                                                <small style={{ color: "#64748b", fontSize: "10px", fontWeight: "700", display: "block", marginBottom: "6px" }}>{item.l}</small>
+                                                <small style={{ color: "#64748b", fontSize: "9px", fontWeight: "700", display: "block", marginBottom: "4px" }}>{item.l}</small>
                                                 {editando && !estaInhabilitado ? (
                                                     <input
                                                         type="number" min="0" value={valorAsignado}
                                                         onChange={(e) => actualizarInfraestructura(item.k, e.target.value)}
-                                                        style={{ width: "100%", background: "transparent", border: "none", outline: "none", textAlign: "center", fontWeight: "bold", fontSize: "16px", color: "#136442" }}
+                                                        style={{ width: "100%", background: "transparent", border: "none", outline: "none", textAlign: "center", fontWeight: "bold", fontSize: "15px", color: "#136442" }}
                                                     />
                                                 ) : (
-                                                    <span style={{ fontWeight: "bold", fontSize: "16px", color: tieneCantidad ? "#136442" : "#333" }}>{valorAsignado}</span>
+                                                    <span style={{ fontWeight: "bold", fontSize: "15px", color: tieneCantidad ? "#136442" : "#333" }}>{valorAsignado}</span>
                                                 )}
                                             </div>
                                         );
@@ -490,11 +500,11 @@ export default function HistorialPredios({
                             </div>
 
                             {/* V. SERVICIOS BÁSICOS */}
-                            <div style={{ marginBottom: "30px" }}>
-                                <div style={{ borderBottom: "2px solid #136442", paddingBottom: "5px", marginBottom: "15px" }}>
-                                    <strong style={{ color: "#136442", fontSize: "14px" }}>V. SERVICIOS BÁSICOS</strong>
+                            <div style={{ marginBottom: "24px" }}>
+                                <div style={{ borderBottom: "2px solid #136442", paddingBottom: "4px", marginBottom: "12px" }}>
+                                    <strong style={{ color: "#136442", fontSize: "13px" }}>V. SERVICIOS BÁSICOS</strong>
                                 </div>
-                                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                                     {[
                                         { id: 'Agua', l: 'Agua' },
                                         { id: 'Electricidad', l: 'Electricidad' },
@@ -521,7 +531,7 @@ export default function HistorialPredios({
                                                     display: "flex",
                                                     alignItems: "center",
                                                     gap: "6px",
-                                                    padding: "8px 14px",
+                                                    padding: "8px 12px",
                                                     borderRadius: "8px",
                                                     backgroundColor: poseeServicio ? "#136442" : "#f1f5f9",
                                                     color: poseeServicio ? "#fff" : "#475569",
@@ -533,7 +543,7 @@ export default function HistorialPredios({
                                                     transition: "all 0.2s ease"
                                                 }}
                                             >
-                                                <span style={{ fontSize: "13px", fontWeight: "bold", color: poseeServicio ? "#fff" : "#94a3b8" }}>
+                                                <span style={{ fontSize: "12px", fontWeight: "bold", color: poseeServicio ? "#fff" : "#94a3b8" }}>
                                                     {poseeServicio ? "✓" : "○"}
                                                 </span>
                                                 {srv.l}
@@ -545,8 +555,8 @@ export default function HistorialPredios({
 
                             {/* VII. MODELO DE PRODUCCIÓN */}
                             <div className="grid-explotacion">
-                                <div style={{ border: "1px solid #e0e0e0", padding: "12px", borderRadius: "8px", boxSizing: "border-box" }}>
-                                    <strong style={{ color: "#136442", fontSize: "12px", display: "block", marginBottom: "8px" }}>TIPO DE EXPLOTACIÓN</strong>
+                                <div style={{ border: "1px solid #e0e0e0", padding: "10px", borderRadius: "8px", boxSizing: "border-box" }}>
+                                    <strong style={{ color: "#136442", fontSize: "11px", display: "block", marginBottom: "6px" }}>TIPO DE EXPLOTACIÓN</strong>
                                     {editando && !estaInhabilitado ? (
                                         <select style={{ ...estiloInput, width: "100%", boxSizing: "border-box" }} value={predioSeleccionado.produccion?.tipo_explotacion || ""} onChange={(e) => actualizarProduccion('tipo_explotacion', e.target.value)}>
                                             <option value="Intensivo">Intensivo</option>
@@ -554,12 +564,12 @@ export default function HistorialPredios({
                                             <option value="Extensivo">Extensivo</option>
                                         </select>
                                     ) : (
-                                        <span style={{ fontSize: "16px", fontWeight: "bold" }}>{predioSeleccionado.produccion?.tipo_explotacion || "N/A"}</span>
+                                        <span style={{ fontSize: "15px", fontWeight: "bold" }}>{predioSeleccionado.produccion?.tipo_explotacion || "N/A"}</span>
                                     )}
                                 </div>
-                                <div style={{ border: "1px solid #e0e0e0", padding: "12px", borderRadius: "8px", boxSizing: "border-box" }}>
-                                    <strong style={{ color: "#136442", fontSize: "12px", display: "block", marginBottom: "8px" }}>SISTEMAS DE REGISTRO</strong>
-                                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                <div style={{ border: "1px solid #e0e0e0", padding: "10px", borderRadius: "8px", boxSizing: "border-box" }}>
+                                    <strong style={{ color: "#136442", fontSize: "11px", display: "block", marginBottom: "6px" }}>SISTEMAS DE REGISTRO</strong>
+                                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                                         {[
                                             { k: 'registro_sanitario', l: 'SANITARIO' }, { k: 'registro_productivo', l: 'PRODUCTIVO' },
                                             { k: 'registro_reproductivo', l: 'REPRODUCTIVO' }, { k: 'registro_financiero', l: 'FINANCIERO' }
@@ -568,10 +578,10 @@ export default function HistorialPredios({
                                                 key={reg.k}
                                                 onClick={() => editando && !estaInhabilitado && actualizarProduccion(reg.k, !predioSeleccionado.produccion?.[reg.k])}
                                                 style={{
-                                                    display: "flex", alignItems: "center", gap: "5px", padding: "5px 10px", borderRadius: "20px",
+                                                    display: "flex", alignItems: "center", gap: "4px", padding: "5px 8px", borderRadius: "20px",
                                                     backgroundColor: predioSeleccionado.produccion?.[reg.k] ? "#136442" : "#f0f0f0",
                                                     color: predioSeleccionado.produccion?.[reg.k] ? "#fff" : "#999",
-                                                    fontSize: "11px", fontWeight: "bold", cursor: editando && !estaInhabilitado ? "pointer" : "default", transition: "all 0.2s"
+                                                    fontSize: "10px", fontWeight: "bold", cursor: editando && !estaInhabilitado ? "pointer" : "default", transition: "all 0.2s"
                                                 }}
                                             >
                                                 {predioSeleccionado.produccion?.[reg.k] ? "✓" : "○"} {reg.l}
@@ -584,8 +594,8 @@ export default function HistorialPredios({
 
                         {/* ── BOTONERA FINAL ── */}
                         <div className="modal-acciones-footer" style={{
-                            padding: "15px 20px", backgroundColor: "#f4f4f4", display: "flex",
-                            justifyContent: "flex-end", gap: "10px", borderTop: "1px solid #ddd",
+                            padding: "12px 16px", backgroundColor: "#f4f4f4", display: "flex",
+                            justifyContent: "flex-end", gap: "8px", borderTop: "1px solid #ddd",
                             position: "sticky", bottom: 0, zIndex: 10, flexWrap: "wrap", boxSizing: "border-box"
                         }}>
                             {!esAdmin && !estaInhabilitado && (
