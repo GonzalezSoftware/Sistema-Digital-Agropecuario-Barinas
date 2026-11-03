@@ -26,13 +26,13 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno, onToggleSidebar 
             borderBottom: "1px solid #e2e8f0",
             paddingBottom: "16px",
             backgroundColor: "#ffffff",
-            flexWrap: "wrap",
-            gap: "12px",
+            flexWrap: "nowrap", // Evita que los elementos bajen automáticamente de forma vertical
+            gap: "16px",
             boxSizing: "border-box",
             width: "100%"
         }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0, flex: 1 }}>
-                {/* Botón de Hamburguesa exclusivo para móviles */}
+                {/* Botón de Hamburguesa */}
                 <button
                     onClick={onToggleSidebar}
                     className="menu-hamburguesa-btn"
@@ -52,11 +52,12 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno, onToggleSidebar 
                     <Bars3Icon style={{ width: "24px", height: "24px" }} />
                 </button>
                 
-                <div style={{ minWidth: 0, flex: 1 }}>
-                    <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#1e293b", margin: 0, wordBreak: "break-word" }}>
+                {/* Contenedor de textos con minWidth: 0 obligatorio para prevenir desbordes o columnas forzadas */}
+                <div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column" }}>
+                    <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#1e293b", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {obtenerTitulo()}
                     </h2>
-                    <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b", wordBreak: "break-word" }}>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {obtenerSubtitulo()}
                     </p>
                 </div>
