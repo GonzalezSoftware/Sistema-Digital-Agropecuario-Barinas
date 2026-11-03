@@ -1,8 +1,6 @@
 // src/components/EmpleadosRegistroPredios.jsx
 import React from "react";
 import {
-    grid3,
-    gridCheck,
     labelStyle,
     radioLabel,
     FormSection,
@@ -62,10 +60,18 @@ export default function EmpleadosRegistroPredios({
                     padding: 0 12px;
                     overflow-x: hidden !important;
                 }
-                .registro-grid-productor {
+                .registro-grid-productor,
+                .registro-grid-3 {
                     display: grid;
                     grid-template-columns: repeat(3, minmax(0, 1fr));
                     gap: 16px;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                .registro-grid-check {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                    gap: 12px;
                     width: 100%;
                     box-sizing: border-box;
                 }
@@ -93,7 +99,8 @@ export default function EmpleadosRegistroPredios({
                 }
 
                 @media (max-width: 992px) {
-                    .registro-grid-productor {
+                    .registro-grid-productor,
+                    .registro-grid-3 {
                         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                     }
                     .productor-accion-cell {
@@ -103,9 +110,11 @@ export default function EmpleadosRegistroPredios({
 
                 @media (max-width: 768px) {
                     .registro-predios-wrapper {
-                        padding: 0 6px !important;
+                        padding: 0 8px !important;
                     }
-                    .registro-grid-productor {
+                    .registro-grid-productor,
+                    .registro-grid-3,
+                    .registro-grid-check {
                         grid-template-columns: 1fr !important;
                         gap: 12px !important;
                     }
@@ -223,7 +232,7 @@ export default function EmpleadosRegistroPredios({
             </FormSection>
 
             <FormSection title="II. Georreferenciación y Ubicación">
-                <div style={grid3}>
+                <div className="registro-grid-3">
                     <InputField
                         label="Municipio"
                         name="municipio"
@@ -324,7 +333,7 @@ export default function EmpleadosRegistroPredios({
             </FormSection>
 
             <FormSection title="III. Identificación del Predio">
-                <div style={grid3}>
+                <div className="registro-grid-3">
                     <InputField
                         label="Nombre del Predio"
                         name="nombre_predio"
@@ -361,7 +370,7 @@ export default function EmpleadosRegistroPredios({
             </FormSection>
 
             <FormSection title="IV. Tenencia de la Tierra">
-                <div style={gridCheck}>
+                <div className="registro-grid-check">
                     {[
                         "Propiedad", "Ocupación", "Comunidad", "Título Supletorio",
                         "Arrendamiento", "Adjudicación", "Concesión",
@@ -381,7 +390,7 @@ export default function EmpleadosRegistroPredios({
             </FormSection>
 
             <FormSection title="V. Servicios Básicos">
-                <div style={gridCheck}>
+                <div className="registro-grid-check">
                     {["Agua", "Electricidad", "Gas", "Internet", "Teléfono", "Transporte"].map(s => (
                         <label key={s} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", cursor: "pointer", color: "#334155" }}>
                             <input
@@ -405,7 +414,7 @@ export default function EmpleadosRegistroPredios({
             </FormSection>
 
             <FormSection title="VI. Infraestructura">
-                <div style={grid3}>
+                <div className="registro-grid-3">
                     {Object.keys(formData.infraestructura || {
                         corrales: 0, galpones: 0, vaqueras: 0, cochineras: 0,
                         silos: 0, caballerizas: 0, feedlot: 0, lagunas: 0,
@@ -436,7 +445,7 @@ export default function EmpleadosRegistroPredios({
                 />
                 <div style={{ marginTop: "20px" }}>
                     <p style={labelStyle}>Sistemas de Registro</p>
-                    <div style={gridCheck}>
+                    <div className="registro-grid-check">
                         {["Sanitario", "Productivo", "Reproductivo", "Financiero"].map(s => (
                             <label key={s} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", cursor: "pointer", color: "#334155" }}>
                                 <input
