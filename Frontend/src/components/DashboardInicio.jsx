@@ -32,7 +32,7 @@ const CustomTreemapContent = (props) => {
                     dominantBaseline="central"
                     fill="#F8FAFC" // Usamos un blanco tipo "Humo" (Slate 50) que quita el efecto de brillo agresivo
                     fontSize={10}
-                    fontWeight="100" // Bajamos de 600 a 500 para que la letra sea más fina y nítida
+                    fontWeight="100" // Bajamos de 600 al 100 para que la letra sea más fina y nítida
                     style={{
                         pointerEvents: 'none',
                         textShadow: 'none', // Forzamos a que no tenga sombras
@@ -65,14 +65,66 @@ export default function DashboardInicio({
     chartPlaceholder
 }) {
     return (
-        <div style={{ maxWidth: "1100px", margin: "0 auto", width: "100%" }}>
+        <div className="admin-dashboard-container">
+            {/* ── ESTILOS CSS RESPONSIVE AISLADOS PARA MÓVIL ── */}
+            <style>{`
+                .admin-dashboard-container {
+                    width: 100% !important;
+                    max-width: 1100px;
+                    margin: 0 auto;
+                    box-sizing: border-box !important;
+                    padding: 0 10px;
+                    overflow-x: hidden !important;
+                }
+                .admin-stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                    gap: 20px;
+                    margin-bottom: 24px;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                .admin-charts-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                    gap: 20px;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                .admin-chart-item {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                    min-width: 0 !important;
+                    overflow: hidden !important;
+                }
+                .admin-treemap-full {
+                    grid-column: 1 / -1;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+
+                /* 🔹 ADAPTACIÓN EXACTA PARA TELÉFONOS */
+                @media (max-width: 768px) {
+                    .admin-dashboard-container {
+                        padding: 0 4px !important;
+                    }
+                    .admin-stats-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 14px !important;
+                    }
+                    .admin-charts-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 14px !important;
+                    }
+                    .admin-treemap-full {
+                        grid-column: 1 / 1 !important;
+                    }
+                }
+            `}</style>
+
             {/* ── TARJETAS DE ESTADÍSTICAS ── */}
-            <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: "24px",
-                marginBottom: "30px"
-            }}>
+            <div className="admin-stats-grid">
                 <CardStat
                     label="Predios Censados"
                     value={cargando ? <Spinner /> : totalPredios}
@@ -93,15 +145,11 @@ export default function DashboardInicio({
             </div>
 
             {/* ── GRÁFICOS ── */}
-            <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                gap: "20px"
-            }}>
+            <div className="admin-charts-grid">
                 {/* Gráfico 1 - Barras */}
-                <div style={chartCard}>
+                <div style={chartCard} className="admin-chart-item">
                     <h3 style={chartTitle}>Predios por Municipio</h3>
-                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -113,7 +161,7 @@ export default function DashboardInicio({
                                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 11, fontWeight: 500 }} />
                                     <YAxis axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 11 }} allowDecimals={false} dx={-10} domain={[0, dataMax => (dataMax <= 1 ? 1 : dataMax + 1)]} />
                                     <Tooltip cursor={{ fill: 'rgba(19, 100, 66, 0.05)' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '12px' }} itemStyle={{ color: '#136442', fontWeight: 'bold' }} />
-                                    <Bar dataKey="cantidad" radius={[6, 6, 0, 0]} barSize={35}>
+                                    <Bar dataKey="cantidad" radius={[6, 6, 0, 0]} barSize={32}>
                                         {datosGrafico.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={index === 0 ? '#136442' : '#4CAF50'} fillOpacity={0.8 + (index * -0.1)} />
                                         ))}
@@ -125,9 +173,9 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 2 - Circular (Dona) */}
-                <div style={chartCard}>
+                <div style={chartCard} className="admin-chart-item">
                     <h3 style={chartTitle}>Estatus Legal de la Tierra</h3>
-                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -135,7 +183,7 @@ export default function DashboardInicio({
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={datosTenencia} cx="50%" cy="45%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" animationDuration={1000}>
+                                    <Pie data={datosTenencia} cx="50%" cy="45%" innerRadius={55} outerRadius={75} paddingAngle={5} dataKey="value" animationDuration={1000}>
                                         {datosTenencia.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
                                     </Pie>
                                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px' }} />
@@ -147,19 +195,19 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 3 - Radar (Servicios Básicos) */}
-                <div style={chartCard}>
+                <div style={chartCard} className="admin-chart-item">
                     <h3 style={chartTitle}>Cobertura de Servicios Básicos (%)</h3>
-                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><p style={{ color: '#999' }}>Sin datos de servicios</p></div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={datosServicios}>
+                                <RadarChart cx="50%" cy="50%" outerRadius="65%" data={datosServicios}>
                                     <PolarGrid stroke="#e0e0e0" />
-                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 11, fontWeight: 'bold' }} />
-                                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} axisLine={false} />
+                                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 10, fontWeight: 'bold' }} />
+                                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 9 }} axisLine={false} />
                                     <Radar name="Cobertura" dataKey="A" stroke="#136442" fill="#136442" fillOpacity={0.5} />
                                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} formatter={(value) => [`${value.toFixed(1)}%`, "Cobertura"]} />
                                 </RadarChart>
@@ -169,21 +217,21 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 4 - Vialidad */}
-                <div style={chartCard}>
+                <div style={chartCard} className="admin-chart-item">
                     <h3 style={chartTitle}>Estado de la Vialidad</h3>
-                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><p style={{ color: '#999' }}>Sin datos de vialidad</p></div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart layout="vertical" data={datosVialidad} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                <BarChart layout="vertical" data={datosVialidad} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                                     <XAxis type="number" hide />
-                                    <YAxis dataKey="estado" type="category" tick={{ fontSize: 12, fontWeight: 'bold' }} width={80} />
+                                    <YAxis dataKey="estado" type="category" tick={{ fontSize: 11, fontWeight: 'bold' }} width={75} />
                                     <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px' }} />
-                                    <Bar dataKey="cantidad" radius={[0, 5, 5, 0]} barSize={30}>
+                                    <Bar dataKey="cantidad" radius={[0, 5, 5, 0]} barSize={25}>
                                         {datosVialidad.map((entry, index) => {
                                             const colors = { Excelente: '#0d5437', Bueno: '#338261', Regular: '#82ca9d', Malo: '#c8e6c9' };
                                             return <Cell key={`cell-${index}`} fill={colors[entry.estado] || '#8884d8'} />;
@@ -196,9 +244,9 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 5 - Intensidad de Producción */}
-                <div style={chartCard}>
+                <div style={chartCard} className="admin-chart-item">
                     <h3 style={chartTitle}>Intensidad de Producción por Municipio</h3>
-                    <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 280, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
@@ -207,13 +255,13 @@ export default function DashboardInicio({
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={datosIntensidad} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                    <XAxis dataKey="municipio" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 11, fontWeight: 500 }} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 11 }} allowDecimals={false} dx={-10} domain={[0, dataMax => (dataMax <= 1 ? 1 : dataMax + 0.5)]} />
+                                    <XAxis dataKey="municipio" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 10, fontWeight: 500 }} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 10 }} allowDecimals={false} dx={-10} domain={[0, dataMax => (dataMax <= 1 ? 1 : dataMax + 0.5)]} />
                                     <Tooltip cursor={{ fill: 'rgba(19, 100, 66, 0.05)' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '12px' }} />
-                                    <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ fontSize: '11px', paddingBottom: '10px' }} />
-                                    <Bar dataKey="Intensivo" fill="#136442" barSize={35} radius={[6, 6, 6, 6]} />
-                                    <Bar dataKey="Semi Intensivo" fill="#4CAF50" barSize={35} radius={[6, 6, 6, 6]} />
-                                    <Bar dataKey="Extensivo" fill="#82ca9d" barSize={35} radius={[6, 6, 6, 6]} />
+                                    <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ fontSize: '10px', paddingBottom: '10px' }} />
+                                    <Bar dataKey="Intensivo" fill="#136442" barSize={25} radius={[6, 6, 6, 6]} />
+                                    <Bar dataKey="Semi Intensivo" fill="#4CAF50" barSize={25} radius={[6, 6, 6, 6]} />
+                                    <Bar dataKey="Extensivo" fill="#82ca9d" barSize={25} radius={[6, 6, 6, 6]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         )}
@@ -221,19 +269,19 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 6 - Dispersión: Superficie vs Infraestructura */}
-                <div style={chartCard}>
+                <div style={chartCard} className="admin-chart-item">
                     <h3 style={chartTitle}>Relación Superficie vs. Infraestructura</h3>
-                    <div style={{ width: '100%', height: 350, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 300, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><p style={{ color: '#999' }}>No hay datos para mostrar</p></div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: -10 }}>
+                                <ScatterChart margin={{ top: 15, right: 15, bottom: 15, left: -15 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                    <XAxis type="number" dataKey="superficie" name="Superficie" unit=" Ha" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 11 }} />
-                                    <YAxis type="number" dataKey="infraestructura" name="Infraestructura" unit=" und" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 11 }} allowDecimals={false} />
+                                    <XAxis type="number" dataKey="superficie" name="Superficie" unit=" Ha" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 10 }} />
+                                    <YAxis type="number" dataKey="infraestructura" name="Infraestructura" unit=" und" axisLine={false} tickLine={false} tick={{ fill: '#666', fontSize: 10 }} allowDecimals={false} />
                                     <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '12px' }} />
                                     <Scatter name="Predios" data={datosDispersion} fill="#136442" fillOpacity={0.6} />
                                 </ScatterChart>
@@ -243,9 +291,9 @@ export default function DashboardInicio({
                 </div>
 
                 {/* Gráfico 7 - Treemap de Tenencia de Tierras (Ancho Completo) */}
-                <div style={{ ...chartCard, gridColumn: '1 / -1', width: '100%' }}>
+                <div style={chartCard} className="admin-chart-item admin-treemap-full">
                     <h3 style={chartTitle}>Distribución por Tenencia (Superficie)</h3>
-                    <div style={{ width: '100%', height: 400, marginTop: '20px' }}>
+                    <div style={{ width: '100%', height: 350, marginTop: '16px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
                         ) : listaPredios.length === 0 ? (

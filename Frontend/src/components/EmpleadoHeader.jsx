@@ -45,7 +45,7 @@ export const EmpleadoHeader = ({ vistaActiva, escudo }) => {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    margin-bottom: 30px;
+                    margin-bottom: 24px;
                     border-bottom: 1px solid #e2e8f0;
                     padding-bottom: 10px;
                     width: 100%;
@@ -73,8 +73,8 @@ export const EmpleadoHeader = ({ vistaActiva, escudo }) => {
                         flex-direction: column;
                         align-items: flex-start;
                         gap: 10px;
-                        margin-top: 50px !important; /* 👈 Deja espacio libre para que el botón hamburguesa no tape el título */
-                        margin-bottom: 20px;
+                        margin-top: 48px !important; /* Espacio exacto para el botón de menú flotante */
+                        margin-bottom: 16px;
                     }
                     .empleado-header-title-text {
                         font-size: 19px !important;
@@ -86,7 +86,7 @@ export const EmpleadoHeader = ({ vistaActiva, escudo }) => {
                 <h2 className="empleado-header-title-text">
                     {obtenerTitulo()}
                 </h2>
-                <p style={{ margin: "0px 0 0 0", fontSize: "13px", color: "#64748b" }}>
+                <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "#64748b" }}>
                     {obtenerSubtitulo()}
                 </p>
             </div>

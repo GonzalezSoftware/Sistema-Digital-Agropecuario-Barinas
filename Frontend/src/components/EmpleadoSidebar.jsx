@@ -136,8 +136,7 @@ export const EmpleadoSidebar = ({
             <aside 
                 className={`empleado-sidebar ${sidebarAbierto ? "abierto" : ""}`}
                 style={{
-                    width: "290px",
-                    maxWidth: "80vw",
+                    width: "280px",
                     backgroundColor: "#136442",
                     borderRight: "1px solid #0f4d34",
                     height: "100vh",
@@ -153,7 +152,7 @@ export const EmpleadoSidebar = ({
                     flexShrink: 0
                 }}
             >
-                {/* Encabezado: Info del Empleado y Predio Seleccionado */}
+                {/* Info del Empleado y Predio */}
                 <div style={{
                     display: "flex",
                     flexDirection: "column",
@@ -161,7 +160,7 @@ export const EmpleadoSidebar = ({
                     padding: "10px 12px",
                     backgroundColor: "rgba(255,255,255,0.08)",
                     borderRadius: "14px",
-                    marginBottom: "12px",
+                    marginBottom: "10px",
                     flexShrink: 0
                 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
@@ -206,7 +205,6 @@ export const EmpleadoSidebar = ({
                         </div>
                     </div>
 
-                    {/* Indicador del Predio Seleccionado */}
                     <div style={{
                         backgroundColor: "rgba(0, 0, 0, 0.2)",
                         padding: "6px 8px",
@@ -230,16 +228,15 @@ export const EmpleadoSidebar = ({
                     </div>
                 </div>
 
-                {/* Navegación de Opciones (Con desplazamiento y compacta) */}
+                {/* Lista de Opciones */}
                 <div style={{
                     display: "flex",
                     flexDirection: "column",
                     gap: "2px",
-                    flex: "1 1 auto",
+                    flex: "0 1 auto",
                     overflowY: "auto",
                     paddingRight: "2px",
-                    scrollbarWidth: "thin",
-                    marginBottom: "6px"
+                    scrollbarWidth: "thin"
                 }}>
                     {/* 1. Predios */}
                     <div>
@@ -247,7 +244,7 @@ export const EmpleadoSidebar = ({
                             onClick={() => setPrediosAbierto(!prediosAbierto)}
                             style={{
                                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "10px 14px", borderRadius: "10px", cursor: "pointer", marginBottom: "2px",
+                                padding: "9px 12px", borderRadius: "10px", cursor: "pointer", marginBottom: "2px",
                                 backgroundColor: "transparent", color: "#86efac", fontWeight: 500, fontSize: "13.5px"
                             }}
                         >
@@ -302,7 +299,7 @@ export const EmpleadoSidebar = ({
                             onClick={() => setProduccionAbierto(!produccionAbierto)}
                             style={{
                                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                                padding: "10px 14px", borderRadius: "10px", cursor: "pointer", marginBottom: "2px",
+                                padding: "9px 12px", borderRadius: "10px", cursor: "pointer", marginBottom: "2px",
                                 backgroundColor: "transparent", color: "#86efac", fontSize: "13.5px"
                             }}
                         >
@@ -352,19 +349,17 @@ export const EmpleadoSidebar = ({
                     </div>
                 </div>
 
-                {/* Cerrar Sesión (Pegado y compacto al final del menú) */}
+                {/* Cerrar Sesión (Ubicado justo al terminar las opciones) */}
                 <div
                     onClick={cerrarSesion}
                     style={{
                         display: "flex", alignItems: "center", gap: "10px",
                         padding: "9px 12px", borderRadius: "8px", cursor: "pointer",
-                        color: "#fca5a5", fontSize: "13.5px", fontWeight: 600,
-                        flexShrink: 0,
+                        color: "#fca5a5", fontSize: "13px", fontWeight: 600,
+                        marginTop: "8px", flexShrink: 0,
                         backgroundColor: "rgba(252, 165, 165, 0.08)",
                         transition: "background 0.2s"
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.18)"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.08)"}
                 >
                     {PowerIcon && <PowerIcon style={{ width: "18px", height: "18px", color: "#fca5a5" }} />}
                     <span>Cerrar Sesión</span>
@@ -387,7 +382,7 @@ export const EmpleadoSidebar = ({
                         transform: translateX(-100%);
                         z-index: 1050 !important;
                         box-shadow: 5px 0 25px rgba(0,0,0,0.3);
-                        max-width: 280px !important;
+                        max-width: 270px !important;
                         width: 80% !important;
                     }
                     .empleado-sidebar.abierto {
