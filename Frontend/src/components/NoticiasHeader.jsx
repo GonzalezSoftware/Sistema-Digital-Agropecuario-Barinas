@@ -24,31 +24,35 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno }) => {
             marginBottom: "30px",
             borderBottom: "1px solid #e2e8f0",
             paddingBottom: "16px",
-            backgroundColor: "#ffffff"
+            backgroundColor: "#ffffff",
+            flexWrap: "wrap",
+            gap: "12px",
+            boxSizing: "border-box",
+            width: "100%"
         }}>
-            <div>
-                <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#1e293b", margin: 0 }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+                <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#1e293b", margin: 0, wordBreak: "break-word" }}>
                     {obtenerTitulo()}
                 </h2>
-                <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#64748b" }}>
+                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b", wordBreak: "break-word" }}>
                     {obtenerSubtitulo()}
                 </p>
             </div>
 
             {/* Logos / Escudos */}
-            <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
                 {escudo && (
                     <img
                         src={escudo}
                         alt="Logo Escudo"
-                        style={{ height: "40px", objectFit: "contain" }}
+                        style={{ height: "35px", objectFit: "contain" }}
                     />
                 )}
                 {gobierno && (
                     <img
                         src={gobierno}
                         alt="Logo Gobierno"
-                        style={{ height: "50px", objectFit: "contain" }}
+                        style={{ height: "45px", objectFit: "contain" }}
                     />
                 )}
             </div>

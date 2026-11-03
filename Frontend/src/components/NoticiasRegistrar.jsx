@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 
 export default function NoticiasRegistrar() {
-    // URL del servidor backend en AWS con HTTPS
     const API_URL = "https://3.145.179.35.nip.io/api/";
 
     const [titulo, setTitulo] = useState("");
@@ -12,20 +11,17 @@ export default function NoticiasRegistrar() {
     const [cargando, setCargando] = useState(false);
     const [mensaje, setMensaje] = useState({ texto: "", tipo: "" });
 
-    // ── FUNCIÓN DE COMPRESIÓN Y VALIDACIÓN DE IMAGEN ──
     const manejarSeleccionImagen = (e) => {
         const archivo = e.target.files[0];
         if (!archivo) return;
 
-        const LIMITE_MAXIMO = 1 * 1024 * 1024; // 1 MB en bytes
+        const LIMITE_MAXIMO = 1 * 1024 * 1024;
 
-        // Si la imagen original ya pesa menos de 1 MB, se asigna directamente
         if (archivo.size <= LIMITE_MAXIMO) {
             setImagen(archivo);
             return;
         }
 
-        // Si supera 1 MB, se comprime automáticamente mediante un Canvas
         const reader = new FileReader();
         reader.readAsDataURL(archivo);
         reader.onload = (event) => {
@@ -36,7 +32,6 @@ export default function NoticiasRegistrar() {
                 let width = img.width;
                 let height = img.height;
 
-                // Redimensionamiento proporcional si las dimensiones superan 1200px
                 const MAX_DIMENSION = 1200;
                 if (width > height && width > MAX_DIMENSION) {
                     height = Math.round((height * MAX_DIMENSION) / width);
@@ -51,7 +46,6 @@ export default function NoticiasRegistrar() {
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Exportar la imagen comprimida a formato JPEG al 70% de calidad
                 canvas.toBlob(
                     (blob) => {
                         if (!blob) {
@@ -66,7 +60,6 @@ export default function NoticiasRegistrar() {
                             return;
                         }
 
-                        // Verificar si aun después de la compresión supera 1 MB
                         if (blob.size > LIMITE_MAXIMO) {
                             Swal.fire({
                                 icon: "warning",
@@ -79,7 +72,6 @@ export default function NoticiasRegistrar() {
                             return;
                         }
 
-                        // Crear archivo optimizado final
                         const archivoComprimido = new File([blob], archivo.name.replace(/\.[^/.]+$/, ".jpg"), {
                             type: "image/jpeg",
                             lastModified: Date.now(),
@@ -170,70 +162,67 @@ export default function NoticiasRegistrar() {
     };
 
     return (
-        <div style={{ background: "#ffffff", padding: "32px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
+        <div style={{ background: "#ffffff", padding: "24px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)", width: "100%", boxSizing: "border-box" }}>
             
             {mensaje.texto && (
                 <div style={{
                     padding: "12px 16px",
                     borderRadius: "8px",
                     marginBottom: "20px",
-                    fontSize: "14px",
+                    fontSize: "13px",
                     backgroundColor: mensaje.tipo === "exito" ? "#d1fae5" : "#fee2e2",
                     color: mensaje.tipo === "exito" ? "#065f46" : "#991b1b",
-                    border: `1px solid ${mensaje.tipo === "exito" ? "#a7f3d0" : "#fca5a5"}`
+                    border: `1px solid ${mensaje.tipo === "exito" ? "#a7f3d0" : "#fca5a5"}`,
+                    wordBreak: "break-word"
                 }}>
                     {mensaje.texto}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                {/* Campo Título */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <label style={{ fontSize: "14px", fontWeight: "600", color: "#334155" }}>
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "18px", width: "100%", boxSizing: "border-box" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+                    <label style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>
                         Título de la Noticia
                     </label>
                     <input
                         type="text"
                         value={titulo}
                         onChange={(e) => setTitulo(e.target.value)}
-                        placeholder="Ej: Jornada extraordinaria de registro agropecuario..."
-                        style={{ padding: "12px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px", outline: "none" }}
+                        placeholder="Ej: Jornada extraordinaria..."
+                        style={{ padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px", outline: "none", width: "100%", boxSizing: "border-box" }}
                         required
                     />
                 </div>
 
-                {/* Campo Autor */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <label style={{ fontSize: "14px", fontWeight: "600", color: "#334155" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+                    <label style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>
                         Autor / Fuente
                     </label>
                     <input
                         type="text"
                         value={autor}
                         onChange={(e) => setAutor(e.target.value)}
-                        placeholder="Ej: Dirección Estadal de Salud Agrícola..."
-                        style={{ padding: "12px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px", outline: "none" }}
+                        placeholder="Ej: Dirección Estadal..."
+                        style={{ padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px", outline: "none", width: "100%", boxSizing: "border-box" }}
                     />
                 </div>
 
-                {/* Campo Descripción */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <label style={{ fontSize: "14px", fontWeight: "600", color: "#334155" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+                    <label style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>
                         Contenido / Descripción
                     </label>
                     <textarea
                         value={descripcion}
                         onChange={(e) => setDescripcion(e.target.value)}
-                        placeholder="Redacta los detalles del comunicado oficial aquí..."
+                        placeholder="Redacta los detalles del comunicado..."
                         rows={5}
-                        style={{ padding: "12px 14px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "14px", outline: "none", resize: "vertical", fontFamily: "inherit" }}
+                        style={{ padding: "10px 12px", borderRadius: "8px", border: "1px solid #cbd5e1", fontSize: "13px", outline: "none", resize: "vertical", fontFamily: "inherit", width: "100%", boxSizing: "border-box" }}
                         required
                     />
                 </div>
 
-                {/* Campo Imagen */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <label style={{ fontSize: "14px", fontWeight: "600", color: "#334155" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+                    <label style={{ fontSize: "13px", fontWeight: "600", color: "#334155" }}>
                         Imagen Ilustrativa
                     </label>
                     <input
@@ -252,7 +241,7 @@ export default function NoticiasRegistrar() {
                             padding: "8px 14px",
                             borderRadius: "6px",
                             cursor: "pointer",
-                            fontSize: "13px",
+                            fontSize: "12px",
                             fontWeight: "500",
                             display: "inline-flex",
                             alignItems: "center",
@@ -263,26 +252,27 @@ export default function NoticiasRegistrar() {
                     >
                         Seleccionar Imagen
                     </label>
-                    <span style={{ fontSize: "12px", color: "#64748b" }}>
+                    <span style={{ fontSize: "11px", color: "#64748b", wordBreak: "break-word" }}>
                         {imagen ? `Archivo listo: ${imagen.name} (${(imagen.size / 1024).toFixed(0)} KB)` : "Formatos aceptados: JPG, PNG, WEBP (Máx. 1 MB)."}
                     </span>
                 </div>
 
-                {/* Botón de Enviar */}
                 <button
                     type="submit"
                     disabled={cargando}
                     style={{
                         backgroundColor: "#136442",
                         color: "#ffffff",
-                        padding: "14px",
+                        padding: "12px",
                         borderRadius: "8px",
                         border: "none",
-                        fontSize: "14px",
+                        fontSize: "13px",
                         fontWeight: "600",
                         cursor: cargando ? "not-allowed" : "pointer",
                         opacity: cargando ? 0.7 : 1,
-                        marginTop: "10px"
+                        marginTop: "10px",
+                        width: "100%",
+                        boxSizing: "border-box"
                     }}
                 >
                     {cargando ? "Publicando..." : "Publicar Noticia"}

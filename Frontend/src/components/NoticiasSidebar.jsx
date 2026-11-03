@@ -13,31 +13,47 @@ export const NoticiasSidebar = ({
 }) => {
     return (
         <aside style={{
-            width: "290px",
+            width: "280px",
             backgroundColor: "#136442",
             borderRight: "1px solid #0f4d34",
-            height: "100vh",
+            minHeight: "100vh",
             position: "sticky",
             top: 0,
             display: "flex",
             flexDirection: "column",
-            padding: "24px 22px",
+            padding: "20px 16px",
             boxSizing: "border-box",
-            overflow: "hidden"
+            flexShrink: 0
         }}>
+            <style>{`
+                @media (max-width: 768px) {
+                    aside {
+                        width: 70px !important;
+                        padding: 16px 8px !important;
+                    }
+                    aside span, aside .empleado-texto-info {
+                        display: none !important;
+                    }
+                    aside div[style*="gap: 12px"] {
+                        justify-content: center !important;
+                    }
+                }
+            `}</style>
+
             {/* Encabezado: Info del Empleado de Noticias */}
             <div style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "12px",
-                padding: "15px",
+                gap: "10px",
+                padding: "12px",
                 backgroundColor: "rgba(255,255,255,0.08)",
-                borderRadius: "18px",
+                borderRadius: "14px",
                 marginBottom: "20px",
-                flexShrink: 0
+                flexShrink: 0,
+                boxSizing: "border-box"
             }}>
                 <div style={{
-                    width: "45px", height: "45px", borderRadius: "12px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.2)"
+                    width: "40px", height: "40px", borderRadius: "10px", overflow: "hidden", border: "2px solid rgba(255,255,255,0.2)", flexShrink: 0
                 }}>
                     <img
                         src={
@@ -49,9 +65,9 @@ export const NoticiasSidebar = ({
                     />
                 </div>
 
-                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                <div className="empleado-texto-info" style={{ display: "flex", flexDirection: "column", minWidth: 0, flex: 1 }}>
                     <span style={{
-                        fontSize: "14px",
+                        fontSize: "13px",
                         fontWeight: "700",
                         color: "#fff",
                         whiteSpace: "nowrap",
@@ -72,50 +88,47 @@ export const NoticiasSidebar = ({
                 </div>
             </div>
 
-            {/* Navegación Principal Directa (Sin Dashboard) */}
+            {/* Navegación Principal */}
             <div style={{
                 display: "flex",
                 flexDirection: "column",
                 gap: "8px",
                 flex: 1,
-                overflowY: "auto",
-                paddingRight: "4px"
+                overflowY: "auto"
             }}>
                 {/* 1. Registrar Noticia */}
                 <div
                     onClick={() => setVistaActiva("registrar")}
                     style={{
                         display: "flex", alignItems: "center", gap: "12px",
-                        padding: "14px 18px", borderRadius: "14px", cursor: "pointer",
+                        padding: "12px 14px", borderRadius: "12px", cursor: "pointer",
                         backgroundColor: vistaActiva === "registrar" ? "rgba(255,255,255,0.15)" : "transparent",
                         color: vistaActiva === "registrar" ? "#ffffff" : "#86efac",
                         fontWeight: vistaActiva === "registrar" ? 600 : 500,
-                        fontSize: "14px",
-                        transition: "all 0.25s ease"
+                        fontSize: "13px",
+                        transition: "all 0.25s ease",
+                        boxSizing: "border-box"
                     }}
-                    onMouseEnter={(e) => { if (vistaActiva !== "registrar") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"; }}
-                    onMouseLeave={(e) => { if (vistaActiva !== "registrar") e.currentTarget.style.backgroundColor = "transparent"; }}
                 >
-                    <PencilSquareIcon style={{ width: "23px", height: "23px", color: vistaActiva === "registrar" ? "#ffffff" : "#86efac" }} />
+                    <PencilSquareIcon style={{ width: "22px", height: "22px", flexShrink: 0, color: vistaActiva === "registrar" ? "#ffffff" : "#86efac" }} />
                     <span>Registrar Noticia</span>
                 </div>
 
-                {/* 2. Editar / Eliminar Noticia */}
+                {/* 2. Eliminar Noticia */}
                 <div
                     onClick={() => setVistaActiva("gestion")}
                     style={{
                         display: "flex", alignItems: "center", gap: "12px",
-                        padding: "14px 18px", borderRadius: "14px", cursor: "pointer",
+                        padding: "12px 14px", borderRadius: "12px", cursor: "pointer",
                         backgroundColor: vistaActiva === "gestion" ? "rgba(255,255,255,0.15)" : "transparent",
                         color: vistaActiva === "gestion" ? "#ffffff" : "#86efac",
                         fontWeight: vistaActiva === "gestion" ? 600 : 500,
-                        fontSize: "14px",
-                        transition: "all 0.25s ease"
+                        fontSize: "13px",
+                        transition: "all 0.25s ease",
+                        boxSizing: "border-box"
                     }}
-                    onMouseEnter={(e) => { if (vistaActiva !== "gestion") e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)"; }}
-                    onMouseLeave={(e) => { if (vistaActiva !== "gestion") e.currentTarget.style.backgroundColor = "transparent"; }}
                 >
-                    <TrashIcon style={{ width: "23px", height: "23px", color: vistaActiva === "gestion" ? "#ffffff" : "#86efac" }} />
+                    <TrashIcon style={{ width: "22px", height: "22px", flexShrink: 0, color: vistaActiva === "gestion" ? "#ffffff" : "#86efac" }} />
                     <span>Eliminar Noticia</span>
                 </div>
             </div>
@@ -126,14 +139,12 @@ export const NoticiasSidebar = ({
                 style={{
                     display: "flex", alignItems: "center", gap: "12px",
                     padding: "12px 14px", borderRadius: "10px", cursor: "pointer",
-                    color: "#fca5a5", fontSize: "14px", fontWeight: 600,
+                    color: "#fca5a5", fontSize: "13px", fontWeight: 600,
                     marginTop: "16px", flexShrink: 0,
-                    transition: "background 0.2s"
+                    boxSizing: "border-box"
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(239, 68, 68, 0.15)"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
             >
-                <PowerIcon style={{ width: "20px", height: "20px", color: "#fca5a5" }} />
+                <PowerIcon style={{ width: "20px", height: "20px", flexShrink: 0, color: "#fca5a5" }} />
                 <span>Cerrar Sesión</span>
             </div>
         </aside>
