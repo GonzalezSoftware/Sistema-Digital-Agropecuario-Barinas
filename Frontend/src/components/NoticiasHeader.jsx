@@ -1,6 +1,7 @@
 import React from 'react';
+import { Bars3Icon } from "@heroicons/react/24/outline";
 
-export const NoticiasHeader = ({ vistaActiva, escudo, gobierno }) => {
+export const NoticiasHeader = ({ vistaActiva, escudo, gobierno, onToggleSidebar }) => {
     const obtenerTitulo = () => {
         switch (vistaActiva) {
             case "registrar":
@@ -30,13 +31,35 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno }) => {
             boxSizing: "border-box",
             width: "100%"
         }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
-                <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#1e293b", margin: 0, wordBreak: "break-word" }}>
-                    {obtenerTitulo()}
-                </h2>
-                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b", wordBreak: "break-word" }}>
-                    {obtenerSubtitulo()}
-                </p>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0, flex: 1 }}>
+                {/* Botón de Hamburguesa exclusivo para móviles */}
+                <button
+                    onClick={onToggleSidebar}
+                    className="menu-hamburguesa-btn"
+                    style={{
+                        background: "none",
+                        border: "1px solid #cbd5e1",
+                        borderRadius: "8px",
+                        padding: "8px",
+                        cursor: "pointer",
+                        display: "none",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#136442",
+                        flexShrink: 0
+                    }}
+                >
+                    <Bars3Icon style={{ width: "24px", height: "24px" }} />
+                </button>
+                
+                <div style={{ minWidth: 0, flex: 1 }}>
+                    <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#1e293b", margin: 0, wordBreak: "break-word" }}>
+                        {obtenerTitulo()}
+                    </h2>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b", wordBreak: "break-word" }}>
+                        {obtenerSubtitulo()}
+                    </p>
+                </div>
             </div>
 
             {/* Logos / Escudos */}
@@ -56,6 +79,14 @@ export const NoticiasHeader = ({ vistaActiva, escudo, gobierno }) => {
                     />
                 )}
             </div>
+
+            <style>{`
+                @media (max-width: 992px) {
+                    .menu-hamburguesa-btn {
+                        display: flex !important;
+                    }
+                }
+            `}</style>
         </header>
     );
 };
