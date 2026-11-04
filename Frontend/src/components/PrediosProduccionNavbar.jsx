@@ -44,7 +44,7 @@ export default function PrediosProduccionNavbar({ logo, escudo }) {
             fontWeight: 500, fontSize: "13px", fontFamily: "'Poppins', sans-serif",
             whiteSpace: "nowrap"
           }}>
-            ← Portal
+            ← 
           </button>
         </div>
 

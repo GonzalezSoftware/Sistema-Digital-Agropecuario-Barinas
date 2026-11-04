@@ -555,7 +555,7 @@ export default function Productores() {
                 </div>
 
                 <button onClick={() => navigate("/")} style={{ background: "none", border: "1.5px solid #aaa", color: "#666", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", fontSize: "13px", whiteSpace: "nowrap" }}>
-                    ← Portal
+                    ← 
                 </button>
             </nav>
 

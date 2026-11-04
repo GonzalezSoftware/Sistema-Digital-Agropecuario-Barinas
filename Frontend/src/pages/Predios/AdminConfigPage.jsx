@@ -403,7 +403,7 @@ export default function AdminConfigPage() {
           padding: "8px 16px", borderRadius: "6px", cursor: "pointer",
           fontWeight: 500, fontSize: "13px", fontFamily: "'Poppins', sans-serif", whiteSpace: "nowrap"
         }}>
-          ← Volver
+          ← 
         </button>
       </nav>
 
