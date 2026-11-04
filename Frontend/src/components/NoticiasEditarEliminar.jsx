@@ -84,23 +84,47 @@ export default function NoticiasEditarEliminar() {
                 .noticia-card-item {
                     display: flex;
                     justify-content: space-between;
-                    align-items: flex-start;
+                    align-items: center;
                     gap: 16px;
                     padding: 16px;
-                    borderRadius: 10px;
+                    border-radius: 10px;
                     border: 1px solid #e2e8f0;
-                    backgroundColor: #f8fafc;
+                    background-color: #f8fafc;
                     width: 100%;
                     box-sizing: border-box;
                 }
+                .noticia-inner-content {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 14px;
+                    flex: 1;
+                    min-width: 0;
+                }
+                .noticia-textos {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    flex: 1;
+                    min-width: 0;
+                }
                 @media (max-width: 768px) {
                     .noticia-card-item {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                        gap: 12px;
+                    }
+                    .noticia-inner-content {
                         flex-direction: column !important;
                         align-items: stretch !important;
                     }
                     .noticia-card-item img {
                         width: 100% !important;
                         height: 160px !important;
+                        object-fit: cover;
+                    }
+                    .noticia-card-item button {
+                        width: 100% !important;
+                        justify-content: center !important;
                     }
                 }
             `}</style>
@@ -128,15 +152,15 @@ export default function NoticiasEditarEliminar() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "14px", width: "100%", boxSizing: "border-box" }}>
                     {noticias.map((noticia) => (
                         <div key={noticia.id} className="noticia-card-item">
-                            <div style={{ display: "flex", gap: "14px", flex: 1, minWidth: 0, flexDirection: "row" }} className="noticia-inner-content">
+                            <div className="noticia-inner-content">
                                 {noticia.imagen && (
                                     <img
                                         src={noticia.imagen}
                                         alt="Noticia"
-                                        style={{ width: "80px", height: "80px", objectFit: "cover", borderRadius: "8px", border: "1px solid #cbd5e1", flexShrink: 0 }}
+                                        style={{ width: "90px", height: "90px", objectFit: "cover", borderRadius: "8px", border: "1px solid #cbd5e1", flexShrink: 0 }}
                                     />
                                 )}
-                                <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
+                                <div className="noticia-textos">
                                     <h4 style={{ margin: 0, fontSize: "15px", fontWeight: "600", color: "#1e293b", wordBreak: "break-word" }}>{noticia.titulo}</h4>
                                     <p style={{ margin: 0, fontSize: "13px", color: "#475569", lineHeight: "1.4", wordBreak: "break-word" }}>{noticia.descripcion}</p>
                                     
@@ -151,7 +175,7 @@ export default function NoticiasEditarEliminar() {
                             </div>
 
                             {/* Botón de Eliminar */}
-                            <div style={{ display: "flex", gap: "8px", flexShrink: 0, alignSelf: "flex-end" }}>
+                            <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
                                 <button
                                     onClick={() => eliminarNoticia(noticia.id)}
                                     title="Eliminar"
