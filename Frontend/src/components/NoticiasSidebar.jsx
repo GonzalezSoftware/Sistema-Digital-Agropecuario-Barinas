@@ -180,14 +180,14 @@ export const NoticiasSidebar = ({
                     </div>
                 </div>
 
-                {/* Botón Cerrar Sesión */}
+                {/* Botón Cerrar Sesión (Más pegado a las opciones de arriba) */}
                 <div
                     onClick={cerrarSesion}
                     style={{
                         display: "flex", alignItems: "center", gap: "12px",
                         padding: "12px 16px", borderRadius: "12px", cursor: "pointer",
                         color: "#fca5a5", fontSize: "14px", fontWeight: 600,
-                        marginTop: "12px", flexShrink: 0,
+                        marginTop: "8px", flexShrink: 0,
                         backgroundColor: "rgba(252, 165, 165, 0.08)",
                         transition: "background 0.2s"
                     }}
