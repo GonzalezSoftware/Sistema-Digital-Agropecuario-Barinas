@@ -10,6 +10,9 @@ import TrashIcon from "@heroicons/react/24/solid/TrashIcon";
 import Swal from 'sweetalert2';
 import axios from 'axios';
 
+// URL base de tu backend desplegado en AWS (puedes cambiarla por tu dominio o IP elástica)
+const API_URL = "https://3.145.179.35.nip.io/api/";
+
 export const AdminSidebar = ({
     adminData,
     vistaActiva,
@@ -79,7 +82,7 @@ export const AdminSidebar = ({
         });
 
         try {
-            await axios.post("http://127.0.0.1:8000/api/reiniciar/solicitar/", {
+            await axios.post(`${API_URL}/api/reiniciar/solicitar/`, {
                 usuario: usernameAdmin,
                 clave: password
             });
@@ -107,7 +110,7 @@ export const AdminSidebar = ({
                 didOpen: () => Swal.showLoading()
             });
 
-            await axios.post("http://127.0.0.1:8000/api/reiniciar/ejecutar/", {
+            await axios.post(`${API_URL}/api/reiniciar/ejecutar/`, {
                 usuario: usernameAdmin,
                 codigo: codigoVerificacion
             });
