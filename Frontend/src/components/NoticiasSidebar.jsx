@@ -15,7 +15,6 @@ export const NoticiasSidebar = ({
     isOpen,
     setIsOpen
 }) => {
-    // Si manejas el estado de apertura externamente con isOpen/setIsOpen o de forma interna:
     const [sidebarAbiertoInterno, setSidebarAbiertoInterno] = useState(false);
     
     const sidebarAbierto = isOpen !== undefined ? isOpen : sidebarAbiertoInterno;
@@ -28,7 +27,7 @@ export const NoticiasSidebar = ({
 
     return (
         <>
-            {/* ── BOTÓN HAMBURGUESA MÓVIL (Flotante idéntico al de empleados) ── */}
+            {/* ── BOTÓN HAMBURGUESA MÓVIL ── */}
             <button
                 onClick={() => setSidebarAbierto(!sidebarAbierto)}
                 className="btn-hamburguesa-noticias"
@@ -186,7 +185,7 @@ export const NoticiasSidebar = ({
                     onClick={cerrarSesion}
                     style={{
                         display: "flex", alignItems: "center", gap: "12px",
-                        padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                        padding: "12px 16px", borderRadius: "12px", cursor: "pointer",
                         color: "#fca5a5", fontSize: "14px", fontWeight: 600,
                         marginTop: "12px", flexShrink: 0,
                         backgroundColor: "rgba(252, 165, 165, 0.08)",
@@ -200,7 +199,7 @@ export const NoticiasSidebar = ({
                 </div>
             </aside>
 
-            {/* Estilos CSS Responsive idénticos al módulo de empleados */}
+            {/* Estilos CSS Responsive */}
             <style>{`
                 @media (max-width: 992px) {
                     .btn-hamburguesa-noticias {
