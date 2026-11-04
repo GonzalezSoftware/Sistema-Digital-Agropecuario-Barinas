@@ -136,7 +136,7 @@ export const NoticiasSidebar = ({
                     </div>
                 </div>
 
-                {/* Lista de Opciones de Noticias */}
+                {/* Contenedor unificado para las opciones y el botón de cerrar sesión juntos */}
                 <div style={{
                     display: "flex",
                     flexDirection: "column",
@@ -178,24 +178,24 @@ export const NoticiasSidebar = ({
                         <TrashIcon style={{ width: "22px", height: "22px", color: vistaActiva === "gestion" ? "#ffffff" : "#86efac" }} />
                         <span>Eliminar Noticia</span>
                     </div>
-                </div>
 
-                {/* Botón Cerrar Sesión (Más pegado a las opciones de arriba) */}
-                <div
-                    onClick={cerrarSesion}
-                    style={{
-                        display: "flex", alignItems: "center", gap: "12px",
-                        padding: "12px 16px", borderRadius: "12px", cursor: "pointer",
-                        color: "#fca5a5", fontSize: "14px", fontWeight: 600,
-                        marginTop: "8px", flexShrink: 0,
-                        backgroundColor: "rgba(252, 165, 165, 0.08)",
-                        transition: "background 0.2s"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.18)"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.08)"}
-                >
-                    <PowerIcon style={{ width: "20px", height: "20px", color: "#fca5a5" }} />
-                    <span>Cerrar Sesión</span>
+                    {/* Botón Cerrar Sesión (Ahora está dentro del mismo flujo, pegado inmediatamente después) */}
+                    <div
+                        onClick={cerrarSesion}
+                        style={{
+                            display: "flex", alignItems: "center", gap: "12px",
+                            padding: "12px 16px", borderRadius: "12px", cursor: "pointer",
+                            color: "#fca5a5", fontSize: "14px", fontWeight: 600,
+                            marginTop: "4px",
+                            backgroundColor: "rgba(252, 165, 165, 0.08)",
+                            transition: "background 0.2s"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.18)"}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(252, 165, 165, 0.08)"}
+                    >
+                        <PowerIcon style={{ width: "20px", height: "20px", color: "#fca5a5" }} />
+                        <span>Cerrar Sesión</span>
+                    </div>
                 </div>
             </aside>
 
