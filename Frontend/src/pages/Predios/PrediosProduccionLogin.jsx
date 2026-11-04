@@ -75,7 +75,7 @@ export default function LoginPrediosPage() {
           Swal.fire({
             icon: "error",
             title: "Error de acceso",
-            text: mensajeError,
+            text: "Credenciales de administrador no permitidas en este módulo.",
             confirmButtonColor: "#b91c1c"
           });
           return;
@@ -193,16 +193,63 @@ export default function LoginPrediosPage() {
           padding: 40px;
         }
 
+        /* ── CORRECCIÓN RESPONSIVE PARA LAS TARJETAS / STATS ── */
+        .login-stats-container {
+          position: relative;
+          z-index: 2;
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .login-stat-card {
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.15);
+          border-radius: 12px;
+          padding: 12px 10px;
+          text-align: center;
+          flex: 1;
+          min-width: 90px;
+          box-sizing: border-box;
+        }
+        .login-stat-num {
+          font-size: 16px;
+          font-weight: 700;
+          color: #fff;
+          white-space: nowrap;
+        }
+        .login-stat-label {
+          font-size: 10px;
+          color: rgba(255,255,255,0.7);
+          margin-top: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
         @media (max-width: 992px) {
           .login-main-container {
             flex-direction: column !important;
           }
           .login-panel-izq, .login-panel-der {
             width: 100% !important;
-            padding: 40px 20px !important;
+            padding: 30px 20px !important;
           }
           .texto-institucional {
             display: none !important;
+          }
+          /* Aseguramos que en pantallas móviles pequeñas las tarjetas se acomoden perfectamente en una sola línea o se expandan fluidas */
+          .login-stats-container {
+            gap: 8px;
+          }
+          .login-stat-card {
+            padding: 10px 6px;
+            min-width: 75px;
+          }
+          .login-stat-num {
+            font-size: 14px;
+          }
+          .login-stat-label {
+            font-size: 9.5px;
           }
         }
       `}</style>
@@ -287,20 +334,16 @@ export default function LoginPrediosPage() {
             </p>
           </div>
 
-          {/* Stats */}
-          <div style={{ position: "relative", zIndex: 2, display: "flex", gap: "14px", flexWrap: "wrap" }}>
+          {/* Stats / Tarjetas inferiores corregidas */}
+          <div className="login-stats-container">
             {[
               { num: "12", label: "Municipios" },
               { num: "100%", label: "Verificado" },
               { num: "Empleados", label: "Gestión Municipal" },
             ].map(item => (
-              <div key={item.label} style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: "12px", padding: "14px 18px", textAlign: "center", flex: "1", minWidth: "90px"
-              }}>
-                <div style={{ fontSize: "18px", fontWeight: 700, color: "#fff" }}>{item.num}</div>
-                <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.55)", marginTop: "2px" }}>{item.label}</div>
+              <div key={item.label} className="login-stat-card">
+                <div className="login-stat-num">{item.num}</div>
+                <div className="login-stat-label">{item.label}</div>
               </div>
             ))}
           </div>
@@ -347,7 +390,7 @@ export default function LoginPrediosPage() {
                     stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                     style={{
                       position: "absolute", left: "14px", top: "50%",
-                      transform: "translateY(-50%)", pointerEvents: "none"
+                      transform: "translateY(-50% )", pointerEvents: "none"
                     }}>
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                     <circle cx="12" cy="7" r="4" />
