@@ -59,70 +59,49 @@ export const AdminSidebar = ({
     const handleReiniciarSistema = async () => {
         const usernameAdmin = adminData?.usuario || "admin";
 
-       const { value: password } = await Swal.fire({
+        // Usamos HTML personalizado en el input para tener control absoluto y evitar que se cierre al hacer clic en el icono
+        const { value: password } = await Swal.fire({
             title: '⚠️ Advertencia Crítica',
-            text: 'Esta acción borrará TODOS los datos del sistema (predios, productores, bitácora, etc.). Ingrese su contraseña de administrador para continuar:',
-            input: 'password',
-            inputPlaceholder: 'Contraseña de administrador',
-            inputAttributes: { autocapitalize: 'off', autocorrect: 'off' },
+            html: `
+                <p style="margin-bottom: 15px; color: #475569; font-size: 15px; line-height: 1.5;">
+                    Esta acción borrará TODOS los datos del sistema (predios, productores, bitácora, etc.). Ingrese su contraseña de administrador para continuar:
+                </p>
+                <div style="position: relative; width: 100%; display: flex; align-items: center; margin-top: 10px;">
+                    <input type="password" id="swal-password-input" class="swal2-input" placeholder="Contraseña de administrador" style="margin: 0 !important; width: 100% !important; padding-right: 45px; box-sizing: border-box;" autocapitalize="off" autocorrect="off">
+                    <button type="button" id="toggle-password-btn" style="position: absolute; right: 12px; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; z-index: 10;">
+                        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            `,
             showCancelButton: true,
             confirmButtonText: 'Continuar',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#dc2626',
             cancelButtonColor: '#64748b',
             didOpen: () => {
-                const input = Swal.getInput();
-                if (input) {
-                    // Creamos un contenedor exclusivo para el input y el botón
-                    const wrapper = document.createElement('div');
-                    wrapper.style.position = 'relative';
-                    wrapper.style.display = 'flex';
-                    wrapper.style.alignItems = 'center';
-                    wrapper.style.width = '100%';
+                const input = document.getElementById('swal-password-input');
+                const toggleBtn = document.getElementById('toggle-password-btn');
+                const eyeIcon = document.getElementById('eye-icon');
 
-                    // Insertamos el wrapper en el DOM justo donde estaba el input y metemos el input dentro
-                    input.parentNode.insertBefore(wrapper, input);
-                    wrapper.appendChild(input);
-
-                    // Ajustamos el input para que ocupe todo el ancho y deje espacio al icono
-                    input.style.width = '100%';
-                    input.style.boxSizing = 'border-box';
-                    input.style.paddingRight = '45px';
-
-                    // Creamos el botón del ícono
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    // SVG de Ojo Abierto por defecto
-                    button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
-                    
-                    button.style.position = 'absolute';
-                    button.style.right = '42px';
-                    button.style.top = '60%';
-                    button.style.transform = 'translateY(-50%)';
-                    button.style.background = 'transparent';
-                    button.style.border = 'none';
-                    button.style.cursor = 'pointer';
-                    button.style.display = 'flex';
-                    button.style.alignItems = 'center';
-                    button.style.justifyContent = 'center';
-                    button.style.padding = '0';
-                    button.style.zIndex = '10';
-
-                    // Alternar visibilidad y cambiar entre ojo abierto y tachado
-                    button.onclick = () => {
+                if (toggleBtn && input) {
+                    toggleBtn.onclick = (e) => {
+                        e.preventDefault(); // Evita cualquier propagación que cierre el modal
                         if (input.type === 'password') {
                             input.type = 'text';
-                            // SVG de Ojo Cerrado / Tachado
-                            button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+                            eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
                         } else {
                             input.type = 'password';
-                            // SVG de Ojo Abierto
-                            button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+                            eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
                         }
                     };
-
-                    wrapper.appendChild(button);
                 }
+            },
+            preConfirm: () => {
+                const input = document.getElementById('swal-password-input');
+                if (!input.value) {
+                    Swal.showValidationMessage('Debe ingresar la contraseña de administrador');
+                }
+                return input.value;
             }
         });
 
