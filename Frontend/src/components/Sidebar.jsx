@@ -73,29 +73,28 @@ export const AdminSidebar = ({
             didOpen: () => {
                 const input = Swal.getInput();
                 if (input) {
-                    // Envolver el input en un contenedor relativo propio para que el icono no se salga
+                    // Forzar que el contenedor abarque todo el ancho disponible del diálogo
                     const wrapper = document.createElement('div');
                     wrapper.style.position = 'relative';
+                    wrapper.style.display = 'block';
                     wrapper.style.width = '100%';
-                    wrapper.style.display = 'flex';
-                    wrapper.style.alignItems= 'center';
                     
                     input.parentNode.insertBefore(wrapper, input);
                     wrapper.appendChild(input);
 
-                    // Ajustar estilos del input para dejar espacio al icono
+                    // Ajustar el input para que ocupe el 100% y deje espacio a la derecha
                     input.style.width = '100%';
-                    input.style.paddingRight = '45px';
                     input.style.boxSizing = 'border-box';
+                    input.style.paddingRight = '45px';
 
-                    // Crear el botón con ícono SVG de ojo limpio
+                    // Crear el botón del ícono centrado dentro del input
                     const button = document.createElement('button');
                     button.type = 'button';
                     // SVG de Ojo Abierto por defecto
                     button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
                     
                     button.style.position = 'absolute';
-                    button.style.right = '12px';
+                    button.style.right = '14px';
                     button.style.top = '50%';
                     button.style.transform = 'translateY(-50%)';
                     button.style.background = 'transparent';
@@ -105,8 +104,9 @@ export const AdminSidebar = ({
                     button.style.alignItems = 'center';
                     button.style.justifyContent = 'center';
                     button.style.padding = '0';
+                    button.style.zIndex = '10';
 
-                    // Alternar visibilidad y cambiar entre ojo abierto y cerrado (tachado)
+                    // Alternar visibilidad y cambiar entre ojo abierto y cerrado
                     button.onclick = () => {
                         if (input.type === 'password') {
                             input.type = 'text';
