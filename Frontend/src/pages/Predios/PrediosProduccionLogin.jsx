@@ -148,7 +148,7 @@ export default function LoginPrediosPage() {
   };
 
   return (
-    <div style={{ fontFamily: "'Poppins', sans-serif", minHeight: "100vh", display: "flex", flexDirection: "column", overflowX: "hidden" }}>
+    <div style={{ fontFamily: "'Poppins', sans-serif", minHeight: "100vh", display: "flex", flexDirection: "column", overflowX: "hidden", paddingTop: "68px" }}>
 
       <style>{`
         @keyframes fadeInUp {
@@ -254,12 +254,12 @@ export default function LoginPrediosPage() {
         }
       `}</style>
 
-      {/* ── NAVBAR FIJO / STICKY EN PANTALLA ── */}
+      {/* ── NAVBAR FIJO (PERMANECE VISIBLE AL HACER SCROLL) ── */}
       <nav style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 24px", height: "68px", backgroundColor: "#fff",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "sticky", top: 0, zIndex: 100,
-        flexShrink: 0,
+        boxShadow: "0 2px 12px rgba(0,0,0,0.08)", position: "fixed", top: 0, left: 0, width: "100%", zIndex: 100,
+        boxSizing: "border-box",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => navigate("/")}>
