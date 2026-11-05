@@ -69,7 +69,43 @@ export const AdminSidebar = ({
             confirmButtonText: 'Continuar',
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#64748b'
+            cancelButtonColor: '#64748b',
+            didOpen: () => {
+                const input = Swal.getInput();
+                if (input) {
+                    // Dar espacio a la derecha para que el texto no choque con el ícono
+                    input.style.paddingRight = '45px';
+                    input.parentNode.style.position = 'relative';
+
+                    // Crear el botón del ojito
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.innerHTML = '👁️';
+                    button.style.position = 'absolute';
+                    button.style.right = '12px';
+                    button.style.top = '50%';
+                    button.style.transform = 'translateY(-50%)';
+                    button.style.background = 'transparent';
+                    button.style.border = 'none';
+                    button.style.cursor = 'pointer';
+                    button.style.fontSize = '18px';
+                    button.style.padding = '0';
+                    button.style.lineHeight = '1';
+
+                    // Alternar visibilidad de la contraseña al hacer clic
+                    button.onclick = () => {
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            button.innerHTML = '🙈'; // Cambia a ojito cerrado
+                        } else {
+                            input.type = 'password';
+                            button.innerHTML = '👁️'; // Cambia a ojito abierto
+                        }
+                    };
+
+                    input.parentNode.appendChild(button);
+                }
+            }
         });
 
         if (!password) return;
@@ -82,7 +118,7 @@ export const AdminSidebar = ({
         });
 
         try {
-            await axios.post(`${API_URL}/api/reiniciar/solicitar/`, {
+            await axios.post(`${API_URL}reiniciar/solicitar/`, {
                 usuario: usernameAdmin,
                 clave: password
             });
@@ -110,7 +146,7 @@ export const AdminSidebar = ({
                 didOpen: () => Swal.showLoading()
             });
 
-            await axios.post(`${API_URL}/api/reiniciar/ejecutar/`, {
+            await axios.post(`${API_URL}reiniciar/ejecutar/`, {
                 usuario: usernameAdmin,
                 codigo: codigoVerificacion
             });

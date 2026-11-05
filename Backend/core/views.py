@@ -31,22 +31,29 @@ def solicitar_reinicio_sistema(request):
         return Response({"error": "Usuario y contraseña requeridos."}, status=400)
         
     try:
+        # Buscamos al administrador en su modelo correspondiente
         admin = AdministradorSistema.objects.get(usuario=usuario)
         if not check_password(clave, admin.clave):
             return Response({"error": "Contraseña de administrador incorrecta."}, status=400)
+            
+        # Obtenemos el correo directamente del registro del administrador
+        # (Asegúrate de que el campo en tu modelo AdministradorSistema se llame 'correo' o 'email')
+        correo_destino = getattr(admin, 'correo', None) or getattr(admin, 'email', None)
+        
+        if not correo_destino:
+            return Response({"error": "El administrador no tiene un correo electrónico registrado."}, status=400)
+            
     except AdministradorSistema.DoesNotExist:
         return Response({"error": "Administrador no encontrado."}, status=404)
         
     # Generar código de 6 dígitos
     codigo = str(random.randint(100000, 999999))
-    contacto = ConfiguracionContacto.objects.first()
-    correo_destino = contacto.correo if contacto else "agrosistema@barinas.gob.ve"
     
     asunto = "Código de validación - MPPAT (Reinicio de Sistema)"
     
     # Cuerpo alternativo en texto plano
     cuerpo_texto = (
-        f"Estimado administrador,\n\n"
+        f"Estimado administrador ({usuario}),\n\n"
         f"Se ha solicitado el reinicio de la base de datos del sistema. Su código de confirmación es: {codigo}\n\n"
         f"Por favor, ingrese este código en la pantalla del sistema para validar la operación.\n"
         f"No comparta este código con nadie.\n\n"
@@ -152,7 +159,7 @@ def solicitar_reinicio_sistema(request):
             
             <!-- Contenido Principal -->
             <div class="email-body">
-                <p>Estimado/a administrador/a,</p>
+                <p>Estimado/a administrador/a <strong>{usuario}</strong>,</p>
                 <p>Hemos recibido una solicitud crítica para reiniciar la base de datos del sistema. Utilice el siguiente código de confirmación:</p>
                 
                 <!-- Caja del Código -->
@@ -196,7 +203,7 @@ def solicitar_reinicio_sistema(request):
     
     return Response({
         "success": True, 
-        "mensaje": f"Código enviado al correo {correo_destino}"
+        "mensaje": f"Código enviado al correo personal del administrador: {correo_destino}"
     }, status=200)
 
 @api_view(['POST'])
