@@ -115,6 +115,14 @@ export default function SeccionReportes({ listaPredios = [], cargando }) {
             : new Date().toLocaleDateString();
         doc.text(`Fecha de Registro: ${fechaEmision}`, 204, 18, { align: "right" });
 
+        // Cálculo de la Fecha de Vencimiento: 6 meses a partir de la fecha del día de exportación
+        const fechaActualExportacion = new Date();
+        const fechaVencimientoObj = new Date(fechaActualExportacion);
+        fechaVencimientoObj.setMonth(fechaVencimientoObj.getMonth() + 6);
+        const fechaVencimientoStr = fechaVencimientoObj.toLocaleDateString();
+
+        doc.text(`Fecha de Vencimiento: ${fechaVencimientoStr}`, 204, 22, { align: "right" });
+
         doc.setDrawColor(...verdeBarinas);
         doc.setLineWidth(0.6);
         doc.line(12, 25, 204, 25);
