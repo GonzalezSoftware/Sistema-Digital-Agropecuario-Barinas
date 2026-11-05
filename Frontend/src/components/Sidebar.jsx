@@ -59,7 +59,7 @@ export const AdminSidebar = ({
     const handleReiniciarSistema = async () => {
         const usernameAdmin = adminData?.usuario || "admin";
 
-        const { value: password } = await Swal.fire({
+       const { value: password } = await Swal.fire({
             title: '⚠️ Advertencia Crítica',
             text: 'Esta acción borrará TODOS los datos del sistema (predios, productores, bitácora, etc.). Ingrese su contraseña de administrador para continuar:',
             input: 'password',
@@ -73,15 +73,23 @@ export const AdminSidebar = ({
             didOpen: () => {
                 const input = Swal.getInput();
                 if (input) {
-                    // Asegurar que el padre del input sea relativo para contener el icono
-                    const parent = input.parentNode;
-                    parent.style.position = 'relative';
+                    // Creamos un contenedor exclusivo para el input y el botón
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.display = 'flex';
+                    wrapper.style.alignItems = 'center';
+                    wrapper.style.width = '100%';
 
-                    // Darle espacio interno a la derecha al input para que el texto no tape el ícono
-                    input.style.paddingRight = '45px';
+                    // Insertamos el wrapper en el DOM justo donde estaba el input y metemos el input dentro
+                    input.parentNode.insertBefore(wrapper, input);
+                    wrapper.appendChild(input);
+
+                    // Ajustamos el input para que ocupe todo el ancho y deje espacio al icono
+                    input.style.width = '100%';
                     input.style.boxSizing = 'border-box';
+                    input.style.paddingRight = '45px';
 
-                    // Crear el botón del ícono
+                    // Creamos el botón del ícono
                     const button = document.createElement('button');
                     button.type = 'button';
                     // SVG de Ojo Abierto por defecto
@@ -113,7 +121,7 @@ export const AdminSidebar = ({
                         }
                     };
 
-                    parent.appendChild(button);
+                    wrapper.appendChild(button);
                 }
             }
         });
