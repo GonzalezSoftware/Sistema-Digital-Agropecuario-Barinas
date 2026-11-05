@@ -73,14 +73,27 @@ export const AdminSidebar = ({
             didOpen: () => {
                 const input = Swal.getInput();
                 if (input) {
-                    // Dar espacio a la derecha para que el texto no choque con el ícono
-                    input.style.paddingRight = '45px';
-                    input.parentNode.style.position = 'relative';
+                    // Envolver el input en un contenedor relativo propio para que el icono no se salga
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.width = '100%';
+                    wrapper.style.display = 'flex';
+                    wrapper.style.alignItems= 'center';
+                    
+                    input.parentNode.insertBefore(wrapper, input);
+                    wrapper.appendChild(input);
 
-                    // Crear el botón del ojito
+                    // Ajustar estilos del input para dejar espacio al icono
+                    input.style.width = '100%';
+                    input.style.paddingRight = '45px';
+                    input.style.boxSizing = 'border-box';
+
+                    // Crear el botón con ícono SVG de ojo limpio
                     const button = document.createElement('button');
                     button.type = 'button';
-                    button.innerHTML = '👁️';
+                    // SVG de Ojo Abierto por defecto
+                    button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+                    
                     button.style.position = 'absolute';
                     button.style.right = '12px';
                     button.style.top = '50%';
@@ -88,22 +101,25 @@ export const AdminSidebar = ({
                     button.style.background = 'transparent';
                     button.style.border = 'none';
                     button.style.cursor = 'pointer';
-                    button.style.fontSize = '18px';
+                    button.style.display = 'flex';
+                    button.style.alignItems = 'center';
+                    button.style.justifyContent = 'center';
                     button.style.padding = '0';
-                    button.style.lineHeight = '1';
 
-                    // Alternar visibilidad de la contraseña al hacer clic
+                    // Alternar visibilidad y cambiar entre ojo abierto y cerrado (tachado)
                     button.onclick = () => {
                         if (input.type === 'password') {
                             input.type = 'text';
-                            button.innerHTML = '🙈'; // Cambia a ojito cerrado
+                            // SVG de Ojo Cerrado / Tachado
+                            button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
                         } else {
                             input.type = 'password';
-                            button.innerHTML = '👁️'; // Cambia a ojito abierto
+                            // SVG de Ojo Abierto
+                            button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
                         }
                     };
 
-                    input.parentNode.appendChild(button);
+                    wrapper.appendChild(button);
                 }
             }
         });
