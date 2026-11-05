@@ -32,6 +32,15 @@ export default function AdminProduccionDashboard({ productionState, cargando: ca
         );
     };
 
+    // 🔹 Filtramos el radar para que solo contenga "Leche", "Carne" y "Cría" (ignorando mayúsculas/minúsculas o acentos si es necesario)
+    const radarDataOriginal = statsProduccion?.graficos?.digitalizacion_radar;
+    const radarDataFiltrado = Array.isArray(radarDataOriginal)
+        ? radarDataOriginal.filter(item => {
+              const nombre = (item.subject || "").toLowerCase();
+              return nombre.includes("leche") || nombre.includes("carne") || nombre.includes("cría") || nombre.includes("cria");
+          })
+        : null;
+
     return (
         <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
             {/* ── TARJETAS DE ESTADÍSTICAS ── */}
@@ -97,17 +106,17 @@ export default function AdminProduccionDashboard({ productionState, cargando: ca
                     </div>
                 </div>
 
-                {/* 3. Gráfico 3: Capacidades Productivas Pecuarias (Radar) */}
+                {/* 3. Gráfico 3: Capacidades Productivas Pecuarias (Radar con 3 variables: Leche, Carne y Cría) */}
                 <div style={chartCard}>
                     <h3 style={chartTitle}>Capacidades Productivas Pecuarias (Global)</h3>
                     <div style={{ width: '100%', height: 300, marginTop: '20px' }}>
                         {cargando ? (
                             <div style={{ ...chartPlaceholder, border: 'none' }}><Spinner /></div>
-                        ) : !statsProduccion?.graficos?.digitalizacion_radar ? (
+                        ) : !radarDataFiltrado || radarDataFiltrado.length === 0 ? (
                             <div style={chartPlaceholder}>Sin datos de capacidades</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={statsProduccion.graficos.digitalizacion_radar}>
+                                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarDataFiltrado}>
                                     <PolarGrid stroke="#e0e0e0" />
                                     <PolarAngleAxis dataKey="subject" tick={{ fill: '#666', fontSize: 10, fontWeight: 'bold' }} />
                                     <PolarRadiusAxis angle={30} tick={{ fontSize: 9 }} axisLine={false} />
