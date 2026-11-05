@@ -210,7 +210,7 @@ export const AdminSidebar = ({
                 />
             )}
 
-            {/* ── ASIDE (SIDEBAR) ── */}
+            {/* ── ASIDE (SIDEBAR FIJO EN ESCRITORIO) ── */}
             <aside 
                 className={`admin-sidebar ${sidebarAbierto ? "abierto" : ""}`}
                 style={{
@@ -218,8 +218,9 @@ export const AdminSidebar = ({
                     backgroundColor: "#136442",
                     borderRight: "1px solid #0f4d34",
                     height: "100vh",
-                    position: "sticky",
+                    position: "fixed",
                     top: 0,
+                    left: 0,
                     display: "flex",
                     flexDirection: "column",
                     padding: "20px 18px",
@@ -647,8 +648,13 @@ export const AdminSidebar = ({
                 </div>
             </aside>
 
-            {/* Estilos CSS Responsive */}
+            {/* Estilos CSS Responsive y Margen de Escritorio */}
             <style>{`
+                @media (min-width: 993px) {
+                    .dashboard-main-content {
+                        margin-left: 290px !important;
+                    }
+                }
                 @media (max-width: 992px) {
                     .btn-hamburguesa-admin {
                         display: flex !important;
@@ -666,6 +672,9 @@ export const AdminSidebar = ({
                     }
                     .admin-sidebar.abierto {
                         transform: translateX(0) !important;
+                    }
+                    .dashboard-main-content {
+                        margin-left: 0 !important;
                     }
                 }
             `}</style>
