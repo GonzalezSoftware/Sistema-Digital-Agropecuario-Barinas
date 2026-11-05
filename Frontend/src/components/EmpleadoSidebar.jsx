@@ -132,7 +132,7 @@ export const EmpleadoSidebar = ({
                 />
             )}
 
-            {/* ── ASIDE (SIDEBAR) ── */}
+            {/* ── ASIDE (SIDEBAR FIJO EN ESCRITORIO) ── */}
             <aside 
                 className={`empleado-sidebar ${sidebarAbierto ? "abierto" : ""}`}
                 style={{
@@ -140,8 +140,9 @@ export const EmpleadoSidebar = ({
                     backgroundColor: "#136442",
                     borderRight: "1px solid #0f4d34",
                     height: "100vh",
-                    position: "sticky",
+                    position: "fixed",
                     top: 0,
+                    left: 0,
                     display: "flex",
                     flexDirection: "column",
                     padding: "20px 18px",
@@ -368,8 +369,13 @@ export const EmpleadoSidebar = ({
                 </div>
             </aside>
 
-            {/* Estilos CSS Responsive */}
+            {/* Estilos CSS Responsive y Margen para Escritorio */}
             <style>{`
+                @media (min-width: 993px) {
+                    .dashboard-main-content {
+                        margin-left: 290px !important;
+                    }
+                }
                 @media (max-width: 992px) {
                     .btn-hamburguesa-empleado {
                         display: flex !important;
@@ -389,6 +395,9 @@ export const EmpleadoSidebar = ({
                     }
                     .empleado-sidebar.abierto {
                         transform: translateX(0) !important;
+                    }
+                    .dashboard-main-content {
+                        margin-left: 0 !important;
                     }
                 }
             `}</style>
