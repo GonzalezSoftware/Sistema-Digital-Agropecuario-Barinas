@@ -254,7 +254,7 @@ export default function LoginPrediosPage() {
         }
       `}</style>
 
-      {/* ── NAVBAR SIMPLE SIN HAMBURGUESA ── */}
+      {/* ── NAVBAR FIJO / STICKY EN PANTALLA ── */}
       <nav style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "0 24px", height: "68px", backgroundColor: "#fff",
