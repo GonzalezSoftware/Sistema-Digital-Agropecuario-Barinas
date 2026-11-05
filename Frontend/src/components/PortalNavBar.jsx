@@ -72,13 +72,13 @@ export default function PortalNavBar() {
         </button>
       </nav>
 
-      {/* Menú desplegable para dispositivos móviles */}
+      {/* Menú desplegable para dispositivos móviles (Fijo en pantalla para verse al hacer scroll) */}
       {menuAbierto && (
         <div style={{
-          position: "absolute", top: "68px", left: 0, width: "100%",
-          background: "#fff", boxShadow: "0 10px 15px rgba(0,0,0,0.1)",
+          position: "fixed", top: "68px", left: 0, width: "100%",
+          background: "#fff", boxShadow: "0 10px 20px rgba(0,0,0,0.15)",
           padding: "20px", display: "flex", flexDirection: "column", gap: "12px",
-          zIndex: 99, borderTop: "1px solid #eee"
+          zIndex: 99, borderTop: "1px solid #eee", boxSizing: "border-box"
         }}>
           {NAV_ITEMS.map((item) => (
             <a 
