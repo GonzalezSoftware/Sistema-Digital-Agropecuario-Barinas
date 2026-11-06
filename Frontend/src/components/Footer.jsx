@@ -43,7 +43,7 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
             {escudo && <img src={escudo} alt="Escudo" style={{ height: 35 }} />}
           </div>
           <p style={{ fontSize: "14px", lineHeight: 1.8, color: "#777", maxWidth: "280px" }}>
-            Ecosistema digital agropecuario del estado Barinas. Plataforma oficial para el registro
+            Sistema digital agropecuario del estado Barinas. Plataforma oficial para el registro
             y gestión de la actividad productiva del campo barinés.
           </p>
           {/* Redes sociales */}
