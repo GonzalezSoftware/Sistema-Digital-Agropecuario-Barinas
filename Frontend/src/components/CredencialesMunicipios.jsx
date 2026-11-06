@@ -20,10 +20,18 @@ export const CredencialesMunicipios = ({
     const [municipioSeleccionado, setMunicipioSeleccionado] = useState(null);
     const [formUsuario, setFormUsuario] = useState("");
     const [formPassword, setFormPassword] = useState("");
-    const [formCorreo, setFormCorreo] = useState(""); // ✉️ Nuevo estado para el correo
+    const [formCorreo, setFormCorreo] = useState(""); // ✉️ Estado para el correo
     const [errorMsg, setErrorMsg] = useState("");
     const [exitoMsg, setExitoMsg] = useState("");
     const [cargando, setCargando] = useState(false);
+    const [verClaveModal, setVerClaveModal] = useState(false);
+
+    // Estados de validación de contraseña en tiempo real
+    const [valLength, setValLength] = useState(false);
+    const [valLetter, setValLetter] = useState(false);
+    const [valUpper, setValUpper] = useState(false);
+    const [valNumber, setValNumber] = useState(false);
+    const [valSymbol, setValSymbol] = useState(false);
 
     const abrirModal = (mun) => {
         setMunicipioSeleccionado(mun);
@@ -33,12 +41,31 @@ export const CredencialesMunicipios = ({
         setFormCorreo(credsExistentes?.correo || ""); // Cargamos el correo si ya existe
         setErrorMsg("");
         setExitoMsg("");
+        setVerClaveModal(false);
+        setValLength(false);
+        setValLetter(false);
+        setValUpper(false);
+        setValNumber(false);
+        setValSymbol(false);
     };
 
     const cerrarModal = () => {
         setMunicipioSeleccionado(null);
         setErrorMsg("");
         setExitoMsg("");
+    };
+
+    const handlePasswordChange = (e) => {
+        const val = e.target.value;
+        setFormPassword(val);
+        setErrorMsg("");
+
+        // Validaciones estrictas
+        setValLength(val.length >= 6 && val.length <= 25);
+        setValLetter(/[a-zA-Z]/.test(val));
+        setValUpper(/[A-Z]/.test(val));
+        setValNumber(/[0-9]/.test(val));
+        setValSymbol(/[!@#$%^&*(),.?":{}|<>]/.test(val));
     };
 
     const guardarCredenciales = async (e) => {
@@ -51,8 +78,8 @@ export const CredencialesMunicipios = ({
             return;
         }
 
-        if (formPassword.length < 8) {
-            setErrorMsg("La contraseña debe tener al menos 8 caracteres.");
+        if (!(valLength && valLetter && valUpper && valNumber && valSymbol)) {
+            setErrorMsg("La contraseña no cumple con todos los requisitos de seguridad establecidos.");
             return;
         }
 
@@ -99,6 +126,8 @@ export const CredencialesMunicipios = ({
             setCargando(false);
         }
     };
+
+    const contraseñaValida = valLength && valLetter && valUpper && valNumber && valSymbol;
 
     return (
         <div style={{ paddingBottom: "40px", width: "100%", boxSizing: "border-box", fontFamily: "'Poppins', sans-serif" }}>
@@ -260,7 +289,10 @@ export const CredencialesMunicipios = ({
                         maxWidth: "460px",
                         boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
                         overflow: "hidden",
-                        boxSizing: "border-box"
+                        boxSizing: "border-box",
+                        maxHeight: "90vh",
+                        display: "flex",
+                        flexDirection: "column"
                     }}>
                         {/* Cabecera del Modal */}
                         <div style={{
@@ -269,7 +301,8 @@ export const CredencialesMunicipios = ({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            boxSizing: "border-box"
+                            boxSizing: "border-box",
+                            flexShrink: 0
                         }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, marginRight: "10px" }}>
                                 {KeyIcon && <KeyIcon style={{ width: "22px", height: "22px", color: "#95d5b2", flexShrink: 0 }} />}
@@ -286,7 +319,7 @@ export const CredencialesMunicipios = ({
                         </div>
 
                         {/* Formulario */}
-                        <form onSubmit={guardarCredenciales} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px", boxSizing: "border-box" }}>
+                        <form onSubmit={guardarCredenciales} style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "14px", boxSizing: "border-box", overflowY: "auto", flex: 1 }}>
                             {errorMsg && (
                                 <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", padding: "10px 14px", borderRadius: "8px", color: "#991b1b", fontSize: "13px", boxSizing: "border-box" }}>
                                     {errorMsg}
@@ -356,24 +389,27 @@ export const CredencialesMunicipios = ({
                                         onBlur={(e) => e.target.style.borderColor = "#cbd5e1"}
                                     />
                                 </div>
+                                <span style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", display: "block" }}>
+                                    Se usará para enviar el código de verificación 2FA.
+                                </span>
                             </div>
 
-                            {/* Contraseña */}
+                            {/* Contraseña con icono de Ojo y validadores */}
                             <div style={{ width: "100%", boxSizing: "border-box" }}>
                                 <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
-                                    Contraseña (Mínimo 8 caracteres)
+                                    Contraseña
                                 </label>
                                 <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%", boxSizing: "border-box" }}>
                                     {LockClosedIcon && <LockClosedIcon style={{ width: "18px", height: "18px", color: "#94a3b8", position: "absolute", left: "12px", flexShrink: 0 }} />}
                                     <input
-                                        type="password"
+                                        type={verClaveModal ? "text" : "password"}
                                         value={formPassword}
-                                        onChange={(e) => setFormPassword(e.target.value)}
+                                        onChange={handlePasswordChange}
                                         placeholder="••••••••"
                                         required
                                         style={{
                                             width: "100%",
-                                            padding: "10px 12px 10px 38px",
+                                            padding: "10px 42px 10px 38px",
                                             borderRadius: "8px",
                                             border: "1px solid #cbd5e1",
                                             fontSize: "14px",
@@ -385,13 +421,55 @@ export const CredencialesMunicipios = ({
                                         onFocus={(e) => e.target.style.borderColor = "#136442"}
                                         onBlur={(e) => e.target.style.borderColor = "#cbd5e1"}
                                     />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setVerClaveModal(!verClaveModal)}
+                                        style={{
+                                            position: "absolute", right: "12px", top: "50%",
+                                            transform: "translateY(-50%)", background: "none",
+                                            border: "none", cursor: "pointer", padding: "4px",
+                                            color: "#888", display: "flex", alignItems: "center", justifyContent: "center"
+                                        }}
+                                        title={verClaveModal ? "Ocultar contraseña" : "Ver contraseña"}
+                                    >
+                                        {verClaveModal ? (
+                                            /* Icono Ojo Abierto */
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                        ) : (
+                                            /* Icono Ojo Tachado */
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                                            </svg>
+                                        )}
+                                    </button>
                                 </div>
-                                <span style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", display: "block" }}>
-                                    Este correo se usará para enviar el código de verificación en cada inicio de sesión.
-                                </span>
+
+                                {/* Requisitos de seguridad visuales en tiempo real */}
+                                <div style={{ background: "#f8fafc", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "11.5px", marginTop: "8px" }}>
+                                    <span style={{ fontWeight: 600, color: "#475569", display: "block", marginBottom: "4px" }}>Requisitos de seguridad:</span>
+                                    <div style={{ color: valLength ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                                        {valLength ? "✔" : "❌"} De 6 a 25 caracteres
+                                    </div>
+                                    <div style={{ color: valLetter ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                                        {valLetter ? "✔" : "❌"} Al menos una letra
+                                    </div>
+                                    <div style={{ color: valUpper ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                                        {valUpper ? "✔" : "❌"} Al menos una letra mayúscula
+                                    </div>
+                                    <div style={{ color: valNumber ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                                        {valNumber ? "✔" : "❌"} Al menos un número
+                                    </div>
+                                    <div style={{ color: valSymbol ? "#059669" : "#dc2626" }}>
+                                        {valSymbol ? "✔" : "❌"} Al menos un carácter especial (!@#$%^&*)
+                                    </div>
+                                </div>
                             </div>
 
-                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "10px", borderTop: "1px solid #f1f5f9", paddingTop: "14px", width: "100%", boxSizing: "border-box" }}>
+                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "6px", borderTop: "1px solid #f1f5f9", paddingTop: "14px", width: "100%", boxSizing: "border-box", flexShrink: 0 }}>
                                 <button
                                     type="button"
                                     onClick={cerrarModal}
@@ -411,7 +489,7 @@ export const CredencialesMunicipios = ({
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={cargando}
+                                    disabled={cargando || !contraseñaValida}
                                     style={{
                                         padding: "10px 18px",
                                         borderRadius: "8px",
@@ -420,10 +498,10 @@ export const CredencialesMunicipios = ({
                                         color: "#ffffff",
                                         fontSize: "13px",
                                         fontWeight: 600,
-                                        cursor: "pointer",
+                                        cursor: (cargando || !contraseñaValida) ? "not-allowed" : "pointer",
                                         boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                                         fontFamily: "'Poppins', sans-serif",
-                                        opacity: cargando ? 0.7 : 1,
+                                        opacity: (cargando || !contraseñaValida) ? 0.6 : 1,
                                         display: "flex",
                                         alignItems: "center",
                                         gap: "8px"
