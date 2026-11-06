@@ -101,7 +101,7 @@ export default function AdminConfigPage() {
     }
 
     setCargando(true);
-    const urlPost = `${API_URL}admin-config/`;
+    const urlPost = adminRegistrado ? `${API_URL}admin-login/` : `${API_URL}admin-config/`;
 
     Swal.fire({
       title: "Procesando...",
