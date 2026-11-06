@@ -8,11 +8,6 @@ export default function LoginPrediosPage() {
   const navigate = useNavigate();
   const [usuario, setUsuario] = React.useState("");
   const [clave, setClave] = React.useState("");
-  
-  // 🔐 NUEVOS ESTADOS PARA 2FA
-  const [codigo2FA, setCodigo2FA] = useState("");
-  const [requiere2FA, setRequiere2FA] = useState(false);
-  const [correoOculto, setCorreoOculto] = useState("");
 
   const [error, setError] = React.useState("");
   const [cargando, setCargando] = React.useState(false);
@@ -87,16 +82,95 @@ export default function LoginPrediosPage() {
           return;
         }
 
-        // 🛡️ SI EL BACKEND REQUIERE 2FA, MOSTRAMOS EL CAMPO DEL CÓDIGO
+        // 🔑 SI EL BACKEND REQUIERE 2FA, ABRIMOS EL MODAL FLOTANTE CON SWEETALERT2
         if (data.requiere_2fa) {
-          setRequiere2FA(true);
-          setCorreoOculto(data.correo_destinatario || "tu correo");
+          setCargando(false);
           Swal.close();
+
+          const correoDestino = data.correo_destinatario || "su correo electrónico";
+
+          const { value: codigoIngresado } = await Swal.fire({
+            title: 'Código de Verificación 2FA',
+            text: `Se ha enviado un código de 6 dígitos a ${correoDestino}. Ingréselo a continuación:`,
+            input: 'text',
+            inputAttributes: {
+              maxlength: 6,
+              autocapitalize: 'off',
+              autocorrect: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Verificar Código',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#136442',
+            allowOutsideClick: false
+          });
+
+          if (!codigoIngresado) {
+            setCargando(false);
+            return;
+          }
+
           Swal.fire({
-            icon: "info",
-            title: "Código enviado",
-            text: data.message || "Se ha enviado un código de 6 dígitos a su correo.",
-            confirmButtonColor: "#136442"
+            title: "Verificando código...",
+            text: "Validando autenticación de dos factores.",
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+          });
+
+          // Petición al endpoint de verificación
+          const responseVerificar = await fetch(`${API_URL}verificar-codigo-login/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              usuario: usuario.trim(),
+              codigo: codigoIngresado.trim()
+            })
+          });
+
+          const dataVerificar = await responseVerificar.json();
+
+          if (!responseVerificar.ok || !dataVerificar.success) {
+            throw new Error(dataVerificar.message || "El código ingresado es incorrecto o ha expirado.");
+          }
+
+          // Guardamos los datos en sessionStorage
+          sessionStorage.setItem("usuario_predios", JSON.stringify(dataVerificar.usuario));
+          sessionStorage.setItem("usuario", dataVerificar.usuario.usuario);
+          sessionStorage.setItem("session_token", dataVerificar.usuario.session_token);
+
+          // 📰 CASO: Empleado de Noticias
+          if (dataVerificar.usuario.rol === "Empleado de Noticias") {
+            await Swal.fire({
+              icon: "success",
+              title: "¡Acceso Autorizado!",
+              text: "Accediste a la sección de noticias",
+              confirmButtonColor: "#136442",
+              timer: 2500,
+              timerProgressBar: true
+            });
+            navigate("/predios/noticias-dashboard");
+            return;
+          }
+
+          // CASO GENERAL: Empleados Municipales
+          const municipioRaw = dataVerificar.usuario.municipio || "";
+          const destinoTexto = municipioRaw
+            ? `el municipio ${municipioRaw.replace(/_/g, ' ').toUpperCase()}`
+            : `el sistema general (${dataVerificar.usuario.rol})`;
+
+          await Swal.fire({
+            icon: "success",
+            title: "¡Credenciales Correctas!",
+            text: `Accediste a ${destinoTexto}.`,
+            confirmButtonColor: "#136442",
+            timer: 3500,
+            timerProgressBar: true
+          });
+
+          navigate("/predios/Empleados", {
+            state: {
+              municipio: municipioRaw ? municipioRaw.replace(/_/g, ' ').toUpperCase() : dataVerificar.usuario.rol
+            }
           });
           return;
         }
@@ -115,112 +189,12 @@ export default function LoginPrediosPage() {
       }
     } catch (err) {
       setCargando(false);
-      const mensajeConexion = "Error de conexión con el servidor. Inténtalo de nuevo.";
+      const mensajeConexion = err.message || "Error de conexión con el servidor. Inténtalo de nuevo.";
       setError(mensajeConexion);
 
       Swal.fire({
         icon: "error",
         title: "Error de conexión",
-        text: mensajeConexion,
-        confirmButtonColor: "#b91c1c"
-      });
-    }
-  };
-
-  // 🛡️ NUEVA FUNCIÓN PARA VERIFICAR EL CÓDIGO 2FA Y EL TOKEN DE SESIÓN ÚNICA
-  const verificarCodigo2FA = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (!codigo2FA.trim() || codigo2FA.length !== 6) {
-      setError("Ingresa el código completo de 6 dígitos.");
-      return;
-    }
-
-    setCargando(true);
-    Swal.fire({
-      title: "Verificando código...",
-      text: "Validando autenticación y sesión única.",
-      allowOutsideClick: false,
-      didOpen: () => { Swal.showLoading(); }
-    });
-
-    try {
-      const response = await fetch(`${API_URL}verificar-codigo-login/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usuario: usuario.trim(),
-          codigo: codigo2FA.trim()
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setCargando(false);
-
-        // Guardamos los datos del usuario y el token de sesión única en sessionStorage
-        sessionStorage.setItem("usuario_predios", JSON.stringify(data.usuario));
-        sessionStorage.setItem("usuario", data.usuario.usuario);
-        sessionStorage.setItem("session_token", data.usuario.session_token);
-
-        // 📰 CASO ESPECÍFICO: Si es Empleado de Noticias
-        if (data.usuario.rol === "Empleado de Noticias") {
-          await Swal.fire({
-            icon: "success",
-            title: "¡Acceso Autorizado!",
-            text: "Accediste a la sección de noticias",
-            confirmButtonColor: "#136442",
-            timer: 2500,
-            timerProgressBar: true
-          });
-
-          navigate("/predios/noticias-dashboard");
-          return;
-        }
-
-        // CASO GENERAL: Empleados Municipales
-        const municipioRaw = data.usuario.municipio || "";
-        const destinoTexto = municipioRaw
-          ? `el municipio ${municipioRaw.replace(/_/g, ' ').toUpperCase()}`
-          : `el sistema general (${data.usuario.rol})`;
-
-        await Swal.fire({
-          icon: "success",
-          title: "¡Credenciales Correctas!",
-          text: `Accediste a ${destinoTexto}.`,
-          confirmButtonColor: "#136442",
-          timer: 3500,
-          timerProgressBar: true
-        });
-
-        // Redirección al dashboard general
-        navigate("/predios/Empleados", {
-          state: {
-            municipio: municipioRaw ? municipioRaw.replace(/_/g, ' ').toUpperCase() : data.usuario.rol
-          }
-        });
-
-      } else {
-        setCargando(false);
-        const mensajeError = data.message || "Código incorrecto o expirado.";
-        setError(mensajeError);
-
-        Swal.fire({
-          icon: "error",
-          title: "Código inválido",
-          text: mensajeError,
-          confirmButtonColor: "#b91c1c"
-        });
-      }
-    } catch (err) {
-      setCargando(false);
-      const mensajeConexion = "Error al validar el código.";
-      setError(mensajeConexion);
-
-      Swal.fire({
-        icon: "error",
-        title: "Error",
         text: mensajeConexion,
         confirmButtonColor: "#b91c1c"
       });
@@ -442,163 +416,120 @@ export default function LoginPrediosPage() {
                 </svg>
               </div>
               <h2 style={{ color: "#1b4332", fontSize: "24px", fontWeight: 700, margin: "0 0 6px" }}>
-                {requiere2FA ? "Verificación 2FA" : "Login de Acceso Empleados"}
+                Login de Acceso Empleados
               </h2>
               <p style={{ color: "#888", fontSize: "14px", margin: 0 }}>
-                {requiere2FA ? `Código enviado a ${correoOculto}` : "Ingresa con las credenciales de tu municipio"}
+                Ingresa con las credenciales de tu municipio
               </p>
             </div>
 
-            {/* FORMULARIO CONDICIONAL: SI NO REQUIERE 2FA MUESTRA CREDENCIALES, SI REQUIERE MUESTRA EL CÓDIGO */}
-            {!requiere2FA ? (
-              <form onSubmit={manejarLogin}>
-                <div style={{ marginBottom: "16px" }}>
-                  <label style={{
-                    display: "block", fontSize: "13px", fontWeight: 600,
-                    color: "#1b4332", marginBottom: "8px"
-                  }}>
-                    Usuario
-                  </label>
-                  <div style={{ position: "relative" }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                      style={{
-                        position: "absolute", left: "14px", top: "50%",
-                        transform: "translateY(-50% )", pointerEvents: "none"
-                      }}>
-                      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    <input
-                      type="text"
-                      className="input-login"
-                      value={usuario}
-                      onChange={e => { setUsuario(e.target.value); setError(""); }}
-                      placeholder="Nombre de usuario"
-                      autoComplete="username"
-                      style={{
-                        width: "100%", padding: "11px 14px 11px 42px",
-                        border: "1.5px solid #e0e0e0", borderRadius: "10px",
-                        fontSize: "14px", fontFamily: "'Poppins', sans-serif",
-                        background: "#fff", color: "#333",
-                        boxSizing: "border-box", transition: "all 0.2s",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: "20px" }}>
-                  <label style={{
-                    display: "block", fontSize: "13px", fontWeight: 600,
-                    color: "#1b4332", marginBottom: "8px"
-                  }}>
-                    Contraseña
-                  </label>
-                  <div style={{ position: "relative" }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                      style={{
-                        position: "absolute", left: "14px", top: "50%",
-                        transform: "translateY(-50%)", pointerEvents: "none"
-                      }}>
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                      <path d="M7 11V7a5 5 0 0110 0v4" />
-                    </svg>
-                    <input
-                      type={verClave ? "text" : "password"}
-                      className="input-login"
-                      value={clave}
-                      onChange={e => { setClave(e.target.value); setError(""); }}
-                      placeholder="Contraseña"
-                      autoComplete="current-password"
-                      style={{
-                        width: "100%", padding: "11px 42px 11px 42px",
-                        border: "1.5px solid #e0e0e0", borderRadius: "10px",
-                        fontSize: "14px", fontFamily: "'Poppins', sans-serif",
-                        background: "#fff", color: "#333",
-                        boxSizing: "border-box", transition: "all 0.2s",
-                      }}
-                    />
-                    <button type="button" onClick={() => setVerClave(!verClave)}
-                      style={{
-                        position: "absolute", right: "14px", top: "50%",
-                        transform: "translateY(-50%)", background: "none",
-                        border: "none", cursor: "pointer", padding: 0,
-                        color: "#aaa", display: "flex", alignItems: "center",
-                      }}>
-                      {verClave ? "Ocultar" : "Ver"}
-                    </button>
-                  </div>
-                </div>
-
-                {error && (
-                  <div style={{
-                    background: "#fff5f5", border: "1px solid #fecaca",
-                    borderRadius: "8px", padding: "10px 14px",
-                    marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px",
-                  }}>
-                    <span style={{ fontSize: "13px", color: "#dc2626" }}>{error}</span>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  className="btn-login"
-                  disabled={cargando}
-                  style={{
-                    width: "100%", padding: "12px",
-                    background: "#136442", color: "#fff", border: "none",
-                    borderRadius: "10px", fontSize: "14px", fontWeight: 600,
-                    fontFamily: "'Poppins', sans-serif", cursor: "pointer",
-                    transition: "all 0.2s", display: "flex",
-                    alignItems: "center", justifyContent: "center", gap: "8px",
-                    boxSizing: "border-box"
-                  }}
-                >
-                  Aceptar
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={verificarCodigo2FA}>
-                <div style={{ marginBottom: "20px" }}>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#1b4332", marginBottom: "8px" }}>
-                    Código de Confirmación (6 Dígitos)
-                  </label>
+            <form onSubmit={manejarLogin}>
+              <div style={{ marginBottom: "16px" }}>
+                <label style={{
+                  display: "block", fontSize: "13px", fontWeight: 600,
+                  color: "#1b4332", marginBottom: "8px"
+                }}>
+                  Usuario
+                </label>
+                <div style={{ position: "relative" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    style={{
+                      position: "absolute", left: "14px", top: "50%",
+                      transform: "translateY(-50% )", pointerEvents: "none"
+                    }}>
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
                   <input
                     type="text"
-                    maxLength={6}
                     className="input-login"
-                    value={codigo2FA}
-                    onChange={e => setCodigo2FA(e.target.value)}
-                    placeholder="123456"
-                    required
+                    value={usuario}
+                    onChange={e => { setUsuario(e.target.value); setError(""); }}
+                    placeholder="Nombre de usuario"
+                    autoComplete="username"
                     style={{
-                      width: "100%", padding: "14px", textAlign: "center",
-                      fontSize: "24px", letterSpacing: "8px", border: "1.5px solid #136442",
-                      borderRadius: "10px", boxSizing: "border-box"
+                      width: "100%", padding: "11px 14px 11px 42px",
+                      border: "1.5px solid #e0e0e0", borderRadius: "10px",
+                      fontSize: "14px", fontFamily: "'Poppins', sans-serif",
+                      background: "#fff", color: "#333",
+                      boxSizing: "border-box", transition: "all 0.2s",
                     }}
                   />
                 </div>
+              </div>
 
-                {error && (
-                  <div style={{ background: "#fff5f5", color: "#dc2626", padding: "10px", borderRadius: "8px", marginBottom: "16px", fontSize: "13px" }}>
-                    {error}
-                  </div>
-                )}
+              <div style={{ marginBottom: "20px" }}>
+                <label style={{
+                  display: "block", fontSize: "13px", fontWeight: 600,
+                  color: "#1b4332", marginBottom: "8px"
+                }}>
+                  Contraseña
+                </label>
+                <div style={{ position: "relative" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    style={{
+                      position: "absolute", left: "14px", top: "50%",
+                      transform: "translateY(-50%)", pointerEvents: "none"
+                    }}>
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0110 0v4" />
+                  </svg>
+                  <input
+                    type={verClave ? "text" : "password"}
+                    className="input-login"
+                    value={clave}
+                    onChange={e => { setClave(e.target.value); setError(""); }}
+                    placeholder="Contraseña"
+                    autoComplete="current-password"
+                    style={{
+                      width: "100%", padding: "11px 42px 11px 42px",
+                      border: "1.5px solid #e0e0e0", borderRadius: "10px",
+                      fontSize: "14px", fontFamily: "'Poppins', sans-serif",
+                      background: "#fff", color: "#333",
+                      boxSizing: "border-box", transition: "all 0.2s",
+                    }}
+                  />
+                  <button type="button" onClick={() => setVerClave(!verClave)}
+                    style={{
+                      position: "absolute", right: "14px", top: "50%",
+                      transform: "translateY(-50%)", background: "none",
+                      border: "none", cursor: "pointer", padding: 0,
+                      color: "#aaa", display: "flex", alignItems: "center",
+                    }}>
+                    {verClave ? "Ocultar" : "Ver"}
+                  </button>
+                </div>
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={cargando}
-                  className="btn-login"
-                  style={{
-                    width: "100%", padding: "12px", background: "#136442", color: "#fff",
-                    border: "none", borderRadius: "10px", fontWeight: 600, cursor: "pointer"
-                  }}
-                >
-                  {cargando ? "Validando..." : "Confirmar e Ingresar"}
-                </button>
-              </form>
-            )}
+              {error && (
+                <div style={{
+                  background: "#fff5f5", border: "1px solid #fecaca",
+                  borderRadius: "8px", padding: "10px 14px",
+                  marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px",
+                }}>
+                  <span style={{ fontSize: "13px", color: "#dc2626" }}>{error}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="btn-login"
+                disabled={cargando}
+                style={{
+                  width: "100%", padding: "12px",
+                  background: "#136442", color: "#fff", border: "none",
+                  borderRadius: "10px", fontSize: "14px", fontWeight: 600,
+                  fontFamily: "'Poppins', sans-serif", cursor: "pointer",
+                  transition: "all 0.2s", display: "flex",
+                  alignItems: "center", justifyContent: "center", gap: "8px",
+                  boxSizing: "border-box"
+                }}
+              >
+                Aceptar
+              </button>
+            </form>
 
             <p style={{
               marginTop: "24px", textAlign: "center",
