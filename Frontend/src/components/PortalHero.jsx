@@ -23,7 +23,7 @@ export default function PortalHero() {
           <span style={{ color: "#86efac" }}>del Estado Barinas</span>
         </h1>
         <p style={{ color: "rgba(255,255,255,0.85)", fontSize: "15px", lineHeight: 1.6, margin: "0 0 36px" }}>
-          Portal de información agropecuaria del <strong style={{ color: "#fff" }}>estado Barinas</strong>.
+          Portal de información agropecuaria del <strong style={{ color: "#fff" }}>Estado Barinas</strong>.
           Registra predios, controla producción animal y vegetal, y visualiza
           estadísticas. Todo en una sola plataforma pensada para el productor venezolano.
         </p>

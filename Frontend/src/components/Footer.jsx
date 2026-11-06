@@ -199,7 +199,7 @@ export default function Footer({ logo, escudo, NAV_ITEMS = [] }) {
         display: "flex", justifyContent: "center", alignItems: "center", textAlign: "center"
       }}>
         <span style={{ fontSize: "12px", color: "#999", lineHeight: "1.5" }}>
-          © 2026 Ecosistema Digital Agropecuario, Estado Barinas. Todos los derechos reservados.
+          © 2026 Sistema Digital Agropecuario, Estado Barinas. Todos los derechos reservados.
         </span>
       </div>
 

@@ -20,7 +20,7 @@ export default function PortalSobreNosotros() {
             Tecnología al servicio del campo barinés
           </h2>
           <p style={{ color: "#555", fontSize: "15px", lineHeight: 1.7 }}>
-            Somos un ecosistema digital diseñado para modernizar la gestión agropecuaria
+            Somos un sistema digital diseñado para modernizar la gestión agropecuaria
             del estado Barinas. Centralizamos la información de predios, producción y
             estadísticas en un solo lugar, accesible para productores de todas las escalas,
             desde el pequeño agricultor hasta las grandes explotaciones ganaderas.

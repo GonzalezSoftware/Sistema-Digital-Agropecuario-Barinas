@@ -3,11 +3,11 @@ import React from "react";
 export default function PortalSolucionesIntegrales() {
   const solutions = [
     { img: "https://images.unsplash.com/photo-1591389703635-e15a07b842d7?q=80&w=1333&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Registro de Predios", desc: "Administra información catastral, ubicación y gestión de terrenos." },
-    { img: "https://images.unsplash.com/photo-1454179083322-198bb4daae41?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Producción Animal", desc: "Control de inventario ganadero, salud, reproducción y rendimiento." },
+    { img: "https://images.unsplash.com/photo-1454179083322-198bb4daae41?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Producción Animal", desc: "Control de inventario ganadero, reproducción y rendimiento." },
     { img: "https://images.unsplash.com/photo-1554402100-8d1d9f3dff80?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Producción Vegetal", desc: "Gestión de ciclos de siembra, cosechas e insumos agrícolas." },
-    { img: "https://images.unsplash.com/flagged/photo-1553267252-d100936057c1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Estadísticas", desc: "Reportes visuales y análisis de tu actividad agropecuaria." },
-    { img: "https://plus.unsplash.com/premium_photo-1661389248634-912a0e92b85d?q=80&w=1467&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Reportes", desc: "Generación de informes detallados sobre la rentabilidad y el flujo de caja." },
-    { img: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Actualización de Predio", desc: "Modifica datos catastrales, linderos y mejoras en tiempo real." }
+    { img: "https://images.unsplash.com/flagged/photo-1553267252-d100936057c1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Estadísticas", desc: "Gráficos visuales y análisis de la actividad agropecuaria." },
+    { img: "https://plus.unsplash.com/premium_photo-1661389248634-912a0e92b85d?q=80&w=1467&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Reportes", desc: "Generación de informes detallados de la actividad agropecuaria." },
+    { img: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", title: "Actualización de Predio", desc: "Modifica datos catastrales e información pecuaria y vegetal en tiempo real." }
   ];
 
   return (

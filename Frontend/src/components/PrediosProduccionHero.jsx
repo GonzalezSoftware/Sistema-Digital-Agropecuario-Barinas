@@ -52,7 +52,7 @@ export default function PrediosProduccionHero() {
           <span style={{ color: "#86efac" }}>de Predios Agropecuarios</span>
         </h1>
         <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "15px", lineHeight: 1.8, margin: "0 0 36px", maxWidth: "500px" }}>
-          Sistema oficial administrado por <strong style={{ color: "#fff" }}>MPPAT</strong> para el registro integral de predios del estado Barinas, junto con el control detallado de su respectiva información productiva, tanto animal como vegetal.
+          Sistema oficial administrado por <strong style={{ color: "#fff" }}>MPPAT</strong> para el registro integral de predios del estado Barinas, junto con el control detallado de su respectiva información productiva pecuaria y vegetal.
         </p>
         <div className="predios-hero-buttons" style={{ display: "flex", gap: "14px", flexWrap: "wrap" }}>
           <button className="hero-btn-primary"
