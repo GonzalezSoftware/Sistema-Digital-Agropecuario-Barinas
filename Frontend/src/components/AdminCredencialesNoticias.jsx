@@ -29,13 +29,22 @@ export function AdminCredencialesNoticias({
 }) {
     const [usuarioInput, setUsuarioInput] = useState("");
     const [passwordInput, setPasswordInput] = useState("");
+    const [correoInput, setCorreoInput] = useState("");
 
-    const [credencialesBD, setCredencialesBD] = useState({ usuario: "", activo: false });
+    const [credencialesBD, setCredencialesBD] = useState({ usuario: "", correo: "", activo: false });
 
     const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [mensajeFeedback, setMensajeFeedback] = useState(null);
     const [editando, setEditando] = useState(false);
+    const [verClave, setVerClave] = useState(false);
+
+    // Estados de validación de contraseña en tiempo real
+    const [valLength, setValLength] = useState(false);
+    const [valLetter, setValLetter] = useState(false);
+    const [valUpper, setValUpper] = useState(false);
+    const [valNumber, setValNumber] = useState(false);
+    const [valSymbol, setValSymbol] = useState(false);
 
     const API_URL = "https://3.145.179.35.nip.io/api/";
 
@@ -55,6 +64,7 @@ export function AdminCredencialesNoticias({
                     if (data.activo) {
                         setCredencialesBD(data);
                         setUsuarioInput(data.usuario);
+                        setCorreoInput(data.correo || "");
                         setEditando(false);
                     } else {
                         setEditando(true);
@@ -70,11 +80,32 @@ export function AdminCredencialesNoticias({
         obtenerCredenciales();
     }, []);
 
+    const handlePasswordChange = (e) => {
+        const val = e.target.value;
+        setPasswordInput(val);
+        setMensajeFeedback(null);
+
+        // Validaciones estrictas
+        setValLength(val.length >= 6 && val.length <= 25);
+        setValLetter(/[a-zA-Z]/.test(val));
+        setValUpper(/[A-Z]/.test(val));
+        setValNumber(/[0-9]/.test(val));
+        setValSymbol(/[!@#$%^&*(),.?":{}|<>]/.test(val));
+    };
+
+    const contraseñaValida = valLength && valLetter && valUpper && valNumber && valSymbol;
+
     // 2. GUARDAR / ACTUALIZAR EN LA BASE DE DATOS
     const guardarCredenciales = async (e) => {
         e.preventDefault();
         setGuardando(true);
         setMensajeFeedback(null);
+
+        if (!contraseñaValida) {
+            setMensajeFeedback({ tipo: "error", texto: "La contraseña no cumple con todos los requisitos de seguridad establecidos." });
+            setGuardando(false);
+            return;
+        }
 
         try {
             const response = await fetch(`${API_URL}credenciales-noticias/`, {
@@ -85,14 +116,15 @@ export function AdminCredencialesNoticias({
                 },
                 body: JSON.stringify({
                     usuario: usuarioInput,
-                    password: passwordInput
+                    password: passwordInput,
+                    correo: correoInput.trim()
                 })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                setCredencialesBD({ usuario: usuarioInput, activo: true });
+                setCredencialesBD({ usuario: usuarioInput, correo: correoInput.trim(), activo: true });
                 setMensajeFeedback({ tipo: "exito", texto: data.mensaje || "¡Credenciales actualizadas correctamente!" });
                 setPasswordInput("");
                 setEditando(false);
@@ -216,6 +248,11 @@ export function AdminCredencialesNoticias({
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                                <span style={{ fontSize: "13px", color: "#475569", fontWeight: "600" }}>✉️ Correo institucional:</span>
+                                <span style={{ fontSize: "14px", color: "#136442", fontWeight: "700", wordBreak: "break-all" }}>{credencialesBD.correo}</span>
+                            </div>
+
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                                 {LockClosedIcon && <LockClosedIcon style={{ width: "18px", height: "18px", color: "#136442", flexShrink: 0 }} />}
                                 <span style={{ fontSize: "13px", color: "#475569", fontWeight: "600" }}>Contraseña:</span>
                                 <span style={{ fontSize: "14px", color: "#1e293b", letterSpacing: "2px" }}>•••••••• (Protegida)</span>
@@ -275,9 +312,36 @@ export function AdminCredencialesNoticias({
                             </div>
                         </div>
 
+                        <div style={{ marginBottom: "18px", width: "100%", boxSizing: "border-box" }}>
+                            <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#136442", marginBottom: "6px" }}>
+                                Correo Electrónico Institucional (para 2FA)
+                            </label>
+                            <input
+                                type="email"
+                                required
+                                value={correoInput}
+                                onChange={(e) => setCorreoInput(e.target.value)}
+                                placeholder="empleado.noticias@mppat.gob.ve"
+                                style={{
+                                    width: "100%",
+                                    padding: "10px 12px",
+                                    borderRadius: "8px",
+                                    border: "1px solid #cbd5e1",
+                                    fontSize: "14px",
+                                    boxSizing: "border-box",
+                                    outline: "none",
+                                    backgroundColor: "#ffffff",
+                                    color: "#1e293b",
+                                    fontFamily: "'Poppins', sans-serif"
+                                }}
+                                onFocus={(e) => e.target.style.borderColor = "#136442"}
+                                onBlur={(e) => e.target.style.borderColor = "#cbd5e1"}
+                            />
+                        </div>
+
                         <div style={{ marginBottom: "20px", width: "100%", boxSizing: "border-box" }}>
                             <label style={{ display: "block", fontSize: "12.5px", fontWeight: "600", color: "#136442", marginBottom: "6px" }}>
-                                Contraseña (Mínimo 8 caracteres)
+                                Contraseña
                             </label>
                             <div style={{ position: "relative", width: "100%", boxSizing: "border-box" }}>
                                 {LockClosedIcon && (
@@ -286,14 +350,14 @@ export function AdminCredencialesNoticias({
                                     </span>
                                 )}
                                 <input
-                                    type="password"
+                                    type={verClave ? "text" : "password"}
                                     required
                                     value={passwordInput}
-                                    onChange={(e) => setPasswordInput(e.target.value)}
+                                    onChange={handlePasswordChange}
                                     placeholder="••••••••"
                                     style={{
                                         width: "100%",
-                                        padding: "10px 12px 10px 38px",
+                                        padding: "10px 42px 10px 38px",
                                         borderRadius: "8px",
                                         border: "1px solid #cbd5e1",
                                         fontSize: "14px",
@@ -306,6 +370,49 @@ export function AdminCredencialesNoticias({
                                     onFocus={(e) => e.target.style.borderColor = "#136442"}
                                     onBlur={(e) => e.target.style.borderColor = "#cbd5e1"}
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setVerClave(!verClave)}
+                                    style={{
+                                        position: "absolute", right: "12px", top: "50%",
+                                        transform: "translateY(-50%)", background: "none",
+                                        border: "none", cursor: "pointer", padding: "4px",
+                                        color: "#888", display: "flex", alignItems: "center", justifyContent: "center"
+                                    }}
+                                    title={verClave ? "Ocultar contraseña" : "Ver contraseña"}
+                                >
+                                    {verClave ? (
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
+                                    ) : (
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                                        </svg>
+                                    )}
+                                </button>
+                            </div>
+
+                            {/* Requisitos visuales en tiempo real */}
+                            <div style={{ background: "#f8fafc", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "11.5px", marginTop: "8px" }}>
+                                <span style={{ fontWeight: 600, color: "#475569", display: "block", marginBottom: "4px" }}>Requisitos de seguridad:</span>
+                                <div style={{ color: valLength ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                                    {valLength ? "✔" : "❌"} De 6 a 25 caracteres
+                                </div>
+                                <div style={{ color: valLetter ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                                    {valLetter ? "✔" : "❌"} Al menos una letra
+                                </div>
+                                <div style={{ color: valUpper ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                                    {valUpper ? "✔" : "❌"} Al menos una letra mayúscula
+                                </div>
+                                <div style={{ color: valNumber ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                                    {valNumber ? "✔" : "❌"} Al menos un número
+                                </div>
+                                <div style={{ color: valSymbol ? "#059669" : "#dc2626" }}>
+                                    {valSymbol ? "✔" : "❌"} Al menos un carácter especial (!@#$%^&*)
+                                </div>
                             </div>
                         </div>
 
@@ -331,7 +438,7 @@ export function AdminCredencialesNoticias({
                             )}
                             <button
                                 type="submit"
-                                disabled={guardando}
+                                disabled={guardando || !contraseñaValida}
                                 style={{
                                     padding: "10px 20px",
                                     backgroundColor: "#136442",
@@ -339,14 +446,12 @@ export function AdminCredencialesNoticias({
                                     border: "none",
                                     borderRadius: "8px",
                                     fontWeight: "600",
-                                    cursor: "pointer",
+                                    cursor: (guardando || !contraseñaValida) ? "not-allowed" : "pointer",
                                     fontSize: "13px",
-                                    opacity: guardando ? 0.7 : 1,
+                                    opacity: (guardando || !contraseñaValida) ? 0.6 : 1,
                                     transition: "background-color 0.2s",
                                     fontFamily: "'Poppins', sans-serif"
                                 }}
-                                onMouseOver={(e) => { if (!guardando) e.currentTarget.style.backgroundColor = "#0f4f35"; }}
-                                onMouseOut={(e) => { if (!guardando) e.currentTarget.style.backgroundColor = "#136442"; }}
                             >
                                 {guardando ? "Guardando..." : "Guardar Credenciales"}
                             </button>
