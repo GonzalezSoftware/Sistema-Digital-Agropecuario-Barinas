@@ -83,15 +83,15 @@ export default function LoginPrediosPage() {
           return;
         }
 
-        // 🔑 SI EL BACKEND REQUIERE 2FA, ABRIMOS EL MODAL FLOTANTE CON SWEETALERT2
+// 🔑 SI EL BACKEND REQUIERE 2FA, ABRIMOS EL MODAL FLOTANTE CON SWEETALERT2
         if (data.requiere_2fa) {
           setCargando(false);
           Swal.close();
 
           const correoDestino = data.correo_destinatario || "su correo electrónico";
           
-          // Capturamos el usuario exacto enviado por la respuesta de login-admin/ (ej. data.usuario)
-          const usuarioBackend = data.usuario || usuario.trim();
+          // 🛡️ CAPTURAMOS EL USUARIO EXACTO DEVUELTO POR EL BACKEND (Vital para la caché)
+          const usuarioExactoBD = data.usuario; 
 
           const { value: codigoIngresado } = await Swal.fire({
             title: 'Código de Verificación 2FA',
@@ -121,12 +121,12 @@ export default function LoginPrediosPage() {
             didOpen: () => { Swal.showLoading(); }
           });
 
-          // Petición al endpoint de verificación enviando la clave exacta que está en la caché del servidor
+          // Petición al endpoint de verificación enviando el usuario exacto de la BD
           const responseVerificar = await fetch(`${API_URL}verificar-codigo-login/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              usuario: usuarioBackend,
+              usuario: usuarioExactoBD, // 👈 Enviamos la clave exacta que busca la caché en Django
               codigo: codigoIngresado.trim()
             })
           });
