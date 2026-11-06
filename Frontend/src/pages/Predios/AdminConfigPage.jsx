@@ -105,7 +105,7 @@ export default function AdminConfigPage() {
 
     Swal.fire({
       title: "Procesando...",
-      text: !adminRegistrado ? "Registrando administrador..." : "Verificando credenciales...",
+      text: !adminRegistrado ? "Registrando administrador..." : "Validando credenciales y enviando código 2FA...",
       allowOutsideClick: false,
       allowEscapeKey: false,
       didOpen: () => { Swal.showLoading(); }
@@ -126,23 +126,91 @@ export default function AdminConfigPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Ocurrió un error en el servidor.");
+        throw new Error(data.message || data.error || "Ocurrió un error en el servidor.");
       }
 
+      // 🔑 PASO 1: SI EL BACKEND REQUIERE 2FA
+      if (adminRegistrado && data.requiere_2fa) {
+        setCargando(false);
+        Swal.close();
+
+        // Pedir el código de 6 dígitos al usuario
+        const { value: codigoIngresado } = await Swal.fire({
+          title: 'Código de Verificación 2FA',
+          text: data.message || `Se ha enviado un código de 6 dígitos a su correo electrónico. Ingréselo a continuación:`,
+          input: 'text',
+          inputAttributes: {
+            maxlength: 6,
+            autocapitalize: 'off',
+            autocorrect: 'off'
+          },
+          showCancelButton: true,
+          confirmButtonText: 'Verificar Código',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#136442',
+          allowOutsideClick: false
+        });
+
+        if (!codigoIngresado) {
+          setCargando(false);
+          return;
+        }
+
+        Swal.fire({
+          title: "Verificando código...",
+          text: "Validando autenticación de dos factores.",
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        // 🔑 PASO 2: ENVIAR EL CÓDIGO AL ENDPOINT DE VERIFICACIÓN
+        const resVerificar = await fetch(`${API_URL}verificar-codigo-login/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            usuario: usuario.trim(),
+            codigo: codigoIngresado.trim()
+          })
+        });
+
+        const dataVerificar = await resVerificar.json();
+
+        if (!resVerificar.ok || !dataVerificar.success) {
+          throw new Error(dataVerificar.message || "El código ingresado es incorrecto o ha expirado.");
+        }
+
+        // Guardar la sesión y el token único
+        sessionStorage.setItem("usuario_admin", JSON.stringify(dataVerificar.usuario));
+        sessionStorage.setItem("admin_usuario", dataVerificar.usuario.usuario);
+        if (dataVerificar.usuario.session_token) {
+          sessionStorage.setItem("admin_session_token", dataVerificar.usuario.session_token);
+        }
+
+        await Swal.fire({
+          icon: "success",
+          title: "¡Inicio de Sesión Exitoso!",
+          text: "Bienvenido al panel de administración general.",
+          confirmButtonColor: "#136442",
+          timer: 2000,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+
+        navigate("/admin/dashboard");
+        return;
+      }
+
+      // FLUJO NORMAL DE REGISTRO INICIAL (Cuando no hay admin previo)
       sessionStorage.setItem("usuario_admin", JSON.stringify(data.usuario));
       sessionStorage.setItem("admin_usuario", data.usuario.usuario);
       if (data.usuario.session_token) {
         sessionStorage.setItem("admin_session_token", data.usuario.session_token);
       }
 
-      const mensajeExito = !adminRegistrado
-        ? "¡Administrador registrado en la Base de Datos con éxito! Redirigiendo..."
-        : "¡Inicio de sesión exitoso! Redirigiendo...";
-
       await Swal.fire({
         icon: "success",
         title: "¡Éxito!",
-        text: mensajeExito,
+        text: "¡Administrador registrado en la Base de Datos con éxito! Redirigiendo...",
         confirmButtonColor: "#136442",
         timer: 2000,
         timerProgressBar: true,
