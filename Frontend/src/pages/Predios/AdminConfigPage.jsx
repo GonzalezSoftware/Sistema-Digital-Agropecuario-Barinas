@@ -134,15 +134,18 @@ export default function AdminConfigPage() {
         throw new Error(data.message || data.error || "Ocurrió un error en el servidor.");
       }
 
-      // 🔑 PASO 1: SI EL BACKEND REQUIERE 2FA (ADMINISTRADOR YA REGISTRADO)
+// 🔑 PASO 1: SI EL BACKEND REQUIERE 2FA (ADMINISTRADOR YA REGISTRADO)
       if (esLogin && data.requiere_2fa) {
         setCargando(false);
         Swal.close();
 
-        // Pedir el código de 6 dígitos al usuario
+        // Capturamos el correo oculto que envía el backend
+        const correoDestino = data.correo_destinatario || "su correo electrónico";
+
+        // Pedir el código de 6 dígitos al usuario mostrando el correo oculto
         const { value: codigoIngresado } = await Swal.fire({
           title: 'Código de Verificación 2FA',
-          text: data.message || `Se ha enviado un código de 6 dígitos a su correo electrónico. Ingréselo a continuación:`,
+          text: `Se ha enviado un código de 6 dígitos a ${correoDestino}. Ingréselo a continuación:`,
           input: 'text',
           inputAttributes: {
             maxlength: 6,
