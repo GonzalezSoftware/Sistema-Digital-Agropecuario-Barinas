@@ -8,11 +8,6 @@ export default function LoginPrediosPage() {
   const navigate = useNavigate();
   const [usuario, setUsuario] = React.useState("");
   const [clave, setClave] = React.useState("");
-  
-  // 🔐 ESTADOS PARA 2FA
-  const [codigo2FA, setCodigo2FA] = useState("");
-  const [requiere2FA, setRequiere2FA] = useState(false);
-  const [correoOculto, setCorreoOculto] = useState("");
 
   const [error, setError] = React.useState("");
   const [cargando, setCargando] = React.useState(false);
@@ -60,7 +55,7 @@ export default function LoginPrediosPage() {
         return;
       }
 
-      // Petición al backend de Django en AWS para validar credenciales
+      // Petición al backend de Django en AWS para validar credenciales y disparar el 2FA
       const response = await fetch(`${API_URL}login-admin/`, {
         method: "POST",
         headers: {
@@ -93,7 +88,6 @@ export default function LoginPrediosPage() {
           Swal.close();
 
           const correoDestino = data.correo_destinatario || "su correo electrónico";
-          // Capturamos el usuario exacto devuelto por el backend para evitar discrepancias en la caché
           const usuarioBackend = data.usuario.usuario || usuario.trim();
 
           const { value: codigoIngresado } = await Swal.fire({
@@ -507,7 +501,7 @@ export default function LoginPrediosPage() {
                       border: "none", cursor: "pointer", padding: 0,
                       color: "#aaa", display: "flex", alignItems: "center",
                     }}>
-                    {verClave ? "Ocultar" : "Ver"}
+                      {verClave ? "Ocultar" : "Ver"}
                   </button>
                 </div>
               </div>
