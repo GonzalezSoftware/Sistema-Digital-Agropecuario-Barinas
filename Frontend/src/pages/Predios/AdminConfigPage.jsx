@@ -20,6 +20,13 @@ export default function AdminConfigPage() {
   const [cargando, setCargando] = React.useState(false);
   const [verClave, setVerClave] = React.useState(false);
 
+  // Estados de validación de contraseña en tiempo real para el registro
+  const [valLength, setValLength] = useState(false);
+  const [valLetter, setValLetter] = useState(false);
+  const [valUpper, setValUpper] = useState(false);
+  const [valNumber, setValNumber] = useState(false);
+  const [valSymbol, setValSymbol] = useState(false);
+
   useEffect(() => {
     const urlPeticion = `${API_URL}admin-config/`;
     console.log("🔍 [DEBUG] Intentando conectar con la API en:", urlPeticion);
@@ -88,6 +95,21 @@ export default function AdminConfigPage() {
     return () => clearInterval(intervalo);
   }, [API_URL]);
 
+  const handlePasswordChange = (e) => {
+    const val = e.target.value;
+    setClave(val);
+    setError("");
+
+    // Validaciones estrictas
+    setValLength(val.length >= 6 && val.length <= 25);
+    setValLetter(/[a-zA-Z]/.test(val));
+    setValUpper(/[A-Z]/.test(val));
+    setValNumber(/[0-9]/.test(val));
+    setValSymbol(/[!@#$%^&*(),.?":{}|<>]/.test(val));
+  };
+
+  const contraseñaValidaRegistro = valLength && valLetter && valUpper && valNumber && valSymbol;
+
   const manejarAccion = async (e) => {
     e.preventDefault();
     setError("");
@@ -102,6 +124,10 @@ export default function AdminConfigPage() {
     if (!esLogin) {
       if (!nombre.trim()) { setError("Ingresa el nombre completo."); return; }
       if (!correo.trim()) { setError("Ingresa el correo electrónico."); return; }
+      if (!contraseñaValidaRegistro) {
+        setError("La contraseña no cumple con todos los requisitos de seguridad establecidos.");
+        return;
+      }
     }
 
     setCargando(true);
@@ -134,7 +160,7 @@ export default function AdminConfigPage() {
         throw new Error(data.message || data.error || "Ocurrió un error en el servidor.");
       }
 
-// 🔑 PASO 1: SI EL BACKEND REQUIERE 2FA (ADMINISTRADOR YA REGISTRADO)
+      // 🔑 PASO 1: SI EL BACKEND REQUIERE 2FA (ADMINISTRADOR YA REGISTRADO)
       if (esLogin && data.requiere_2fa) {
         setCargando(false);
         Swal.close();
@@ -340,10 +366,11 @@ export default function AdminConfigPage() {
 
               <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 12px;">
                 <span style="font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Requisitos de seguridad:</span>
-                <div id="req-length" style="color: #dc2626; margin-bottom: 4px;">❌ Mínimo 8 caracteres</div>
+                <div id="req-length" style="color: #dc2626; margin-bottom: 4px;">❌ De 6 a 25 caracteres</div>
                 <div id="req-letter" style="color: #dc2626; margin-bottom: 4px;">❌ Al menos una letra</div>
                 <div id="req-upper" style="color: #dc2626; margin-bottom: 4px;">❌ Al menos una letra mayúscula</div>
-                <div id="req-symbol" style="color: #dc2626;">❌ Al menos un signo especial (!@#$%^&*)</div>
+                <div id="req-number" style="color: #dc2626; margin-bottom: 4px;">❌ Al menos un número</div>
+                <div id="req-symbol" style="color: #dc2626;">❌ Al menos un carácter especial (!@#$%^&*)</div>
               </div>
             </div>
           `,
@@ -370,29 +397,34 @@ export default function AdminConfigPage() {
             input.addEventListener('input', () => {
               const val = input.value;
 
-              const hasLength = val.length >= 8;
+              const hasLength = val.length >= 6 && val.length <= 25;
               const hasLetter = /[a-zA-Z]/.test(val);
               const hasUpper = /[A-Z]/.test(val);
+              const hasNumber = /[0-9]/.test(val);
               const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(val);
 
               const reqLength = document.getElementById('req-length');
               const reqLetter = document.getElementById('req-letter');
               const reqUpper = document.getElementById('req-upper');
+              const reqNumber = document.getElementById('req-number');
               const reqSymbol = document.getElementById('req-symbol');
 
-              reqLength.innerHTML = hasLength ? ' Mínimo 8 caracteres' : ' Mínimo 8 caracteres';
+              reqLength.innerHTML = hasLength ? '✔ De 6 a 25 caracteres' : '❌ De 6 a 25 caracteres';
               reqLength.style.color = hasLength ? '#059669' : '#dc2626';
 
-              reqLetter.innerHTML = hasLetter ? ' Al menos una letra' : ' Al menos una letra';
+              reqLetter.innerHTML = hasLetter ? '✔ Al menos una letra' : '❌ Al menos una letra';
               reqLetter.style.color = hasLetter ? '#059669' : '#dc2626';
 
-              reqUpper.innerHTML = hasUpper ? 'Al menos una letra mayúscula' : ' Al menos una letra mayúscula';
+              reqUpper.innerHTML = hasUpper ? '✔ Al menos una letra mayúscula' : '❌ Al menos una letra mayúscula';
               reqUpper.style.color = hasUpper ? '#059669' : '#dc2626';
 
-              reqSymbol.innerHTML = hasSymbol ? ' Al menos un signo especial (!@#$%^&*)' : ' Al menos un signo especial (!@#$%^&*)';
+              reqNumber.innerHTML = hasNumber ? '✔ Al menos un número' : '❌ Al menos un número';
+              reqNumber.style.color = hasNumber ? '#059669' : '#dc2626';
+
+              reqSymbol.innerHTML = hasSymbol ? '✔ Al menos un carácter especial (!@#$%^&*)' : '❌ Al menos un carácter especial (!@#$%^&*)';
               reqSymbol.style.color = hasSymbol ? '#059669' : '#dc2626';
 
-              if (hasLength && hasLetter && hasUpper && hasSymbol) {
+              if (hasLength && hasLetter && hasUpper && hasNumber && hasSymbol) {
                 confirmBtn.disabled = false;
                 confirmBtn.style.opacity = '1';
                 confirmBtn.style.cursor = 'pointer';
@@ -664,7 +696,7 @@ export default function AdminConfigPage() {
                     type={verClave ? "text" : "password"}
                     className="input-login"
                     value={clave}
-                    onChange={e => { setClave(e.target.value); setError(""); }}
+                    onChange={adminRegistrado ? (e => { setClave(e.target.value); setError(""); }) : handlePasswordChange}
                     placeholder="Contraseña"
                     autoComplete="current-password"
                     style={{
@@ -698,6 +730,28 @@ export default function AdminConfigPage() {
                     )}
                   </button>
                 </div>
+
+                {/* Requisitos de seguridad visuales en tiempo real (Solo para el Registro) */}
+                {!adminRegistrado && (
+                  <div style={{ background: "#f8fafc", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "11.5px", marginTop: "8px" }}>
+                    <span style={{ fontWeight: 600, color: "#475569", display: "block", marginBottom: "4px" }}>Requisitos de seguridad:</span>
+                    <div style={{ color: valLength ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                      {valLength ? "✔" : "❌"} De 6 a 25 caracteres
+                    </div>
+                    <div style={{ color: valLetter ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                      {valLetter ? "✔" : "❌"} Al menos una letra
+                    </div>
+                    <div style={{ color: valUpper ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                      {valUpper ? "✔" : "❌"} Al menos una letra mayúscula
+                    </div>
+                    <div style={{ color: valNumber ? "#059669" : "#dc2626", marginBottom: "2px" }}>
+                      {valNumber ? "✔" : "❌"} Al menos un número
+                    </div>
+                    <div style={{ color: valSymbol ? "#059669" : "#dc2626" }}>
+                      {valSymbol ? "✔" : "❌"} Al menos un carácter especial (!@#$%^&*)
+                    </div>
+                  </div>
+                )}
               </div>
 
               {adminRegistrado && (
@@ -727,11 +781,13 @@ export default function AdminConfigPage() {
               <button
                 type="submit"
                 className="btn-login"
-                disabled={cargando}
+                disabled={cargando || (!adminRegistrado && !contraseñaValidaRegistro)}
                 style={{
                   width: "100%", padding: "12px", background: "#136442", color: "#fff", border: "none",
                   borderRadius: "10px", fontSize: "14px", fontWeight: 600, fontFamily: "'Poppins', sans-serif",
-                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", boxSizing: "border-box"
+                  cursor: (cargando || (!adminRegistrado && !contraseñaValidaRegistro)) ? "not-allowed" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", boxSizing: "border-box",
+                  opacity: (cargando || (!adminRegistrado && !contraseñaValidaRegistro)) ? 0.6 : 1
                 }}
               >
                 {!adminRegistrado ? "Registrar en Base de Datos" : "Aceptar"}
