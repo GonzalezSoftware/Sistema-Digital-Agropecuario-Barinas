@@ -95,32 +95,37 @@ export default function AdminConfigPage() {
 
     if (!usuario.trim()) { setError("Ingresa el usuario del administrador."); return; }
     if (!clave.trim()) { setError("Ingresa la contraseña."); return; }
-    if (!adminRegistrado) {
+
+    // Evaluamos estrictamente si ya está registrado para alternar entre Login (2FA) y Registro Inicial
+    const esLogin = adminRegistrado === true;
+
+    if (!esLogin) {
       if (!nombre.trim()) { setError("Ingresa el nombre completo."); return; }
       if (!correo.trim()) { setError("Ingresa el correo electrónico."); return; }
     }
 
     setCargando(true);
-    const urlPost = adminRegistrado ? `${API_URL}admin-login/` : `${API_URL}admin-config/`;
+    // Si ya existe admin, usamos la ruta de login con 2FA. Si no, la ruta de configuración inicial.
+    const urlPost = esLogin ? `${API_URL}admin-login/` : `${API_URL}admin-config/`;
 
     Swal.fire({
       title: "Procesando...",
-      text: !adminRegistrado ? "Registrando administrador..." : "Validando credenciales y enviando código 2FA...",
+      text: !esLogin ? "Registrando administrador..." : "Validando credenciales y enviando código 2FA...",
       allowOutsideClick: false,
       allowEscapeKey: false,
       didOpen: () => { Swal.showLoading(); }
     });
 
     try {
+      // Preparamos el cuerpo de la petición de manera limpia según el modo (Login vs Registro)
+      const bodyData = esLogin
+        ? { usuario: usuario.trim(), clave: clave }
+        : { nombre: nombre.trim(), usuario: usuario.trim(), correo: correo.trim(), clave: clave };
+
       const response = await fetch(urlPost, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: nombre.trim(),
-          usuario: usuario.trim(),
-          correo: correo.trim(),
-          clave: clave
-        })
+        body: JSON.stringify(bodyData)
       });
 
       const data = await response.json();
@@ -129,8 +134,8 @@ export default function AdminConfigPage() {
         throw new Error(data.message || data.error || "Ocurrió un error en el servidor.");
       }
 
-      // 🔑 PASO 1: SI EL BACKEND REQUIERE 2FA
-      if (adminRegistrado && data.requiere_2fa) {
+      // 🔑 PASO 1: SI EL BACKEND REQUIERE 2FA (ADMINISTRADOR YA REGISTRADO)
+      if (esLogin && data.requiere_2fa) {
         setCargando(false);
         Swal.close();
 
@@ -200,7 +205,7 @@ export default function AdminConfigPage() {
         return;
       }
 
-      // FLUJO NORMAL DE REGISTRO INICIAL (Cuando no hay admin previo)
+      // FLUJO NORMAL DE REGISTRO INICIAL (Cuando no hay admin previo en la BD)
       sessionStorage.setItem("usuario_admin", JSON.stringify(data.usuario));
       sessionStorage.setItem("admin_usuario", data.usuario.usuario);
       if (data.usuario.session_token) {
