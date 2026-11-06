@@ -8,6 +8,11 @@ export default function LoginPrediosPage() {
   const navigate = useNavigate();
   const [usuario, setUsuario] = React.useState("");
   const [clave, setClave] = React.useState("");
+  
+  // 🔐 ESTADOS PARA 2FA
+  const [codigo2FA, setCodigo2FA] = useState("");
+  const [requiere2FA, setRequiere2FA] = useState(false);
+  const [correoOculto, setCorreoOculto] = useState("");
 
   const [error, setError] = React.useState("");
   const [cargando, setCargando] = React.useState(false);
@@ -55,7 +60,7 @@ export default function LoginPrediosPage() {
         return;
       }
 
-      // Petición al backend de Django en AWS para validar credenciales en la tabla AdministradorSistema
+      // Petición al backend de Django en AWS para validar credenciales
       const response = await fetch(`${API_URL}login-admin/`, {
         method: "POST",
         headers: {
@@ -88,6 +93,8 @@ export default function LoginPrediosPage() {
           Swal.close();
 
           const correoDestino = data.correo_destinatario || "su correo electrónico";
+          // Capturamos el usuario exacto devuelto por el backend para evitar discrepancias en la caché
+          const usuarioBackend = data.usuario.usuario || usuario.trim();
 
           const { value: codigoIngresado } = await Swal.fire({
             title: 'Código de Verificación 2FA',
@@ -117,12 +124,12 @@ export default function LoginPrediosPage() {
             didOpen: () => { Swal.showLoading(); }
           });
 
-          // Petición al endpoint de verificación enviando el usuario limpio con .trim()
+          // Petición al endpoint de verificación enviando el usuario exacto y limpio
           const responseVerificar = await fetch(`${API_URL}verificar-codigo-login/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              usuario: usuario.trim(),
+              usuario: usuarioBackend,
               codigo: codigoIngresado.trim()
             })
           });
@@ -133,12 +140,12 @@ export default function LoginPrediosPage() {
             throw new Error(dataVerificar.message || "El código ingresado es incorrecto o ha expirado.");
           }
 
-          // Guardamos los datos en sessionStorage
+          // Guardamos los datos del usuario y el token de sesión única en sessionStorage
           sessionStorage.setItem("usuario_predios", JSON.stringify(dataVerificar.usuario));
           sessionStorage.setItem("usuario", dataVerificar.usuario.usuario);
           sessionStorage.setItem("session_token", dataVerificar.usuario.session_token);
 
-          // 📰 CASO: Empleado de Noticias
+          // 📰 CASO ESPECÍFICO: Si es Empleado de Noticias
           if (dataVerificar.usuario.rol === "Empleado de Noticias") {
             await Swal.fire({
               icon: "success",
@@ -148,6 +155,7 @@ export default function LoginPrediosPage() {
               timer: 2500,
               timerProgressBar: true
             });
+
             navigate("/predios/noticias-dashboard");
             return;
           }
@@ -167,6 +175,7 @@ export default function LoginPrediosPage() {
             timerProgressBar: true
           });
 
+          // Redirección al dashboard general
           navigate("/predios/Empleados", {
             state: {
               municipio: municipioRaw ? municipioRaw.replace(/_/g, ' ').toUpperCase() : dataVerificar.usuario.rol
