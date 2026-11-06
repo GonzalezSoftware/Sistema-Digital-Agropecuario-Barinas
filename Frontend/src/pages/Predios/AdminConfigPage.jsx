@@ -1,7 +1,7 @@
 import logo from "../../assets/gobierno.jpg";
 import escudo from "../../assets/logo2.jpg";
 import { useNavigate } from "react-router-dom";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Swal from 'sweetalert2';
 
 export default function AdminConfigPage() {
@@ -40,6 +40,52 @@ export default function AdminConfigPage() {
         console.error("❌ [DEBUG] Error al verificar estado del admin en la BD:", err);
         setAdminRegistrado(false);
       });
+  }, [API_URL]);
+
+  // 🛡️ VALIDACIÓN DE SESIÓN ÚNICA AUTOMÁTICA PARA EVITAR SESIONES DUPLICADAS
+  useEffect(() => {
+    const verificarEstadoSesionAdmin = async () => {
+      const usuarioActual = sessionStorage.getItem("admin_usuario");
+      const sessionTokenActual = sessionStorage.getItem("admin_session_token");
+
+      if (!usuarioActual || !sessionTokenActual) return;
+
+      try {
+        const response = await fetch(`${API_URL}verificar-sesion-activa/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            usuario: usuarioActual,
+            session_token: sessionTokenActual
+          })
+        });
+
+        if (response.status === 401) {
+          const data = await response.json();
+          if (data.motivo === "sesion_duplicada") {
+            sessionStorage.clear();
+            localStorage.clear();
+
+            await Swal.fire({
+              icon: 'warning',
+              title: 'Sesión Interrumpida',
+              text: data.message || 'Tu sesión ha sido cerrada porque se inició sesión desde otro dispositivo.',
+              confirmButtonColor: '#136442',
+              confirmButtonText: 'Entendido',
+              allowOutsideClick: false,
+              allowEscapeKey: false
+            });
+
+            window.location.href = '/admin/config';
+          }
+        }
+      } catch (error) {
+        console.error("Error al validar sesión activa del admin:", error);
+      }
+    };
+
+    const intervalo = setInterval(verificarEstadoSesionAdmin, 10000);
+    return () => clearInterval(intervalo);
   }, [API_URL]);
 
   const manejarAccion = async (e) => {
@@ -84,6 +130,10 @@ export default function AdminConfigPage() {
       }
 
       sessionStorage.setItem("usuario_admin", JSON.stringify(data.usuario));
+      sessionStorage.setItem("admin_usuario", data.usuario.usuario);
+      if (data.usuario.session_token) {
+        sessionStorage.setItem("admin_session_token", data.usuario.session_token);
+      }
 
       const mensajeExito = !adminRegistrado
         ? "¡Administrador registrado en la Base de Datos con éxito! Redirigiendo..."
@@ -139,7 +189,6 @@ export default function AdminConfigPage() {
     });
 
      try {
-      // Usamos la API existente enviar-codigo-correo o una adaptada de recuperación
       const res = await fetch(`${API_URL}admin/perfil/?usuario=${usuarioInput}`);
       const dataPerfil = await res.json();
 
@@ -149,7 +198,6 @@ export default function AdminConfigPage() {
 
       const correoAdmin = dataPerfil.correo;
 
-      // Disparamos el envío del código usando la API del backend
       const resCorreo = await fetch(`${API_URL}admin/enviar-codigo-recuperacion/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -159,7 +207,6 @@ export default function AdminConfigPage() {
       const dataCorreo = await resCorreo.json();
       if (!resCorreo.ok) throw new Error(dataCorreo.error || "No se pudo enviar el correo.");
 
-      // Pedimos ingresar el código de 6 dígitos
       const { value: codigoIngresado } = await Swal.fire({
         title: 'Código enviado',
         text: `Hemos enviado un código de 6 dígitos a su correo (${correoAdmin.replace(/(.{2})(.*)(@.*)/, "$1***$3")}). Ingréselo a continuación:`,
@@ -177,10 +224,8 @@ export default function AdminConfigPage() {
 
       if (!codigoIngresado) return;
 
-      // Validamos si coincide con el código enviado (el backend o el caché valida)
       if (codigoIngresado.trim() === String(dataCorreo.codigo)) {
         
-        // Alerta que requiere presionar "OK" antes de avanzar
         await Swal.fire({
           icon: 'success',
           title: '¡Código verificado!',
@@ -190,7 +235,6 @@ export default function AdminConfigPage() {
           allowOutsideClick: false
         });
 
-        // Pedimos la nueva contraseña con validación estricta y ojito
         let verNuevaClave = false;
 
         const resultadoPassword = await Swal.fire({
@@ -291,7 +335,6 @@ export default function AdminConfigPage() {
         if (!resultadoPassword.isConfirmed || !resultadoPassword.value) return;
         const nuevaClave = resultadoPassword.value;
 
-        // Guardamos la nueva clave en el backend
         const resReset = await fetch(`${API_URL}admin/reset-password/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -563,7 +606,6 @@ export default function AdminConfigPage() {
                 </div>
               </div>
 
-              {/* Enlace de ¿Olvidaste tu contraseña? */}
               {adminRegistrado && (
                 <div style={{ textAlign: "right", marginBottom: "20px" }}>
                   <button

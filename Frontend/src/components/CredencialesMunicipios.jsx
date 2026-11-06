@@ -20,6 +20,7 @@ export const CredencialesMunicipios = ({
     const [municipioSeleccionado, setMunicipioSeleccionado] = useState(null);
     const [formUsuario, setFormUsuario] = useState("");
     const [formPassword, setFormPassword] = useState("");
+    const [formCorreo, setFormCorreo] = useState(""); // ✉️ Nuevo estado para el correo
     const [errorMsg, setErrorMsg] = useState("");
     const [exitoMsg, setExitoMsg] = useState("");
     const [cargando, setCargando] = useState(false);
@@ -29,6 +30,7 @@ export const CredencialesMunicipios = ({
         const credsExistentes = credenciales[mun.id];
         setFormUsuario(credsExistentes ? credsExistentes.usuario : `mppat_${mun.id}`);
         setFormPassword("");
+        setFormCorreo(credsExistentes?.correo || ""); // Cargamos el correo si ya existe
         setErrorMsg("");
         setExitoMsg("");
     };
@@ -44,8 +46,8 @@ export const CredencialesMunicipios = ({
         setErrorMsg("");
         setExitoMsg("");
 
-        if (!formUsuario.trim() || !formPassword.trim()) {
-            setErrorMsg("Por favor, completa todos los campos.");
+        if (!formUsuario.trim() || !formPassword.trim() || !formCorreo.trim()) {
+            setErrorMsg("Por favor, completa todos los campos, incluyendo el correo electrónico.");
             return;
         }
 
@@ -66,7 +68,8 @@ export const CredencialesMunicipios = ({
                     municipio_id: municipioSeleccionado.id,
                     nombre_municipio: municipioSeleccionado.nombre,
                     usuario: formUsuario,
-                    clave: formPassword
+                    clave: formPassword,
+                    correo: formCorreo.trim() // ✉️ Enviamos el correo al backend
                 })
             });
 
@@ -80,7 +83,8 @@ export const CredencialesMunicipios = ({
                 ...prev,
                 [municipioSeleccionado.id]: {
                     creado: true,
-                    usuario: formUsuario
+                    usuario: formUsuario,
+                    correo: formCorreo.trim()
                 }
             }));
 
@@ -116,7 +120,7 @@ export const CredencialesMunicipios = ({
 
             <div style={{ marginBottom: "24px" }}>
                 <p style={{ fontSize: "13px", color: "#64748b", margin: 0, lineHeight: "1.4" }}>
-                    Asigna usuarios y contraseñas independientes para los 12 municipios encargados del registro de predios.
+                    Asigna usuarios, correos institucionales y contraseñas independientes para los 12 municipios encargados del registro de predios.
                 </p>
             </div>
 
@@ -295,6 +299,7 @@ export const CredencialesMunicipios = ({
                                 </div>
                             )}
 
+                            {/* Usuario */}
                             <div style={{ width: "100%", boxSizing: "border-box" }}>
                                 <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
                                     Usuario de Acceso
@@ -324,6 +329,36 @@ export const CredencialesMunicipios = ({
                                 </div>
                             </div>
 
+                            {/* Correo Electrónico */}
+                            <div style={{ width: "100%", boxSizing: "border-box" }}>
+                                <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
+                                    Correo Electrónico Institucional
+                                </label>
+                                <div style={{ position: "relative", display: "flex", alignItems: "center", width: "100%", boxSizing: "border-box" }}>
+                                    <input
+                                        type="email"
+                                        value={formCorreo}
+                                        onChange={(e) => setFormCorreo(e.target.value)}
+                                        placeholder="empleado@mppat.gob.ve"
+                                        required
+                                        style={{
+                                            width: "100%",
+                                            padding: "10px 12px",
+                                            borderRadius: "8px",
+                                            border: "1px solid #cbd5e1",
+                                            fontSize: "14px",
+                                            color: "#0f172a",
+                                            outline: "none",
+                                            boxSizing: "border-box",
+                                            fontFamily: "'Poppins', sans-serif"
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = "#136442"}
+                                        onBlur={(e) => e.target.style.borderColor = "#cbd5e1"}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Contraseña */}
                             <div style={{ width: "100%", boxSizing: "border-box" }}>
                                 <label style={{ display: "block", fontSize: "12.5px", fontWeight: 600, color: "#334155", marginBottom: "6px" }}>
                                     Contraseña (Mínimo 8 caracteres)
@@ -352,7 +387,7 @@ export const CredencialesMunicipios = ({
                                     />
                                 </div>
                                 <span style={{ fontSize: "11px", color: "#64748b", marginTop: "4px", display: "block" }}>
-                                    Asegúrate de guardar esta contraseña en un lugar seguro.
+                                    Este correo se usará para enviar el código de verificación en cada inicio de sesión.
                                 </span>
                             </div>
 
