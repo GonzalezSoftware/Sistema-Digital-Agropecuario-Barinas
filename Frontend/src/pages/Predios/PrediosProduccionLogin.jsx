@@ -117,7 +117,7 @@ export default function LoginPrediosPage() {
             didOpen: () => { Swal.showLoading(); }
           });
 
-          // Petición al endpoint de verificación
+          // Petición al endpoint de verificación enviando el usuario limpio con .trim()
           const responseVerificar = await fetch(`${API_URL}verificar-codigo-login/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
