@@ -226,8 +226,16 @@ export default function Productores() {
                 didOpen: () => { Swal.showLoading(); }
             });
 
-            await GenerarFichaProductor(predioCompleto);
-            Swal.close();
+            GenerarFichaProductor(predioCompleto);
+
+            // Reemplazamos el cierre brusco por un mensaje de éxito limpio
+            Swal.fire({
+                icon: 'success',
+                title: '¡Ficha Exportada!',
+                text: 'El documento PDF se ha generado y descargado con éxito.',
+                confirmButtonColor: '#136442',
+                confirmButtonText: 'Aceptar'
+            });
 
         } catch (error) {
             Swal.close();
