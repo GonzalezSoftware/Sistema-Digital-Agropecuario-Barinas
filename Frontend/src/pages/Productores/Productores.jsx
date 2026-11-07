@@ -235,8 +235,14 @@ export default function Productores() {
     };
 
     const GenerarFichaProductor = (predio) => {
-        if (!predio || !predio.caracterizacion_completada) {
-            alert("No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.");
+       if (!predio || !predio.caracterizacion_completada) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Caracterización Incompleta',
+                text: 'No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.',
+                confirmButtonColor: '#136442',
+                confirmButtonText: 'Entendido'
+            });
             return;
         }
 
