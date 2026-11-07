@@ -188,13 +188,6 @@ export default function Productores() {
         try {
             const cedulaRif = resultado?.cedula_rif;
 
-            Swal.fire({
-                title: 'Buscando...',
-                text: 'Consultando registros del productor, por favor espere.',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-
             const { data } = await axios.get(`https://3.145.179.35.nip.io/api/predios/`, {
                 params: { cedula: cedulaRif }
             });
@@ -202,7 +195,6 @@ export default function Productores() {
             const listaPredios = Array.isArray(data) ? data : data.results;
 
             if (!listaPredios || listaPredios.length === 0) {
-                Swal.close();
                 Swal.fire({
                     icon: "error",
                     title: "Predio no encontrado",
@@ -213,6 +205,27 @@ export default function Productores() {
             }
 
             const predioCompleto = listaPredios[0];
+
+            // 1. Validamos la caracterización ANTES de abrir cualquier loading o generar nada
+            if (!predioCompleto.caracterizacion_completada) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Caracterización Incompleta',
+                    text: 'No se puede exportar el PDF debido a que la caracterización de este predio no ha sido completada.',
+                    confirmButtonColor: '#136442',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+
+            // 2. Si está completa, recién aquí mostramos el loading para generar el PDF
+            Swal.fire({
+                title: 'Generando PDF...',
+                text: 'Procesando los datos del predio, por favor espere.',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
             await GenerarFichaProductor(predioCompleto);
             Swal.close();
 
