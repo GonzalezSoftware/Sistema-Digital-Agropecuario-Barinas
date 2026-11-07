@@ -206,7 +206,7 @@ export default function Productores() {
 
             const predioCompleto = listaPredios[0];
 
-            // 1. Validamos la caracterización ANTES de abrir cualquier loading o generar nada
+            // 1. Validamos la caracterización antes de hacer nada
             if (!predioCompleto.caracterizacion_completada) {
                 Swal.fire({
                     icon: 'warning',
@@ -218,29 +218,19 @@ export default function Productores() {
                 return;
             }
 
-            Swal.fire({
-                title: 'Generando PDF...',
-                text: 'Procesando los datos del predio, por favor espere.',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-
+            // 2. Generamos el PDF de inmediato
             GenerarFichaProductor(predioCompleto);
 
-            // Cerramos el loading antes de mostrar el mensaje de éxito
-            Swal.close();
-
-            // Mostramos el mensaje de éxito limpio con su botón normal
-            Swal.fire({
+            // 3. Mostramos el mensaje de éxito limpio con su botón de Aceptar
+            await Swal.fire({
                 icon: 'success',
                 title: '¡Ficha Exportada!',
                 text: 'El documento PDF se ha generado y descargado con éxito.',
                 confirmButtonColor: '#136442',
                 confirmButtonText: 'Aceptar'
             });
-            
+
         } catch (error) {
-            Swal.close();
             Swal.fire({
                 icon: "error",
                 title: "Error",
