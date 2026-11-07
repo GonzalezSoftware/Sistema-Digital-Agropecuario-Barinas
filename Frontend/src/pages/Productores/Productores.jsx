@@ -218,7 +218,6 @@ export default function Productores() {
                 return;
             }
 
-            // 2. Si está completa, recién aquí mostramos el loading para generar el PDF
             Swal.fire({
                 title: 'Generando PDF...',
                 text: 'Procesando los datos del predio, por favor espere.',
@@ -228,7 +227,10 @@ export default function Productores() {
 
             GenerarFichaProductor(predioCompleto);
 
-            // Reemplazamos el cierre brusco por un mensaje de éxito limpio
+            // Cerramos el loading antes de mostrar el mensaje de éxito
+            Swal.close();
+
+            // Mostramos el mensaje de éxito limpio con su botón normal
             Swal.fire({
                 icon: 'success',
                 title: '¡Ficha Exportada!',
@@ -236,7 +238,7 @@ export default function Productores() {
                 confirmButtonColor: '#136442',
                 confirmButtonText: 'Aceptar'
             });
-
+            
         } catch (error) {
             Swal.close();
             Swal.fire({
