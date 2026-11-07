@@ -155,13 +155,6 @@ export default function Productores() {
         try {
             const envio = await axios.post("https://3.145.179.35.nip.io/api/enviar-codigo-correo/", { correo: correoProductor });
             codigoServidor = envio.data.codigo.toString();
-
-            await Swal.fire({
-                icon: "success",
-                title: "Código enviado",
-                text: `El código de seguridad fue enviado exitosamente al correo: ${correoProductor}`,
-                confirmButtonColor: "#136442",
-            });
         } catch (error) {
             Swal.fire({
                 icon: "error",
