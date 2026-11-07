@@ -199,37 +199,7 @@ export default function EmpleadosRegistroPredios({
                         error={errors.productor_correo}
                     />
 
-                    <div className="productor-accion-cell">
-                        <span style={{ fontSize: "11px", color: "#64748b", fontStyle: "italic", textAlign: "right" }}>
-                            Si el productor ya se encuentra registrado, presionar la lupa para cargar sus datos.
-                        </span>
-
-                        <button
-                            type="button"
-                            onClick={() => verificarCedulaDuplicada(formData.productor_cedula)}
-                            disabled={camposBloqueados}
-                            title="Buscar productor"
-                            style={{
-                                padding: "8px",
-                                backgroundColor: "transparent",
-                                color: camposBloqueados ? "#cbd5e1" : "#16a34a",
-                                border: "1px solid #16a34a",
-                                borderRadius: "50%",
-                                cursor: camposBloqueados ? "not-allowed" : "pointer",
-                                height: "42px",
-                                width: "42px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0
-                            }}
-                        >
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                        </button>
-                    </div>
+                    
                 </div>
             </FormSection>
 
