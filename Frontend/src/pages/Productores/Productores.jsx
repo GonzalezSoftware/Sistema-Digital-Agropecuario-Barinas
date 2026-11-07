@@ -109,12 +109,12 @@ export default function Productores() {
     };
 
     const validarCampoProductor = (value) => {
-        const regexCedula = prefijo === "V-" ? /^[0-9]{7,8}$/ : /^[0-9]{5,8}$/;
+        const regexCedula = prefijo === "V-" ? /^[0-9]{5,8}$/ : /^[0-9]{5,8}$/;
 
         if (value === "") {
             setErrors({});
         } else if (!regexCedula.test(value)) {
-            setErrors({ productor_cedula: prefijo === "V-" ? "La cédula venezolana debe tener 7 u 8 números" : "La cédula extranjera debe tener entre 5 y 8 números" });
+            setErrors({ productor_cedula: prefijo === "V-" ? "La cédula venezolana debe tener 5 u 8 números" : "La cédula extranjera debe tener entre 5 y 8 números" });
         } else {
             setErrors({});
         }
