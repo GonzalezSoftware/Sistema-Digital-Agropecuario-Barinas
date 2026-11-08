@@ -1,6 +1,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Swal from 'sweetalert2';
+import logoGobierno from "../assets/gobierno.jpg";
+import logoEscudo from "../assets/logo.png";
 
 export const generarPDFBitacora = (moduloFiltro, fechaInicio, fechaFin, listaRegistros = []) => {
     // Filtrar los registros por módulo y por rango de fechas (corrigiendo la hora final)
@@ -48,8 +50,8 @@ export const generarPDFBitacora = (moduloFiltro, fechaInicio, fechaFin, listaReg
 
     // Cintillo institucional superior
     try {
-        doc.addImage("/src/assets/gobierno.jpg", "JPEG", 12, 5, 42, 16);
-        doc.addImage("/src/assets/logo.png", "PNG", 57, 8, 28, 10); 
+        doc.addImage(logoGobierno, "JPEG", 12, 5, 42, 16);
+        doc.addImage(logoEscudo, "PNG", 57, 8, 28, 10);
     } catch (error) {
         console.warn("No se pudieron cargar las imágenes de los logos en el PDF.", error);
     }
