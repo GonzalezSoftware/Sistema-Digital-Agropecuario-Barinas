@@ -143,9 +143,9 @@ export default function AdminConfigPage() {
     });
 
     try {
-      // Preparamos el cuerpo de la petición de manera limpia según el modo (Login vs Registro)
+      // Preparamos el cuerpo de la petición enviando explícitamente portal: "admin"
       const bodyData = esLogin
-        ? { usuario: usuario.trim(), clave: clave }
+        ? { usuario: usuario.trim(), clave: clave, portal: "admin" }
         : { nombre: nombre.trim(), usuario: usuario.trim(), correo: correo.trim(), clave: clave };
 
       const response = await fetch(urlPost, {
