@@ -132,7 +132,7 @@ export default function AdminConfigPage() {
 
     setCargando(true);
     // Si ya existe admin, usamos la ruta de login con 2FA. Si no, la ruta de configuración inicial.
-    const urlPost = esLogin ? `${API_URL}login-admin/` : `${API_URL}admin-config/`;
+    const urlPost = esLogin ? `${API_URL}login-admin-general/` : `${API_URL}admin-config/`;
 
     Swal.fire({
       title: "Procesando...",
