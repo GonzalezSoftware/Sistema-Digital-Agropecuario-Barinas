@@ -67,9 +67,6 @@ export default function AdminConfigPage() {
           })
         });
 
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) return;
-
         if (response.status === 401) {
           const data = await response.json();
           if (data.motivo === "sesion_duplicada") {
@@ -121,6 +118,7 @@ export default function AdminConfigPage() {
     if (!usuario.trim()) { setError("Ingresa el usuario del administrador."); return; }
     if (!clave.trim()) { setError("Ingresa la contraseña."); return; }
 
+    // Evaluamos estrictamente si ya está registrado para alternar entre Login (2FA) y Registro Inicial
     const esLogin = adminRegistrado === true;
 
     if (!esLogin) {
@@ -133,8 +131,7 @@ export default function AdminConfigPage() {
     }
 
     setCargando(true);
-    
-    // 🚀 RUTA SEPARADA EXCLUSIVA PARA EL ADMIN (Evita choques con el login de empleados)
+    // Si ya existe admin, usamos la ruta de login con 2FA. Si no, la ruta de configuración inicial.
     const urlPost = esLogin ? `${API_URL}login-admin-general/` : `${API_URL}admin-config/`;
 
     Swal.fire({
@@ -146,8 +143,9 @@ export default function AdminConfigPage() {
     });
 
     try {
+      // Preparamos el cuerpo de la petición enviando explícitamente portal: "admin"
       const bodyData = esLogin
-        ? { usuario: usuario.trim(), clave: clave }
+        ? { usuario: usuario.trim(), clave: clave, portal: "admin" }
         : { nombre: nombre.trim(), usuario: usuario.trim(), correo: correo.trim(), clave: clave };
 
       const response = await fetch(urlPost, {
@@ -156,27 +154,21 @@ export default function AdminConfigPage() {
         body: JSON.stringify(bodyData)
       });
 
-      // VALIDACIÓN DE CONTENIDO JSON PARA EVITAR ERRORES DE HTML
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const textoHtml = await response.text();
-        console.error("Respuesta HTML inesperada:", textoHtml);
-        throw new Error("El servidor no devolvió una respuesta válida (Comprueba que la ruta 'login-admin-general/' esté configurada en Django).");
-      }
-
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || data.error || "Ocurrió un error en el servidor.");
       }
 
-      // 🔑 PASO 1: SI EL BACKEND REQUIERE 2FA
+      // 🔑 PASO 1: SI EL BACKEND REQUIERE 2FA (ADMINISTRADOR YA REGISTRADO)
       if (esLogin && data.requiere_2fa) {
         setCargando(false);
         Swal.close();
 
+        // Capturamos el correo oculto que envía el backend
         const correoDestino = data.correo_destinatario || "su correo electrónico";
 
+        // Pedir el código de 6 dígitos al usuario mostrando el correo oculto
         const { value: codigoIngresado } = await Swal.fire({
           title: 'Código de Verificación 2FA',
           text: `Se ha enviado un código de 6 dígitos a ${correoDestino}. Ingréselo a continuación:`,
@@ -215,17 +207,13 @@ export default function AdminConfigPage() {
           })
         });
 
-        const contentTypeVerif = resVerificar.headers.get("content-type");
-        if (!contentTypeVerif || !contentTypeVerif.includes("application/json")) {
-          throw new Error("Error de comunicación al verificar el código.");
-        }
-
         const dataVerificar = await resVerificar.json();
 
         if (!resVerificar.ok || !dataVerificar.success) {
           throw new Error(dataVerificar.message || "El código ingresado es incorrecto o ha expirado.");
         }
 
+        // Guardar la sesión y el token único
         sessionStorage.setItem("usuario_admin", JSON.stringify(dataVerificar.usuario));
         sessionStorage.setItem("admin_usuario", dataVerificar.usuario.usuario);
         if (dataVerificar.usuario.session_token) {
@@ -246,7 +234,7 @@ export default function AdminConfigPage() {
         return;
       }
 
-      // FLUJO NORMAL DE REGISTRO INICIAL
+      // FLUJO NORMAL DE REGISTRO INICIAL (Cuando no hay admin previo en la BD)
       sessionStorage.setItem("usuario_admin", JSON.stringify(data.usuario));
       sessionStorage.setItem("admin_usuario", data.usuario.usuario);
       if (data.usuario.session_token) {
@@ -304,10 +292,6 @@ export default function AdminConfigPage() {
 
      try {
       const res = await fetch(`${API_URL}admin/perfil/?usuario=${usuarioInput}`);
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("No se pudo conectar con el servidor.");
-      }
       const dataPerfil = await res.json();
 
       if (!res.ok || !dataPerfil.correo) {
@@ -732,11 +716,13 @@ export default function AdminConfigPage() {
                     title={verClave ? "Ocultar contraseña" : "Ver contraseña"}
                   >
                     {verClave ? (
+                      /* Icono de Ojo Abierto (Ver) */
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                       </svg>
                     ) : (
+                      /* Icono de Ojo Tachado (Ocultar) */
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                         <line x1="1" y1="1" x2="23" y2="23"></line>
@@ -745,6 +731,7 @@ export default function AdminConfigPage() {
                   </button>
                 </div>
 
+                {/* Requisitos de seguridad visuales en tiempo real (Solo para el Registro) */}
                 {!adminRegistrado && (
                   <div style={{ background: "#f8fafc", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "11.5px", marginTop: "8px" }}>
                     <span style={{ fontWeight: 600, color: "#475569", display: "block", marginBottom: "4px" }}>Requisitos de seguridad:</span>
