@@ -60,10 +60,18 @@ export default function LoginPrediosPage() {
         throw new Error(data.message || "Usuario o contraseña incorrectos.");
       }
 
-      // 🚫 BLOQUEO DISCRETO DE CREDENCIALES DE ADMINISTRADOR EN EL LOGIN DE EMPLEADOS
-      // Si el rol es admin, lanzamos exactamente el mismo error genérico para no delatar que son de admin.
+      // 🚫 BLOQUEO ESTRICTO DE CREDENCIALES DE ADMINISTRADOR EN EL LOGIN DE EMPLEADOS
+      // Verificamos de forma exhaustiva si el usuario pertenece al grupo o rol administrativo
       const rolUsuario = data.usuario && data.usuario.rol ? data.usuario.rol.toLowerCase() : "";
-      if (rolUsuario.includes("admin") || rolUsuario.includes("administrador")) {
+      const esAdminBackend = data.usuario && (data.usuario.is_superuser || data.usuario.is_staff);
+      
+      if (
+        esAdminBackend ||
+        rolUsuario.includes("admin") ||
+        rolUsuario.includes("administrador") ||
+        rolUsuario.includes("superusuario")
+      ) {
+        // Lanzamos exactamente el mismo error genérico para que no se note que es una cuenta de admin
         throw new Error("Usuario o contraseña incorrectos.");
       }
 
@@ -112,6 +120,17 @@ export default function LoginPrediosPage() {
 
         if (!resVerificar.ok || !dataVerificar.success) {
           throw new Error(dataVerificar.message || "El código ingresado es incorrecto o ha expirado.");
+        }
+
+        // Validación doble post-verificación 2FA por seguridad absoluta
+        const rolVerificar = dataVerificar.usuario && dataVerificar.usuario.rol ? dataVerificar.usuario.rol.toLowerCase() : "";
+        if (
+          dataVerificar.usuario.is_superuser ||
+          dataVerificar.usuario.is_staff ||
+          rolVerificar.includes("admin") ||
+          rolVerificar.includes("administrador")
+        ) {
+          throw new Error("Usuario o contraseña incorrectos.");
         }
 
         // Guardamos los datos en sessionStorage
