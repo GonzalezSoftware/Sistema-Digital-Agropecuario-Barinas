@@ -60,16 +60,11 @@ export default function LoginPrediosPage() {
         throw new Error(data.message || "Usuario o contraseña incorrectos.");
       }
 
-      // 🚫 BLOQUEO DE CREDENCIALES DE ADMINISTRADOR EN EL LOGIN DE EMPLEADOS
+      // 🚫 BLOQUEO DISCRETO DE CREDENCIALES DE ADMINISTRADOR EN EL LOGIN DE EMPLEADOS
+      // Si el rol es admin, lanzamos exactamente el mismo error genérico para no delatar que son de admin.
       const rolUsuario = data.usuario && data.usuario.rol ? data.usuario.rol.toLowerCase() : "";
       if (rolUsuario.includes("admin") || rolUsuario.includes("administrador")) {
-        Swal.fire({
-          icon: "error",
-          title: "Error de acceso",
-          text: "Credenciales de administrador no permitidas en este módulo.",
-          confirmButtonColor: "#b91c1c"
-        });
-        return;
+        throw new Error("Usuario o contraseña incorrectos.");
       }
 
       // 🔑 SI EL BACKEND REQUIERE 2FA, ABRIMOS EL SWEETALERT DE VERIFICACIÓN
