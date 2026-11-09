@@ -61,7 +61,7 @@ export default function LoginPrediosPage() {
       }
 
       // 🚫 BLOQUEO DISCRETO EN EL FRONTEND DE CREDENCIALES DE ADMINISTRADOR
-      // Analizamos el rol que devolvió el backend. Si pertenece al área de administradores generales,
+      // Si el rol devuelto pertenece al área de administradores generales,
       // simulamos exactamente el mismo error genérico para no delatar que las credenciales son de admin.
       const rolUsuario = data.usuario && data.usuario.rol ? data.usuario.rol.toLowerCase() : "";
       
